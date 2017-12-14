@@ -8,6 +8,12 @@ import os
 STIM_DIR = os.path.abspath(__file__) + "/../../Data"
 SAMPLES = 1000
 
+try:
+    os.mkdir(STIM_DIR)
+except FileExistsError:
+    pass
+
+
 #############################################################
 # Functions
 #############################################################

@@ -1,8 +1,8 @@
 #Constants
-set LibPath "../../../../Lib"
+set LibPath "../.."
 
 #Set library
-psi::sim::add_library psi_fix_v1_0
+psi::sim::add_library psi_fix
 
 #suppress messages
 psi::sim::compile_suppress 135,1236
@@ -10,10 +10,10 @@ psi::sim::run_suppress 8684,3479,3813,8009,3812
 
 # Library
 psi::sim::add_sources $LibPath {
-	Vhdl_Lib/psi_tb_1.0/hdl/psi_tb_txt_util.vhd \
-	Vhdl_Lib/psi_common_1.0/hdl/psi_common_math_pkg.vhd \
-	Vhdl_Lib/psi_common_1.0/hdl/psi_common_tdp_ram_rbw.vhd \
-	Vhdl_Lib/psi_common_1.0/hdl/psi_common_array_pkg.vhd \
+	psi_tb/hdl/psi_tb_txt_util.vhd \
+	psi_common/hdl/psi_common_math_pkg.vhd \
+	psi_common/hdl/psi_common_tdp_ram_rbw.vhd \
+	psi_common/hdl/psi_common_array_pkg.vhd \
 } -tag lib
 
 # project sources

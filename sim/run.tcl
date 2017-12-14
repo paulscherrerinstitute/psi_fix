@@ -1,5 +1,5 @@
 #Load dependencies
-source ../../../../Lib/Tcl_Lib/PsiSim/PsiSim.tcl
+source ../../../TCL/PsiSim/PsiSim.tcl
 
 #Initialize Simulation
 psi::sim::init
