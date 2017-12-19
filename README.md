@@ -49,7 +49,8 @@ f:  Number of fractional bits
 The total number of bits required is s+i+f. 
 
 The value of each bit depending on its position relative to the binary point (i-bits left, f-bits right) is given below.
-... [4][2][1].[0.5][0.25][0.125] ...
+
+... [4][2][1]**.**[0.5][0.25][0.125] ...
 
 Some examples are given below:
 
