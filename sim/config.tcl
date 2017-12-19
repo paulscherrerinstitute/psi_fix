@@ -21,6 +21,7 @@ psi::sim::add_sources "../hdl" {
 	psi_fix_pkg.vhd \
 	psi_fix_cordic_abs_pl.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf.vhd \
+	psi_fix_fir_dec_ser_nch_chtdm_conf.vhd \
 	psi_fix_lin_approx_calc.vhd \
 	psi_fix_lin_approx_sin18b.vhd \
 	psi_fix_lin_approx_sin18b_dual.vhd \
@@ -36,6 +37,10 @@ psi::sim::add_sources "../testbench" {
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb_case0_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb_case1_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb.vhd \
+	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_tb_pkg.vhd \
+	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_tb_case0_pkg.vhd \
+	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_tb_case1_pkg.vhd \
+	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -61,6 +66,13 @@ psi::sim::add_tb_run
 psi::sim::create_tb_run "psi_fix_fir_dec_ser_nch_chpar_conf_tb"
 psi::sim::tb_run_add_pre_script "python" "preScript.py" "../testbench/psi_fix_fir_dec_ser_nch_chpar_conf_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_fir_dec_ser_nch_chpar_conf_tb/Data"]
+psi::sim::tb_run_add_arguments 	"-gStimuliPath_g=$dataDir -gDutyCycle_g=32" \
+								"-gStimuliPath_g=$dataDir -gDutyCycle_g=4"
+psi::sim::add_tb_run
+
+psi::sim::create_tb_run "psi_fix_fir_dec_ser_nch_chtdm_conf_tb"
+psi::sim::tb_run_add_pre_script "python" "preScript.py" "../testbench/psi_fix_fir_dec_ser_nch_chtdm_conf_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_fir_dec_ser_nch_chtdm_conf_tb/Data"]
 psi::sim::tb_run_add_arguments 	"-gStimuliPath_g=$dataDir -gDutyCycle_g=32" \
 								"-gStimuliPath_g=$dataDir -gDutyCycle_g=4"
 psi::sim::add_tb_run

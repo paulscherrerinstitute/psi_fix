@@ -16,8 +16,8 @@ nch		Multi-channel (channel count configurable)
 1ch		Single-channel
 
 <channel-handling>
-par		All channels arrive in parallel and can be calculated in parallel
-tdm		Channels are calculated one after the other
+chpar		All channels arrive in parallel and can be calculated in parallel
+chtdm		Channels are calculated one after the other
 
 <coefficient-handling>
 conf		Coefficients can be written, all channels use the same cofficients
