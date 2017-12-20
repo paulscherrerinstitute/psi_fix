@@ -6,6 +6,8 @@
 -- - The number of channels is configurable
 -- - All channels are processed in parallel and their data must be synchronized
 -- - Coefficients are configurable but the same for each channel
+--
+-- Required Memory depth per channel = MaxTaps_g + MaxRatio_g
 
 ------------------------------------------------------------------------------
 -- Libraries
@@ -60,7 +62,10 @@ end entity;
 architecture rtl of psi_fix_fir_dec_ser_nch_chtdm_conf is
 
 	-- Data Memory needs twice the depth since a almost a full set of data can arrive until the last channel is fully processed
-	constant DataMemDepth_c		: natural	:= 2*MaxTaps_g;
+	constant DataMemDepthRequired_c		: natural	:= MaxTaps_g+MaxRatio_g;	-- MaxRatio_g is the maximum samples to arrive before a calculation starts
+	constant DataMemAddBits_c			: natural	:= log2ceil(DataMemDepthRequired_c);
+	constant DataMemDepthApplied_c		: natural	:= 2**DataMemAddBits_c;
+	constant CoefMemDepthApplied_c		: natural	:= 2**log2ceil(MaxTaps_g);
 
 	-- Constants
 	constant MultFmt_c	: PsiFixFmt_t		:= (max(InFmt_g.S, CoefFmt_g.S), InFmt_g.I+CoefFmt_g.I, InFmt_g.F+CoefFmt_g.F);
@@ -80,13 +85,13 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chtdm_conf is
 		Vld				: std_logic_vector(0 to 1);	
 		InSig			: InData_a(0 to 1);
 		ChannelNr		: ChNr_a(0 to 2);
-		TapWrAddr_1		: std_logic_vector(log2ceil(DataMemDepth_c)-1 downto 0);
-		Tap0Addr_1		: std_logic_vector(log2ceil(DataMemDepth_c)-1 downto 0);
+		TapWrAddr_1		: std_logic_vector(DataMemAddBits_c-1 downto 0);
+		Tap0Addr_1		: std_logic_vector(DataMemAddBits_c-1 downto 0);
 		DecCnt_1		: std_logic_vector(log2ceil(MaxRatio_g)-1 downto 0);
 		TapCnt_1		: std_logic_vector(log2ceil(MaxTaps_g)-1 downto 0);
 		CalcChnl_1		: std_logic_vector(log2ceil(Channels_g)-1 downto 0);
 		CalcChnl_2		: std_logic_vector(log2ceil(Channels_g)-1 downto 0);
-		TapRdAddr_2		: std_logic_vector(log2ceil(DataMemDepth_c)-1 downto 0);
+		TapRdAddr_2		: std_logic_vector(DataMemAddBits_c-1 downto 0);
 		CoefRdAddr_2	: std_logic_vector(log2ceil(MaxTaps_g)-1 downto 0);
 		CalcOn			: std_logic_vector(1 to 6);
 		Last			: std_logic_vector(1 to 6);
@@ -99,20 +104,19 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chtdm_conf is
 		OutVld_7		: std_logic;
 		FirstTapLoop_2	: std_logic;
 		FirstTapLoop_3	: std_logic;
-		TapRdAddr_3 	: std_logic_vector(log2ceil(DataMemDepth_c)-1 downto 0);
+		TapRdAddr_3 	: std_logic_vector(DataMemAddBits_c-1 downto 0);
 		ReplaceZero_4	: std_logic;
 	end record;
 	signal r, r_next : two_process_r;
 	
 	-- Component Interface Signals
-	signal DataRamWrAddr_1	: std_logic_vector(log2ceil(DataMemDepth_c)+log2ceil(Channels_g)-1 downto 0);
-	signal DataRamRdAddr_2	: std_logic_vector(log2ceil(DataMemDepth_c)+log2ceil(Channels_g)-1 downto 0);
+	signal DataRamWrAddr_1	: std_logic_vector(DataMemAddBits_c+log2ceil(Channels_g)-1 downto 0);
+	signal DataRamRdAddr_2	: std_logic_vector(DataMemAddBits_c+log2ceil(Channels_g)-1 downto 0);
 	signal DataRamDout_3	: std_logic_vector(PsiFixSize(InFmt_g)-1 downto 0);
 	signal CoefRamDout_3	: std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
 	
 	
 begin
-	assert log2(MaxTaps_g) = log2ceil(MaxTaps_g) report "###ERROR###: psi_fix_fir_dec_ser_nch_chtdm_conf: only powers of 2 are allowed for MaxTaps_g" severity error;
 
 	--------------------------------------------
 	-- Combinatorial Process
@@ -298,7 +302,7 @@ begin
 	--------------------------------------------
 	i_coef_ram : entity work.psi_common_tdp_ram_rbw
 		generic map (
-			Depth_g		=> MaxTaps_g,
+			Depth_g		=> CoefMemDepthApplied_c,
 			Width_g		=> PsiFixSize(CoefFmt_g)
 		)
 		port map (
@@ -319,7 +323,7 @@ begin
 	
 	i_data_ram : entity work.psi_common_tdp_ram_rbw
 		generic map (
-			Depth_g		=> DataMemDepth_c*Channels_g,
+			Depth_g		=> DataMemDepthApplied_c*Channels_g,
 			Width_g		=> PsiFixSize(InFmt_g)
 		) 
 		port map (
