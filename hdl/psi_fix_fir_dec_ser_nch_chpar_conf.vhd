@@ -59,6 +59,9 @@ end entity;
 ------------------------------------------------------------------------------
 architecture rtl of psi_fix_fir_dec_ser_nch_chpar_conf is
 
+	constant DataMemDepthApplied_c		: natural	:= 2**log2ceil(MaxTaps_g);
+	constant CoefMemDepthApplied_c		: natural	:= 2**log2ceil(MaxTaps_g);
+
 	-- Constants
 	constant MultFmt_c	: PsiFixFmt_t		:= (max(InFmt_g.S, CoefFmt_g.S), InFmt_g.I+CoefFmt_g.I, InFmt_g.F+CoefFmt_g.F);
 	constant AccuFmt_c	: PsiFixFmt_t		:= (1, OutFmt_g.I+1, InFmt_g.F + CoefFmt_g.F);
@@ -271,7 +274,7 @@ begin
 	--------------------------------------------
 	i_coef_ram : entity work.psi_common_tdp_ram_rbw
 		generic map (
-			Depth_g		=> MaxTaps_g,
+			Depth_g		=> CoefMemDepthApplied_c,
 			Width_g		=> PsiFixSize(CoefFmt_g)
 		)
 		port map (
@@ -293,7 +296,7 @@ begin
 		
 	i_data_ram : entity work.psi_common_tdp_ram_rbw
 		generic map (
-			Depth_g		=> MaxTaps_g,
+			Depth_g		=> DataMemDepthApplied_c,
 			Width_g		=> PsiFixSize(InFmt_g)*Channels_g
 		) 
 		port map (
