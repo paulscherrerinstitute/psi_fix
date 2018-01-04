@@ -22,23 +22,12 @@ class PsiFixSat(Enum):
     Wrap = 0
     Sat = 1
 
+
+########################################################################################################################
+# Bittrue available in VHDL
+########################################################################################################################
 def PsiFixSize(fmt : PsiFixFmt) -> int:
     return fmt.S+fmt.I+fmt.F
-
-def PsiFixUpperBound(rFmt : PsiFixFmt):
-    return 2**rFmt.I-2**(-rFmt.F)
-
-def PsiFixLowerBound(rFmt : PsiFixFmt):
-    if rFmt.S is 1:
-        return -2**rFmt.I
-    else:
-        return 0
-
-def PsiFixGetBitsAsInt(a, aFmt : PsiFixFmt):
-    return np.array(np.round(a*2.0**aFmt.F),int)
-
-def PsiFixFromBitsAsInt(a : int, aFmt : PsiFixFmt):
-    return np.array(a/2**aFmt.F, np.float64)
 
 def PsiFixFromReal(a,
                    rFmt : PsiFixFmt,
@@ -55,8 +44,8 @@ def PsiFixFromReal(a,
     x = np.where(x < PsiFixLowerBound(rFmt), PsiFixLowerBound(rFmt), x)
     return x
 
-def PsiFixToInt(a, aFmt : PsiFixFmt):
-    return a*2**aFmt.F
+def PsiFixFromBitsAsInt(a : int, aFmt : PsiFixFmt):
+    return np.array(a/2**aFmt.F, np.float64)
 
 def PsiFixResize(a, aFmt : PsiFixFmt,
                  rFmt : PsiFixFmt,
@@ -121,4 +110,40 @@ def PsiFixNeg(a, aFmt : PsiFixFmt,
     fullA = PsiFixResize(a, aFmt, fullFmt)
     neg = -fullA
     return PsiFixResize(neg, fullFmt, rFmt, rnd, sat)
+
+def PsiFixShiftLeft(a, aFmt : PsiFixFmt,
+                    shift : int, maxShift : int,
+                    rFmt : PsiFixFmt,
+                    rnd: PsiFixRnd = PsiFixRnd.Trunc, sat: PsiFixSat = PsiFixSat.Wrap):
+    if shift > maxShift:
+        raise ValueError("PsiFixShiftLeft: shift must be <= maxShift")
+    if shift < 0:
+        raise ValueError("PsiFixShiftLeft: shift must be > 0")
+    fullFmt = PsiFixFmt(max(aFmt.S, rFmt.S), max(aFmt.I+maxShift, rFmt.I), max(aFmt.F, rFmt.F))
+    fullA = PsiFixResize(a, aFmt, fullFmt)
+    bitsIn = PsiFixGetBitsAsInt(fullA, fullFmt)
+    pwr2 =  np.array(np.power(2.0,shift), int)
+    mlt = np.floor(bitsIn * pwr2)
+    bitsOut = np.array(mlt, int)
+    fullOut = PsiFixFromBitsAsInt(bitsOut, fullFmt)
+    return PsiFixResize(fullOut, fullFmt, rFmt, rnd, sat)
+
+########################################################################################################################
+# Python only (helpers)
+########################################################################################################################
+def PsiFixUpperBound(rFmt : PsiFixFmt):
+    return 2**rFmt.I-2**(-rFmt.F)
+
+def PsiFixLowerBound(rFmt : PsiFixFmt):
+    if rFmt.S is 1:
+        return -2**rFmt.I
+    else:
+        return 0
+
+def PsiFixGetBitsAsInt(a, aFmt : PsiFixFmt):
+    return np.array(np.round(a*2.0**aFmt.F),int)
+
+def PsiFixToInt(a, aFmt : PsiFixFmt):
+    return a*2**aFmt.F
+
 

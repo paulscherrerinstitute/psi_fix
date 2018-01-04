@@ -7,6 +7,7 @@ library ieee;
 	
 library work;
 	use work.psi_common_math_pkg.all;
+	use work.psi_common_logic_pkg.all;
 
 ------------------------------------------------------------------------------
 -- Package Header
@@ -84,7 +85,16 @@ package psi_fix_pkg is
 							rFmt	: PsiFixFmt_t;
 							rnd		: PsiFixRnd_t 	:= PsiFixTrunc;
 							sat		: PsiFixSat_t	:= PsiFixWrap) 
-							return std_logic_vector;							
+							return std_logic_vector;	
+
+	function PsiFixShiftLeft(	a 			: std_logic_vector;
+								aFmt		: PsiFixFmt_t;
+								shift		: integer;
+								maxShift	: integer;
+								rFmt	: PsiFixFmt_t;
+								rnd		: PsiFixRnd_t 	:= PsiFixTrunc;
+								sat		: PsiFixSat_t	:= PsiFixWrap) 
+								return std_logic_vector;
   
 end psi_fix_pkg;	 
 
@@ -323,6 +333,24 @@ package body psi_fix_pkg is
 		Neg_v	:= std_logic_vector(-signed(AFull_v));
 		return PsiFixResize(Neg_v, AFullFmt_c, rFmt, rnd, sat);
 	end function;	
+	
+	-- *** PsiFixShiftLeft ***
+	function PsiFixShiftLeft(	a 			: std_logic_vector;
+								aFmt		: PsiFixFmt_t;
+								shift		: integer;
+								maxShift	: integer;
+								rFmt	: PsiFixFmt_t;
+								rnd		: PsiFixRnd_t 	:= PsiFixTrunc;
+								sat		: PsiFixSat_t	:= PsiFixWrap) 
+								return std_logic_vector is
+		constant FullFmt_c	: PsiFixFmt_t	:= (max(aFmt.S, rFmt.S), max(aFmt.I+maxShift, rFmt.I), max(aFmt.F, rFmt.F));
+		variable FullA_v	: std_logic_vector(PsiFixsize(FullFmt_c)-1 downto 0);
+		variable FullOut_v	: std_logic_vector(FullA_v'range);
+	begin
+		FullA_v 	:= PsiFixResize(a, aFmt, FullFmt_c);
+		FullOut_v	:= ShiftLeft(FullA_v, shift);
+		return PsiFixResize(FullOut_v, FullFmt_c, rFmt, rnd, sat);
+	end function;
 	
 	
 	
