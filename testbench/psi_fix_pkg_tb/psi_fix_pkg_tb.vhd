@@ -41,6 +41,15 @@ architecture sim of psi_fix_pkg_tb is
 			report "###ERROR### " & msg & " [expected: " & real'image(expected) & ", got: " & real'image(actual) & "]"
 			severity error;
 	end procedure;		
+	
+	procedure CheckBoolean(	expected : boolean;
+							actual	 : boolean;
+							msg		 : string) is
+	begin
+		assert expected = actual
+			report "###ERROR### " & msg & " [expected: " & boolean'image(expected) & ", got: " & boolean'image(actual) & "]"
+			severity error;
+	end procedure;			
 
 begin
 
@@ -106,6 +115,21 @@ begin
 		CheckReal(	4.0, 	
 					PsiFixToReal(PsiFixFromReal(	4.0, (1, 3, -1)), (1, 3, -1)),
 					"PsiFixToReal Wrong: Negative Fractional Bits");		
+					
+		-- *** PsiFixFromBitsAsInt ***
+		print("*** PsiFixFromBitsAsInt ***");
+		CheckStdlv("0011", PsiFixFromBitsAsInt(3, (0, 4, 0)), "PsiFixFromBitsAsInt: Unsigned Positive");
+		CheckStdlv("0011", PsiFixFromBitsAsInt(3, (1, 3, 0)), "PsiFixFromBitsAsInt: Signed Positive");
+		CheckStdlv("1101", PsiFixFromBitsAsInt(-3, (1, 3, 0)), "PsiFixFromBitsAsInt: Signed Negative");
+		CheckStdlv("1101", PsiFixFromBitsAsInt(-3, (1, 1, 2)), "PsiFixFromBitsAsInt: Fractional"); -- binary point position is not important
+		CheckStdlv("0001", PsiFixFromBitsAsInt(17, (0, 4, 0)), "PsiFixFromBitsAsInt: Wrap Unsigned");		
+		
+		-- *** PsiFixGetBitsAsInt ***
+		print("*** PsiFixGetBitsAsInt ***");
+		CheckInt(3, PsiFixGetBitsAsInt("11", (0,2,0)), "PsiFixGetBitsAsInt: Unsigned Positive");
+		CheckInt(3, PsiFixGetBitsAsInt("011", (1,2,0)), "PsiFixGetBitsAsInt: Signed Positive");
+		CheckInt(-3, PsiFixGetBitsAsInt("1101", (1,3,0)), "PsiFixGetBitsAsInt: Signed Negative");
+		CheckInt(-3, PsiFixGetBitsAsInt("1101", (1,1,2)), "PsiFixGetBitsAsInt: Fractional"); -- binary point position is not important
 
 		-- *** PsiFixResize ***
 		print("*** PsiFixResize ***");
@@ -290,47 +314,47 @@ begin
 					PsiFixMult(	PsiFixFromReal(2.5, (0, 5, 1)), (0, 5, 1),
 								PsiFixFromReal(1.25, (0, 5, 2)), (0, 5, 2),
 								(0, 5, 5)),
-					"PsiFixSub: A unsigned positive, B unsigned positive");		
+					"PsiFixMult: A unsigned positive, B unsigned positive");		
 		CheckStdlv(	PsiFixFromReal(2.5*1.25, (1, 3, 3)), 
 					PsiFixMult(	PsiFixFromReal(2.5, (1, 2, 1)), (1, 2, 1),
 								PsiFixFromReal(1.25, (1, 1, 2)), (1, 1, 2),
 								(1, 3, 3)),
-					"PsiFixSub: A signed positive, B signed positive");	
+					"PsiFixMult: A signed positive, B signed positive");	
 		CheckStdlv(	PsiFixFromReal(2.5*(-1.25), (1, 3, 3)), 
 					PsiFixMult(	PsiFixFromReal(2.5, (1, 2, 1)), (1, 2, 1),
 								PsiFixFromReal(-1.25, (1, 1, 2)), (1, 1, 2),
 								(1, 3, 3)),
-					"PsiFixSub: A signed positive, B signed negative");	
+					"PsiFixMult: A signed positive, B signed negative");	
 		CheckStdlv(	PsiFixFromReal((-2.5)*1.25, (1, 3, 3)), 
 					PsiFixMult(	PsiFixFromReal(-2.5, (1, 2, 1)), (1, 2, 1),
 								PsiFixFromReal(1.25, (1, 1, 2)), (1, 1, 2),
 								(1, 3, 3)),
-					"PsiFixSub: A signed negative, B signed positive");		
+					"PsiFixMult: A signed negative, B signed positive");		
 		CheckStdlv(	PsiFixFromReal((-2.5)*(-1.25), (1, 3, 3)), 
 					PsiFixMult(	PsiFixFromReal(-2.5, (1, 2, 1)), (1, 2, 1),
 								PsiFixFromReal(-1.25, (1, 1, 2)), (1, 1, 2),
 								(1, 3, 3)),
-					"PsiFixSub: A signed negative, B signed negative");
+					"PsiFixMult: A signed negative, B signed negative");
 		CheckStdlv(	PsiFixFromReal(2.5*1.25, (1, 3, 3)), 
 					PsiFixMult(	PsiFixFromReal(2.5, (0, 2, 1)), (0, 2, 1),
 								PsiFixFromReal(1.25, (1, 1, 2)), (1, 1, 2),
 								(1, 3, 3)),
-					"PsiFixSub: A unsigned positive, B signed positive");
+					"PsiFixMult: A unsigned positive, B signed positive");
 		CheckStdlv(	PsiFixFromReal(2.5*(-1.25), (1, 3, 3)), 
 					PsiFixMult(	PsiFixFromReal(2.5, (0, 2, 1)), (0, 2, 1),
 								PsiFixFromReal(-1.25, (1, 1, 2)), (1, 1, 2),
 								(1, 3, 3)),
-					"PsiFixSub: A unsigned positive, B signed negative");	
+					"PsiFixMult: A unsigned positive, B signed negative");	
 		CheckStdlv(	PsiFixFromReal(2.5*1.25, (0, 3, 3)), 
 					PsiFixMult(	PsiFixFromReal(2.5, (0, 2, 1)), (0, 2, 1),
 								PsiFixFromReal(1.25, (1, 1, 2)), (1, 1, 2),
 								(0, 3, 3)),
-					"PsiFixSub: A unsigned positive, B signed positive, result unsigned");			
+					"PsiFixMult: A unsigned positive, B signed positive, result unsigned");			
 		CheckStdlv(	PsiFixFromReal(1.875, (0, 1, 3)), 
 					PsiFixMult(	PsiFixFromReal(2.5, (0, 2, 1)), (0, 2, 1),
 								PsiFixFromReal(1.25, (1, 1, 2)), (1, 1, 2),
 								(0, 1, 3), PsiFixTrunc, PsiFixSat),
-					"PsiFixSub: A unsigned positive, B signed positive, saturate");			
+					"PsiFixMult: A unsigned positive, B signed positive, saturate");			
 
 		-- *** PsiFixAbs ***
 		print("*** PsiFixMult ***");					
@@ -346,7 +370,183 @@ begin
 					PsiFixAbs(	PsiFixFromReal(-4.0, (1, 2, 2)), (1, 2, 2),
 								(1, 2, 2), PsiFixTrunc, PsiFixSat),
 					"PsiFixAbs: most negative value sat");		
-
+					
+		-- *** PsiFixNeg ***
+		print("*** PsiFixNeg ***");
+		CheckStdlv(	PsiFixFromReal(-2.5, (1, 5, 5)), 
+					PsiFixNeg(	PsiFixFromReal(2.5, (1, 5, 1)), (1, 5, 1),
+								(1, 5, 5)),
+					"PsiFixNeg: positive to negative (signed -> signed)");	
+		CheckStdlv(	PsiFixFromReal(-2.5, (1, 5, 5)), 
+					PsiFixNeg(	PsiFixFromReal(2.5, (0, 5, 1)), (0, 5, 1),
+								(1, 5, 5)),
+					"PsiFixNeg: positive to negative (unsigned -> signed)");	
+		CheckStdlv(	PsiFixFromReal(2.5, (1, 5, 5)), 
+					PsiFixNeg(	PsiFixFromReal(-2.5, (1, 5, 1)), (1, 5, 1),
+								(1, 5, 5)),
+					"PsiFixNeg: negative to positive (signed -> signed)");			
+		CheckStdlv(	PsiFixFromReal(2.5, (0, 5, 5)), 
+					PsiFixNeg(	PsiFixFromReal(-2.5, (1, 5, 1)), (1, 5, 1),
+								(0, 5, 5)),
+					"PsiFixNeg: negative to positive (signed -> unsigned)");		
+		CheckStdlv(	PsiFixFromReal(3.75, (1, 2, 2)), 
+					PsiFixNeg(	PsiFixFromReal(-4.0, (1, 2, 4)), (1, 2, 4),
+								(1, 2, 2), PsiFixTrunc, PsiFixSat),
+					"PsiFixNeg: saturation (signed -> signed)");			
+		CheckStdlv(	PsiFixFromReal(-4.0, (1, 2, 2)), 
+					PsiFixNeg(	PsiFixFromReal(-4.0, (1, 2, 4)), (1, 2, 4),
+								(1, 2, 2), PsiFixTrunc, PsiFixWrap),
+					"PsiFixNeg: wrap (signed -> signed)");	
+		CheckStdlv(	PsiFixFromReal(0.0, (0, 5, 5)), 
+					PsiFixNeg(	PsiFixFromReal(2.5, (1, 5, 1)), (1, 5, 1),
+								(0, 5, 5), PsiFixTrunc, PsiFixSat),
+					"PsiFixNeg: positive to negative saturate (signed -> unsigned)");	
+		
+		-- *** PsiFixShiftLeft ***
+		print("*** PsiFixShiftLeft ***");
+		CheckStdlv(	PsiFixFromReal(2.5, (0, 3, 2)), 
+					PsiFixShiftLeft(	PsiFixFromReal(1.25, (0, 3, 2)),	(0, 3, 2),
+										1, 10,
+										(0, 3, 2)),
+										"Shift same format unsigned");
+		CheckStdlv(	PsiFixFromReal(2.5, (1, 3, 2)), 
+					PsiFixShiftLeft(	PsiFixFromReal(1.25, (1, 3, 2)),	(1, 3, 2),
+										1, 10,
+										(1, 3, 2)),
+										"Shift same format signed");			
+		CheckStdlv(	PsiFixFromReal(2.5, (0, 3, 2)), 
+					PsiFixShiftLeft(	PsiFixFromReal(1.25, (1, 1, 2)),	(1, 1, 2),
+										1, 10,
+										(0, 3, 2)),
+										"Shift format change");	
+		CheckStdlv(	PsiFixFromReal(3.75, (1, 2, 2)), 
+					PsiFixShiftLeft(	PsiFixFromReal(2.0, (1, 2, 2)),	(1, 2, 2),
+										1, 10,
+										(1, 2, 2), PsiFixTrunc, PsiFixSat),
+										"saturation signed");
+		CheckStdlv(	PsiFixFromReal(3.75, (1, 2, 2)), 
+					PsiFixShiftLeft(	PsiFixFromReal(2.0, (0, 3, 2)),	(0, 3, 2),
+										1, 10,
+										(1, 2, 2), PsiFixTrunc, PsiFixSat),
+										"saturation unsigned to signed");		
+		CheckStdlv(	PsiFixFromReal(0.0, (0, 2, 2)), 
+					PsiFixShiftLeft(	PsiFixFromReal(-0.5, (1, 3, 2)),	(1, 3, 2),
+										1, 10,
+										(0, 2, 2), PsiFixTrunc, PsiFixSat),
+										"saturation signed to unsigned");		
+		CheckStdlv(	PsiFixFromReal(-4.0, (1, 2, 2)), 
+					PsiFixShiftLeft(	PsiFixFromReal(2.0, (1, 2, 2)),	(1, 2, 2),
+										1, 10,
+										(1, 2, 2), PsiFixTrunc, PsiFixWrap),
+										"wrap signed");		
+		CheckStdlv(	PsiFixFromReal(-4.0, (1, 2, 2)), 
+					PsiFixShiftLeft(	PsiFixFromReal(2.0, (0, 3, 2)),	(0, 3, 2),
+										1, 10,
+										(1, 2, 2), PsiFixTrunc, PsiFixWrap),
+										"wrap unsigned to signed");	
+		CheckStdlv(	PsiFixFromReal(3.0, (0, 2, 2)), 
+					PsiFixShiftLeft(	PsiFixFromReal(-0.5, (1, 3, 2)), (1, 3, 2),
+										1, 10,
+										(0, 2, 2), PsiFixTrunc, PsiFixWrap),
+										"wrap signed to unsigned");	
+		CheckStdlv(	PsiFixFromReal(0.5, (1, 5, 5)), 
+					PsiFixShiftLeft(	PsiFixFromReal(0.5, (1, 5, 5)), (1, 5, 5),
+										0, 10,
+										(1, 5, 5), PsiFixTrunc, PsiFixWrap),
+										"shift 0");		
+		CheckStdlv(	PsiFixFromReal(-4.0, (1, 5, 5)), 
+					PsiFixShiftLeft(	PsiFixFromReal(-0.5, (1, 5, 5)), (1, 5, 5),
+										3, 10,
+										(1, 5, 5), PsiFixTrunc, PsiFixWrap),
+										"shift 3");			
+		
+		-- *** PsiFixShiftRight ***
+		print("*** PsiFixShiftRight ***");
+		CheckStdlv(	PsiFixFromReal(1.25, (0, 3, 2)), 
+					PsiFixShiftRight(	PsiFixFromReal(2.5, (0, 3, 2)),	(0, 3, 2),
+										1, 10,
+										(0, 3, 2)),
+										"Shift same format unsigned");
+		CheckStdlv(	PsiFixFromReal(1.25, (1, 3, 2)), 
+					PsiFixShiftRight(	PsiFixFromReal(2.5, (1, 3, 2)),	(1, 3, 2),
+										1, 10,
+										(1, 3, 2)),
+										"Shift same format signed");			
+		CheckStdlv(	PsiFixFromReal(1.25, (1, 1, 2)), 
+					PsiFixShiftRight(	PsiFixFromReal(2.5, (0, 3, 2)),	(0, 3, 2),
+										1, 10,
+										(1, 1, 2)),
+										"Shift format change");		
+		CheckStdlv(	PsiFixFromReal(0.0, (0, 2, 2)), 
+					PsiFixShiftRight(	PsiFixFromReal(-0.5, (1, 3, 2)),	(1, 3, 2),
+										1, 10,
+										(0, 2, 2), PsiFixTrunc, PsiFixSat),
+										"saturation signed to unsigned");		
+		CheckStdlv(	PsiFixFromReal(0.5, (1, 5, 5)), 
+					PsiFixShiftRight(	PsiFixFromReal(0.5, (1, 5, 5)), (1, 5, 5),
+										0, 10,
+										(1, 5, 5), PsiFixTrunc, PsiFixWrap),
+										"shift 0");		
+		CheckStdlv(	PsiFixFromReal(-0.5, (1, 5, 5)), 
+					PsiFixShiftRight(	PsiFixFromReal(-4.0, (1, 5, 5)), (1, 5, 5),
+										3, 10,
+										(1, 5, 5), PsiFixTrunc, PsiFixWrap),
+										"shift 3");	
+										
+		-- *** PsiFixUpperBoundStdlv ***
+		print("*** PsiFixUpperBoundStdlv ***");		
+		CheckStdlv(	"1111", PsiFixupperBoundStdlv((0,2,2)), "unsigned");
+		CheckStdlv(	"0111", PsiFixupperBoundStdlv((1,1,2)), "signed");
+		
+		-- *** PsiFixLowerBoundStdlv ***
+		print("*** PsiFixLowerBoundStdlv ***");		
+		CheckStdlv(	"0000", PsiFixLowerBoundStdlv((0,2,2)), "unsigned");
+		CheckStdlv(	"1000", PsiFixLowerBoundStdlv((1,1,2)), "signed");
+		
+		-- *** PsiFixUpperBoundReal ***
+		print("*** PsiFixUpperBoundReal ***");		
+		CheckReal(	3.75, PsiFixUpperBoundReal((0,2,2)), "unsigned");
+		CheckReal(	1.75, PsiFixUpperBoundReal((1,1,2)), "signed");
+		
+		-- *** PsiFixLowerBoundReal ***
+		print("*** PsiFixLowerBoundReal ***");		
+		CheckReal(	0.0, PsiFixLowerBoundReal((0,2,2)), "unsigned");
+		CheckReal(	-2.0, PsiFixLowerBoundReal((1,1,2)), "signed");
+		
+		-- *** PsiFixInRange ***
+		print("*** PsiFixInRange ***");	
+		CheckBoolean(	true, 
+						PsiFixInRange(PsiFixFromReal(1.25, (1, 4, 2)), (1, 4, 2),
+									 (1, 2, 4), PsiFixTrunc),
+						"In Range Normal");
+		CheckBoolean(	false, 
+						PsiFixInRange(PsiFixFromReal(6.25, (1, 4, 2)), (1, 4, 2),
+									 (1, 2, 4), PsiFixTrunc),
+						"Out Range Normal");
+		CheckBoolean(	false, 
+						PsiFixInRange(PsiFixFromReal(-1.25, (1, 4, 2)), (1, 4, 2),
+									 (0, 5, 2), PsiFixTrunc),
+						"signed -> unsigned OOR");
+		CheckBoolean(	false, 
+						PsiFixInRange(PsiFixFromReal(15.0, (0, 4, 2)), (0, 4, 2),
+									 (1, 3, 2), PsiFixTrunc),
+						"unsigned -> signed OOR");		
+		CheckBoolean(	true, 
+						PsiFixInRange(PsiFixFromReal(15.0, (0, 4, 2)), (0, 4, 2),
+									 (1, 4, 2), PsiFixTrunc),
+						"unsigned -> signed OK");	
+		CheckBoolean(	false, 
+						PsiFixInRange(PsiFixFromReal(15.5, (0, 4, 2)), (0, 4, 2),
+									 (1, 4, 0), PsiFixRound),
+						"rounding OOR");			
+		CheckBoolean(	true, 
+						PsiFixInRange(PsiFixFromReal(15.5, (0, 4, 2)), (0, 4, 2),
+									 (1, 4, 1), PsiFixRound),
+						"rounding OK 1");	
+		CheckBoolean(	true, 
+						PsiFixInRange(PsiFixFromReal(15.5, (0, 4, 2)), (0, 4, 2),
+									 (0, 5, 0), PsiFixRound),
+						"rounding OK 2");							
 		
 		wait;
 	end process;

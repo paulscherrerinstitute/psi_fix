@@ -60,7 +60,7 @@ if PLOT_ON:
 # Write Files for Co sim
 #############################################################
 with open(STIM_DIR + "/input.txt", "w+") as f:
-    f.writelines(["{} {}\n".format(int(i), int(q)) for i, q in zip(PsiFixToInt(numF, numFmt), PsiFixToInt(denomF, denomFmt))])
+    f.writelines(["{} {}\n".format(int(i), int(q)) for i, q in zip(PsiFixGetBitsAsInt(numF, numFmt), PsiFixGetBitsAsInt(denomF, denomFmt))])
 with open(STIM_DIR + "/output.txt", "w+") as f:
-    f.writelines(["{}\n".format(int(r)) for r in PsiFixToInt(res, outFmt)])
+    f.writelines(["{}\n".format(int(r)) for r in PsiFixGetBitsAsInt(res, outFmt)])
 

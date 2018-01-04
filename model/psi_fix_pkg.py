@@ -45,7 +45,13 @@ def PsiFixFromReal(a,
     return x
 
 def PsiFixFromBitsAsInt(a : int, aFmt : PsiFixFmt):
-    return np.array(a/2**aFmt.F, np.float64)
+    value = np.array(a/2**aFmt.F, np.float64)
+    if not np.all(PsiFixInRange(value, aFmt, aFmt)):
+        raise ValueError("PsiFixFromBitsAsInt: Value not in number format range")
+    return value
+
+def PsiFixGetBitsAsInt(a, aFmt : PsiFixFmt):
+    return np.array(np.round(a*2.0**aFmt.F),int)
 
 def PsiFixResize(a, aFmt : PsiFixFmt,
                  rFmt : PsiFixFmt,
@@ -122,15 +128,25 @@ def PsiFixShiftLeft(a, aFmt : PsiFixFmt,
     fullFmt = PsiFixFmt(max(aFmt.S, rFmt.S), max(aFmt.I+maxShift, rFmt.I), max(aFmt.F, rFmt.F))
     fullA = PsiFixResize(a, aFmt, fullFmt)
     bitsIn = PsiFixGetBitsAsInt(fullA, fullFmt)
-    pwr2 =  np.array(np.power(2.0,shift), int)
-    mlt = np.floor(bitsIn * pwr2)
-    bitsOut = np.array(mlt, int)
+    bitsOut = np.array(np.floor(bitsIn * np.array(np.power(2.0,shift), int)), int)
     fullOut = PsiFixFromBitsAsInt(bitsOut, fullFmt)
     return PsiFixResize(fullOut, fullFmt, rFmt, rnd, sat)
 
-########################################################################################################################
-# Python only (helpers)
-########################################################################################################################
+def PsiFixShiftRight(a, aFmt : PsiFixFmt,
+                     shift : int, maxShift : int,
+                     rFmt : PsiFixFmt,
+                     rnd: PsiFixRnd = PsiFixRnd.Trunc, sat: PsiFixSat = PsiFixSat.Wrap):
+    if shift > maxShift:
+        raise ValueError("PsiFixShiftRight: shift must be <= maxShift")
+    if shift < 0:
+        raise ValueError("PsiFixShiftRight: shift must be > 0")
+    fullFmt = PsiFixFmt(max(aFmt.S, rFmt.S), max(aFmt.I, rFmt.I), max(aFmt.F+maxShift, rFmt.F+1))   #Additional bit for rounding
+    fullA = PsiFixResize(a, aFmt, fullFmt)
+    bitsIn = PsiFixGetBitsAsInt(fullA, fullFmt)
+    bitsOut = np.array(np.floor(bitsIn / np.array(np.power(2.0,shift), int)), int)
+    fullOut = PsiFixFromBitsAsInt(bitsOut, fullFmt)
+    return PsiFixResize(fullOut, fullFmt, rFmt, rnd, sat)
+
 def PsiFixUpperBound(rFmt : PsiFixFmt):
     return 2**rFmt.I-2**(-rFmt.F)
 
@@ -140,10 +156,22 @@ def PsiFixLowerBound(rFmt : PsiFixFmt):
     else:
         return 0
 
-def PsiFixGetBitsAsInt(a, aFmt : PsiFixFmt):
-    return np.array(np.round(a*2.0**aFmt.F),int)
+def PsiFixInRange(a, aFmt : PsiFixFmt,
+                  rFmt : PsiFixFmt,
+                  rnd: PsiFixRnd = PsiFixRnd.Trunc):
+    rndFmt = PsiFixFmt(aFmt.S, aFmt.I+1, rFmt.F)
+    valRnd = PsiFixResize(a, aFmt, rndFmt, rnd, PsiFixSat.Sat)
+    lo = np.where(valRnd < PsiFixLowerBound(rFmt), False, True)
+    hi = np.where(valRnd > PsiFixUpperBound(rFmt), False, True)
+    return np.where(np.logical_and(lo,hi), True, False)
+    return np.where(valRnd < PsiFixLowerBound(rFmt) or valRnd > PsiFixUpperBound(rFmt), False, True)
 
-def PsiFixToInt(a, aFmt : PsiFixFmt):
-    return a*2**aFmt.F
+
+########################################################################################################################
+# Python only (helpers)
+########################################################################################################################
+# Currently none
+
+
 
 

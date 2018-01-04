@@ -44,7 +44,7 @@ cordic = psi_fix_cordic_abs_pl(inFmt, outFmt, intFmt, iterations, PsiFixRnd.Trun
 out = cordic.Process(inI, inQ)
 
 with open(STIM_DIR + "/input.txt", "w+") as f:
-    f.writelines(["{} {}\n".format(int(i), int(q)) for i, q in zip(PsiFixToInt(inI, inFmt), PsiFixToInt(inQ, inFmt))])
+    f.writelines(["{} {}\n".format(int(i), int(q)) for i, q in zip(PsiFixGetBitsAsInt(inI, inFmt), PsiFixGetBitsAsInt(inQ, inFmt))])
 with open(STIM_DIR + "/output.txt", "w+") as f:
-    f.writelines(["{}\n".format(int(r)) for r in PsiFixToInt(out, outFmt)])
+    f.writelines(["{}\n".format(int(r)) for r in PsiFixGetBitsAsInt(out, outFmt)])
 
