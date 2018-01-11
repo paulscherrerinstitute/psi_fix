@@ -1,8 +1,9 @@
 #Load dependencies
 source ../../../TCL/PsiSim/PsiSim.tcl
+namespace import psi::sim::*
 
 #Initialize Simulation
-psi::sim::init
+init
 
 #Configure
 source ./config.tcl
@@ -11,13 +12,13 @@ source ./config.tcl
 puts "------------------------------"
 puts "-- Compile"
 puts "------------------------------"
-psi::sim::compile -all -clean
+compile_files -all -clean
 puts "------------------------------"
 puts "-- Run"
 puts "------------------------------"
-psi::sim::run_tb -all
+run_tb -all
 puts "------------------------------"
 puts "-- Check"
 puts "------------------------------"
 
-psi::sim::run_check_errors "###ERROR###"
+run_check_errors "###ERROR###"
