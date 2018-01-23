@@ -20,10 +20,20 @@ Examples for things that belong into this library:
 * Packages that help with fixed-point processing
 
 # Dependencies
-
+##Library
 * Libraries/TCL/PsiSim
 * Libraries/VHDL/psi_common
 * Libraries/VHDL/psi_tb
+
+##External
+* Python 3.x (for executing the bittrue models)
+
+Note: On Linux Python 3.x and Python 2.x can be called explicitly by using **python3** and **python2**. However, this
+does not work out of the box for Windows but explicit calling is required since Python 2.x may be present. To enable the
+**python3** command for Windows, follow the steps below:
+
+1. Add the path to your Python 3.0 installation to the PATH environment variable
+2. Create a copy of python.exe and rename it to python3.exe
 
 # Simulations and Testbenches
 
