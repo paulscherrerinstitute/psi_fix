@@ -1,0 +1,2 @@
+source run.tcl
+quit
