@@ -6,7 +6,7 @@ from psi_fix_pkg import *
 from psi_fix_fir import psi_fix_fir
 import os
 
-STIM_DIR = os.path.abspath(__file__) + "/../../Data"
+STIM_DIR = os.path.dirname(os.path.abspath(__file__)) + "/../Data"
 SAMPLES = 1000
 try:
     os.mkdir(STIM_DIR)

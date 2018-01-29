@@ -6,7 +6,7 @@ from psi_fix_bin_div import psi_fix_bin_div
 from matplotlib import pyplot
 import os
 
-STIM_DIR = os.path.abspath(__file__) + "/../../Data"
+STIM_DIR = os.path.dirname(os.path.abspath(__file__)) + "/../Data"
 SAMPLES = 1000
 
 PLOT_ON = False
