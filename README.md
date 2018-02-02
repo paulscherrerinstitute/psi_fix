@@ -3,6 +3,9 @@
 ## Maintainer
 Oliver Bründler [oliver.bruendler@psi.ch]
 
+## Authors
+Oliver Bründler [oliver.bruendler@psi.ch]
+
 ## What belongs into this Library
 
 This library contains fixed point processing logic that is not very application specific and can be reused easily. Code
