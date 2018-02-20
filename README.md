@@ -26,12 +26,12 @@ Examples for things that belong into this library:
 * Packages that help with fixed-point processing
 
 # Dependencies
-##Library
+## Library
 * Libraries/TCL/PsiSim
 * Libraries/VHDL/psi_common
 * Libraries/VHDL/psi_tb
 
-##External
+## External
 * Python 3.x (for executing the bittrue models)
 
 Note: On Linux Python 3.x and Python 2.x can be called explicitly by using **python3** and **python2**. However, this
@@ -40,6 +40,14 @@ does not work out of the box for Windows but explicit calling is required since 
 
 1. Add the path to your Python 3.0 installation to the PATH environment variable
 2. Create a copy of python.exe and rename it to python3.exe
+
+# MATLAB
+
+The python models can be called from MATLAB. Not having separate MATLAB models allows maintaining only one code base. 
+
+Some helper functions as well as an example about how to use python models from MATLAB can be found [here](model/matlab).
+
+Python is the main development tool for the models, so minor problems due to limited Python support of MATLAB can occur when using a model the first time from MATLAB. If Python changes are necessary, they shall be implemented fully backward compatible.
 
 # Simulations and Testbenches
 
