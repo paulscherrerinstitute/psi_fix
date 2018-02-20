@@ -48,6 +48,11 @@ class psi_fix_lin_approx:
                         name="sin18b")
         all = [Sin18Bit]
 
+    #Config Methods for MATLAB Compatibility
+    @classmethod
+    def ConfigSin18Bit(cls):
+        return psi_fix_lin_approx.CONFIGS.Sin18Bit
+
     @classmethod
     def Design(cls, cfg : psi_fix_lin_cfg_settings, simPoints : int = 100000, simRange : tuple = None):
         """

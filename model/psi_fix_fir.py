@@ -27,6 +27,8 @@ class psi_fix_fir:
         return outp
 
     def FilterSatDetect(self, inp : np.ndarray, decimRate : int, coefficients : np.ndarray):
+        #Force integer (MATLAB may pass 1.0 as float)
+        decimRate = int(decimRate)
         #Make input fixed point
         inp = PsiFixFromReal(inp, self.inFmt)
         coefs = PsiFixFromReal(coefficients, self.coefFmt)
