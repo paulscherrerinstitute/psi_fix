@@ -61,7 +61,9 @@ add_tb_run
 create_tb_run "psi_fix_cordic_abs_pl_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_cordic_abs_pl_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_cordic_abs_pl_tb/Data"]
-tb_run_add_arguments "-gDataDir_g=$dataDir"
+tb_run_add_arguments "-gDataDir_g=$dataDir -gPipelineFactor_g=1" \
+					 "-gDataDir_g=$dataDir -gPipelineFactor_g=4" \
+					 "-gDataDir_g=$dataDir -gPipelineFactor_g=100"
 add_tb_run
 
 create_tb_run "psi_fix_lin_approx_sin18b_tb"

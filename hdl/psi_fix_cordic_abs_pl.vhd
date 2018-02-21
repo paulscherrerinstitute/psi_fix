@@ -24,6 +24,7 @@ entity psi_fix_cordic_abs_pl is
 		OutFmt_g				: PsiFixFmt_t	:= (0, 0, 17);	-- Must be unsigned
 		InternalFmt_g			: PsiFixFmt_t	:= (1, 0, 25);	-- Must be signed
 		Iterations_g			: natural		:= 13;
+		PipelineFactor_g		: natural		:= 1;			-- 1 = 1 PL stage for every iteration, 2 = 1 PL stage for every 2 iterations, ...
 		Round_g 				: PsiFixRnd_t	:= PsiFixTrunc;
 		Sat_g					: PsiFixSat_t	:= PsiFixWrap
 	);
@@ -71,6 +72,9 @@ begin
 	--------------------------------------------
 	p_comb : process(InVld, InI, InQ, r)
 		variable v : two_process_r;
+		variable xin_v, yin_v : std_logic_vector(PsiFixSize(InternalFmt_g)-1 downto 0);
+		variable x_v, y_v : std_logic_vector(PsiFixSize(InternalFmt_g)-1 downto 0);
+		variable Vld_v : std_logic;
 	begin
 		-- *** Hold variables stable ***
 		v := r;
@@ -80,22 +84,37 @@ begin
 		v.y(0) 		:= PsiFixResize(InQ, InFmt_g, InternalFmt_g, Round_g, Sat_g);
 		v.Vld(0)	:= InVld;
 		for i in 0 to Iterations_g-1 loop
-			v.Vld(i+1) := r.Vld(i);
-			if signed(r.y(i)) < 0 then
-				v.x(i+1)	:= PsiFixSub(	r.x(i), InternalFmt_g, 
-											r.y(i), (1, InternalFmt_g.I-i, InternalFmt_g.F+i), 
+			-- Select pipeline stage or combinatorial
+			if i mod PipelineFactor_g = 0 then
+				Vld_v 	:= r.Vld(i);
+				xin_v		:= r.x(i);
+				yin_v		:= r.y(i);
+			else
+				xin_v		:= x_v;
+				yin_v		:= y_v;				
+			end if;
+			
+			-- Implement cordic
+			if signed(yin_v) < 0 then
+				x_v	:= PsiFixSub(	xin_v, InternalFmt_g, 
+									yin_v, (1, InternalFmt_g.I-i, InternalFmt_g.F+i), 
 											InternalFmt_g, Round_g, Sat_g);
-				v.y(i+1)	:= PsiFixAdd(	r.y(i), InternalFmt_g,
-											r.x(i), (1, InternalFmt_g.I-i, InternalFmt_g.F+i), 
+				y_v	:= PsiFixAdd(	yin_v, InternalFmt_g,
+											xin_v, (1, InternalFmt_g.I-i, InternalFmt_g.F+i), 
 											InternalFmt_g, Round_g, Sat_g);
 			else
-				v.x(i+1)	:= PsiFixAdd(	r.x(i), InternalFmt_g, 
-											r.y(i), (1, InternalFmt_g.I-i, InternalFmt_g.F+i), 
+				x_v	:= PsiFixAdd(	xin_v, InternalFmt_g, 
+											yin_v, (1, InternalFmt_g.I-i, InternalFmt_g.F+i), 
 											InternalFmt_g, Round_g, Sat_g);
-				v.y(i+1)	:= PsiFixSub(	r.y(i), InternalFmt_g,
-											r.x(i), (1, InternalFmt_g.I-i, InternalFmt_g.F+i), 
+				y_v	:= PsiFixSub(	yin_v, InternalFmt_g,
+											xin_v, (1, InternalFmt_g.I-i, InternalFmt_g.F+i), 
 											InternalFmt_g, Round_g, Sat_g);
-			end if;
+			end if;			
+			
+			-- Stove results in FF (non-used FFs will be optimized away during synthesis)
+			v.Vld(i+1) := Vld_v;
+			v.y(i+1) := y_v;
+			v.x(i+1) := x_v;
 		end loop;
 		
 		-- *** Assign to signal ***

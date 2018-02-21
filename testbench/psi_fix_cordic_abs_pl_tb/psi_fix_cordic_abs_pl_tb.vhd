@@ -15,7 +15,8 @@ library std;
 
 entity psi_fix_cordic_abs_pl_tb is
 	generic (
-		DataDir_g	: string	:= "../testbench/psi_fix_cordic_abs_pl_tb/Data"
+		DataDir_g			: string	:= "../testbench/psi_fix_cordic_abs_pl_tb/Data";
+		PipelineFactor_g	: natural	:= 1
 	);
 end entity psi_fix_cordic_abs_pl_tb;
 
@@ -70,10 +71,11 @@ begin
 	-------------------------------------------------------------------------
 	i_dut : entity work.psi_fix_cordic_abs_pl
 		generic map (
-			InFmt_g			=> InFmt_c,
-			OutFmt_g		=> OutFmt_c,
-			InternalFmt_g	=> InternalFmt_c,
-			Iterations_g	=> Iterations_c
+			InFmt_g				=> InFmt_c,
+			OutFmt_g			=> OutFmt_c,
+			InternalFmt_g		=> InternalFmt_c,
+			Iterations_g		=> Iterations_c,
+			PipelineFactor_g	=> PipelineFactor_g
 		)
 		port map (
 			Clk			=> Clk,
@@ -168,34 +170,36 @@ begin
 		CheckReal(sqrt((0.9**2.0)+(0.4**2.0))*CordicGain_c, PsiFixtoReal(OutAbs, OutFmt_c), 0.01, "Output 3");	
 
 		-- Test burst operation
-		wait until rising_edge(Clk);
-		InVld <= '1';
-		InI <= PsiFixFromReal(0.3, InFmt_c);
-		InQ <= PsiFixFromReal(0.4, InFmt_c);
-		wait until rising_edge(Clk);
-		InI <= PsiFixFromReal(0.5, InFmt_c);
-		InQ <= PsiFixFromReal(-0.4, InFmt_c);
-		wait until rising_edge(Clk);
-		InI <= PsiFixFromReal(-0.9, InFmt_c);
-		InQ <= PsiFixFromReal(-0.4, InFmt_c);
-		wait until rising_edge(Clk);
-		InI <= PsiFixFromReal(-0.9, InFmt_c);
-		InQ <= PsiFixFromReal(0.35, InFmt_c);
-		wait until rising_edge(Clk);
-		InVld <= '0';
-		wait until rising_edge(Clk) and OutVld = '1';
-		CheckReal(sqrt((0.3**2.0)+(0.4**2.0))*CordicGain_c, PsiFixtoReal(OutAbs, OutFmt_c), 0.01, "Burst Output 0");
-		wait until rising_edge(Clk);
-		assert OutVld = '1' report "###ERROR###: Output was not burst";
-		CheckReal(sqrt((0.5**2.0)+(0.4**2.0))*CordicGain_c, PsiFixtoReal(OutAbs, OutFmt_c), 0.01, "Burst Output 1");
-		wait until rising_edge(Clk);
-		assert OutVld = '1' report "###ERROR###: Output was not burst";
-		CheckReal(sqrt((0.9**2.0)+(0.4**2.0))*CordicGain_c, PsiFixtoReal(OutAbs, OutFmt_c), 0.01, "Burst Output 2");
-		wait until rising_edge(Clk);
-		assert OutVld = '1' report "###ERROR###: Output was not burst";
-		CheckReal(sqrt((0.9**2.0)+(0.35**2.0))*CordicGain_c, PsiFixtoReal(OutAbs, OutFmt_c), 0.01, "Burst Output 3");
-		wait until rising_edge(Clk);
-		assert OutVld = '0' report "###ERROR###: Burst was not ended";
+		if PipelineFactor_g < 13 then		-- This test case does not work for fully parallel implementation since first results are already output when next inputs are provided.
+			wait until rising_edge(Clk);
+			InVld <= '1';
+			InI <= PsiFixFromReal(0.3, InFmt_c);
+			InQ <= PsiFixFromReal(0.4, InFmt_c);
+			wait until rising_edge(Clk);
+			InI <= PsiFixFromReal(0.5, InFmt_c);
+			InQ <= PsiFixFromReal(-0.4, InFmt_c);
+			wait until rising_edge(Clk);
+			InI <= PsiFixFromReal(-0.9, InFmt_c);
+			InQ <= PsiFixFromReal(-0.4, InFmt_c);
+			wait until rising_edge(Clk);
+			InI <= PsiFixFromReal(-0.9, InFmt_c);
+			InQ <= PsiFixFromReal(0.35, InFmt_c);
+			wait until rising_edge(Clk);
+			InVld <= '0';
+			wait until rising_edge(Clk) and OutVld = '1';
+			CheckReal(sqrt((0.3**2.0)+(0.4**2.0))*CordicGain_c, PsiFixtoReal(OutAbs, OutFmt_c), 0.01, "Burst Output 0");
+			wait until rising_edge(Clk);
+			assert OutVld = '1' report "###ERROR###: Output was not burst";
+			CheckReal(sqrt((0.5**2.0)+(0.4**2.0))*CordicGain_c, PsiFixtoReal(OutAbs, OutFmt_c), 0.01, "Burst Output 1");
+			wait until rising_edge(Clk);
+			assert OutVld = '1' report "###ERROR###: Output was not burst";
+			CheckReal(sqrt((0.9**2.0)+(0.4**2.0))*CordicGain_c, PsiFixtoReal(OutAbs, OutFmt_c), 0.01, "Burst Output 2");
+			wait until rising_edge(Clk);
+			assert OutVld = '1' report "###ERROR###: Output was not burst";
+			CheckReal(sqrt((0.9**2.0)+(0.35**2.0))*CordicGain_c, PsiFixtoReal(OutAbs, OutFmt_c), 0.01, "Burst Output 3");
+			wait until rising_edge(Clk);
+			assert OutVld = '0' report "###ERROR###: Burst was not ended";
+		end if;
 		
 		-- Test file content (bittrueness)
 		file_open(fIn, DataDir_g & "/input.txt",read_mode);
