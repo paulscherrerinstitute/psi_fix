@@ -1,10 +1,6 @@
 from psi_fix_pkg import *
 import numpy as np
-from scipy.signal import lfilter
 from math import *
-from scipy.misc import derivative
-import matplotlib.pyplot as plt
-
 
 class psi_fix_cic_dec:
     """
