@@ -9,6 +9,9 @@ Oliver Bründler [oliver.bruendler@psi.ch]
 ## Changelog
 See [Changelog](Changelog.md)
 
+## Detailed Documentation
+See [Documentation](doc/psi_fix.pdf)
+
 ## What belongs into this Library
 
 This library contains fixed point processing logic that is not very application specific and can be reused easily. Code
