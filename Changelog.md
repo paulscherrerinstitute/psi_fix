@@ -1,3 +1,12 @@
+## 1.3.0
+
+* Added Features
+  * Added support for constant coeefficients to FIR filters (psi_fix_fir_dec_ser_nch_chpar_conf, psi_fix_fir_dec_ser_nch_chtdm_conf)
+* Bugfixes
+  * None
+* Changed Dependencies
+  * None
+
 ## 1.2.0
 
 * Added Features
