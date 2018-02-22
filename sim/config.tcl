@@ -46,10 +46,12 @@ add_sources "../testbench" {
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb_case0_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb_case1_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb.vhd \
+	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_fix_coef_tb.vhd \
 	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_tb_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_tb_case0_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_tb_case1_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_tb.vhd \
+	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_fix_coef_tb.vhd \
 	psi_fix_bin_div_tb/psi_fix_bin_div_tb.vhd \
 	psi_fix_cic_dec_fix_1ch_tb/psi_fix_cic_dec_fix_1ch_tb.vhd \
 	psi_fix_cic_int_fix_1ch_tb/psi_fix_cic_int_fix_1ch_tb.vhd \
@@ -85,11 +87,17 @@ tb_run_add_arguments 	"-gStimuliPath_g=$dataDir -gDutyCycle_g=32" \
 						"-gStimuliPath_g=$dataDir -gDutyCycle_g=4"
 add_tb_run
 
+create_tb_run "psi_fix_fir_dec_ser_nch_chpar_conf_fix_coef_tb"
+add_tb_run
+
 create_tb_run "psi_fix_fir_dec_ser_nch_chtdm_conf_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_fir_dec_ser_nch_chtdm_conf_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_fir_dec_ser_nch_chtdm_conf_tb/Data"]
 tb_run_add_arguments 	"-gStimuliPath_g=$dataDir -gDutyCycle_g=32" \
 						"-gStimuliPath_g=$dataDir -gDutyCycle_g=4"
+add_tb_run
+
+create_tb_run "psi_fix_fir_dec_ser_nch_chtdm_conf_fix_coef_tb"
 add_tb_run
 
 create_tb_run "psi_fix_bin_div_tb"

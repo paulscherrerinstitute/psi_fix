@@ -19,6 +19,7 @@ library ieee;
 library work;
 	use work.psi_fix_pkg.all;
 	use work.psi_common_math_pkg.all;
+	use work.psi_common_array_pkg.all;
 	
 ------------------------------------------------------------------------------
 -- Entity Declaration
@@ -30,9 +31,11 @@ entity psi_fix_fir_dec_ser_nch_chtdm_conf is
 		CoefFmt_g				: PsiFixFmt_t	:= (1, 0, 17);
 		Channels_g				: natural		:= 2;
 		MaxRatio_g				: natural		:= 8;
-		MaxTaps_g				: natural		:= 1024;			-- ONLY POWERS OF 2 ARE ALLOWED
+		MaxTaps_g				: natural		:= 1024;			
 		Rnd_g					: PsiFixRnd_t	:= PsiFixRound;
-		Sat_g					: PsiFixSat_t	:= PsiFixSat
+		Sat_g					: PsiFixSat_t	:= PsiFixSat;
+		UseFixCoefs_g			: boolean		:= false;
+		FixCoefs_g				: t_areal		:= (0.0, 0.0)		
 	);
 	port (
 		-- Control Signals
@@ -45,13 +48,13 @@ entity psi_fix_fir_dec_ser_nch_chtdm_conf is
 		OutVld		: out	std_logic;
 		OutData		: out	std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);
 		-- Parallel Configuration Interface
-		Ratio		: in	std_logic_vector(log2ceil(MaxRatio_g)-1 downto 0); 	-- Ratio - 1 (0 => Ratio 1, 4 => Ratio 5)
-		Taps		: in	std_logic_vector(log2ceil(MaxTaps_g)-1 downto 0);	-- Number of taps - 1
+		Ratio		: in	std_logic_vector(log2ceil(MaxRatio_g)-1 downto 0)	:= std_logic_vector(to_unsigned(MaxRatio_g-1, log2ceil(MaxRatio_g))); 	-- Ratio - 1 (0 => Ratio 1, 4 => Ratio 5)
+		Taps		: in	std_logic_vector(log2ceil(MaxTaps_g)-1 downto 0)	:= std_logic_vector(to_unsigned(MaxTaps_g-1, log2ceil(MaxTaps_g)));		-- Number of taps - 1
 		-- Coefficient interface
-		CoefClk		: in	std_logic;
-		CoefWr		: in	std_logic;
-		CoefAddr	: in	std_logic_vector(log2ceil(MaxTaps_g)-1 downto 0);
-		CoefWrData	: in	std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
+		CoefClk		: in	std_logic											:= '0';
+		CoefWr		: in	std_logic											:= '0';
+		CoefAddr	: in	std_logic_vector(log2ceil(MaxTaps_g)-1 downto 0)	:= (others => '0');
+		CoefWrData	: in	std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0)	:= (others => '0');
 		CoefRdData	: out	std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0)
 	);
 end entity;
@@ -115,8 +118,14 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chtdm_conf is
 	signal DataRamDout_3	: std_logic_vector(PsiFixSize(InFmt_g)-1 downto 0);
 	signal CoefRamDout_3	: std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
 	
+	-- coef ROM
+	type CoefRom_t is array (0 to 2**log2ceil(MaxTaps_g)-1) of std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0); -- full power of two to ensure index is always valid
+	signal CoefRom 	: CoefRom_t := (others => (others => '0'));	
+	
 	
 begin
+
+	assert Channels_g >= 2 report "###ERROR###: psi_fix_fir_dec_ser_nch_chtdm_conf only works for Channels_g >= 2, use psi_fix_fir_dec_ser_nch_chtpar_conf for single channel implementation" severity error;
 
 	--------------------------------------------
 	-- Combinatorial Process
@@ -300,23 +309,45 @@ begin
 	--------------------------------------------
 	-- Component Instantiations
 	--------------------------------------------
-	i_coef_ram : entity work.psi_common_tdp_ram_rbw
-		generic map (
-			Depth_g		=> CoefMemDepthApplied_c,
-			Width_g		=> PsiFixSize(CoefFmt_g)
-		)
-		port map (
-			ClkA		=> CoefClk,
-			AddrA		=> CoefAddr,
-			WrA			=> CoefWr,
-			DinA		=> CoefWrData,
-			DoutA		=> CoefRdData,
-			ClkB		=> Clk,
-			AddrB		=> r.CoefRdAddr_2,
-			WrB			=> '0',
-			DinB		=> (others => '0'),
-			DoutB		=> CoefRamDout_3
-		);
+	-- Coefficient RAM for configurable coefficients
+	g_nFixCoef : if not UseFixCoefs_g generate
+		i_coef_ram : entity work.psi_common_tdp_ram_rbw
+			generic map (
+				Depth_g		=> CoefMemDepthApplied_c,
+				Width_g		=> PsiFixSize(CoefFmt_g)
+			)
+			port map (
+				ClkA		=> CoefClk,
+				AddrA		=> CoefAddr,
+				WrA			=> CoefWr,
+				DinA		=> CoefWrData,
+				DoutA		=> CoefRdData,
+				ClkB		=> Clk,
+				AddrB		=> r.CoefRdAddr_2,
+				WrB			=> '0',
+				DinB		=> (others => '0'),
+				DoutB		=> CoefRamDout_3
+			);
+	end generate;
+	
+	-- Coefficient ROM for non-configurable coefficients
+	g_FixCoef : if UseFixCoefs_g generate
+		-- Table must be generated outside of the ROM process to make code synthesizable
+		g_CoefTable : for i in FixCoefs_g'low to FixCoefs_g'high generate
+			CoefRom(i) <= PsiFixFromReal(FixCoefs_g(i), CoefFmt_g);
+		end generate;
+	
+		-- Assign unused outputs
+		CoefRdData <= (others => '0');
+		-- Coefficient ROM
+		p_coef_rom : process(Clk)
+		begin
+			if rising_edge(Clk) then
+				CoefRamDout_3 <= CoefRom(to_integer(unsigned(r.CoefRdAddr_2)));
+			end if;
+		end process;
+		
+	end generate;
 	
 	DataRamWrAddr_1	<= r.ChannelNr(1) & r.TapWrAddr_1;
 	DataRamRdAddr_2 <= r.CalcChnl_2 & r.TapRdAddr_2;
