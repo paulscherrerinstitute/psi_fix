@@ -33,6 +33,7 @@ add_sources "../hdl" {
 	psi_fix_cic_dec_fix_1ch.vhd \
 	psi_fix_cic_int_fix_1ch.vhd \
 	psi_fix_bin_div.vhd \
+	psi_fix_dds_18b.vhd \
 } -tag src
 
 # testbenches
@@ -52,6 +53,7 @@ add_sources "../testbench" {
 	psi_fix_bin_div_tb/psi_fix_bin_div_tb.vhd \
 	psi_fix_cic_dec_fix_1ch_tb/psi_fix_cic_dec_fix_1ch_tb.vhd \
 	psi_fix_cic_int_fix_1ch_tb/psi_fix_cic_int_fix_1ch_tb.vhd \
+	psi_fix_dds_18b_tb/psi_fix_dds_18b_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -114,8 +116,14 @@ tb_run_add_arguments 	"-gInIdleCycles_g=0 -gOutIdleCycles_g=0 -gOrder_g=3 -gRati
 						"-gInIdleCycles_g=0 -gOutIdleCycles_g=0 -gOrder_g=4 -gRatio_g=6 -gDiffDelay_g=2 -gAutoGainCorr_g=False -gInFile_g=input.txt -gOutFile_g=output_o4_r6_dd2_gcFalse.txt -gDataDir_g=$dataDir -gIdleCycles_g=0" \
 						"-gInIdleCycles_g=20 -gOutIdleCycles_g=2 -gOrder_g=4 -gRatio_g=6 -gDiffDelay_g=2 -gAutoGainCorr_g=False -gInFile_g=input.txt -gOutFile_g=output_o4_r6_dd2_gcFalse.txt -gDataDir_g=$dataDir -gIdleCycles_g=0" \
 						"-gInIdleCycles_g=2 -gOutIdleCycles_g=0 -gOrder_g=4 -gRatio_g=6 -gDiffDelay_g=2 -gAutoGainCorr_g=False -gInFile_g=input.txt -gOutFile_g=output_o4_r6_dd2_gcFalse.txt -gDataDir_g=$dataDir -gIdleCycles_g=0" \
-						"-gInIdleCycles_g=2 -gOutIdleCycles_g=20 -gOrder_g=3 -gRatio_g=10 -gDiffDelay_g=1 -gAutoGainCorr_g=True -gInFile_g=input.txt -gOutFile_g=output_o3_r10_dd1_gcTrue.txt -gDataDir_g=$dataDir -gIdleCycles_g=0" \
+						"-gInIdleCycles_g=2 -gOutIdleCycles_g=20 -gOrder_g=3 -gRatio_g=10 -gDiffDelay_g=1 -gAutoGainCorr_g=True -gInFile_g=input.txt -gOutFile_g=output_o3_r10_dd1_gcTrue.txt -gDataDir_g=$dataDir -gIdleCycles_g=0"
+add_tb_run
 
+create_tb_run "psi_fix_dds_18b_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_dds_18b_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_dds_18b_tb/Data"]
+tb_run_add_arguments 	"-gFileFolder_c=$dataDir -gIdleCycles_g=0" \
+						"-gFileFolder_c=$dataDir -gIdleCycles_g=5"
 add_tb_run
 
 
