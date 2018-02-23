@@ -54,6 +54,7 @@ architecture rtl of psi_fix_lin_approx_calc is
 	constant RemFmtSigned_c	: PsiFixFmt_t		:= (1, RemFmt_c.I-1, RemFmt_c.F);
 	constant IdxFmt_c		: PsiFixFmt_t		:= (0, InFmt_g.S + InFmt_g.I, InFmt_g.F - RemFmt_c.F - RemFmt_c.I);
 	constant IntFmt_c		: PsiFixFmt_t		:= (max(RemFmt_c.S, GradFmt_g.S), RemFmt_c.I + GradFmt_g.I + 1, RemFmt_c.F + GradFmt_g.F);
+	constant AddFmt_c		: PsiFixFmt_t		:= (max(IntFmt_c.S, OffsFmt_g.S), max(IntFmt_c.I, OffsFmt_g.I)+1, max(IntFmt_c.F, OffsFmt_g.F));
 	
 	subtype OffsRng_c is natural range PsiFixSize(OffsFmt_g)-1 downto 0;
 	subtype GradRng_c is natural range PsiFixSize(GradFmt_g)+OffsRng_c'high downto OffsRng_c'high+1;
@@ -65,14 +66,15 @@ architecture rtl of psi_fix_lin_approx_calc is
 
 	-- Two process method
 	type two_process_r is record
-		Vld			: std_logic_vector(0 to 5);
+		Vld			: std_logic_vector(0 to 6);
 		In_0		: std_logic_vector(PsiFixSize(InFmt_g)-1 downto 0);
 		TblIdx_1	: std_logic_vector(PsiFixSize(IdxFmt_c)-1 downto 0);
 		Offs		: Offs_t(3 to 4);
 		Grad_3		: std_logic_vector(PsiFixSize(GradFmt_g)-1 downto 0);
 		Reminder	: Rem_t(1 to 3);
 		GradVal_4	: std_logic_vector(PsiFixSize(IntFmt_c)-1 downto 0);
-		Out_5		: std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);		
+		Add_5		: std_logic_vector(PsiFixSize(AddFmt_c)-1 downto 0);	
+		Out_6		: std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);	
 	end record;
 	signal r, r_next : two_process_r;
 	
@@ -119,17 +121,21 @@ begin
 									IntFmt_c);
 	
 		-- *** Stage 5 ***
-		-- Addition
-		v.Out_5	:= PsiFixAdd(	r.Offs(4), OffsFmt_g,
+		-- Addition (at full precision and without round/sat to fit into DSP slie)
+		v.Add_5 := PsiFixAdd(	r.Offs(4), OffsFmt_g,
 								r.GradVal_4, IntFmt_c,
-								OutFmt_g, PsiFixRound, PsiFixSat);
+								AddFmt_c, PsiFixTrunc, PsiFixWrap);
 		
+		-- *** Stage 6 ***
+		-- Output rounding and saturation
+		v.Out_6	:= PsiFixResize(r.Add_5, AddFmt_c,
+								OutFmt_g, PsiFixRound, PsiFixSat);	
 		
 		
 		-- *** Outputs ***
 		TblAddr <= r.TblIdx_1;
-		OutVld	<= r.Vld(5);
-		OutData	<= r.Out_5;				
+		OutVld	<= r.Vld(6);
+		OutData	<= r.Out_6;				
 		
 		-- *** Assign to signal ***
 		r_next <= v;

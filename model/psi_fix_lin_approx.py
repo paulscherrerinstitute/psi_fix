@@ -85,6 +85,7 @@ class psi_fix_lin_approx:
                                 self.cfg.inFmt.F - self.remFmt.F - self.remFmt.I)
         self.intFmt = PsiFixFmt(max(self.remFmt.S, self.cfg.gradFmt.S), self.remFmt.I + self.cfg.gradFmt.I + 1,
                                 self.remFmt.F + self.cfg.gradFmt.F)
+        self.addFmt = PsiFixFmt(max(self.intFmt.S, self.cfg.offsFmt.S), max(self.intFmt.I, self.cfg.offsFmt.I)+1, max(self.intFmt.F, self.cfg.offsFmt.F))
         #Calculate tables
         inputRange = [PsiFixLowerBound(self.cfg.inFmt), 2 ** self.cfg.inFmt.I]
         fullRange = inputRange[1] - inputRange[0]
@@ -116,9 +117,11 @@ class psi_fix_lin_approx:
         gradVal= PsiFixMult(grad, self.cfg.gradFmt,
                             tblRem, self.remFmt,
                             self.intFmt)
-        output = PsiFixAdd(offsVal, self.cfg.offsFmt,
+        addVal = PsiFixAdd(offsVal, self.cfg.offsFmt,
                            gradVal, self.intFmt,
-                           self.cfg.outFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+                           self.addFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        output = PsiFixResize(addVal, self.addFmt,
+                              self.cfg.outFmt, PsiFixRnd.Round, PsiFixSat.Sat)
         return output
 
     def Analyze(self, simPoints,

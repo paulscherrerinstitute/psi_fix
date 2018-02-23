@@ -48,7 +48,7 @@ architecture rtl of psi_fix_dds_18b is
 	
 	-- Two Process Method
 	type two_process_r is record
-		VldIn				: std_logic_vector(0 to 8);
+		VldIn				: std_logic_vector(0 to 9);
 		PhaseAccu_0			: std_logic_vector(PsiFixSize(PhaseFmt_g)-1 downto 0);
 		PhaseOffs_0			: std_logic_vector(PsiFixSize(PhaseFmt_g)-1 downto 0);
 		PhaseOffs_1			: std_logic_vector(PsiFixSize(PhaseFmt_g)-1 downto 0);
@@ -71,7 +71,7 @@ begin
 		if rising_edge(Clk) then
 			if Rst = '0' then
 				assert SinVld = CosVld report "###ERROR###: psi_fix_dds_18b: SinVld / CosVld mismatch" severity error;
-				assert SinVld = r.VldIn(8) report "###ERROR###: psi_fix_dds_18b: SinVld / Pipeline Vld mismatch" severity error;
+				assert SinVld = r.VldIn(9) report "###ERROR###: psi_fix_dds_18b: SinVld / Pipeline Vld mismatch" severity error;
 			end if;
 		end if;
 	end process;
@@ -121,7 +121,7 @@ begin
 		-- Reserved for Linear approximation		
 
 		-- *** Outputs ***
-		OutVld 	<= r.VldIn(8);
+		OutVld 	<= r.VldIn(9);
 		OutSin 	<= SinData;
 		OutCos 	<= CosData;
 		
