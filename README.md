@@ -31,8 +31,8 @@ Examples for things that belong into this library:
 # Dependencies
 ## Library
 * Libraries/TCL/PsiSim
-* Libraries/VHDL/psi_common
-* Libraries/VHDL/psi_tb
+* Libraries/VHDL/psi_common (must be compiled into the same VHDL library as *psi_fix*)
+* Libraries/VHDL/psi_tb (must be compiled into the same VHDL library as *psi_fix*)
 
 ## External
 * Python 3.x (for executing the bittrue models)
