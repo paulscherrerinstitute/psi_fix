@@ -36,6 +36,9 @@ Examples for things that belong into this library:
 
 ## External
 * Python 3.x (for executing the bittrue models)
+* Python Packages
+  * SciPy (*pip install scipy*)
+  * NumPy (*pip install numpy*)
 
 Note: On Linux Python 3.x and Python 2.x can be called explicitly by using **python3** and **python2**. However, this
 does not work out of the box for Windows but explicit calling is required since Python 2.x may be present. To enable the
