@@ -14,7 +14,8 @@ import matplotlib.pyplot as plt
 # not required since in psi_fix_pkg
 from psi_fix_matrix_rotation_2D import psi_fix_matrix_rot
 # fetch path for model
-sys.path.insert(0, "../../model")
+import sys
+sys.path.append("../../../model")
 import numpy as np
 from psi_fix_pkg import *
 
@@ -42,7 +43,7 @@ q2 = np.cos(theta)
 #print(i1, i2, q1, q2)
 
 # call Model rotation matrix
-MatRot = psi_fix_matrix_rot(inFmt, outFmt, coefFmt, internalFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+MatRot = psi_fix_complex_mult(inFmt, outFmt, coefFmt, internalFmt, PsiFixRnd.Round, PsiFixSat.Sat)
 rotX, rotY = MatRot.Process(x, y, i1, i2, q1, q2)
 
 #print(np.arctan2(y[0], x[0])*180/np.pi)
