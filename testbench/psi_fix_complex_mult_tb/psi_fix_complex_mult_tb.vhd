@@ -23,8 +23,7 @@ use ieee.math_real.all;
 use ieee.std_logic_textio.all;
 use std.textio.all;
 
-library psi_fix;
-use psi_fix.psi_fix_pkg.all;
+use work.psi_fix_pkg.all;
 
 entity psi_fix_complex_mult_tb is
 	generic(freq_clock_g     : real    := 100.0e6; --frequency clock
