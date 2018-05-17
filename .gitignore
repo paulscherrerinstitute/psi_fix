@@ -1,0 +1,6 @@
+#Pycharm files
+**/.idea/**/*
+*.pyc
+
+#backup files
+*.bak

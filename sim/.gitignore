@@ -12,3 +12,7 @@
 #Ignore transcripts
 *.transcript
 *.wlf
+transcript
+
+#Stacktraces
+*_stacktrace.*
