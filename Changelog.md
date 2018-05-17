@@ -1,3 +1,14 @@
+## 1.4.0 [TO BE RELEASED]
+
+* Added Features
+  * None
+* Changes
+  * Changed some TBs to use the new psi_tb_textfile_pkg (including the automatically generated psi_fix_lin_appprox testbenches)
+* Bugfixes
+  * None
+* Changed Dependencies
+  * psi_tb >= 1.1.0
+
 ## 1.3.0
 
 * Added Features

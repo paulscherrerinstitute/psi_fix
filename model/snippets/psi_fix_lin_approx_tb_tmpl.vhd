@@ -11,6 +11,7 @@ library std;
 library work;
 	use work.psi_fix_pkg.all;
 	use work.psi_common_math_pkg.all;
+	use work.psi_tb_textfile_pkg.all;	
 	
 ------------------------------------------------------------------------------
 -- Entity Declaration
@@ -71,9 +72,6 @@ begin
 	end process;
 	
 	p_stimuli : process
-		file 		f : text;
-		variable 	l : line;
-		variable 	s : integer;
 	begin
 		Rst <= '1';
 		-- Remove reset
@@ -83,17 +81,12 @@ begin
 		wait for 1 us;
 		
 		-- Apply StimuliDir_g
-		file_open(f, StimuliDir_g & "/stimuli.txt");
-		wait until rising_edge(Clk);
-		InVld <= '1';
-		while not endfile(f) loop
-			readline(f, l);
-			read(l, s);
-			InData <= PsiFixFromBitsAsInt(s, InFmt_c);
-			wait until rising_edge(Clk);
-		end loop;
-		InVld <= '0';
-		file_close(f);
+		appy_textfile_content(	Clk 		=> Clk, 
+								Rdy 		=> PsiTextfile_SigOne,
+								Vld 		=> InVld, 
+								Data(0)		=> InData, 
+								Filepath	=> StimuliDir_g & "/stimuli.txt", 
+								ClkPerSpl	=> 1);		
 		
 		-- Finish
 		wait for 1 us;
@@ -103,26 +96,14 @@ begin
 	end process;
 	
 	p_response : process
-		file 		f : text;
-		variable 	l : line;
-		variable 	s : integer;
-		variable	i : integer := 0;
-		variable    e : std_logic_vector(PsiFixSize(OutFmt_c)-1 downto 0);
 	begin
 		
-		-- Apply StimuliDir_g
-		file_open(f, StimuliDir_g & "/response.txt");
-		while not endfile(f) loop
-			wait until OutVld = '1' and rising_edge(Clk);
-			readline(f, l);
-			read(l, s);
-			e := PsiFixFromBitsAsInt(s, OutFmt_c);
-			assert e = OutData report "###ERROR###: Received wrong data in sample " & integer'image(i) &
-									  " (got " & integer'image(to_integer(signed(OutData))) &
-									  " expected " & integer'image(to_integer(signed(e))) & ")" severity error;
-			i := i + 1;
-		end loop;
-		file_close(f);
+		-- Check
+		check_textfile_content(	Clk			=> Clk,
+								Rdy			=> PsiTextfile_SigUnused,
+								Vld			=> OutVld,
+								Data(0)		=> OutData,
+								Filepath	=> StimuliDir_g & "/response.txt");
 		
 		-- Finish
 		wait;

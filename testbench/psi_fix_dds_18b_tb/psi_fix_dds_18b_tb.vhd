@@ -11,6 +11,7 @@ library std;
 library work;
 	use work.psi_tb_txt_util.all;
 	use work.psi_fix_pkg.all;
+	use work.psi_tb_textfile_pkg.all;
 
 entity psi_fix_dds_18b_tb is
 	generic (
@@ -50,31 +51,6 @@ architecture sim of psi_fix_dds_18b_tb is
 	signal PhaseStep				: std_logic_vector(PsiFixSize(PhaseFmt_c)-1 downto 0)	:= (others => '0');
 	signal PhaseOffs				: std_logic_vector(PsiFixSize(PhaseFmt_c)-1 downto 0)	:= (others => '0');
 	signal Restart					: std_logic			:= '0';
-	
-	-------------------------------------------------------------------------
-	-- Procedures
-	-------------------------------------------------------------------------	
-	procedure CheckOutput(	file	fSinCos 	: 			text;
-							signal 	Sin			: in		std_logic_vector;
-							signal  Cos			: in		std_logic_vector;
-									Idx			: in		integer) is
-		variable ln		: line;
-		variable Spl	: integer;
-	begin
-		readline(fSinCos,ln);
-		read(ln, Spl);
-		assert to_integer(signed(Sin)) = Spl 
-			report "###ERROR###: Wrong Sin Sample " & integer'image(Idx)  &
-			       " Expected: " & integer'image(Spl) &
-				   " Received: " & integer'image(to_integer(signed(Sin)))
-			severity error;
-		read(ln, Spl);
-		assert to_integer(signed(Cos)) = Spl 
-			report "###ERROR###: Wrong Cos Sample " & integer'image(Idx)  &
-			       " Expected: " & integer'image(Spl) &
-				   " Received: " & integer'image(to_integer(signed(Cos)))
-			severity error;			
-	end procedure;
 
 begin
 
@@ -133,36 +109,25 @@ begin
 		wait for 1 us;
 		
 		-- Apply Configuration
-		file_open(fCfg, FileFolder_c & "/" & ConfigFile, read_mode);
-		wait until rising_edge(Clk);
-		readline(fCfg,ln); --header
-		readline(fCfg,ln);
-		read(ln, Spl);
-		PhaseStep <= std_logic_vector(to_unsigned(Spl, PhaseStep'length));
-		read(ln, Spl);
-		PhaseOffs <= std_logic_vector(to_unsigned(Spl, PhaseOffs'length));
-		file_close(fCfg);
-		wait until rising_edge(Clk);
+		appy_textfile_content(	Clk 		=> Clk, 
+								Rdy 		=> PsiTextfile_SigOne,
+								Vld 		=> PsiTextfile_SigUnused, 
+								Data(0)		=> PhaseStep, 
+								Data(1)		=> PhaseOffs,
+								Filepath	=> FileFolder_c & "/" & ConfigFile,
+								IgnoreLines	=> 1);	
 		
 		
 		-- *** Case 0: Bittrueness ***
 		print("Case 0: Bittrueness");
 		TestCase <= 0;
-		-- Apply Inputs
-		file_open(fSig, FileFolder_c & "/" & SinCosFile, read_mode); --only required for determining the number of samples
-		wait until rising_edge(Clk);
-		while not endfile(fSig) loop
-			readline(fSig,ln);
-			InVld <= '1';	
-			wait until rising_edge(Clk);
-			for i in 0 to IdleCycles_g-1 loop
-				InVld <= '0';
-				wait until rising_edge(Clk);
-			end loop;
-		end loop;
-		InVld <= '0';
-		file_close(fSig);		wait until rising_edge(Clk);
-		
+		-- File reading only required for determining number of samples
+		appy_textfile_content(	Clk 		=> Clk, 
+								Rdy 		=> PsiTextfile_SigOne,
+								Vld 		=> InVld, 
+								Data(0)		=> PsiTextfile_SigUnusedVec, 
+								Filepath	=> FileFolder_c & "/" & SinCosFile, 
+								ClkPerSpl	=> IdleCycles_g+1);	
 		wait until ResponseDone = 0;
 		
 		-- *** Case 1: Restart ***
@@ -174,19 +139,13 @@ begin
 		wait until rising_edge(Clk);
 		Restart <= '0';
 		-- Apply Inputs
-		file_open(fSig, FileFolder_c & "/" & SinCosFile, read_mode); --only required for determining the number of samples
-		wait until rising_edge(Clk);
-		for i in 0 to 10 loop -- if first 10 samples are corred, we can assume the restart worked			
-			InVld <= '1';	
-			wait until rising_edge(Clk);
-			for i in 0 to IdleCycles_g-1 loop
-				InVld <= '0';
-				wait until rising_edge(Clk);
-			end loop;			
-		end loop;
-		InVld <= '0';
-		file_close(fSig);
-		wait until rising_edge(Clk);		
+		appy_textfile_content(	Clk 		=> Clk, 
+								Rdy 		=> PsiTextfile_SigOne,
+								Vld 		=> InVld, 
+								Data(0)		=> PsiTextfile_SigUnusedVec, 
+								Filepath	=> FileFolder_c & "/" & SinCosFile, 
+								ClkPerSpl	=> IdleCycles_g+1,
+								MaxLines	=> 10);		
 		wait until ResponseDone = 1;		
 		
 		-- TB done
@@ -196,42 +155,27 @@ begin
 	end process;
 	
 	p_check : process
-		file fSinCos		: text;
-		variable ln	 		: line;
-		variable Spl		: integer;	
-		variable idx		: integer := 0;
 	begin
 		-- *** Case 0: Bittrueness ***
-		wait until TestCase = 0;
-		-- Open files
-		file_open(fSinCos, FileFolder_c & "/" & SinCosFile, read_mode);
+		wait until TestCase = 0;		
+		check_textfile_content(	Clk			=> Clk,
+								Rdy			=> PsiTextfile_SigUnused,
+								Vld			=> OutVld,
+								Data(0)		=> OutSin,
+								Data(1)		=> OutCos,
+								Filepath	=> FileFolder_c & "/" & SinCosFile);
 		
-		-- Check Outputs
-		while not endfile(fSinCos) loop
-			wait until rising_edge(Clk) and OutVld = '1';
-			CheckOutput(fSinCos, OutSin, OutCos, idx);		
-			idx := idx + 1;
-		end loop;			
-		
-		-- Close Files
-		file_close(fSinCos);
 		ResponseDone <= 0;
 		
 		-- *** Case 1: Restart ***
 		wait until TestCase = 1;
-		-- Open files
-		file_open(fSinCos, FileFolder_c & "/" & SinCosFile, read_mode);
-		
-		-- Check Outputs
-		idx := 0;
-		for i in 0 to 10 loop -- if first 10 samples are corred, we can assume the restart worked
-			wait until rising_edge(Clk) and OutVld = '1';
-			CheckOutput(fSinCos, OutSin, OutCos, idx);		
-			idx := idx + 1;
-		end loop;		
-		
-		-- Close Files
-		file_close(fSinCos);
+		check_textfile_content(	Clk			=> Clk,
+								Rdy			=> PsiTextfile_SigUnused,
+								Vld			=> OutVld,
+								Data(0)		=> OutSin,
+								Data(1)		=> OutCos,
+								Filepath	=> FileFolder_c & "/" & SinCosFile,
+								MaxLines	=> 10);
 		ResponseDone <= 1;		
 	
 		-- TB done

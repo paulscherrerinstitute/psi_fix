@@ -11,6 +11,7 @@ library std;
 library work;
 	use work.psi_fix_pkg.all;
 	use work.psi_common_math_pkg.all;
+	use work.psi_tb_textfile_pkg.all;	
 	
 ------------------------------------------------------------------------------
 -- Entity Declaration
@@ -46,7 +47,6 @@ architecture sim of psi_fix_lin_approx_sin18b_dual_tb is
 	-- Tb Signals
 	signal TbRunning	: boolean	:= true;
 	
-	
 begin
 
 	i_dut : entity work.psi_fix_lin_approx_sin18b_dual 
@@ -78,12 +78,15 @@ begin
 		wait;
 	end process;
 	
+	p_chb : process(Clk)
+	begin
+		if rising_edge(Clk) then
+			InVldB <= InVldA;
+			InDataB <= InDataA;
+		end if;
+	end process;
+	
 	p_stimuli : process
-		file 		f 		: text;
-		variable 	l 		: line;
-		variable 	s 		: integer;
-		variable	slast	: integer;
-		variable 	i 		: integer := 0;
 	begin
 		Rst <= '1';
 		-- Remove reset
@@ -92,25 +95,13 @@ begin
 		Rst <= '0';
 		wait for 1 us;
 		
-		-- Apply StimuliDir_g
-		file_open(f, StimuliDir_g & "/stimuli.txt");
-		wait until rising_edge(Clk);
-		InVldA <= '1';
-		while not endfile(f) loop
-			readline(f, l);
-			read(l, s);
-			InDataA <= PsiFixFromBitsAsInt(s, InFmt_c);
-			if i >= 1 then
-				InDataB <= PsiFixFromBitsAsInt(slast, InFmt_c);
-				InVldB <= '1';
-			end if;
-			wait until rising_edge(Clk);
-			i := i+1;
-			slast := s;
-		end loop;
-		InVldA <= '0';
-		InVldB <= '0';
-		file_close(f);
+		-- Apply StimuliDir_g		
+		appy_textfile_content(	Clk 		=> Clk, 
+								Rdy 		=> PsiTextfile_SigOne,
+								Vld 		=> InVldA, 
+								Data(0)		=> InDataA, 
+								Filepath	=> StimuliDir_g & "/stimuli.txt", 
+								ClkPerSpl	=> 1);
 		
 		-- Finish
 		wait for 1 us;
@@ -119,40 +110,31 @@ begin
 		wait;
 	end process;
 	
-	p_response : process
-		file 		f 		: text;
-		variable 	l 		: line;
-		variable 	s 		: integer;
-		variable	slast 	: integer;
-		variable	i 		: integer := 0;
-		variable    e 		: std_logic_vector(PsiFixSize(OutFmt_c)-1 downto 0);
+	p_response_a : process
 	begin
-		
-		-- Apply StimuliDir_g
-		file_open(f, StimuliDir_g & "/response.txt");
-		while not endfile(f) loop
-			wait until OutVldA = '1' and rising_edge(Clk);
-			readline(f, l);
-			read(l, s);
-			e := PsiFixFromBitsAsInt(s, OutFmt_c);
-			assert e = OutDataA report "###ERROR###: Received wrong data ChA in sample " & integer'image(i) &
-									   " (got " & integer'image(to_integer(signed(OutDataA))) &
-									   " expected " & integer'image(to_integer(signed(e))) & ")" severity error;
-			if i >= 1 then
-				assert OutVldB = '1' report "###ERRROR###: ChannelB not valid" severity error;
-				e := PsiFixFromBitsAsInt(slast, OutFmt_c);
-				assert e = OutDataB report "###ERROR###: Received wrong data ChB in sample " & integer'image(i) &
-										   " (got " & integer'image(to_integer(signed(OutDataB))) &
-									       " expected " & integer'image(to_integer(signed(e))) & ")" severity error;
-			end if;
-			i := i + 1;
-			slast := s;
-		end loop;
-		file_close(f);
-		
-		-- Finish
+	
+		check_textfile_content(	Clk			=> Clk,
+								Rdy			=> PsiTextfile_SigUnused,
+								Vld			=> OutVldA,
+								Data(0)		=> OutDataA,
+								Filepath	=> StimuliDir_g & "/response.txt");
+
+
 		wait;
 	end process;
+	
+	p_response_b : process
+	begin
+	
+		check_textfile_content(	Clk			=> Clk,
+								Rdy			=> PsiTextfile_SigUnused,
+								Vld			=> OutVldB,
+								Data(0)		=> OutDataB,
+								Filepath	=> StimuliDir_g & "/response.txt");
+
+
+		wait;
+	end process;	
 	
 
 end sim;

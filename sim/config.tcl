@@ -15,6 +15,7 @@ run_suppress 8684,3479,3813,8009,3812
 add_sources $LibPath {
 	psi_tb/hdl/psi_tb_txt_util.vhd \
 	psi_tb/hdl/psi_tb_compare_pkg.vhd \
+	psi_tb/hdl/psi_tb_textfile_pkg.vhd \
 	psi_common/hdl/psi_common_math_pkg.vhd \
 	psi_common/hdl/psi_common_tdp_ram_rbw.vhd \
 	psi_common/hdl/psi_common_array_pkg.vhd \
