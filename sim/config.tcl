@@ -34,6 +34,7 @@ add_sources "../hdl" {
 	psi_fix_cic_int_fix_1ch.vhd \
 	psi_fix_bin_div.vhd \
 	psi_fix_dds_18b.vhd \
+	psi_fix_complex_mult.vhd \
 } -tag src
 
 # testbenches
@@ -56,6 +57,7 @@ add_sources "../testbench" {
 	psi_fix_cic_dec_fix_1ch_tb/psi_fix_cic_dec_fix_1ch_tb.vhd \
 	psi_fix_cic_int_fix_1ch_tb/psi_fix_cic_int_fix_1ch_tb.vhd \
 	psi_fix_dds_18b_tb/psi_fix_dds_18b_tb.vhd \
+	psi_fix_complex_mult_tb.vhd \
 } -tag tb
 	
 #TB Runs

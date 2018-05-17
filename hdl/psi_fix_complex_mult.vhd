@@ -25,8 +25,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library psi_fix;
-use psi_fix.psi_fix_pkg.all;
+use work.psi_fix_pkg.all;
 
 entity psi_fix_complex_mult is
 	generic(RstPol_g      : std_logic   := '0'; -- set reset polarity
