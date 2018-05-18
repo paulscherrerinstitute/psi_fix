@@ -1,18 +1,18 @@
 ## 1.4.0 [TO BE RELEASED]
 
 * Added Features
-  * None
+  * Added psi\_fix\_lowpass\_iir\_order1 (order 1 lowpass with integrated coefficient calculation)
 * Changes
-  * Changed some TBs to use the new psi_tb_textfile_pkg (including the automatically generated psi_fix_lin_appprox testbenches)
+  * Changed some TBs to use the new psi\_tb\_textfile\_pkg (including the automatically generated psi\_fix\_lin\_appprox testbenches)
 * Bugfixes
   * None
 * Changed Dependencies
-  * psi_tb >= 1.1.0
+  * psi\_tb >= 1.1.0
 
 ## 1.3.0
 
 * Added Features
-  * Added support for constant coeefficients to FIR filters (psi_fix_fir_dec_ser_nch_chpar_conf, psi_fix_fir_dec_ser_nch_chtdm_conf)
+  * Added support for constant coeefficients to FIR filters (psi\_fix\_fir\_dec\_ser\_nch\_chpar\_conf, psi\_fix\_fir\_dec\_ser\_nch\_chtdm\_conf)
 * Bugfixes
   * None
 * Changed Dependencies
@@ -21,16 +21,16 @@
 ## 1.2.0
 
 * Added Features
-  * Implemented single-channel CIC decimator for fixed ratio (psi_fix_cic_dec_fix_1ch)
-  * Implemented single channel CIC interpolator for fixed ratio (psi_fix_cic_int_fix_1ch)
-  * Implemented 18-bit DDS (psi_fix_dds_18b)
+  * Implemented single-channel CIC decimator for fixed ratio (psi\_fix\_cic\_dec\_fix\_1ch)
+  * Implemented single channel CIC interpolator for fixed ratio (psi\_fix\_cic\_int\_fix\_1ch)
+  * Implemented 18-bit DDS (psi\_fix\_dds\_18b)
   * Added interface functions and example for usage of the Python models from MATLAB
-  * Added parameter to psi_fix_cordic_abs_pl to select the amount of pipelining
+  * Added parameter to psi\_fix\_cordic\_abs\_pl to select the amount of pipelining
   * Added documentation of all library elements 
 * Bugfixes
   * None
 * Changed Dependencies
-  * psi_common >= 1.2.0
+  * psi\_common >= 1.2.0
 
 ## V1.01
 

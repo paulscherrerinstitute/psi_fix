@@ -35,6 +35,7 @@ add_sources "../hdl" {
 	psi_fix_cic_int_fix_1ch.vhd \
 	psi_fix_bin_div.vhd \
 	psi_fix_dds_18b.vhd \
+	psi_fix_lowpass_iir_order1.vhd \
 } -tag src
 
 # testbenches
@@ -57,6 +58,7 @@ add_sources "../testbench" {
 	psi_fix_cic_dec_fix_1ch_tb/psi_fix_cic_dec_fix_1ch_tb.vhd \
 	psi_fix_cic_int_fix_1ch_tb/psi_fix_cic_int_fix_1ch_tb.vhd \
 	psi_fix_dds_18b_tb/psi_fix_dds_18b_tb.vhd \
+	psi_fix_lowpass_iir_order1_tb/psi_fix_lowpass_iir_order1_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -134,6 +136,15 @@ set dataDir [file normalize "../testbench/psi_fix_dds_18b_tb/Data"]
 tb_run_add_arguments 	"-gFileFolder_c=$dataDir -gIdleCycles_g=0" \
 						"-gFileFolder_c=$dataDir -gIdleCycles_g=5"
 add_tb_run
+
+create_tb_run "psi_fix_lowpass_iir_order1_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_lowpass_iir_order1_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_lowpass_iir_order1_tb/Data"]
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gPipeline_g=true" \
+						"-gFileFolder_g=$dataDir -gPipeline_g=false"
+add_tb_run
+
+
 
 
 
