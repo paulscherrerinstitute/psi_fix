@@ -29,10 +29,7 @@ entity psi_fix_complex_mult_tb is
 	generic(freq_clock_g     : real    := 100.0e6; --frequency clock
 	        angle_g          : real    := 90.0; --same as python model
 	        Pipeline_g       : boolean := True; --set pipeline
-	        inp_txt_stim_g   : string  := "..\Scripts\stimuli_inphase.txt";
-	        qua_txt_stim_g   : string  := "..\Scripts\stimuli_quadrature.txt";
-	        rotInp_txt_obs_g : string  := "..\Scripts\model_result_rotX.txt";
-	        rotQua_txt_obs_g : string  := "..\Scripts\model_result_rotY.txt"
+			StimDir_g		 : string  := "..\Scripts"
 	       );
 end entity;
 
@@ -42,6 +39,12 @@ architecture tb of psi_fix_complex_mult_tb is
 	constant CoefFixFmt_c  : PsiFixFmt_t := (1, 1, 15); --same as python model
 	constant OutFmt_c      : PsiFixFmt_t := (1, 1, 15); --same as python model
 	constant InternalFmt_c : PsiFixFmt_t := (1, 2, 30); --same as python model
+	
+	-- stimuli files
+	constant inp_txt_stim_c   : string  := StimDir_g & "\stimuli_inphase.txt";
+	constant qua_txt_stim_c   : string  := StimDir_g & "\stimuli_quadrature.txt";
+	constant rotInp_txt_obs_c : string  := StimDir_g & "\model_result_rotX.txt";
+	constant rotQua_txt_obs_c : string  := StimDir_g & "\model_result_rotY.txt";
 
 	--typedef for next function
 	type matrix_array_t is array (0 to 3) of std_logic_vector(PsiFixSize(CoefFixFmt_c) - 1 downto 0);
@@ -95,7 +98,7 @@ begin
 	inp_stim_read_proc : process(rst_i, clk_i)
 		constant NUM_COL_c          : integer := 1;
 		type t_integer_array is array (integer range <>) of integer;
-		file test_vector_f          : text open read_mode is inp_txt_stim_g;
+		file test_vector_f          : text open read_mode is inp_txt_stim_c;
 		variable row                : line;
 		variable v_data_read        : t_integer_array(1 to NUM_COL_c);
 		variable v_data_row_counter : integer := 0;
@@ -127,7 +130,7 @@ begin
 	qua_stim_read_proc : process(rst_i, clk_i)
 		constant NUM_COL_c          : integer := 1;
 		type t_integer_array is array (integer range <>) of integer;
-		file test_vector_f          : text open read_mode is qua_txt_stim_g;
+		file test_vector_f          : text open read_mode is qua_txt_stim_c;
 		variable row                : line;
 		variable v_data_read        : t_integer_array(1 to NUM_COL_c);
 		variable v_data_row_counter : integer := 0;
@@ -158,7 +161,7 @@ begin
 	inp_obs_read_proc : process(rst_i, clk_i)
 		constant NUM_COL_c          : integer := 1;
 		type t_integer_array is array (integer range <>) of integer;
-		file test_vector_f          : text open read_mode is rotInp_txt_obs_g;
+		file test_vector_f          : text open read_mode is rotInp_txt_obs_c;
 		variable row                : line;
 		variable v_data_read        : t_integer_array(1 to NUM_COL_c);
 		variable v_data_row_counter : integer := 0;
@@ -189,7 +192,7 @@ begin
 	qua_obs_read_proc : process(rst_i, clk_i)
 		constant NUM_COL_c          : integer := 1;
 		type t_integer_array is array (integer range <>) of integer;
-		file test_vector_f          : text open read_mode is rotQua_txt_obs_g;
+		file test_vector_f          : text open read_mode is rotQua_txt_obs_c;
 		variable row                : line;
 		variable v_data_read        : t_integer_array(1 to NUM_COL_c);
 		variable v_data_row_counter : integer := 0;
@@ -246,7 +249,7 @@ begin
 				if str_vld_o = '1' then
 					count_sample_v := count_sample_v + 1;
 					assert signed(data_inphase_o) = signed(obs_ipath_s)
-					report "###ERROR###  mismatch for Inphase path @Sample n°: " & integer'image(count_sample_v) severity error;
+					report "###ERROR###:  mismatch for Inphase path @Sample n°: " & integer'image(count_sample_v) severity error;
 
 					if signed(data_inphase_o) = signed(obs_ipath_s) then
 						count_mismatch := count_mismatch;
@@ -255,7 +258,7 @@ begin
 					end if;
 
 					assert signed(data_quadrature_o) = signed(obs_qpath_s)
-					report "###ERROR###  mismatch for Quadrature path @Sample n°: " & integer'image(count_sample_v) severity error;
+					report "###ERROR###:  mismatch for Quadrature path @Sample n°: " & integer'image(count_sample_v) severity error;
 					if signed(data_quadrature_o) = signed(obs_qpath_s) then
 						count_mismatch2 := count_mismatch2;
 					else
@@ -269,17 +272,6 @@ begin
 	process
 		variable lout : line;
 	begin
-		----------------------------------------------------------------------------
-		write(lout, string'(" ***************************************************** "));
-		writeline(output, lout);
-		write(lout, string'(" **             Paul Scherrer Institut              ** "));
-		writeline(output, lout);
-		write(lout, string'(" ** Simulation Bit True Model Matrix Rotation PsiFix** "));
-		writeline(output, lout);
-		write(lout, string'(" ***************************************************** "));
-		writeline(output, lout);
-		----------------------------------------------------------------------------
-
 		rst_i <= '1';
 		wait for 10* period_c;
 		rst_i <= '0';
@@ -291,6 +283,7 @@ begin
 			write(lout, string'(" ----->     SUCCESS!! Bit True model for Matrix Rotation 100% Match "));
 			writeline(output, lout);
 		else
+			report "###ERROR###: Testbench failed";
 			write(lout, string'("  Time :  "));
 			write(lout, now);
 			write(lout, string'(" ----->     FAIL!! Bit True model for Matrix Rotation contains ERRORs "));
