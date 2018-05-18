@@ -60,7 +60,7 @@ add_sources "../testbench" {
 	psi_fix_cic_int_fix_1ch_tb/psi_fix_cic_int_fix_1ch_tb.vhd \
 	psi_fix_dds_18b_tb/psi_fix_dds_18b_tb.vhd \
 	psi_fix_lowpass_iir_order1_tb/psi_fix_lowpass_iir_order1_tb.vhd \
-	psi_fix_complex_mult_tb.vhd \
+	psi_fix_complex_mult_tb/psi_fix_complex_mult_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -144,6 +144,13 @@ tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_lowpass_iir
 set dataDir [file normalize "../testbench/psi_fix_lowpass_iir_order1_tb/Data"]
 tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gPipeline_g=true" \
 						"-gFileFolder_g=$dataDir -gPipeline_g=false"
+add_tb_run
+
+create_tb_run "psi_fix_complex_mult_tb"
+tb_run_add_pre_script "python3" "cosim.py" "../testbench/psi_fix_complex_mult_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_complex_mult_tb/Data"]
+tb_run_add_arguments 	"-gStimDir_g=$dataDir -gPipeline_g=true" \
+						"-gStimDir_g=$dataDir -gPipeline_g=false"
 add_tb_run
 
 
