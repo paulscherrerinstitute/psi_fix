@@ -2,6 +2,7 @@
 
 * Added Features
   * Added psi\_fix\_lowpass\_iir\_order1 (order 1 lowpass with integrated coefficient calculation)
+  * Added psi\_fix\_complex\_mult (multiplication of two complex numbers) 
 * Changes
   * Changed some TBs to use the new psi\_tb\_textfile\_pkg (including the automatically generated psi\_fix\_lin\_appprox testbenches)
 * Bugfixes
