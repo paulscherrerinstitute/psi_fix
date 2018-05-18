@@ -7,9 +7,9 @@ library ieee;
 	use ieee.numeric_std.all;
 	use ieee.math_real.all;
 	
-library work;
-	use work.psi_common_array_pkg.all;
-	use work.psi_common_math_pkg.all;
+library psi_common;
+	use psi_common.psi_common_array_pkg.all;
+	use psi_common.psi_common_math_pkg.all;
 	use work.psi_fix_pkg.all;
 
 ------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ architecture rtl of psi_fix_cic_dec_fix_1ch is
 	constant Shift_c				: integer			:= CicAddBits_c;
 	constant AccuFmt_c				: PsiFixFmt_t		:= (InFmt_g.S, InFmt_g.I+CicAddBits_c, InFmt_g.F);
 	constant DiffFmt_c				: PsiFixFmt_t		:= (OutFmt_g.S, InFmt_g.I, OutFmt_g.F + Order_g + 1);
-	constant GcInFmt_c				: PsiFixFmt_t		:= (1, OutFmt_g.I, work.psi_common_math_pkg.min(24-OutFmt_g.I, DiffFmt_c.F));
+	constant GcInFmt_c				: PsiFixFmt_t		:= (1, OutFmt_g.I, psi_common.psi_common_math_pkg.min(24-OutFmt_g.I, DiffFmt_c.F));
 	constant GcCoefFmt_c			: PsiFixFmt_t		:= (0, 1, 16);
 	constant Gc_c					: std_logic_vector(PsiFixSize(GcCoefFmt_c)-1 downto 0) := PsiFixFromReal(2.0**real(CicAddBits_c)/real(CicGain_c), GcCoefFmt_c);
 	
