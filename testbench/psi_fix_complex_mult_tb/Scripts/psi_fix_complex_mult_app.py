@@ -9,15 +9,21 @@
 # HDL file  : psi_fix_complex_mult_tb.vhd
 #==================================================================
 import sys
-import matplotlib.pyplot as plt
-
-# not required since in psi_fix_pkg
-from psi_fix_complex_mult import psi_fix_complex_mult
-# fetch path for model
-import sys
+import os
 sys.path.append("../../../model")
+import matplotlib.pyplot as plt
+from psi_fix_complex_mult import psi_fix_complex_mult
 import numpy as np
 from psi_fix_pkg import *
+
+PLOT_ON = False
+
+### Stimuli location
+STIM_DIR = os.path.dirname(os.path.abspath(__file__)) + "/../Data"
+try:
+    os.mkdir(STIM_DIR)
+except FileExistsError:
+    pass
 
 # Format definition
 inFmt       = PsiFixFmt(1, 1, 15)
@@ -26,8 +32,8 @@ internalFmt = PsiFixFmt(1, 2, 30)
 outFmt      = PsiFixFmt(1, 1, 15)
 
 # write into text file
-x = np.genfromtxt("stimuli_inphase.txt")/(2**inFmt.F)
-y = np.genfromtxt("stimuli_quadrature.txt")/(2**inFmt.F)
+x = np.genfromtxt(STIM_DIR + "/stimuli_inphase.txt")/(2**inFmt.F)
+y = np.genfromtxt(STIM_DIR + "/stimuli_quadrature.txt")/(2**inFmt.F)
 
 # Test with a scalar
 #x = np.full((1, 16),  0.5, dtype=float)
@@ -50,24 +56,26 @@ rotX, rotY = MatRot.Process(x, y, i1, i2, q1, q2)
 #print(np.arctan2(rotY[0], rotX[0])*180/np.pi)
 
 # plot complex plane and evidence of rotation
-unit_circle = plt.Circle((0,0),1,color='g',fill=False)
-sample  = np.arange(0,len(x),1)
-fig0    = plt.figure()
-ax2     = fig0.add_subplot(111)
-ax2.plot(y,x,'b+',label='stimuli data')
-ax2.plot(rotY,rotX,'r+',label='rotation data')
-ax2.set_ylim([-1.2, 1.2])
-ax2.set_xlim([-1.2, 1.2])
-ax2.add_artist(unit_circle)
-ax2.grid(axis='both')
-ax2.set_title('Unit circle complex plane IQ => rotation: %d' %(angle))
+if PLOT_ON:
+    unit_circle = plt.Circle((0,0),1,color='g',fill=False)
+    sample  = np.arange(0,len(x),1)
+    fig0    = plt.figure()
+    ax2     = fig0.add_subplot(111)
+    ax2.plot(y,x,'b+',label='stimuli data')
+    ax2.plot(rotY,rotX,'r+',label='rotation data')
+    ax2.set_ylim([-1.2, 1.2])
+    ax2.set_xlim([-1.2, 1.2])
+    ax2.add_artist(unit_circle)
+    ax2.grid(axis='both')
+    ax2.set_title('Unit circle complex plane IQ => rotation: %d' %(angle))
 
 # format data prior to write into text file
 rotXtxt = PsiFixGetBitsAsInt(rotX,outFmt)
 rotYtxt = PsiFixGetBitsAsInt(rotY,outFmt)
 
 # text file used to make VHDL testbench comparison
-np.savetxt('model_result_rotX.txt', rotXtxt.astype(int).T, fmt='% 4d', newline='\n') #observable wave
-np.savetxt('model_result_rotY.txt', rotYtxt.astype(int).T, fmt='% 4d', newline='\n') #observable wave
+np.savetxt(STIM_DIR + '/model_result_rotX.txt', rotXtxt.astype(int).T, fmt='% 4d', newline='\n') #observable wave
+np.savetxt(STIM_DIR + '/model_result_rotY.txt', rotYtxt.astype(int).T, fmt='% 4d', newline='\n') #observable wave
 
-plt.show()
+if PLOT_ON:
+    plt.show()
