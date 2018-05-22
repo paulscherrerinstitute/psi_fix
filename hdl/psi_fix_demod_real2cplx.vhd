@@ -21,17 +21,16 @@ library work;
 	use work.psi_common_math_pkg.all;
 	use work.psi_fix_pkg.all;
 	
--- TODO: Gaincorr
-
 ------------------------------------------------------------------------------
 -- Entity Declaration
 ------------------------------------------------------------------------------
 -- $$ processes=stim,check $$
 entity psi_fix_demod_real2cplx is
 	generic (
-		RstPol_g  : std_logic   := '1';			-- $$ constant = '1' $$
-	    DataFmt_g : PsiFixFmt_t;				-- $$ constant=(1,0,15) $$
-	    Ratio_g   : natural     := 5			-- $$ constant=5 $$
+		RstPol_g  	: std_logic   	:= '1';			-- $$ constant = '1' $$
+	    DataFmt_g 	: PsiFixFmt_t;					-- $$ constant=(1,0,15) $$
+	    Ratio_g   	: natural     	:= 5;			-- $$ constant=5 $$
+		GainCorr_g	: string		:= "NONE"		-- NONE, EXACT or ROUGH (see psi_fix_mov_avg for details)
 	);
 	port(
 		clk_i				: in  	std_logic; 												-- $$ type=clk; freq=100e6 $$
@@ -84,21 +83,14 @@ architecture RTL of psi_fix_demod_real2cplx is
 	attribute rom_style of nonIQ_table_sin, nonIQ_table_cos : constant is "distributed";
 	
 	constant SubType_t				: PsiFixFmt_t	:= (DataFmt_g.S, DataFmt_g.I+1, DataFmt_g.F);
+	
+	type OutPipe_t is array (natural range <>) of std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	--
 	signal cptInt					: integer range 0 to Ratio_g - 1 := 0;		
 	signal cpt_s                    : integer range 0 to Ratio_g - 1 := 0;
 	signal mult_i_s                 : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	signal mult_q_s                 : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
-	signal data_sr_i_s, data_sr_q_s : coef_array_t;
 	--
-	signal i_sub_s                  : std_logic_vector(PsiFixSize(SubType_t) - 1 downto 0);
-	signal i_add_s                  : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
-	signal q_sub_s                  : std_logic_vector(PsiFixSize(SubType_t) - 1 downto 0);
-	signal q_add_s                  : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
-	signal i_sub_dff_s              : std_logic_vector(PsiFixSize(SubType_t) - 1 downto 0);
-	signal i_sub_dff2_s             : std_logic_vector(PsiFixSize(SubType_t) - 1 downto 0);
-	signal q_sub_dff_s              : std_logic_vector(PsiFixSize(SubType_t) - 1 downto 0);
-	signal q_sub_dff2_s             : std_logic_vector(PsiFixSize(SubType_t) - 1 downto 0);
 	signal mult_i_dff_s             : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	signal mult_q_dff_s             : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	signal mult_i_dff2_s            : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
@@ -106,9 +98,18 @@ architecture RTL of psi_fix_demod_real2cplx is
 	signal coef_i_s                 : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	signal coef_q_s                 : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	signal data_s                   : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
-	signal str						: std_logic_vector(0 to 8);
+	signal strIn					: std_logic_vector(0 to 3);
+	signal strOut					: std_logic_vector(6 to 8);
+	signal outQ_dffs				: OutPipe_t(6 to 8);
+	signal outI_dffs				: OutPipe_t(6 to 8);
+	signal RstPos					: std_logic;
+	signal VldMvAvg					: std_logic;
+	signal OutMvAvgI				: std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
+	signal OutMvAvgQ				: std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	
 begin 
+
+	RstPos <= '1' when rst_i = RstPol_g else '0';
 
 	--===========================================================================
 	-- 		LIMIT the phase offset to max value and check value change
@@ -117,16 +118,19 @@ begin
 	begin
 		if rising_edge(clk_i) then
 			if rst_i = RstPol_g then
-				data_s           <= (others => '0');
-				str				 <= (others => '0');
+				data_s      <= (others => '0');
+				strIn		<= (others => '0');
+				strOut		<= (others => '0');
 			else
-				str(0)				<= str_i;
-				str(1 to str'high)	<= str(0 to str'high-1);
+				strIn(0)					<= str_i;
+				strIn(1 to strIn'high)		<= strIn(0 to strIn'high-1);
+				strOut(strOut'low)			<= VldMvAvg;
+				strOut(strOut'low+1 to strOut'high)	<= strOut(strOut'low to strOut'high-1);
 				data_s          	<= data_i;			
 			end if;
 		end if;
 	end process;
-	str_o <= str(str'high);
+	str_o <= strOut(strOut'high);
 
 	--===========================================================================
 	-- 	 pointer ROM
@@ -174,9 +178,7 @@ begin
 				mult_i_dff_s  	<= (others => '0');
 				mult_i_dff2_s 	<= (others => '0');
 				coef_i_s 		<= (others => '0');
-				for i in 0 to Ratio_g - 1 loop
-					data_sr_i_s(i) <= (others => '0');
-				end loop;
+				outI_dffs		<= (others => (others => '0'));
 			else
 				coef_i_s 	 <= nonIQ_table_sin(cpt_s);
 				mult_i_s       <= PsiFixMult(data_s, DataFmt_g,
@@ -184,42 +186,33 @@ begin
 				                             DataFmt_g, PsiFixRound, PsiFixSat);
 				mult_i_dff_s   <= mult_i_s;
 				mult_i_dff2_s  <= mult_i_dff_s;
-				if str(3) = '1' then
-					data_sr_i_s(0) <= mult_i_dff2_s;
-					for i in 1 to Ratio_g - 1 loop
-						data_sr_i_s(i) <= data_sr_i_s(i - 1);
-					end loop;
-				end if;
+				outI_dffs(outI_dffs'low)						<= OutMvAvgI;
+				outI_dffs(outI_dffs'low+1 to outI_dffs'high)	<= outI_dffs(outI_dffs'low to outI_dffs'high-1);
 			end if;
 		end if;
 	end process;
+	data_I_o <= outI_dffs(outI_dffs'high);
+	
+	i_mov_avg_i : entity work.psi_fix_mov_avg
+		generic map (
+			InFmt_g 	=> DataFmt_g,
+			OutFmt_g 	=> DataFmt_g,
+			Taps_g		=> Ratio_g,
+			GainCorr_g	=> GainCorr_g,
+			Round_g		=> PsiFixRound,
+			Sat_g		=> PsiFixSat
+		)
+		port map (
+			Clk			=> clk_i,
+			Rst			=> RstPos,
+			InVld		=> strIn(3),										
+			InData		=> mult_i_dff2_s,
+			OutVld		=> VldMvAvg,										
+			OutData		=> OutMvAvgI
+		);
 
 	--===========================================================================
-	--Q path Recursive running sum
-	--===========================================================================
-	i_adder_proc : process(clk_i)
-	begin
-		if rising_edge(clk_i) then
-			if rst_i = RstPol_g then
-				i_sub_s      <= (others => '0');
-				i_sub_dff_s  <= (others => '0');
-				i_sub_dff2_s <= (others => '0');
-				i_add_s      <= (others => '0');
-				data_I_o     <= (others => '0');
-			else
-				i_sub_s      <= PsiFixSub(mult_i_dff2_s, DataFmt_g, data_sr_i_s(Ratio_g - 1), DataFmt_g, SubType_t, PsiFixRound, PsiFixSat);
-				i_sub_dff_s  <= i_sub_s;
-				i_sub_dff2_s <= i_sub_dff_s;
-				if str(6) = '1' then
-					i_add_s      <= PsiFixAdd(i_add_s, DataFmt_g, i_sub_dff2_s, SubType_t, DataFmt_g, PsiFixRound, PsiFixSat);
-				end if;
-				data_I_o     <= i_add_s;
-			end if;
-		end if;
-	end process;
-
-	--===========================================================================
-	-- Q PATH shift register
+	-- Q PATH
 	--===========================================================================
 	process(clk_i)
 	begin
@@ -229,9 +222,7 @@ begin
 				mult_q_dff_s  <= (others => '0');
 				mult_q_dff2_s <= (others => '0');
 				coef_q_s 	  <= (others => '0');
-				for i in 0 to Ratio_g - 1 loop
-					data_sr_q_s(i) <= (others => '0');
-				end loop;
+				outQ_dffs	  <= (others => (others => '0'));
 			else
 				coef_q_s 		<= nonIQ_table_cos(cpt_s);
 				mult_q_s       	<= PsiFixMult(data_s, DataFmt_g,
@@ -240,42 +231,29 @@ begin
 				mult_q_dff_s   <= mult_q_s;
 				mult_q_dff2_s  <= mult_q_dff_s;
 				mult_q_dff2_s  <= mult_q_dff_s;
-				if str(3) = '1' then
-					data_sr_q_s(0) <= mult_q_dff2_s;
-					for i in 1 to Ratio_g - 1 loop
-						data_sr_q_s(i) <= data_sr_q_s(i - 1);
-					end loop;
-				end if;
+				outQ_dffs(outQ_dffs'low)						<= OutMvAvgQ;
+				outQ_dffs(outQ_dffs'low+1 to outQ_dffs'high)	<= outQ_dffs(outQ_dffs'low to outQ_dffs'high-1);
 			end if;
 		end if;
 	end process;
+	data_Q_o <= outQ_dffs(outQ_dffs'high);
 
-	--===========================================================================
-	--Q path Recursive running sum
-	--===========================================================================
-	q_adder_proc : process(clk_i)
-	begin
-		if rising_edge(clk_i) then
-			if rst_i = RstPol_g then
-				q_sub_s      <= (others => '0');
-				q_sub_dff_s  <= (others => '0');
-				q_sub_dff2_s <= (others => '0');
-				q_add_s      <= (others => '0');
-				data_Q_o     <= (others => '0');
-			else
-				q_sub_s      <= PsiFixSub(mult_q_dff2_s, DataFmt_g,
-				                          data_sr_q_s(Ratio_g - 1), DataFmt_g,
-				                          SubType_t, PsiFixRound, PsiFixSat);
-				q_sub_dff_s  <= q_sub_s;
-				q_sub_dff2_s <= q_sub_dff_s;
-				if str(6) = '1' then
-					q_add_s      <= PsiFixAdd(q_add_s, DataFmt_g,
-											  q_sub_dff2_s, SubType_t,
-											  DataFmt_g, PsiFixRound, PsiFixSat);
-				end if;
-				data_Q_o     <= q_add_s;
-			end if;
-		end if;
-	end process;
+	i_mov_avg_q : entity work.psi_fix_mov_avg
+		generic map (
+			InFmt_g 	=> DataFmt_g,
+			OutFmt_g 	=> DataFmt_g,
+			Taps_g		=> Ratio_g,
+			GainCorr_g	=> GainCorr_g,
+			Round_g		=> PsiFixRound,
+			Sat_g		=> PsiFixSat
+		)
+		port map (
+			Clk			=> clk_i,
+			Rst			=> RstPos,
+			InVld		=> strIn(3),										
+			InData		=> mult_q_dff2_s,
+			OutVld		=> open,										
+			OutData		=> OutMvAvgQ
+		);
 
 end architecture;

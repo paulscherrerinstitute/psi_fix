@@ -2,13 +2,20 @@ from psi_fix_pkg import *
 import numpy as np
 from psi_fix_pkg import *
 from typing import Tuple, Union
+from psi_fix_mov_avg import psi_fix_mov_avg
 
 
 class psi_fix_demod_real2cplx:
-    def __init__(self, dataFmt: PsiFixFmt, ratio: int):
+    GAINCORR_NONE = psi_fix_mov_avg.GAINCORR_NONE
+    GAINCORR_ROUGH = psi_fix_mov_avg.GAINCORR_ROUGH
+    GAINCORR_EXACT = psi_fix_mov_avg.GAINCORR_EXACT
+
+    def __init__(self, dataFmt: PsiFixFmt, ratio: int, gaincorr : str = GAINCORR_NONE):
         self.dataFmt = dataFmt
         self.ratio = ratio
         self.subFmt = PsiFixFmt(dataFmt.S, dataFmt.I+1, dataFmt.F)
+        self.movAvg = psi_fix_mov_avg(dataFmt, dataFmt, ratio, gaincorr, PsiFixRnd.Round, PsiFixSat.Sat)
+
 
     def Process(self, inData : np.ndarray, phOffset : Union[np.ndarray,float]) -> Tuple[np.ndarray, np.ndarray]:
         # resize real number to Fixed Point
@@ -32,16 +39,11 @@ class psi_fix_demod_real2cplx:
 
         #I-Path
         multI = PsiFixMult(dataFix, self.dataFmt, sinTable[cpt], self.dataFmt, self.dataFmt, PsiFixRnd.Round, PsiFixSat.Sat)
-        delI = np.concatenate((np.zeros(self.ratio), multI[:-self.ratio]))
-        subI = PsiFixSub(multI, self.dataFmt, delI, self.dataFmt, self.subFmt, PsiFixRnd.Round, PsiFixSat.Sat)
-        addI = PsiFixResize(np.cumsum(subI), self.subFmt, self.dataFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+        resI = self.movAvg.Process(multI)
 
         #Q-Path
         multQ = PsiFixMult(dataFix, self.dataFmt, cosTable[cpt], self.dataFmt, self.dataFmt, PsiFixRnd.Round, PsiFixSat.Sat)
-        delQ = np.concatenate((np.zeros(self.ratio), multQ[:-self.ratio]))
-        subQ = PsiFixSub(multQ, self.dataFmt, delQ, self.dataFmt, self.subFmt, PsiFixRnd.Round, PsiFixSat.Sat)
-        addQ = PsiFixResize(np.cumsum(subQ), self.subFmt, self.dataFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+        resQ = self.movAvg.Process(multQ)
 
-
-        return addI, addQ
+        return resI, resQ
 
