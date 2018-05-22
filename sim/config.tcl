@@ -37,6 +37,7 @@ add_sources "../hdl" {
 	psi_fix_dds_18b.vhd \
 	psi_fix_lowpass_iir_order1.vhd \
 	psi_fix_complex_mult.vhd \
+	psi_fix_demod_real2cplx.vhd \
 } -tag src
 
 # testbenches
@@ -61,6 +62,7 @@ add_sources "../testbench" {
 	psi_fix_dds_18b_tb/psi_fix_dds_18b_tb.vhd \
 	psi_fix_lowpass_iir_order1_tb/psi_fix_lowpass_iir_order1_tb.vhd \
 	psi_fix_complex_mult_tb/psi_fix_complex_mult_tb.vhd \
+	psi_fix_demod_real2cplx_tb/psi_fix_demod_real2cplx_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -151,6 +153,12 @@ tb_run_add_pre_script "python3" "cosim.py" "../testbench/psi_fix_complex_mult_tb
 set dataDir [file normalize "../testbench/psi_fix_complex_mult_tb/Data"]
 tb_run_add_arguments 	"-gStimDir_g=$dataDir -gPipeline_g=true" \
 						"-gStimDir_g=$dataDir -gPipeline_g=false"
+add_tb_run
+
+create_tb_run "psi_fix_demod_real2cplx_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_demod_real2cplx_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_demod_real2cplx_tb/Data"]
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir" 
 add_tb_run
 
 
