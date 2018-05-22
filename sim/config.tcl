@@ -158,7 +158,8 @@ add_tb_run
 create_tb_run "psi_fix_demod_real2cplx_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_demod_real2cplx_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_demod_real2cplx_tb/Data"]
-tb_run_add_arguments 	"-gFileFolder_g=$dataDir" 
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gDutyCycle_g=1" \
+						"-gFileFolder_g=$dataDir -gDutyCycle_g=5"
 add_tb_run
 
 

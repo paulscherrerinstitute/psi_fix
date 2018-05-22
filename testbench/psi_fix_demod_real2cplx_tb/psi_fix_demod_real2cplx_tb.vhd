@@ -21,7 +21,8 @@ library work;
 ------------------------------------------------------------
 entity psi_fix_demod_real2cplx_tb is
 	generic (
-		FileFolder_g	: string 	:= "../tesbench/psi_fix_demod_real2cplx_tb/Data"
+		FileFolder_g	: string 	:= "../tesbench/psi_fix_demod_real2cplx_tb/Data";
+		DutyCycle_g		: integer	:= 1
 	);
 end entity;
 
@@ -128,7 +129,7 @@ begin
 								Vld 		=> str_i, 
 								Data(0)		=> data_i, 
 								Filepath	=> FileFolder_g & "/input.txt", 
-								ClkPerSpl	=> 1,
+								ClkPerSpl	=> DutyCycle_g,
 								IgnoreLines => 1);		
 		
 		-- end of process !DO NOT EDIT!

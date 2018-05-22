@@ -22,7 +22,6 @@ library work;
 	use work.psi_fix_pkg.all;
 	
 -- TODO: Gaincorr
--- TODO: Strobe (not 1)
 
 ------------------------------------------------------------------------------
 -- Entity Declaration
@@ -108,8 +107,6 @@ architecture RTL of psi_fix_demod_real2cplx is
 	signal coef_i_s                 : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	signal coef_q_s                 : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	signal data_s                   : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
-	signal coef_i_dff_s 			: std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
-	signal coef_q_dff_s 			: std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	signal str						: std_logic_vector(0 to 8);
 	
 begin
@@ -141,25 +138,32 @@ begin
 	-- 	 pointer ROM
 	--===========================================================================
 	process(clk_i)
-		variable cptIntOffs : integer range 0 to 2*Ratio_g - 1 := 0;
+		
 	begin
 		if rising_edge(clk_i) then
 			if rst_i = RstPol_g then
 				cptInt    <= 0;
 			else
-				if cptInt = Ratio_g-1 then
-					cptInt <= 0;
-				else
-					cptInt <= cptInt+1;
+				if str_i = '1' then
+					if cptInt = Ratio_g-1 then
+						cptInt <= 0;
+					else
+						cptInt <= cptInt+1;
+					end if;
 				end if;
 			end if;
 		end if;
+	end process;
+	
+	process(cptInt)
+		variable cptIntOffs : integer range 0 to 2*Ratio_g - 1 := 0;
+	begin
 		cptIntOffs := cptInt + to_integer(unsigned(phi_offset_s));
 		if cptIntOffs > Ratio_g-1 then
 			cpt_s <= cptIntOffs - Ratio_g;
 		else
 			cpt_s <= cptIntOffs;
-		end if;
+		end if;	
 	end process;
 
 	--===========================================================================
@@ -173,23 +177,22 @@ begin
 				mult_i_dff_s  	<= (others => '0');
 				mult_i_dff2_s 	<= (others => '0');
 				coef_i_s 		<= (others => '0');
-				coef_i_dff_s	<= (others => '0');
 				for i in 0 to Ratio_g - 1 loop
 					data_sr_i_s(i) <= (others => '0');
 				end loop;
 			else
 				coef_i_s 	 <= nonIQ_table_sin(cpt_s);
-				coef_i_dff_s <= coef_i_s;
 				mult_i_s       <= PsiFixMult(data_s, DataFmt_g,
-				                             coef_i_dff_s, DataFmt_g,
+				                             coef_i_s, DataFmt_g,
 				                             DataFmt_g, PsiFixRound, PsiFixSat);
 				mult_i_dff_s   <= mult_i_s;
 				mult_i_dff2_s  <= mult_i_dff_s;
-				data_sr_i_s(0) <= mult_i_dff2_s;
-				for i in 1 to Ratio_g - 1 loop
-					data_sr_i_s(i) <= data_sr_i_s(i - 1);
-				end loop;
-
+				if str(3) = '1' then
+					data_sr_i_s(0) <= mult_i_dff2_s;
+					for i in 1 to Ratio_g - 1 loop
+						data_sr_i_s(i) <= data_sr_i_s(i - 1);
+					end loop;
+				end if;
 			end if;
 		end if;
 	end process;
@@ -210,7 +213,9 @@ begin
 				i_sub_s      <= PsiFixSub(mult_i_dff2_s, DataFmt_g, data_sr_i_s(Ratio_g - 1), DataFmt_g, SubType_t, PsiFixRound, PsiFixSat);
 				i_sub_dff_s  <= i_sub_s;
 				i_sub_dff2_s <= i_sub_dff_s;
-				i_add_s      <= PsiFixAdd(i_add_s, DataFmt_g, i_sub_dff2_s, SubType_t, DataFmt_g, PsiFixRound, PsiFixSat);
+				if str(6) = '1' then
+					i_add_s      <= PsiFixAdd(i_add_s, DataFmt_g, i_sub_dff2_s, SubType_t, DataFmt_g, PsiFixRound, PsiFixSat);
+				end if;
 				data_I_o     <= i_add_s;
 			end if;
 		end if;
@@ -227,23 +232,23 @@ begin
 				mult_q_dff_s  <= (others => '0');
 				mult_q_dff2_s <= (others => '0');
 				coef_q_s 	  <= (others => '0');
-				coef_q_dff_s  <= (others=>'0');
 				for i in 0 to Ratio_g - 1 loop
 					data_sr_q_s(i) <= (others => '0');
 				end loop;
 			else
 				coef_q_s 		<= nonIQ_table_cos(cpt_s);
-				coef_q_dff_s 	<= coef_q_s;
 				mult_q_s       	<= PsiFixMult(data_s, DataFmt_g,
-				                              coef_q_dff_s, DataFmt_g,
+				                              coef_q_s, DataFmt_g,
 				                              DataFmt_g, PsiFixRound, PsiFixSat);
 				mult_q_dff_s   <= mult_q_s;
 				mult_q_dff2_s  <= mult_q_dff_s;
 				mult_q_dff2_s  <= mult_q_dff_s;
-				data_sr_q_s(0) <= mult_q_dff2_s;
-				for i in 1 to Ratio_g - 1 loop
-					data_sr_q_s(i) <= data_sr_q_s(i - 1);
-				end loop;
+				if str(3) = '1' then
+					data_sr_q_s(0) <= mult_q_dff2_s;
+					for i in 1 to Ratio_g - 1 loop
+						data_sr_q_s(i) <= data_sr_q_s(i - 1);
+					end loop;
+				end if;
 			end if;
 		end if;
 	end process;
@@ -266,9 +271,11 @@ begin
 				                          SubType_t, PsiFixRound, PsiFixSat);
 				q_sub_dff_s  <= q_sub_s;
 				q_sub_dff2_s <= q_sub_dff_s;
-				q_add_s      <= PsiFixAdd(q_add_s, DataFmt_g,
-				                          q_sub_dff2_s, SubType_t,
-				                          DataFmt_g, PsiFixRound, PsiFixSat);
+				if str(6) = '1' then
+					q_add_s      <= PsiFixAdd(q_add_s, DataFmt_g,
+											  q_sub_dff2_s, SubType_t,
+											  DataFmt_g, PsiFixRound, PsiFixSat);
+				end if;
 				data_Q_o     <= q_add_s;
 			end if;
 		end if;

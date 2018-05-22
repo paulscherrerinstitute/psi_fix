@@ -4,3 +4,6 @@
 
 #backup files
 *.bak
+
+#Stimuli files for tbs
+/testbench/**/*.txt
