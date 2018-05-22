@@ -85,7 +85,6 @@ architecture RTL of psi_fix_demod_real2cplx is
 	
 	constant SubType_t				: PsiFixFmt_t	:= (DataFmt_g.S, DataFmt_g.I+1, DataFmt_g.F);
 	--
-	signal phi_offset_s             : std_logic_vector(log2ceil(Ratio_g) - 1 downto 0);
 	signal cptInt					: integer range 0 to Ratio_g - 1 := 0;		
 	signal cpt_s                    : integer range 0 to Ratio_g - 1 := 0;
 	signal mult_i_s                 : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
@@ -109,7 +108,8 @@ architecture RTL of psi_fix_demod_real2cplx is
 	signal data_s                   : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	signal str						: std_logic_vector(0 to 8);
 	
-begin
+begin 
+
 	--===========================================================================
 	-- 		LIMIT the phase offset to max value and check value change
 	--===========================================================================
@@ -117,18 +117,12 @@ begin
 	begin
 		if rising_edge(clk_i) then
 			if rst_i = RstPol_g then
-				phi_offset_s     <= (others => '0');
 				data_s           <= (others => '0');
 				str				 <= (others => '0');
 			else
 				str(0)				<= str_i;
 				str(1 to str'high)	<= str(0 to str'high-1);
-				data_s          	<= data_i;
-				if unsigned(phi_offset_i) > Ratio_g - 1 then
-					phi_offset_s <= std_logic_vector(to_unsigned((Ratio_g - 1), phi_offset_i'length));
-				else
-					phi_offset_s <= phi_offset_i;
-				end if;				
+				data_s          	<= data_i;			
 			end if;
 		end if;
 	end process;
@@ -155,11 +149,14 @@ begin
 		end if;
 	end process;
 	
-	process(cptInt)
+	process(cptInt, phi_offset_i)
 		variable cptIntOffs : integer range 0 to 2*Ratio_g - 1 := 0;
 	begin
-		cptIntOffs := cptInt + to_integer(unsigned(phi_offset_s));
-		if cptIntOffs > Ratio_g-1 then
+		assert unsigned(phi_offset_i) <= Ratio_g-1 report "###ERROR###: psi_fix_demod_real2cpls: phi_offset_i must be <= Ratio_g-1" severity error;
+		cptIntOffs := cptInt + to_integer(unsigned(phi_offset_i));
+		if unsigned(phi_offset_i) > Ratio_g-1 then
+			cpt_s <= cptInt + Ratio_g-1;
+		elsif cptIntOffs > Ratio_g-1 then
 			cpt_s <= cptIntOffs - Ratio_g;
 		else
 			cpt_s <= cptIntOffs;

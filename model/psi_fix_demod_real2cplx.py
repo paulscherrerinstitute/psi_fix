@@ -15,7 +15,7 @@ class psi_fix_demod_real2cplx:
         dataFix = PsiFixFromReal(inData, self.dataFmt, errSat=True)
 
         #Limit the phase offset
-        phaseOffset = min(phOffset, self.ratio-1)
+        phaseOffset = np.minimum(phOffset, self.ratio-1).astype("int32")
 
         #ROM pointer
         #Generate phases (use integer to prevent floating point precision errors)

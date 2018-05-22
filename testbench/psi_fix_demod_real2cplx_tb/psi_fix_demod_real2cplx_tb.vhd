@@ -50,10 +50,10 @@ architecture sim of psi_fix_demod_real2cplx_tb is
 	signal rst_i : std_logic := '1';
 	signal str_i : std_logic := '0';
 	signal data_i : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0) := (others => '0');
-	signal phi_offset_i : std_logic_vector(log2ceil(Ratio_g) - 1 downto 0) := (others => '0');
 	signal data_I_o : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0) := (others => '0');
 	signal data_Q_o : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0) := (others => '0');
 	signal str_o : std_logic := '0';
+	signal phi_offset_16 : std_logic_vector(15 downto 0) := (others => '0');
 	
 begin
 	------------------------------------------------------------
@@ -69,7 +69,7 @@ begin
 			rst_i => rst_i,
 			str_i => str_i,
 			data_i => data_i,
-			phi_offset_i => phi_offset_i,
+			phi_offset_i => phi_offset_16(2 downto 0),
 			data_I_o => data_I_o,
 			data_Q_o => data_Q_o,
 			str_o => str_o
@@ -128,6 +128,7 @@ begin
 								Rdy 		=> PsiTextfile_SigOne,
 								Vld 		=> str_i, 
 								Data(0)		=> data_i, 
+								Data(1)		=> phi_offset_16,
 								Filepath	=> FileFolder_g & "/input.txt", 
 								ClkPerSpl	=> DutyCycle_g,
 								IgnoreLines => 1);		

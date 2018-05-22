@@ -33,22 +33,31 @@ FSTOP = fSig*1.01
 t = np.arange(0, (SAMPLES-1)/fSample, 1/fSample)
 sig = sps.chirp(t, FSTART, t[-1], FSTOP, method="linear")*0.1
 sigFix = PsiFixFromReal(sig, dataFmt)
+phase = np.ones_like(sigFix)*2
+phase [100:1000] = 4
 
 demod = psi_fix_demod_real2cplx(dataFmt, Ratio)
-resI, resQ = demod.Process(sigFix, 0)
+resI, resQ = demod.Process(sigFix, phase)
 
 #############################################################
 # Plot (if required)
 #############################################################
 if PLOT_ON:
+    plt.figure()
     plt.plot(resI, resQ)
+    plt.figure()
+    plt.plot(resI, 'b')
+    plt.plot(resQ, 'r')
     plt.show()
 
 
 #############################################################
 # Write Files for Co sim
 #############################################################
-np.savetxt(STIM_DIR + "/input.txt", PsiFixGetBitsAsInt(sigFix, dataFmt), fmt="%i", header="input")
+np.savetxt(STIM_DIR + "/input.txt",
+           np.column_stack((PsiFixGetBitsAsInt(sigFix, dataFmt),
+                            phase)),
+           fmt="%i", header="input phase")
 np.savetxt(STIM_DIR + "/output.txt",
            np.column_stack((PsiFixGetBitsAsInt(resI, dataFmt),
                            PsiFixGetBitsAsInt(resQ, dataFmt))),
