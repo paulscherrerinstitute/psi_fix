@@ -22,7 +22,8 @@ library work;
 entity psi_fix_demod_real2cplx_tb is
 	generic (
 		FileFolder_g	: string 	:= "../tesbench/psi_fix_demod_real2cplx_tb/Data";
-		DutyCycle_g		: integer	:= 1
+		DutyCycle_g		: integer	:= 1;
+		GainCorr_g		: string	:= "NONE"
 	);
 end entity;
 
@@ -62,7 +63,8 @@ begin
 	i_dut : entity work.psi_fix_demod_real2cplx
 		generic map (
 			RstPol_g => RstPol_g,
-			DataFmt_g => DataFmt_g
+			DataFmt_g => DataFmt_g,
+			GainCorr_g => GainCorr_g
 		)
 		port map (
 			clk_i => clk_i,
@@ -150,7 +152,7 @@ begin
 								Vld			=> str_o,
 								Data(0)		=> data_I_o,
 								Data(1)		=> data_Q_o,
-								Filepath	=> FileFolder_g & "/output.txt",
+								Filepath	=> FileFolder_g & "/output_" & GainCorr_g & ".txt",
 								IgnoreLines => 1);
 		
 		-- end of process !DO NOT EDIT!

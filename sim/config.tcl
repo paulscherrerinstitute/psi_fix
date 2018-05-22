@@ -39,8 +39,8 @@ add_sources "../hdl" {
 	psi_fix_dds_18b.vhd \
 	psi_fix_lowpass_iir_order1.vhd \
 	psi_fix_complex_mult.vhd \
-	psi_fix_demod_real2cplx.vhd \
 	psi_fix_mov_avg.vhd \
+	psi_fix_demod_real2cplx.vhd \
 } -tag src
 
 # testbenches
@@ -65,8 +65,8 @@ add_sources "../testbench" {
 	psi_fix_dds_18b_tb/psi_fix_dds_18b_tb.vhd \
 	psi_fix_lowpass_iir_order1_tb/psi_fix_lowpass_iir_order1_tb.vhd \
 	psi_fix_complex_mult_tb/psi_fix_complex_mult_tb.vhd \
-	psi_fix_demod_real2cplx_tb/psi_fix_demod_real2cplx_tb.vhd \
 	psi_fix_mov_avg_tb/psi_fix_mov_avg_tb.vhd \
+	psi_fix_demod_real2cplx_tb/psi_fix_demod_real2cplx_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -159,13 +159,6 @@ tb_run_add_arguments 	"-gStimDir_g=$dataDir -gPipeline_g=true" \
 						"-gStimDir_g=$dataDir -gPipeline_g=false"
 add_tb_run
 
-create_tb_run "psi_fix_demod_real2cplx_tb"
-tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_demod_real2cplx_tb/Scripts"
-set dataDir [file normalize "../testbench/psi_fix_demod_real2cplx_tb/Data"]
-tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gDutyCycle_g=1" \
-						"-gFileFolder_g=$dataDir -gDutyCycle_g=5"
-add_tb_run
-
 create_tb_run "psi_fix_mov_avg_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_mov_avg_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_mov_avg_tb/Data"]
@@ -173,6 +166,15 @@ tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gGainCorr_G=NONE -gDutyCycle_g=1
 						"-gFileFolder_g=$dataDir -gGainCorr_G=EXACT -gDutyCycle_g=5" \
 						"-gFileFolder_g=$dataDir -gGainCorr_G=ROUGH -gDutyCycle_g=3"
 add_tb_run
+
+create_tb_run "psi_fix_demod_real2cplx_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_demod_real2cplx_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_demod_real2cplx_tb/Data"]
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gDutyCycle_g=1 -gGainCorr_g=NONE" \
+						"-gFileFolder_g=$dataDir -gDutyCycle_g=5 -gGainCorr_g=EXACT"
+add_tb_run
+
+
 
 
 

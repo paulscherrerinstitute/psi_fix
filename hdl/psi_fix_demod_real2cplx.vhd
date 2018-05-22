@@ -98,10 +98,11 @@ architecture RTL of psi_fix_demod_real2cplx is
 	signal coef_i_s                 : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	signal coef_q_s                 : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	signal data_s                   : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
-	signal strIn					: std_logic_vector(0 to 3);
-	signal strOut					: std_logic_vector(6 to 8);
-	signal outQ_dffs				: OutPipe_t(6 to 8);
-	signal outI_dffs				: OutPipe_t(6 to 8);
+	signal data_dff_s                : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
+	signal strIn					: std_logic_vector(0 to 4);
+	signal strOut					: std_logic_vector(7 to 8);
+	signal outQ_dffs				: OutPipe_t(7 to 8);
+	signal outI_dffs				: OutPipe_t(7 to 8);
 	signal RstPos					: std_logic;
 	signal VldMvAvg					: std_logic;
 	signal OutMvAvgI				: std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
@@ -119,6 +120,7 @@ begin
 		if rising_edge(clk_i) then
 			if rst_i = RstPol_g then
 				data_s      <= (others => '0');
+				data_dff_s  <= (others => '0');
 				strIn		<= (others => '0');
 				strOut		<= (others => '0');
 			else
@@ -126,7 +128,8 @@ begin
 				strIn(1 to strIn'high)		<= strIn(0 to strIn'high-1);
 				strOut(strOut'low)			<= VldMvAvg;
 				strOut(strOut'low+1 to strOut'high)	<= strOut(strOut'low to strOut'high-1);
-				data_s          	<= data_i;			
+				data_s          	<= data_i;		
+				data_dff_s			<= data_s;
 			end if;
 		end if;
 	end process;
@@ -153,18 +156,24 @@ begin
 		end if;
 	end process;
 	
-	process(cptInt, phi_offset_i)
+	process(clk_i)
 		variable cptIntOffs : integer range 0 to 2*Ratio_g - 1 := 0;
 	begin
-		assert unsigned(phi_offset_i) <= Ratio_g-1 report "###ERROR###: psi_fix_demod_real2cpls: phi_offset_i must be <= Ratio_g-1" severity error;
-		cptIntOffs := cptInt + to_integer(unsigned(phi_offset_i));
-		if unsigned(phi_offset_i) > Ratio_g-1 then
-			cpt_s <= cptInt + Ratio_g-1;
-		elsif cptIntOffs > Ratio_g-1 then
-			cpt_s <= cptIntOffs - Ratio_g;
-		else
-			cpt_s <= cptIntOffs;
-		end if;	
+		if rising_edge(clk_i) then
+			if rst_i = RstPol_g then
+				cpt_s <= 0;
+			else
+				assert unsigned(phi_offset_i) <= Ratio_g-1 report "###ERROR###: psi_fix_demod_real2cpls: phi_offset_i must be <= Ratio_g-1" severity error;
+				cptIntOffs := cptInt + to_integer(unsigned(phi_offset_i));
+				if unsigned(phi_offset_i) > Ratio_g-1 then
+					cpt_s <= cptInt + Ratio_g-1;
+				elsif cptIntOffs > Ratio_g-1 then
+					cpt_s <= cptIntOffs - Ratio_g;
+				else
+					cpt_s <= cptIntOffs;
+				end if;
+			end if;
+		end if;
 	end process;
 
 	--===========================================================================
@@ -174,18 +183,22 @@ begin
 	begin
 		if rising_edge(clk_i) then
 			if rst_i = RstPol_g then
+				-- before moving avg
 				mult_i_s      	<= (others => '0');
 				mult_i_dff_s  	<= (others => '0');
 				mult_i_dff2_s 	<= (others => '0');
 				coef_i_s 		<= (others => '0');
+				-- after moving avg
 				outI_dffs		<= (others => (others => '0'));
 			else
+				-- before moving avg
 				coef_i_s 	 <= nonIQ_table_sin(cpt_s);
-				mult_i_s       <= PsiFixMult(data_s, DataFmt_g,
+				mult_i_s       <= PsiFixMult(data_dff_s, DataFmt_g,
 				                             coef_i_s, DataFmt_g,
 				                             DataFmt_g, PsiFixRound, PsiFixSat);
 				mult_i_dff_s   <= mult_i_s;
 				mult_i_dff2_s  <= mult_i_dff_s;
+				-- after moving avg
 				outI_dffs(outI_dffs'low)						<= OutMvAvgI;
 				outI_dffs(outI_dffs'low+1 to outI_dffs'high)	<= outI_dffs(outI_dffs'low to outI_dffs'high-1);
 			end if;
@@ -205,7 +218,7 @@ begin
 		port map (
 			Clk			=> clk_i,
 			Rst			=> RstPos,
-			InVld		=> strIn(3),										
+			InVld		=> strIn(4),										
 			InData		=> mult_i_dff2_s,
 			OutVld		=> VldMvAvg,										
 			OutData		=> OutMvAvgI
@@ -225,11 +238,10 @@ begin
 				outQ_dffs	  <= (others => (others => '0'));
 			else
 				coef_q_s 		<= nonIQ_table_cos(cpt_s);
-				mult_q_s       	<= PsiFixMult(data_s, DataFmt_g,
+				mult_q_s       	<= PsiFixMult(data_dff_s, DataFmt_g,
 				                              coef_q_s, DataFmt_g,
 				                              DataFmt_g, PsiFixRound, PsiFixSat);
 				mult_q_dff_s   <= mult_q_s;
-				mult_q_dff2_s  <= mult_q_dff_s;
 				mult_q_dff2_s  <= mult_q_dff_s;
 				outQ_dffs(outQ_dffs'low)						<= OutMvAvgQ;
 				outQ_dffs(outQ_dffs'low+1 to outQ_dffs'high)	<= outQ_dffs(outQ_dffs'low to outQ_dffs'high-1);
@@ -250,7 +262,7 @@ begin
 		port map (
 			Clk			=> clk_i,
 			Rst			=> RstPos,
-			InVld		=> strIn(3),										
+			InVld		=> strIn(4),										
 			InData		=> mult_q_dff2_s,
 			OutVld		=> open,										
 			OutData		=> OutMvAvgQ

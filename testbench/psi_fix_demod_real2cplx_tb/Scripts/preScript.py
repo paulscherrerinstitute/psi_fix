@@ -25,6 +25,7 @@ dataFmt = PsiFixFmt(1, 0, 15)
 fSample = 100e6
 Ratio = 5
 fSig = fSample/Ratio
+GC_OPTIONS = (psi_fix_demod_real2cplx.GAINCORR_NONE, psi_fix_demod_real2cplx.GAINCORR_EXACT)
 
 FSTART = fSig*0.99
 FSTOP = fSig*1.01
@@ -36,19 +37,24 @@ sigFix = PsiFixFromReal(sig, dataFmt)
 phase = np.ones_like(sigFix)*2
 phase [100:1000] = 4
 
-demod = psi_fix_demod_real2cplx(dataFmt, Ratio)
-resI, resQ = demod.Process(sigFix, phase)
+resutls = {}
+for gc in GC_OPTIONS:
+    demod = psi_fix_demod_real2cplx(dataFmt, Ratio, gaincorr=gc)
+    resutls[gc] = demod.Process(sigFix, phase)
 
 #############################################################
 # Plot (if required)
 #############################################################
 if PLOT_ON:
-    plt.figure()
-    plt.plot(resI, resQ)
-    plt.figure()
-    plt.plot(resI, 'b')
-    plt.plot(resQ, 'r')
-    plt.show()
+    for gc in GC_OPTIONS:
+        plt.figure()
+        plt.title(gc)
+        plt.plot(resutls[gc][0], resutls[gc][1])
+        plt.figure()
+        plt.title(gc)
+        plt.plot(resutls[gc][0], 'b')
+        plt.plot(resutls[gc][1], 'r')
+        plt.show()
 
 
 #############################################################
@@ -58,9 +64,10 @@ np.savetxt(STIM_DIR + "/input.txt",
            np.column_stack((PsiFixGetBitsAsInt(sigFix, dataFmt),
                             phase)),
            fmt="%i", header="input phase")
-np.savetxt(STIM_DIR + "/output.txt",
-           np.column_stack((PsiFixGetBitsAsInt(resI, dataFmt),
-                           PsiFixGetBitsAsInt(resQ, dataFmt))),
-           fmt="%i", header="result-I result-Q")
+for gc in GC_OPTIONS:
+    np.savetxt(STIM_DIR + "/output_{}.txt".format(gc),
+               np.column_stack((PsiFixGetBitsAsInt(resutls[gc][0], dataFmt),
+                               PsiFixGetBitsAsInt(resutls[gc][1], dataFmt))),
+               fmt="%i", header="result-I result-Q")
 
 
