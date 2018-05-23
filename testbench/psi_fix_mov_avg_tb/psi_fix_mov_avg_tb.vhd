@@ -24,7 +24,8 @@ entity psi_fix_mov_avg_tb is
 	generic (
 		GainCorr_g 		: string 	:= "ROUGH";
 		FileFolder_g	: string 	:= "../tesbench/psi_fix_demod_real2cplx_tb/Data";
-		DutyCycle_g		: integer	:= 1
+		DutyCycle_g		: integer	:= 1;
+		OutRegs_g		: integer	:= 1
 	);
 end entity;
 
@@ -66,7 +67,8 @@ begin
 			GainCorr_g => GainCorr_g,
 			InFmt_g => InFmt_g,
 			OutFmt_g => OutFmt_g,
-			Taps_g => Taps_g
+			Taps_g => Taps_g,
+			OutRegs_g => OutRegs_g
 		)
 		port map (
 			Clk => Clk,

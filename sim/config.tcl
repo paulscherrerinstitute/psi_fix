@@ -162,9 +162,9 @@ add_tb_run
 create_tb_run "psi_fix_mov_avg_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_mov_avg_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_mov_avg_tb/Data"]
-tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gGainCorr_G=NONE -gDutyCycle_g=1" \
-						"-gFileFolder_g=$dataDir -gGainCorr_G=EXACT -gDutyCycle_g=5" \
-						"-gFileFolder_g=$dataDir -gGainCorr_G=ROUGH -gDutyCycle_g=3"
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gGainCorr_G=NONE -gDutyCycle_g=1 -gOutRegs_g=0" \
+						"-gFileFolder_g=$dataDir -gGainCorr_G=EXACT -gDutyCycle_g=5 -gOutRegs_g=3" \
+						"-gFileFolder_g=$dataDir -gGainCorr_G=ROUGH -gDutyCycle_g=3 -gOutRegs_g=1"
 add_tb_run
 
 create_tb_run "psi_fix_demod_real2cplx_tb"
