@@ -1,4 +1,4 @@
-## 1.4.0 [TO BE RELEASED]
+## 1.4.0 
 
 * Added Features
   * Added psi\_fix\_lowpass\_iir\_order1 (order 1 lowpass with integrated coefficient calculation)
@@ -11,6 +11,7 @@
   * None
 * Changed Dependencies
   * psi\_tb >= 1.1.0
+  * psi\_common >= 1.5.0
 
 ## 1.3.0
 
