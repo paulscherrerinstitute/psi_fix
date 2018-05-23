@@ -100,13 +100,7 @@ architecture RTL of psi_fix_demod_real2cplx is
 	signal data_s                   : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	signal data_dff_s                : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	signal strIn					: std_logic_vector(0 to 4);
-	signal strOut					: std_logic_vector(7 to 8);
-	signal outQ_dffs				: OutPipe_t(7 to 8);
-	signal outI_dffs				: OutPipe_t(7 to 8);
 	signal RstPos					: std_logic;
-	signal VldMvAvg					: std_logic;
-	signal OutMvAvgI				: std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
-	signal OutMvAvgQ				: std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	
 begin 
 
@@ -122,18 +116,14 @@ begin
 				data_s      <= (others => '0');
 				data_dff_s  <= (others => '0');
 				strIn		<= (others => '0');
-				strOut		<= (others => '0');
 			else
 				strIn(0)					<= str_i;
 				strIn(1 to strIn'high)		<= strIn(0 to strIn'high-1);
-				strOut(strOut'low)			<= VldMvAvg;
-				strOut(strOut'low+1 to strOut'high)	<= strOut(strOut'low to strOut'high-1);
 				data_s          	<= data_i;		
 				data_dff_s			<= data_s;
 			end if;
 		end if;
 	end process;
-	str_o <= strOut(strOut'high);
 
 	--===========================================================================
 	-- 	 pointer ROM
@@ -183,28 +173,20 @@ begin
 	begin
 		if rising_edge(clk_i) then
 			if rst_i = RstPol_g then
-				-- before moving avg
 				mult_i_s      	<= (others => '0');
 				mult_i_dff_s  	<= (others => '0');
 				mult_i_dff2_s 	<= (others => '0');
 				coef_i_s 		<= (others => '0');
-				-- after moving avg
-				outI_dffs		<= (others => (others => '0'));
 			else
-				-- before moving avg
 				coef_i_s 	 <= nonIQ_table_sin(cpt_s);
 				mult_i_s       <= PsiFixMult(data_dff_s, DataFmt_g,
 				                             coef_i_s, DataFmt_g,
 				                             DataFmt_g, PsiFixRound, PsiFixSat);
 				mult_i_dff_s   <= mult_i_s;
 				mult_i_dff2_s  <= mult_i_dff_s;
-				-- after moving avg
-				outI_dffs(outI_dffs'low)						<= OutMvAvgI;
-				outI_dffs(outI_dffs'low+1 to outI_dffs'high)	<= outI_dffs(outI_dffs'low to outI_dffs'high-1);
 			end if;
 		end if;
 	end process;
-	data_I_o <= outI_dffs(outI_dffs'high);
 	
 	i_mov_avg_i : entity work.psi_fix_mov_avg
 		generic map (
@@ -213,15 +195,16 @@ begin
 			Taps_g		=> Ratio_g,
 			GainCorr_g	=> GainCorr_g,
 			Round_g		=> PsiFixRound,
-			Sat_g		=> PsiFixSat
+			Sat_g		=> PsiFixSat,
+			OutRegs_g	=> 2
 		)
 		port map (
 			Clk			=> clk_i,
 			Rst			=> RstPos,
 			InVld		=> strIn(4),										
 			InData		=> mult_i_dff2_s,
-			OutVld		=> VldMvAvg,										
-			OutData		=> OutMvAvgI
+			OutVld		=> str_o,										
+			OutData		=> data_I_o
 		);
 
 	--===========================================================================
@@ -235,7 +218,6 @@ begin
 				mult_q_dff_s  <= (others => '0');
 				mult_q_dff2_s <= (others => '0');
 				coef_q_s 	  <= (others => '0');
-				outQ_dffs	  <= (others => (others => '0'));
 			else
 				coef_q_s 		<= nonIQ_table_cos(cpt_s);
 				mult_q_s       	<= PsiFixMult(data_dff_s, DataFmt_g,
@@ -243,12 +225,9 @@ begin
 				                              DataFmt_g, PsiFixRound, PsiFixSat);
 				mult_q_dff_s   <= mult_q_s;
 				mult_q_dff2_s  <= mult_q_dff_s;
-				outQ_dffs(outQ_dffs'low)						<= OutMvAvgQ;
-				outQ_dffs(outQ_dffs'low+1 to outQ_dffs'high)	<= outQ_dffs(outQ_dffs'low to outQ_dffs'high-1);
 			end if;
 		end if;
 	end process;
-	data_Q_o <= outQ_dffs(outQ_dffs'high);
 
 	i_mov_avg_q : entity work.psi_fix_mov_avg
 		generic map (
@@ -257,7 +236,8 @@ begin
 			Taps_g		=> Ratio_g,
 			GainCorr_g	=> GainCorr_g,
 			Round_g		=> PsiFixRound,
-			Sat_g		=> PsiFixSat
+			Sat_g		=> PsiFixSat,
+			OutRegs_g	=> 2
 		)
 		port map (
 			Clk			=> clk_i,
@@ -265,7 +245,7 @@ begin
 			InVld		=> strIn(4),										
 			InData		=> mult_q_dff2_s,
 			OutVld		=> open,										
-			OutData		=> OutMvAvgQ
+			OutData		=> data_Q_o
 		);
 
 end architecture;
