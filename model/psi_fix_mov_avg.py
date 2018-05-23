@@ -34,7 +34,7 @@ class psi_fix_mov_avg:
         self.gcCoefFmt = PsiFixFmt(0,1,16)
         self.gc = PsiFixFromReal(2.0**self.additionalBits/gain, self.gcCoefFmt)
 
-    def Process(self, inData : np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def Process(self, inData : np.ndarray) -> np.ndarray:
         # resize real number to Fixed Point
         dataFix = PsiFixFromReal(inData, self.inFmt)
 
