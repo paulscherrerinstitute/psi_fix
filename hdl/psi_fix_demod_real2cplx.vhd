@@ -29,8 +29,7 @@ entity psi_fix_demod_real2cplx is
 	generic (
 		RstPol_g  	: std_logic   	:= '1';			-- $$ constant = '1' $$
 	    DataFmt_g 	: PsiFixFmt_t;					-- $$ constant=(1,0,15) $$
-	    Ratio_g   	: natural     	:= 5;			-- $$ constant=5 $$
-		GainCorr_g	: string		:= "NONE"		-- NONE, EXACT or ROUGH (see psi_fix_mov_avg for details)
+	    Ratio_g   	: natural     	:= 5			-- $$ constant=5 $$
 	);
 	port(
 		clk_i				: in  	std_logic; 												-- $$ type=clk; freq=100e6 $$
@@ -52,7 +51,7 @@ architecture RTL of psi_fix_demod_real2cplx is
 
 	type coef_array_t is array(0 to Ratio_g-1) of std_logic_vector(PsiFixSize(DataFmt_g)-1 downto 0);
 	
-	constant coef_scale_c : real := 1.0-2.0**(-real(DataFmt_g.F));	-- prevent +/- 1.0
+	constant coef_scale_c : real := (1.0-2.0**(-real(DataFmt_g.F)))/real(Ratio_g);	-- prevent +/- 1.0 and pre-compensate for gain of moving average
 
 	--SIN coef function <=> Q coef n = (sin(nx2pi/Ratio)(2/Ratio))
 	function coef_sin_array_func return coef_array_t is
@@ -193,7 +192,7 @@ begin
 			InFmt_g 	=> DataFmt_g,
 			OutFmt_g 	=> DataFmt_g,
 			Taps_g		=> Ratio_g,
-			GainCorr_g	=> GainCorr_g,
+			GainCorr_g	=> "NONE",
 			Round_g		=> PsiFixRound,
 			Sat_g		=> PsiFixSat,
 			OutRegs_g	=> 2
@@ -234,7 +233,7 @@ begin
 			InFmt_g 	=> DataFmt_g,
 			OutFmt_g 	=> DataFmt_g,
 			Taps_g		=> Ratio_g,
-			GainCorr_g	=> GainCorr_g,
+			GainCorr_g	=> "NONE",
 			Round_g		=> PsiFixRound,
 			Sat_g		=> PsiFixSat,
 			OutRegs_g	=> 2

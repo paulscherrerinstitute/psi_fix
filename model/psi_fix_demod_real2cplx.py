@@ -6,15 +6,11 @@ from psi_fix_mov_avg import psi_fix_mov_avg
 
 
 class psi_fix_demod_real2cplx:
-    GAINCORR_NONE = psi_fix_mov_avg.GAINCORR_NONE
-    GAINCORR_ROUGH = psi_fix_mov_avg.GAINCORR_ROUGH
-    GAINCORR_EXACT = psi_fix_mov_avg.GAINCORR_EXACT
-
-    def __init__(self, dataFmt: PsiFixFmt, ratio: int, gaincorr : str = GAINCORR_NONE):
+    def __init__(self, dataFmt: PsiFixFmt, ratio: int):
         self.dataFmt = dataFmt
         self.ratio = ratio
         self.subFmt = PsiFixFmt(dataFmt.S, dataFmt.I+1, dataFmt.F)
-        self.movAvg = psi_fix_mov_avg(dataFmt, dataFmt, ratio, gaincorr, PsiFixRnd.Round, PsiFixSat.Sat)
+        self.movAvg = psi_fix_mov_avg(dataFmt, dataFmt, ratio, psi_fix_mov_avg.GAINCORR_NONE, PsiFixRnd.Round, PsiFixSat.Sat)
 
 
     def Process(self, inData : np.ndarray, phOffset : Union[np.ndarray,float]) -> Tuple[np.ndarray, np.ndarray]:
@@ -33,8 +29,8 @@ class psi_fix_demod_real2cplx:
         cpt = np.where(cptIntOffs > self.ratio-1, cptIntOffs - self.ratio, cptIntOffs)
 
         #Get Sin/Cos value
-        scale = 1.0-2.0**-self.dataFmt.F
-        sinTable = PsiFixFromReal(np.sin(2.0*np.pi*np.arange(0, self.ratio)/self.ratio)*scale, self.dataFmt)
+        scale = (1.0-2.0**-self.dataFmt.F)/self.ratio
+        sinTable = PsiFixFromReal(np.sin(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.dataFmt)
         cosTable = PsiFixFromReal(np.cos(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.dataFmt)
 
         #I-Path
