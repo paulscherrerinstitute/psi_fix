@@ -41,10 +41,10 @@ architecture tb of psi_fix_complex_mult_tb is
 	constant InternalFmt_c : PsiFixFmt_t := (1, 2, 30); --same as python model
 	
 	-- stimuli files
-	constant inp_txt_stim_c   : string  := StimDir_g & "\stimuli_inphase.txt";
-	constant qua_txt_stim_c   : string  := StimDir_g & "\stimuli_quadrature.txt";
-	constant rotInp_txt_obs_c : string  := StimDir_g & "\model_result_rotX.txt";
-	constant rotQua_txt_obs_c : string  := StimDir_g & "\model_result_rotY.txt";
+	constant inp_txt_stim_c   : string  := StimDir_g & "/stimuli_inphase.txt";
+	constant qua_txt_stim_c   : string  := StimDir_g & "/stimuli_quadrature.txt";
+	constant rotInp_txt_obs_c : string  := StimDir_g & "/model_result_rotX.txt";
+	constant rotQua_txt_obs_c : string  := StimDir_g & "/model_result_rotY.txt";
 
 	--typedef for next function
 	type matrix_array_t is array (0 to 3) of std_logic_vector(PsiFixSize(CoefFixFmt_c) - 1 downto 0);
