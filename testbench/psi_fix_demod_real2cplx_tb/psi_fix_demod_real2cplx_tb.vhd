@@ -31,8 +31,10 @@ end entity;
 ------------------------------------------------------------
 architecture sim of psi_fix_demod_real2cplx_tb is
 	-- *** Fixed Generics ***
-	constant RstPol_g : std_logic := '1';
-	constant DataFmt_g : PsiFixFmt_t := (1,0,15);
+	constant RstPol_g 	: std_logic 	:= '1';
+	constant InFmt_g 	: PsiFixFmt_t 	:= (1,0,15);
+	constant OutFmt_g	: PsiFixFmt_t	:= (1,0,16);
+	constant CoefBits_g	: integer		:= 25;
 	
 	-- *** Not Assigned Generics (default values) ***
 	constant Ratio_g : natural := 5;   -- $$ constant=5 $$;
@@ -49,11 +51,11 @@ architecture sim of psi_fix_demod_real2cplx_tb is
 	signal clk_i : std_logic := '0';
 	signal rst_i : std_logic := '1';
 	signal str_i : std_logic := '0';
-	signal data_i : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0) := (others => '0');
-	signal data_I_o : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0) := (others => '0');
-	signal data_Q_o : std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0) := (others => '0');
+	signal data_i : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0) := (others => '0');
+	signal data_I_o : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
+	signal data_Q_o : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
 	signal str_o : std_logic := '0';
-	signal phi_offset_16 : std_logic_vector(15 downto 0) := (others => '0');
+	signal phi_offset_16 : std_logic_vector(data_i'range) := (others => '0');
 	
 begin
 	------------------------------------------------------------
@@ -62,7 +64,9 @@ begin
 	i_dut : entity work.psi_fix_demod_real2cplx
 		generic map (
 			RstPol_g => RstPol_g,
-			DataFmt_g => DataFmt_g
+			InFmt_g => InFmt_g,
+			OutFmt_g => OutFmt_g,
+			CoefBits_g => CoefBits_g
 		)
 		port map (
 			clk_i => clk_i,
