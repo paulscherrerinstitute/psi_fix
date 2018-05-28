@@ -44,20 +44,20 @@ class psi_fix_cordic_vect:
             g *= np.sqrt(1+2**(-2*i))
         return g
 
-    def CordicStepX(self, xLast, yLast, shift : int):
+    def _CordicStepX(self, xLast, yLast, shift : int):
         yShifted = PsiFixShiftRight(yLast, self.internalFmt, shift, self.iterations-1, self.internalFmt)
         sub = PsiFixSub(xLast, self.internalFmt, yShifted, self.internalFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
         add = PsiFixAdd(xLast, self.internalFmt, yShifted, self.internalFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
         return np.where(yLast < 0, sub, add)
 
-    def CordicStepY(self, xLast, yLast, shift: int):
+    def _CordicStepY(self, xLast, yLast, shift: int):
         xShifted = PsiFixShiftRight(xLast, self.internalFmt, shift, self.iterations - 1, self.internalFmt)
         add = PsiFixAdd(yLast, self.internalFmt, xShifted, self.internalFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
         sub = PsiFixSub(yLast, self.internalFmt, xShifted, self.internalFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
         out = np.where(yLast < 0, add, sub)
         return out
 
-    def CordicStepZ(self, zLast, yLast, iteration : int):
+    def _CordicStepZ(self, zLast, yLast, iteration : int):
         add = PsiFixAdd(zLast, self.angleIntFmt, self.angleTable[iteration], self.angleIntFmt, self.angleIntFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
         sub = PsiFixSub(zLast, self.angleIntFmt, self.angleTable[iteration], self.angleIntFmt, self.angleIntFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
         return np.where(yLast < 0, sub, add)
@@ -69,9 +69,9 @@ class psi_fix_cordic_vect:
         y = PsiFixAbs(PsiFixFromReal(inpQ, self.inFmt), self.inFmt, self.internalFmt, self.round, self.sat)
         z = 0
         for i in range(0, self.iterations):
-            x_next = self.CordicStepX(x, y, i)
-            y_next = self.CordicStepY(x, y, i)
-            z_next = self.CordicStepZ(z, y, i)
+            x_next = self._CordicStepX(x, y, i)
+            y_next = self._CordicStepY(x, y, i)
+            z_next = self._CordicStepZ(z, y, i)
             x = x_next
             y = y_next
             z = z_next

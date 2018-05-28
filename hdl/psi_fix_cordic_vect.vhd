@@ -102,8 +102,6 @@ architecture rtl of psi_fix_cordic_vect is
 	function CordicStepX (	xLast		: std_logic_vector;
 							yLast		: std_logic_vector;
 							shift		: integer) return std_logic_vector is
-		--constant ShiftedFmt_c 	: PsiFixFmt_t 		:= (1, InternalFmt_g.I-shift, InternalFmt_g.F+shift);
-		--constant yShifted 		: std_logic_vector	:= yLast; -- same bitpattern, just reinterpreted
 		constant yShifted 		: std_logic_vector := PsiFixShiftRight(yLast, InternalFmt_g, shift, Iterations_g-1, InternalFmt_g, PsiFixTrunc, PsiFixWrap, true);
 	begin
 	
@@ -123,8 +121,6 @@ architecture rtl of psi_fix_cordic_vect is
 	function CordicStepY (	xLast		: std_logic_vector;
 							yLast		: std_logic_vector;
 							shift		: integer) return std_logic_vector is
-		--constant ShiftedFmt_c 	: PsiFixFmt_t 		:= (1, InternalFmt_g.I-shift, InternalFmt_g.F+shift);	
-		--constant xShifted 		: std_logic_vector	:= xLast; -- same bitpattern, just reinterpreted
 		constant xShifted 		: std_logic_vector := PsiFixShiftRight(xLast, InternalFmt_g, shift, Iterations_g-1, InternalFmt_g, PsiFixTrunc, PsiFixWrap, true);
 	begin
 	
@@ -277,8 +273,6 @@ begin
 						end if;
 					else
 						-- Normal Calculation Step
-						--Xshifted := PsiFixShiftRight(X, InternalFmt_g, IterCnt, Iterations_g-1, InternalFmt_g, PsiFixTrunc, PsiFixWrap, true);
-						--Yshifted := PsiFixShiftRight(Y, InternalFmt_g, IterCnt, Iterations_g-1, InternalFmt_g, PsiFixTrunc, PsiFixWrap, true);
 						X <= CordicStepX(X, Y, IterCnt);
 						Y <= CordicStepY(X, Y, IterCnt);
 						Z <= CordicStepZ(Z, Y, IterCnt);
