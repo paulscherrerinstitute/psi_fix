@@ -403,7 +403,15 @@ package body psi_fix_pkg is
 		assert shift >= 0 report "PsiFixShiftLeft: Shift must be >= 0" severity error;
 		assert shift <= maxShift report "PsiFixShiftLeft: Shift must be <= maxShift" severity error;
 		FullA_v 	:= PsiFixResize(a, aFmt, FullFmt_c);
-		FullOut_v	:= ShiftLeft(FullA_v, shift);
+		if shift = maxShift then
+			FullOut_v	:= ShiftLeft(FullA_v, shift);
+		else
+			for i in 0 to maxShift loop
+				if i = shift then
+					FullOut_v	:= ShiftLeft(FullA_v, i);
+				end if;
+			end loop;
+		end if;
 		return PsiFixResize(FullOut_v, FullFmt_c, rFmt, rnd, sat);
 	end function;
 	
@@ -423,10 +431,22 @@ package body psi_fix_pkg is
 		assert shift >= 0 report "PsiFixShiftRight: Shift must be >= 0" severity error;
 		assert shift <= maxShift report "PsiFixShiftRight: Shift must be <= maxShift" severity error;
 		FullA_v 	:= PsiFixResize(a, aFmt, FullFmt_c);
-		if aFmt.S = 1 then
-			FullOut_v	:= ShiftRight(FullA_v, shift, FullA_v(FullA_v'left));
+		if shift = maxShift then
+			if aFmt.S = 1 then
+				FullOut_v	:= ShiftRight(FullA_v, shift, FullA_v(FullA_v'left));
+			else
+				FullOut_v	:= ShiftRight(FullA_v, shift, '0');
+			end if;
 		else
-			FullOut_v	:= ShiftRight(FullA_v, shift, '0');
+			for i in 0 to maxShift loop
+				if i = shift then
+					if aFmt.S = 1 then
+						FullOut_v	:= ShiftRight(FullA_v, i, FullA_v(FullA_v'left));
+					else
+						FullOut_v	:= ShiftRight(FullA_v, i, '0');
+					end if;
+				end if;
+			end loop;		
 		end if;
 		return PsiFixResize(FullOut_v, FullFmt_c, rFmt, rnd, sat);
 	end function;	
