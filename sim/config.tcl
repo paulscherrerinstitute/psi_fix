@@ -42,6 +42,7 @@ add_sources "../hdl" {
 	psi_fix_mov_avg.vhd \
 	psi_fix_demod_real2cplx.vhd \
 	psi_fix_cordic_vect.vhd \
+	psi_fix_cordic_rot.vhd \
 } -tag src
 
 # testbenches
@@ -69,6 +70,7 @@ add_sources "../testbench" {
 	psi_fix_mov_avg_tb/psi_fix_mov_avg_tb.vhd \
 	psi_fix_demod_real2cplx_tb/psi_fix_demod_real2cplx_tb.vhd \
 	psi_fix_cordic_vect_tb/psi_fix_cordic_vect_tb.vhd \
+	psi_fix_cordic_rot_tb/psi_fix_cordic_rot_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -179,6 +181,15 @@ add_tb_run
 create_tb_run "psi_fix_cordic_vect_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_cordic_vect_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_cordic_vect_tb/Data"]
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound, -gSat_g=PsiFixSat, -gMode_g=PIPELINED" \
+						"-gFileFolder_g=$dataDir -gGainComp_g=false -gRound_g=PsiFixTrunc, -gSat_g=PsiFixWrap, -gMode_g=PIPELINED" \
+						"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound, -gSat_g=PsiFixSat, -gMode_g=SERIAL" \
+						"-gFileFolder_g=$dataDir -gGainComp_g=false -gRound_g=PsiFixTrunc, -gSat_g=PsiFixWrap, -gMode_g=SERIAL"
+add_tb_run
+
+create_tb_run "psi_fix_cordic_rot_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_cordic_rot_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_cordic_rot_tb/Data"]
 tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound, -gSat_g=PsiFixSat, -gMode_g=PIPELINED" \
 						"-gFileFolder_g=$dataDir -gGainComp_g=false -gRound_g=PsiFixTrunc, -gSat_g=PsiFixWrap, -gMode_g=PIPELINED" \
 						"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound, -gSat_g=PsiFixSat, -gMode_g=SERIAL" \
