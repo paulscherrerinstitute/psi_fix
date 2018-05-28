@@ -34,7 +34,7 @@ entity psi_fix_cordic_vect is
 		GainComp_g				: boolean		:= False;		--						$$ export=true $$
 		Round_g 				: PsiFixRnd_t	:= PsiFixTrunc;	--						$$ export=true $$
 		Sat_g					: PsiFixSat_t	:= PsiFixWrap;	--						$$ export=true $$
-		Mode_g					: string		:= "PIPELINED"	-- PIPELINED or SERIAL	$$ export=true $$
+		Mode_g					: string		:= "SERIAL"	-- PIPELINED or SERIAL	$$ export=true $$
 	);
 	port (
 		-- Control Signals
@@ -58,14 +58,26 @@ end entity;
 architecture rtl of psi_fix_cordic_vect is
 
 	-- *** Constants ***
-	constant AngleTable_c : t_areal(0 to 31)	:= (0.125, 				0.0737918088252,	0.0389895651887,	0.0197917120803,
-													0.00993426215277,	0.00497197391179,	0.00248659363948,	0.00124337269683,
-													0.000621695834357,	0.000310849102962,	0.000155424699705,	7.77123683806e-05,
-													3.88561865063e-05,	1.94280935426e-05,	9.71404680751e-06,	4.85702340828e-06,
-													2.4285117047e-06,	1.21425585242e-06,	6.0712792622e-07,	3.03563963111e-07,
-													1.51781981556e-07,	7.58909907779e-08,	3.7945495389e-08,	1.89727476945e-08,
-													9.48637384724e-09,	4.74318692362e-09,	2.37159346181e-09,	1.1857967309e-09,
-													5.92898365452e-10,	2.96449182726e-10,	1.48224591363e-10,	7.41122956816e-11);
+	constant AngleTableReal_c : t_areal(0 to 31)	:= (0.125, 				0.0737918088252,	0.0389895651887,	0.0197917120803,
+														0.00993426215277,	0.00497197391179,	0.00248659363948,	0.00124337269683,
+														0.000621695834357,	0.000310849102962,	0.000155424699705,	7.77123683806e-05,
+														3.88561865063e-05,	1.94280935426e-05,	9.71404680751e-06,	4.85702340828e-06,
+														2.4285117047e-06,	1.21425585242e-06,	6.0712792622e-07,	3.03563963111e-07,
+														1.51781981556e-07,	7.58909907779e-08,	3.7945495389e-08,	1.89727476945e-08,
+														9.48637384724e-09,	4.74318692362e-09,	2.37159346181e-09,	1.1857967309e-09,
+														5.92898365452e-10,	2.96449182726e-10,	1.48224591363e-10,	7.41122956816e-11);													
+	type AngleTable_t is array (0 to Iterations_g-1) of std_logic_vector(PsiFixSize(AngleIntFmt_g)-1 downto 0);
+	
+	function AngleTableStdlv return AngleTable_t is
+		variable Table : AngleTable_t;
+	begin
+		for i in 0 to Iterations_g-1 loop
+			Table(i) := PsiFixFromReal(AngleTableReal_c(i), AngleIntFmt_g);
+		end loop;
+		return Table;
+	end function;
+	
+	constant AngleTable_c : AngleTable_t := AngleTableStdlv;
 													
 	
 	function CordicGain(iterations : integer) return real is
@@ -89,18 +101,19 @@ architecture rtl of psi_fix_cordic_vect is
 	-- Cordic step for X
 	function CordicStepX (	xLast		: std_logic_vector;
 							yLast		: std_logic_vector;
-							iteration	: integer) return std_logic_vector is
-		constant ShiftedFmt_c 	: PsiFixFmt_t 		:= (1, InternalFmt_g.I-iteration, InternalFmt_g.F+iteration);
-		constant yShifted 		: std_logic_vector	:= yLast; -- same bitpattern, just reinterpreted
+							shift		: integer) return std_logic_vector is
+		--constant ShiftedFmt_c 	: PsiFixFmt_t 		:= (1, InternalFmt_g.I-shift, InternalFmt_g.F+shift);
+		--constant yShifted 		: std_logic_vector	:= yLast; -- same bitpattern, just reinterpreted
+		constant yShifted 		: std_logic_vector := PsiFixShiftRight(yLast, InternalFmt_g, shift, Iterations_g-1, InternalFmt_g, PsiFixTrunc, PsiFixWrap, true);
 	begin
 	
 		if signed(yLast) < 0 then
 			return PsiFixSub(	xLast, InternalFmt_g, 
-								yShifted, ShiftedFmt_c, 
+								yShifted, InternalFmt_g, 
 								InternalFmt_g, PsiFixTrunc, PsiFixWrap);
 		else
 			return PsiFixAdd(	xLast, InternalFmt_g, 
-								yShifted, ShiftedFmt_c, 
+								yShifted, InternalFmt_g, 
 								InternalFmt_g, PsiFixTrunc, PsiFixWrap);
 
 		end if;			
@@ -109,18 +122,19 @@ architecture rtl of psi_fix_cordic_vect is
 	-- Cordic step for Y
 	function CordicStepY (	xLast		: std_logic_vector;
 							yLast		: std_logic_vector;
-							iteration	: integer) return std_logic_vector is
-		constant ShiftedFmt_c 	: PsiFixFmt_t 		:= (1, InternalFmt_g.I-iteration, InternalFmt_g.F+iteration);	
-		constant xShifted 		: std_logic_vector	:= xLast; -- same bitpattern, just reinterpreted
+							shift		: integer) return std_logic_vector is
+		--constant ShiftedFmt_c 	: PsiFixFmt_t 		:= (1, InternalFmt_g.I-shift, InternalFmt_g.F+shift);	
+		--constant xShifted 		: std_logic_vector	:= xLast; -- same bitpattern, just reinterpreted
+		constant xShifted 		: std_logic_vector := PsiFixShiftRight(xLast, InternalFmt_g, shift, Iterations_g-1, InternalFmt_g, PsiFixTrunc, PsiFixWrap, true);
 	begin
 	
 		if signed(yLast) < 0 then
 			return	PsiFixAdd(	yLast, InternalFmt_g,
-								xShifted, ShiftedFmt_c, 
+								xShifted, InternalFmt_g, 
 								InternalFmt_g, PsiFixTrunc, PsiFixWrap);
 		else
 			return	PsiFixSub(	yLast, InternalFmt_g,
-								xShifted, ShiftedFmt_c, 
+								xShifted, InternalFmt_g, 
 								InternalFmt_g, PsiFixTrunc, PsiFixWrap);
 		end if;			
 	end function;
@@ -129,7 +143,7 @@ architecture rtl of psi_fix_cordic_vect is
 	function CordicStepZ (	zLast		: std_logic_vector;
 							yLast		: std_logic_vector;
 							iteration	: integer) return std_logic_vector is
-		constant Atan_c : std_logic_vector(PsiFixSize(AngleIntFmt_g)-1 downto 0) := PsiFixFromReal(AngleTable_c(iteration), AngleIntFmt_g);
+		constant Atan_c : std_logic_vector(PsiFixSize(AngleIntFmt_g)-1 downto 0) := AngleTable_c(iteration);
 	begin
 		if signed(yLast) < 0 then
 			return	PsiFixSub(	zLast, AngleIntFmt_g,
@@ -232,6 +246,7 @@ begin
 		InRdy <= not XinVld;
 	
 		p_cordic_serial : process(Clk)
+			variable Xshifted, Yshifted : std_logic_vector(PsiFixSize(InternalFmt_g)-1 downto 0);
 		begin		
 			if rising_edge(Clk) then
 				if Rst = '1' then
@@ -262,13 +277,12 @@ begin
 						end if;
 					else
 						-- Normal Calculation Step
-						for i in 1 to Iterations_g-1 loop -- loop to make iteration number a constant (required for synthesis)
-							if i = IterCnt then
-								X <= CordicStepX(X, Y, i);
-								Y <= CordicStepY(X, Y, i);
-								Z <= CordicStepZ(Z, Y, i);
-							end if;
-						end loop;
+						--Xshifted := PsiFixShiftRight(X, InternalFmt_g, IterCnt, Iterations_g-1, InternalFmt_g, PsiFixTrunc, PsiFixWrap, true);
+						--Yshifted := PsiFixShiftRight(Y, InternalFmt_g, IterCnt, Iterations_g-1, InternalFmt_g, PsiFixTrunc, PsiFixWrap, true);
+						X <= CordicStepX(X, Y, IterCnt);
+						Y <= CordicStepY(X, Y, IterCnt);
+						Z <= CordicStepZ(Z, Y, IterCnt);
+
 						if IterCnt = Iterations_g-1 then
 							IterCnt <= 0;
 							CordVld <= '1';

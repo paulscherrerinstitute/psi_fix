@@ -44,18 +44,16 @@ class psi_fix_cordic_vect:
             g *= np.sqrt(1+2**(-2*i))
         return g
 
-    def CordicStepX(self, xLast, yLast, iteration : int):
-        shiftedFmt = PsiFixFmt(1, self.internalFmt.I-iteration, self.internalFmt.F+iteration)
-        yShifted = PsiFixShiftRight(yLast, self.internalFmt, iteration, iteration, shiftedFmt)
-        sub = PsiFixSub(xLast, self.internalFmt, yShifted, shiftedFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
-        add = PsiFixAdd(xLast, self.internalFmt, yShifted, shiftedFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+    def CordicStepX(self, xLast, yLast, shift : int):
+        yShifted = PsiFixShiftRight(yLast, self.internalFmt, shift, self.iterations-1, self.internalFmt)
+        sub = PsiFixSub(xLast, self.internalFmt, yShifted, self.internalFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        add = PsiFixAdd(xLast, self.internalFmt, yShifted, self.internalFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
         return np.where(yLast < 0, sub, add)
 
-    def CordicStepY(self, xLast, yLast, iteration: int):
-        shiftedFmt = PsiFixFmt(1, self.internalFmt.I - iteration, self.internalFmt.F + iteration)
-        xShifted = PsiFixShiftRight(xLast, self.internalFmt, iteration, iteration, shiftedFmt)
-        add = PsiFixAdd(yLast, self.internalFmt, xShifted, shiftedFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
-        sub = PsiFixSub(yLast, self.internalFmt, xShifted, shiftedFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+    def CordicStepY(self, xLast, yLast, shift: int):
+        xShifted = PsiFixShiftRight(xLast, self.internalFmt, shift, self.iterations - 1, self.internalFmt)
+        add = PsiFixAdd(yLast, self.internalFmt, xShifted, self.internalFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        sub = PsiFixSub(yLast, self.internalFmt, xShifted, self.internalFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
         out = np.where(yLast < 0, add, sub)
         return out
 
