@@ -1,3 +1,15 @@
+## 1.5.0
+
+* Added Features
+  * Added psi\_fix\_cordic\_vect (vectoring CORDIC for cart to polar converation)
+  * Added psi\_fix\_cordic\_rot (rotating CORDIC for polar to cartesian conversion)
+  * Added psi\_fix\_pol2cart\_approx (sine-approximation based polar to cartesian conversion)
+* Bugfixes
+  * Change PsiFixShiftLeft() and PsiFixShiftRight() to support dynamic shifts
+  * Fixed integer overflow in PsiFixShiftLeft() and PsiFixShiftRight()
+* Changed Dependencies
+  * psi\_common >= 1.6.0
+
 ## 1.4.0 
 
 * Added Features
