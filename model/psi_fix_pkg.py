@@ -127,9 +127,7 @@ def PsiFixShiftLeft(a, aFmt : PsiFixFmt,
         raise ValueError("PsiFixShiftLeft: shift must be > 0")
     fullFmt = PsiFixFmt(max(aFmt.S, rFmt.S), max(aFmt.I+maxShift, rFmt.I), max(aFmt.F, rFmt.F))
     fullA = PsiFixResize(a, aFmt, fullFmt)
-    bitsIn = PsiFixGetBitsAsInt(fullA, fullFmt)
-    bitsOut = np.array(np.floor(bitsIn * np.array(np.power(2.0,shift), int)), int)
-    fullOut = PsiFixFromBitsAsInt(bitsOut, fullFmt)
+    fullOut = fullA*2**shift
     return PsiFixResize(fullOut, fullFmt, rFmt, rnd, sat)
 
 def PsiFixShiftRight(a, aFmt : PsiFixFmt,
@@ -142,9 +140,7 @@ def PsiFixShiftRight(a, aFmt : PsiFixFmt,
         raise ValueError("PsiFixShiftRight: shift must be > 0")
     fullFmt = PsiFixFmt(max(aFmt.S, rFmt.S), max(aFmt.I, rFmt.I), max(aFmt.F+maxShift, rFmt.F+1))   #Additional bit for rounding
     fullA = PsiFixResize(a, aFmt, fullFmt)
-    bitsIn = PsiFixGetBitsAsInt(fullA, fullFmt)
-    bitsOut = np.array(np.floor(bitsIn / np.array(np.power(2.0,shift), int)), int)
-    fullOut = PsiFixFromBitsAsInt(bitsOut, fullFmt)
+    fullOut = fullA * 2**-shift
     return PsiFixResize(fullOut, fullFmt, rFmt, rnd, sat)
 
 def PsiFixUpperBound(rFmt : PsiFixFmt):
