@@ -138,6 +138,12 @@ package psi_fix_pkg is
 	function PsiFixToReal(	a		: std_logic_vector;
 							aFmt	: PsiFixFmt_t) 
 							return real;	
+							
+	function PsiFixRoundFromString(	s 	: string) 
+									return PsiFixRnd_t;
+									
+	function PsiFixSatFromString(	s 	: string)
+									return PsiFixSat_t;
   
 end psi_fix_pkg;	 
 
@@ -508,6 +514,32 @@ package body psi_fix_pkg is
 	begin
 		ValRnd_v	:= PsiFixResize(a, aFmt, RndFmt_c, rnd);
 		return (signed(ValRnd_v) <= signed(UpperBound_c)) and (signed(ValRnd_v) >= signed(LowerBound_c));
+	end function;
+	
+	-- *** PsiFixRoundFromString ***
+	function PsiFixRoundFromString(	s 	: string) 
+									return PsiFixRnd_t is
+	begin
+		if s = "PsiFixRound" or s = "psifixround" then
+			return PsiFixRound;
+		elsif s = "PsiFixTrunc" or s = "psifixtrunc" then
+			return PsiFixTrunc;
+		end if;
+		report "PsiFixRoundFromString: Illegal value - " & s severity error;
+		return PsiFixTrunc;
+	end function;
+		
+	-- *** PsiFixSatFromString ***
+	function PsiFixSatFromString(	s 	: string)
+									return PsiFixSat_t is
+	begin
+		if s = "PsiFixSat" or s = "psifixsat" then
+			return PsiFixSat;
+		elsif s = "PsiFixWrap" or s = "psifixwrap" then
+			return PsiFixWrap;
+		end if;
+		report "PsiFixSatFromString: Illegal value - " & s severity error;
+		return PsiFixWrap;
 	end function;
 	
 	

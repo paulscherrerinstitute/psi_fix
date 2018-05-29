@@ -23,8 +23,8 @@ library work;
 entity psi_fix_cordic_vect_tb is
 	generic (
 		GainComp_g 		: boolean 		:= False ;
-		Round_g 		: PsiFixRnd_t 	:= PsiFixTrunc ;
-		Sat_g 			: PsiFixSat_t 	:= PsiFixWrap ;
+		Round_g 		: string 		:= "PsiFixTrunc" ;	-- Pass as string, required by modelsim on linux
+		Sat_g 			: string 		:= "PsiFixWrap" ;	-- Pass as string, required by modelsim on linux
 		Mode_g 			: string 		:= "PIPELINED";
 		FileFolder_g	: string 		:= "../tesbench/psi_fix_cordic_vect_tb/Data"
 	);
@@ -74,8 +74,8 @@ begin
 	i_dut : entity work.psi_fix_cordic_vect
 		generic map (
 			GainComp_g => GainComp_g,
-			Round_g => Round_g,
-			Sat_g => Sat_g,
+			Round_g => PsiFixRoundFromString(Round_g),
+			Sat_g => PsiFixSatFromString(Sat_g),
 			Mode_g => Mode_g,
 			InFmt_g => InFmt_g,
 			OutFmt_g => OutFmt_g,
