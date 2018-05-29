@@ -5,7 +5,7 @@
 * Bugfixes
   * Fixed various small bugs that prevented the regression-test from succeeding on Linux
 * Changed Dependencies
-  * TCL/PsiSim >= 1.5.1 
+  * TCL/PsiSim >= 1.3.1 
 
 ## 1.5.0
 
