@@ -160,6 +160,7 @@ add_tb_run
 
 create_tb_run "psi_fix_complex_mult_tb"
 tb_run_add_pre_script "python3" "cosim.py" "../testbench/psi_fix_complex_mult_tb/Scripts"
+tb_run_add_time_limit {100 us}
 set dataDir [file normalize "../testbench/psi_fix_complex_mult_tb/Data"]
 tb_run_add_arguments 	"-gStimDir_g=$dataDir -gPipeline_g=true" \
 						"-gStimDir_g=$dataDir -gPipeline_g=false"

@@ -112,14 +112,14 @@ begin
 			if vld_i = '1' then
 				if not endfile(test_vector_f) then
 					v_data_row_counter := v_data_row_counter + 1;
-					readline(test_vector_f, row);
-				end if;
+					readline(test_vector_f, row);				
 
-				-- read integer number from "row" variable in integer array
-				for i in 1 to NUM_COL_c loop
-					read(row, v_data_read(i));
-				end loop;
-				ipath_i <= std_logic_vector(to_signed(v_data_read(1), PsiFixSize(InFixFmt_c)));
+					-- read integer number from "row" variable in integer array
+					for i in 1 to NUM_COL_c loop
+						read(row, v_data_read(i));
+					end loop;
+					ipath_i <= std_logic_vector(to_signed(v_data_read(1), PsiFixSize(InFixFmt_c)));
+				end if;
 			end if;
 		end if;
 	end process;
@@ -144,13 +144,13 @@ begin
 			if vld_i = '1' then
 				if not endfile(test_vector_f) then
 					v_data_row_counter := v_data_row_counter + 1;
-					readline(test_vector_f, row);
-				end if;
+					readline(test_vector_f, row);				
 
-				for i in 1 to NUM_COL_c loop
-					read(row, v_data_read(i));
-				end loop;
-				qpath_i <= std_logic_vector(to_signed(v_data_read(1), PsiFixSize(InFixFmt_c)));
+					for i in 1 to NUM_COL_c loop
+						read(row, v_data_read(i));
+					end loop;
+					qpath_i <= std_logic_vector(to_signed(v_data_read(1), PsiFixSize(InFixFmt_c)));
+				end if;
 			end if;
 		end if;
 	end process;
@@ -175,13 +175,13 @@ begin
 			if str_vld_o = '1' then
 				if not endfile(test_vector_f) then
 					v_data_row_counter := v_data_row_counter + 1;
-					readline(test_vector_f, row);
-				end if;
+					readline(test_vector_f, row);				
 
-				for i in 1 to NUM_COL_c loop
-					read(row, v_data_read(i));
-				end loop;
-				obs_ipath_s := std_logic_vector(to_signed(v_data_read(1), PsiFixSize(InFixFmt_c)));
+					for i in 1 to NUM_COL_c loop
+						read(row, v_data_read(i));
+					end loop;
+					obs_ipath_s := std_logic_vector(to_signed(v_data_read(1), PsiFixSize(InFixFmt_c)));
+				end if;
 			end if;
 		end if;
 	end process;
@@ -206,13 +206,13 @@ begin
 			if str_vld_o = '1' then
 				if not endfile(test_vector_f) then
 					v_data_row_counter := v_data_row_counter + 1;
-					readline(test_vector_f, row);
-				end if;
+					readline(test_vector_f, row);				
 
-				for i in 1 to NUM_COL_c loop
-					read(row, v_data_read(i));
-				end loop;
-				obs_qpath_s := std_logic_vector(to_signed(v_data_read(1), PsiFixSize(InFixFmt_c)));
+					for i in 1 to NUM_COL_c loop
+						read(row, v_data_read(i));
+					end loop;
+					obs_qpath_s := std_logic_vector(to_signed(v_data_read(1), PsiFixSize(InFixFmt_c)));
+				end if;
 			end if;
 		end if;
 	end process;
@@ -298,7 +298,7 @@ begin
 			writeline(output, lout);
 		end if;
 
-		assert false report "end of simulation" severity failure;
+		report "end of simulation" severity note;
 		wait;
 	end process;
 
