@@ -8,8 +8,8 @@ library ieee;
 library std;
 	use std.textio.all;
 
-library work;
-	use work.psi_tb_txt_util.all;
+library psi_tb;
+	use psi_tb.psi_tb_txt_util.all;
 	use work.psi_fix_pkg.all;
 	use work.psi_fix_fir_dec_ser_nch_chtdm_conf_tb_pkg.all;
 	use work.psi_fix_fir_dec_ser_nch_chtdm_conf_tb_case0_pkg.all;

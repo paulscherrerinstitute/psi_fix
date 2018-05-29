@@ -56,7 +56,7 @@ architecture rtl of psi_fix_mov_avg is
 	-- Formats
 	constant DiffFmt_c			: PsiFixFmt_t		:= (1, InFmt_g.I+1, InFmt_g.F);
 	constant SumFmt_c			: PsiFixFmt_t		:= (1, inFmt_g.I+AdditionalBits_c, InFmt_g.F);
-	constant GcInFmt_c			: PsiFixFmt_t		:= (1, InFmt_g.I, work.psi_common_math_pkg.min(24-inFmt_g.I, SumFmt_c.F+AdditionalBits_c));
+	constant GcInFmt_c			: PsiFixFmt_t		:= (1, InFmt_g.I, psi_common.psi_common_math_pkg.min(24-inFmt_g.I, SumFmt_c.F+AdditionalBits_c));
 	constant GcCoefFmt_c		: PsiFixFmt_t		:= (0, 1, 16);
 	
 	-- Gain correction coefficient calculation

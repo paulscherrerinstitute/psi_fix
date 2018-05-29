@@ -11,11 +11,12 @@ library ieee;
 	use ieee.numeric_std.all;
 	use ieee.math_real.all;
 
-library work;
-	use work.psi_common_math_pkg.all;
+library psi_tb;
+library psi_common;
+	use psi_common.psi_common_math_pkg.all;
 	use work.psi_fix_pkg.all;
-	use work.psi_tb_txt_util.all;
-	use work.psi_tb_textfile_pkg.all;
+	use psi_tb.psi_tb_txt_util.all;
+	use psi_tb.psi_tb_textfile_pkg.all;
 
 ------------------------------------------------------------
 -- Entity Declaration

@@ -311,7 +311,7 @@ begin
 	--------------------------------------------
 	-- Coefficient RAM for configurable coefficients
 	g_nFixCoef : if not UseFixCoefs_g generate
-		i_coef_ram : entity work.psi_common_tdp_ram_rbw
+		i_coef_ram : entity psi_common.psi_common_tdp_ram_rbw
 			generic map (
 				Depth_g		=> CoefMemDepthApplied_c,
 				Width_g		=> PsiFixSize(CoefFmt_g)
@@ -352,7 +352,7 @@ begin
 	DataRamWrAddr_1	<= r.ChannelNr(1) & r.TapWrAddr_1;
 	DataRamRdAddr_2 <= r.CalcChnl_2 & r.TapRdAddr_2;
 	
-	i_data_ram : entity work.psi_common_tdp_ram_rbw
+	i_data_ram : entity psi_common.psi_common_tdp_ram_rbw
 		generic map (
 			Depth_g		=> DataMemDepthApplied_c*Channels_g,
 			Width_g		=> PsiFixSize(InFmt_g)
