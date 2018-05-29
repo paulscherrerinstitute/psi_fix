@@ -81,7 +81,7 @@ begin
 	--------------------------------------------------------------------------
 	p_comb : process(	r, InVld, 
 						PhaseStep, PhaseOffs, Restart,
-						SinVld, CosVld, SinData, CosData)	
+						SinData, CosData)	
 		variable v : two_process_r;
 	begin	
 		-- hold variables stable

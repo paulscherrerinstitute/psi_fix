@@ -75,7 +75,7 @@ architecture rtl of psi_fix_bin_div is
 		IterCnt		: integer range 0 to Iterations_c-1;
 		ResultInt	: std_logic_vector(PsiFixSize(ResultIntFmt_c)-1 downto 0);
 		OutVld		: std_logic;
-		OutQuot		: std_logic_vector(PsiFixsize(OutFmt_g)-1 downto 0);
+		OutQuot		: std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);
 		InRdy		: std_logic;
 	end record;
 	signal r, r_next : two_process_r;

@@ -83,7 +83,7 @@ begin
 					strb(0) <= str_i;
 					mulIn <= PsiFixMult(data_i, InFmt_g, beta_c, CoefFmt_g, IntFmt_g, Round_g, Sat_g);	
 					-- stage 1
-					mulInFF	<= MulIn;
+					mulInFF	<= mulIn;
 					-- stage 2
 					add <= PsiFixAdd(mulInFF, IntFmt_g, fbFF, IntFmt_g, IntFmt_g, PsiFixTrunc, Sat_g);
 					-- stage 3

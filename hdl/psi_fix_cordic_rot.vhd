@@ -90,7 +90,7 @@ architecture rtl of psi_fix_cordic_rot is
 	end function;
 	
 	constant GcFmt_c		: PsiFixFmt_t												:= (0, 0, 17);
-	constant AngleIntExtFmt	: PsiFixFmt_t												:= (AngleIntFmt_g.S, max(AngleIntFmt_g.I, 1), AngleIntFmt_g.F);
+	--constant AngleIntExtFmt	: PsiFixFmt_t												:= (AngleIntFmt_g.S, max(AngleIntFmt_g.I, 1), AngleIntFmt_g.F);
 	constant GcCoef_c		: std_logic_vector(PsiFixSize(GcFmt_c)-1 downto 0)			:= PsiFixFromReal(1.0/CordicGain(Iterations_g), GcFmt_c);	
 	constant QuadFmt_c		: PsiFixFmt_t												:= (0,0,2);
 
@@ -245,13 +245,13 @@ begin
 		signal CordVld		: std_logic;
 		signal IterCnt		: integer range 0 to Iterations_g-1;
 		signal Quad			: std_logic_vector(1 downto 0);
-		signal yQc, xQc		: std_logic_vector(PsiFixsize(InternalFmt_g)-1 downto 0);
+		signal yQc, xQc		: std_logic_vector(PsiFixSize(InternalFmt_g)-1 downto 0);
 		signal QcVld		: std_logic;
 	begin
 		InRdy <= not XinVld;
 	
 		p_cordic_serial : process(Clk)
-			variable Xshifted, Yshifted : std_logic_vector(PsiFixSize(InternalFmt_g)-1 downto 0);
+	--		variable Xshifted, Yshifted : std_logic_vector(PsiFixSize(InternalFmt_g)-1 downto 0);
 		begin		
 			if rising_edge(Clk) then
 				if Rst = '1' then

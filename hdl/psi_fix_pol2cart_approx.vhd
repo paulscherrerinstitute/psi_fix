@@ -91,7 +91,7 @@ begin
 	-- Combinatorial Process
 	--------------------------------------------------------------------------
 	p_comb : process(	r, InVld, InAbs, InAng, 
-						SinVld_8, CosVld_8, SinData_8, CosData_8)	
+						SinData_8, CosData_8)	
 		variable v : two_process_r;
 	begin	
 		-- hold variables stable

@@ -82,7 +82,7 @@ architecture RTL of psi_fix_demod_real2cplx is
 	attribute rom_style             : string;
 	attribute rom_style of nonIQ_table_sin, nonIQ_table_cos : constant is "distributed";
 	
-	constant SubType_t				: PsiFixFmt_t	:= (DataFmt_g.S, DataFmt_g.I+1, DataFmt_g.F);
+	--constant SubType_t				: PsiFixFmt_t	:= (DataFmt_g.S, DataFmt_g.I+1, DataFmt_g.F);
 	
 	type OutPipe_t is array (natural range <>) of std_logic_vector(PsiFixSize(DataFmt_g) - 1 downto 0);
 	--
