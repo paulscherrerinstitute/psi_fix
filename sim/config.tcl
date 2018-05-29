@@ -136,12 +136,12 @@ create_tb_run "psi_fix_cic_int_fix_1ch_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_cic_int_fix_1ch_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_cic_int_fix_1ch_tb/Data"]
 # Go through different configurations as well as through different handshaking siutations (input starving, output blocked, both)
-tb_run_add_arguments 	"-gInIdleCycles_g=0 -gOutIdleCycles_g=0 -gOrder_g=3 -gRatio_g=10 -gDiffDelay_g=1 -gAutoGainCorr_g=True -gInFile_g=input.txt -gOutFile_g=output_o3_r10_dd1_gcTrue.txt -gDataDir_g=$dataDir -gIdleCycles_g=0" \
-						"-gInIdleCycles_g=0 -gOutIdleCycles_g=0 -gOrder_g=4 -gRatio_g=9 -gDiffDelay_g=2 -gAutoGainCorr_g=True -gInFile_g=input.txt -gOutFile_g=output_o4_r9_dd2_gcTrue.txt -gDataDir_g=$dataDir -gIdleCycles_g=0" \
-						"-gInIdleCycles_g=0 -gOutIdleCycles_g=0 -gOrder_g=4 -gRatio_g=6 -gDiffDelay_g=2 -gAutoGainCorr_g=False -gInFile_g=input.txt -gOutFile_g=output_o4_r6_dd2_gcFalse.txt -gDataDir_g=$dataDir -gIdleCycles_g=0" \
-						"-gInIdleCycles_g=20 -gOutIdleCycles_g=2 -gOrder_g=4 -gRatio_g=6 -gDiffDelay_g=2 -gAutoGainCorr_g=False -gInFile_g=input.txt -gOutFile_g=output_o4_r6_dd2_gcFalse.txt -gDataDir_g=$dataDir -gIdleCycles_g=0" \
-						"-gInIdleCycles_g=2 -gOutIdleCycles_g=0 -gOrder_g=4 -gRatio_g=6 -gDiffDelay_g=2 -gAutoGainCorr_g=False -gInFile_g=input.txt -gOutFile_g=output_o4_r6_dd2_gcFalse.txt -gDataDir_g=$dataDir -gIdleCycles_g=0" \
-						"-gInIdleCycles_g=2 -gOutIdleCycles_g=20 -gOrder_g=3 -gRatio_g=10 -gDiffDelay_g=1 -gAutoGainCorr_g=True -gInFile_g=input.txt -gOutFile_g=output_o3_r10_dd1_gcTrue.txt -gDataDir_g=$dataDir -gIdleCycles_g=0"
+tb_run_add_arguments 	"-gInIdleCycles_g=0 -gOutIdleCycles_g=0 -gOrder_g=3 -gRatio_g=10 -gDiffDelay_g=1 -gAutoGainCorr_g=True -gInFile_g=input.txt -gOutFile_g=output_o3_r10_dd1_gcTrue.txt -gDataDir_g=$dataDir" \
+						"-gInIdleCycles_g=0 -gOutIdleCycles_g=0 -gOrder_g=4 -gRatio_g=9 -gDiffDelay_g=2 -gAutoGainCorr_g=True -gInFile_g=input.txt -gOutFile_g=output_o4_r9_dd2_gcTrue.txt -gDataDir_g=$dataDir" \
+						"-gInIdleCycles_g=0 -gOutIdleCycles_g=0 -gOrder_g=4 -gRatio_g=6 -gDiffDelay_g=2 -gAutoGainCorr_g=False -gInFile_g=input.txt -gOutFile_g=output_o4_r6_dd2_gcFalse.txt -gDataDir_g=$dataDir" \
+						"-gInIdleCycles_g=20 -gOutIdleCycles_g=2 -gOrder_g=4 -gRatio_g=6 -gDiffDelay_g=2 -gAutoGainCorr_g=False -gInFile_g=input.txt -gOutFile_g=output_o4_r6_dd2_gcFalse.txt -gDataDir_g=$dataDir" \
+						"-gInIdleCycles_g=2 -gOutIdleCycles_g=0 -gOrder_g=4 -gRatio_g=6 -gDiffDelay_g=2 -gAutoGainCorr_g=False -gInFile_g=input.txt -gOutFile_g=output_o4_r6_dd2_gcFalse.txt -gDataDir_g=$dataDir" \
+						"-gInIdleCycles_g=2 -gOutIdleCycles_g=20 -gOrder_g=3 -gRatio_g=10 -gDiffDelay_g=1 -gAutoGainCorr_g=True -gInFile_g=input.txt -gOutFile_g=output_o3_r10_dd1_gcTrue.txt -gDataDir_g=$dataDir"
 add_tb_run
 
 create_tb_run "psi_fix_dds_18b_tb"
@@ -183,19 +183,19 @@ add_tb_run
 create_tb_run "psi_fix_cordic_vect_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_cordic_vect_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_cordic_vect_tb/Data"]
-tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound, -gSat_g=PsiFixSat, -gMode_g=PIPELINED" \
-						"-gFileFolder_g=$dataDir -gGainComp_g=false -gRound_g=PsiFixTrunc, -gSat_g=PsiFixWrap, -gMode_g=PIPELINED" \
-						"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound, -gSat_g=PsiFixSat, -gMode_g=SERIAL" \
-						"-gFileFolder_g=$dataDir -gGainComp_g=false -gRound_g=PsiFixTrunc, -gSat_g=PsiFixWrap, -gMode_g=SERIAL"
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound -gSat_g=PsiFixSat -gMode_g=PIPELINED" \
+						"-gFileFolder_g=$dataDir -gGainComp_g=false -gRound_g=PsiFixTrunc -gSat_g=PsiFixWrap -gMode_g=PIPELINED" \
+						"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound -gSat_g=PsiFixSat -gMode_g=SERIAL" \
+						"-gFileFolder_g=$dataDir -gGainComp_g=false -gRound_g=PsiFixTrunc -gSat_g=PsiFixWrap -gMode_g=SERIAL"
 add_tb_run
 
 create_tb_run "psi_fix_cordic_rot_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_cordic_rot_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_cordic_rot_tb/Data"]
-tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound, -gSat_g=PsiFixSat, -gMode_g=PIPELINED" \
-						"-gFileFolder_g=$dataDir -gGainComp_g=false -gRound_g=PsiFixTrunc, -gSat_g=PsiFixWrap, -gMode_g=PIPELINED" \
-						"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound, -gSat_g=PsiFixSat, -gMode_g=SERIAL" \
-						"-gFileFolder_g=$dataDir -gGainComp_g=false -gRound_g=PsiFixTrunc, -gSat_g=PsiFixWrap, -gMode_g=SERIAL"
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound -gSat_g=PsiFixSat -gMode_g=PIPELINED" \
+						"-gFileFolder_g=$dataDir -gGainComp_g=false -gRound_g=PsiFixTrunc -gSat_g=PsiFixWrap -gMode_g=PIPELINED" \
+						"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound -gSat_g=PsiFixSat -gMode_g=SERIAL" \
+						"-gFileFolder_g=$dataDir -gGainComp_g=false -gRound_g=PsiFixTrunc -gSat_g=PsiFixWrap -gMode_g=SERIAL"
 add_tb_run
 
 create_tb_run "psi_fix_pol2cart_approx_tb"
