@@ -17,8 +17,6 @@ library ieee;
 	use ieee.numeric_std.all;
 	use ieee.math_real.all;
 
-	
-library work;
 	use work.psi_fix_pkg.all;
 
 ------------------------------------------------------------------------------
