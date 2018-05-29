@@ -6,7 +6,7 @@ import unittest
 # Modelsim
 ##################################
 os.chdir("../sim")
-os.system("vsim -batch -do ci.do")
+os.system("vsim -batch -do ci.do -logfile transcript.transcript")
 
 with open("Transcript.transcript") as f:
 	content = f.read()
