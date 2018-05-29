@@ -12,8 +12,8 @@ library ieee;
 	use ieee.numeric_std.all;
 	use ieee.math_real.all;
 
-library work;
-	use work.psi_common_math_pkg.all;
+library psi_common;
+	use psi_common.psi_common_math_pkg.all;
 	use work.psi_fix_pkg.all;
 	
 ------------------------------------------------------------------------------
@@ -138,7 +138,7 @@ begin
 	--------------------------------------------------------------------------
 	-- Component Instantiation
 	--------------------------------------------------------------------------		
-	i_del : entity work.psi_common_delay
+	i_del : entity psi_common.psi_common_delay
 		generic map (
 			Width_g			=> PsiFixSize(InFmt_g),
 			Delay_g			=> Taps_g,
