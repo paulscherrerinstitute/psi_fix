@@ -99,11 +99,12 @@ begin
 	begin
 		
 		-- Check
-		check_textfile_content(	Clk			=> Clk,
-								Rdy			=> PsiTextfile_SigUnused,
-								Vld			=> OutVld,
-								Data(0)		=> OutData,
-								Filepath	=> StimuliDir_g & "/response.txt");
+		check_textfile_content(	Clk				=> Clk,
+								Rdy				=> PsiTextfile_SigUnused,
+								Vld				=> OutVld,
+								Data(0)			=> OutData,
+								Filepath		=> StimuliDir_g & "/response.txt",
+								SignedCompare	=> OutFmt_c.S = 1);
 		
 		-- Finish
 		wait;
