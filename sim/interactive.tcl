@@ -10,3 +10,4 @@ init
 
 #Configure
 source ./config.tcl
+compile_files -all -clean

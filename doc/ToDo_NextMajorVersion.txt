@@ -1,0 +1,1 @@
+- Extract Cordic Rot and Cordic Vect kernel into separate entity (to allow other cordic calculations such as Sqrt/x^2/etc. using them)
