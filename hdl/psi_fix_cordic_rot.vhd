@@ -34,7 +34,7 @@ entity psi_fix_cordic_rot is
 		GainComp_g				: boolean		:= False;		--						$$ export=true $$
 		Round_g 				: PsiFixRnd_t	:= PsiFixTrunc;	--						$$ export=true $$
 		Sat_g					: PsiFixSat_t	:= PsiFixWrap;	--						$$ export=true $$
-		Mode_g					: string		:= "SERIAL"	-- PIPELINED or SERIAL	$$ export=true $$
+		Mode_g					: string		:= "PIPELINED"	-- PIPELINED or SERIAL	$$ export=true $$
 	);
 	port (
 		-- Control Signals

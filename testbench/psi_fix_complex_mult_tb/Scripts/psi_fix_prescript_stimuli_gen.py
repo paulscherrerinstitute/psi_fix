@@ -20,7 +20,7 @@ from scipy import signal, misc
 import os
 
 STIM_DIR = os.path.dirname(os.path.abspath(__file__)) + "/../Data"
-PLOT_ON = False
+PLOT_ON = True
 
 try:
     os.mkdir(STIM_DIR)

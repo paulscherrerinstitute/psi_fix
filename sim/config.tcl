@@ -41,6 +41,7 @@ add_sources "../hdl" {
 	psi_fix_complex_mult.vhd \
 	psi_fix_mov_avg.vhd \
 	psi_fix_demod_real2cplx.vhd \
+	psi_fix_mod_cplx2real.vhd \
 } -tag src
 
 # testbenches
@@ -67,6 +68,7 @@ add_sources "../testbench" {
 	psi_fix_complex_mult_tb/psi_fix_complex_mult_tb.vhd \
 	psi_fix_mov_avg_tb/psi_fix_mov_avg_tb.vhd \
 	psi_fix_demod_real2cplx_tb/psi_fix_demod_real2cplx_tb.vhd \
+	psi_fix_mod_cplx2real_tb/psi_fix_mod_cplx2real_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -173,6 +175,11 @@ set dataDir [file normalize "../testbench/psi_fix_demod_real2cplx_tb/Data"]
 tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gDutyCycle_g=1 -gGainCorr_g=NONE" \
 						"-gFileFolder_g=$dataDir -gDutyCycle_g=5 -gGainCorr_g=EXACT"
 add_tb_run
+
+create_tb_run "psi_fix_mod_cplx2real_tb"
+tb_run_add_pre_script "python3" "psi_fix_mod_cplx2real_app.py" "../testbench/psi_fix_mod_cplx2real_tb/Scripts"
+add_tb_run
+
 
 
 
