@@ -51,12 +51,24 @@ class psi_fix_lin_approx:
                         gradFmt=PsiFixFmt(1,3,8),
                         points=2048,
                         name="sin18b")
-        all = [Sin18Bit]
+        Sqrt18Bit = psi_fix_lin_cfg_settings(
+                        function=lambda x: np.sqrt(x), #Prevent +1 from occurring
+                        inFmt=PsiFixFmt(0,0,20),
+                        outFmt=PsiFixFmt(0,0,17),
+                        offsFmt=PsiFixFmt(0,0,19),
+                        gradFmt=PsiFixFmt(0,0,10),
+                        points=512,
+                        name="sqrt18b",
+                        validRange=(0.25,(1-(2**-17))**2))
+        all = [Sin18Bit, Sqrt18Bit]
 
     #Config Methods for MATLAB Compatibility
     @classmethod
     def ConfigSin18Bit(cls):
         return psi_fix_lin_approx.CONFIGS.Sin18Bit
+    @classmethod
+    def ConfigSqrt18Bit(cls):
+        return psi_fix_lin_approx.CONFIGS.Sqrt18Bit
 
     @classmethod
     def Design(cls, cfg : psi_fix_lin_cfg_settings, simPoints : int = 100000, simRange : tuple = None):
@@ -258,6 +270,10 @@ class psi_fix_lin_approx:
                 f.writelines([str(i) + "\n" for i in PsiFixGetBitsAsInt(input, self.cfg.inFmt)])
             with open(path + "/" + "response.txt", "w+") as f:
                 f.writelines([str(i) + "\n" for i in PsiFixGetBitsAsInt(actualOut, self.cfg.outFmt)])
+
+#*** Uncomment to design filter ***
+#psi_fix_lin_approx.Design(psi_fix_lin_approx.CONFIGS.Sqrt18Bit)
+#exit()
 
 #Generate all Code if executed as Main
 if __name__ == "__main__":

@@ -33,6 +33,7 @@ add_sources "../hdl" {
 	psi_fix_lin_approx_calc.vhd \
 	psi_fix_lin_approx_sin18b.vhd \
 	psi_fix_lin_approx_sin18b_dual.vhd \
+	psi_fix_lin_approx_sqrt18b.vhd \
 	psi_fix_cic_dec_fix_1ch.vhd \
 	psi_fix_cic_int_fix_1ch.vhd \
 	psi_fix_bin_div.vhd \
@@ -52,6 +53,7 @@ add_sources "../testbench" {
 	psi_fix_cordic_abs_pl_tb/psi_fix_cordic_abs_pl_tb.vhd \
 	psi_fix_lin_approx_tb/sin18b/psi_fix_lin_approx_sin18b_tb.vhd \
 	psi_fix_lin_approx_tb/sin18b/psi_fix_lin_approx_sin18b_dual_tb.vhd \
+	psi_fix_lin_approx_tb/sqrt18b/psi_fix_lin_approx_sqrt18b_tb.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb_case0_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb_case1_pkg.vhd \
@@ -94,6 +96,11 @@ add_tb_run
 
 create_tb_run "psi_fix_lin_approx_sin18b_dual_tb"
 set dataDir [file normalize "../testbench/psi_fix_lin_approx_tb/sin18b"]
+tb_run_add_arguments "-gStimuliDir_g=$dataDir"
+add_tb_run
+
+create_tb_run "psi_fix_lin_approx_sqrt18b_tb"
+set dataDir [file normalize "../testbench/psi_fix_lin_approx_tb/sqrt18b"]
 tb_run_add_arguments "-gStimuliDir_g=$dataDir"
 add_tb_run
 
