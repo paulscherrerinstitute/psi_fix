@@ -83,7 +83,7 @@ class psi_fix_lin_approx:
         self.remFmt = PsiFixFmt(0, offsBits - self.cfg.inFmt.F, self.cfg.inFmt.F)
         self.idxFmt = PsiFixFmt(0, self.cfg.inFmt.S + self.cfg.inFmt.I,
                                 self.cfg.inFmt.F - self.remFmt.F - self.remFmt.I)
-        self.intFmt = PsiFixFmt(max(self.remFmt.S, self.cfg.gradFmt.S), self.remFmt.I + self.cfg.gradFmt.I + 1,
+        self.intFmt = PsiFixFmt(1, self.remFmt.I + self.cfg.gradFmt.I + 1,
                                 self.remFmt.F + self.cfg.gradFmt.F)
         self.addFmt = PsiFixFmt(max(self.intFmt.S, self.cfg.offsFmt.S), max(self.intFmt.I, self.cfg.offsFmt.I)+1, max(self.intFmt.F, self.cfg.offsFmt.F))
         #Calculate tables

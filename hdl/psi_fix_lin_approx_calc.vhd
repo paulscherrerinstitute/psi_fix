@@ -53,7 +53,7 @@ architecture rtl of psi_fix_lin_approx_calc is
 	constant RemFmt_c		: PsiFixFmt_t		:= (0, OffsetBits_c-InFmt_g.F, InFmt_g.F);
 	constant RemFmtSigned_c	: PsiFixFmt_t		:= (1, RemFmt_c.I-1, RemFmt_c.F);
 	constant IdxFmt_c		: PsiFixFmt_t		:= (0, InFmt_g.S + InFmt_g.I, InFmt_g.F - RemFmt_c.F - RemFmt_c.I);
-	constant IntFmt_c		: PsiFixFmt_t		:= (max(RemFmt_c.S, GradFmt_g.S), RemFmt_c.I + GradFmt_g.I + 1, RemFmt_c.F + GradFmt_g.F);
+	constant IntFmt_c		: PsiFixFmt_t		:= (1, RemFmt_c.I + GradFmt_g.I + 1, RemFmt_c.F + GradFmt_g.F);
 	constant AddFmt_c		: PsiFixFmt_t		:= (max(IntFmt_c.S, OffsFmt_g.S), max(IntFmt_c.I, OffsFmt_g.I)+1, max(IntFmt_c.F, OffsFmt_g.F));
 	
 	subtype OffsRng_c is natural range PsiFixSize(OffsFmt_g)-1 downto 0;
