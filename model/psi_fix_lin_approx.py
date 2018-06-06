@@ -24,7 +24,12 @@ class psi_fix_lin_cfg_settings:
                  offsFmt: PsiFixFmt,
                  gradFmt: PsiFixFmt,
                  points: int,
-                 name : str):
+                 name : str,
+                 validRange : tuple = (0, np.inf)):
+        self.validRange = (max(validRange[0], PsiFixLowerBound(inFmt)),
+                           min(validRange[1], PsiFixUpperBound(inFmt)))
+       # if validRange is None:
+       #     self.validRange = (PsiFixLowerBound(inFmt), PsiFixUpperBound(inFmt))
         self.function = function
         self.inFmt = inFmt
         self.outFmt = outFmt
@@ -96,12 +101,17 @@ class psi_fix_lin_approx:
         gradients = derivative(self.cfg.function, centers, dx=1e-6)
         offsets = self.cfg.function(centers)
         if designMode:
-            print("gradients: {} ... {}".format(min(gradients), max(gradients)))
-            print("offsets: {} ... {}".format(min(offsets), max(offsets)))
+            minIdx = self._GetTblIdx(cfg.validRange[0])
+            maxIdx = self._GetTblIdx(cfg.validRange[1])
+            print("gradients: {} ... {}".format(min(gradients[minIdx:maxIdx+1]), max(gradients[minIdx:maxIdx+1])))
+            print("offsets: {} ... {}".format(min(offsets[minIdx:maxIdx+1]), max(offsets[minIdx:maxIdx+1])))
             print("table memory width: {}".format(PsiFixSize(self.cfg.offsFmt)+PsiFixSize(self.cfg.gradFmt)))
-        self.gradTable = PsiFixFromReal(gradients, self.cfg.gradFmt)
-        self.offsTable = PsiFixFromReal(offsets, self.cfg.offsFmt)
+        self.gradTable = PsiFixFromReal(gradients, self.cfg.gradFmt, errSat=False)
+        self.offsTable = PsiFixFromReal(offsets, self.cfg.offsFmt, errSat=False)
 
+    #Helper function to get the table index for a given input value
+    def _GetTblIdx(self, inp):
+        return PsiFixGetBitsAsInt(PsiFixResize(inp, self.cfg.inFmt, self.idxFmt), self.idxFmt)
 
     def Approximate(self, inp):
         """
@@ -110,7 +120,7 @@ class psi_fix_lin_approx:
         :return:    Output from the approximation
         """
         inp = PsiFixFromReal(inp, self.cfg.inFmt)
-        tblIdx = PsiFixGetBitsAsInt(PsiFixResize(inp, self.cfg.inFmt, self.idxFmt), self.idxFmt)
+        tblIdx = self._GetTblIdx(inp)
         tblRem = PsiFixResize(inp, self.cfg.inFmt, self.remFmt)-2**(self.remFmt.I-1) #Invert MSB to have signed offset
         offsVal = self.offsTable[tblIdx]
         grad = self.gradTable[tblIdx]
@@ -134,7 +144,7 @@ class psi_fix_lin_approx:
         """
         #Run test
         if simRange is None:
-            simRange = (PsiFixLowerBound(self.cfg.inFmt), PsiFixUpperBound(self.cfg.inFmt))
+            simRange = self.cfg.validRange
         input = PsiFixFromReal(np.linspace(simRange[0], simRange[1], simPoints), self.cfg.inFmt)
         actualOut = self.Approximate(input)
         expectedOut = self.cfg.function(input)
@@ -220,7 +230,7 @@ class psi_fix_lin_approx:
 
             # Run test
             if simRange is None:
-                simRange = (PsiFixLowerBound(self.cfg.inFmt), PsiFixUpperBound(self.cfg.inFmt))
+                simRange = self.cfg.validRange
             input = PsiFixFromReal(np.linspace(simRange[0], simRange[1], simPoints), self.cfg.inFmt)
             actualOut = self.Approximate(input)
 
