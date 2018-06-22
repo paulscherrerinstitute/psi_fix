@@ -21,13 +21,13 @@ use work.psi_fix_pkg.all;
 ------------------------------------------------------------
 -- Entity Declaration
 ------------------------------------------------------------
-entity psi_fix_mod_real2cplx_tb is 
+entity psi_fix_mod_cplx2real_tb is 
 	generic(FileFolder_g : string    := "../testbench/psi_fix_mod_cplx2real_tb/Data";
 	        FreqClock_g  : real      := 100.0e6;
 	        RstPol_g     : std_logic := '1');
 end entity;
 
-architecture tb of psi_fix_mod_real2cplx_tb is
+architecture tb of psi_fix_mod_cplx2real_tb is
 	-- Format definition
 	constant InFixFmt_c    		: PsiFixFmt_t := (1, 1, 15); --same as python model
 	constant CoefFixFmt_c 		: PsiFixFmt_t := (1, 1, 23); --same as python model
