@@ -29,7 +29,7 @@ entity psi_fix_cordic_rot is
 		InAngleFmt_g			: PsiFixFmt_t	:= (0, 0, 15);	-- Must be unsigned		$$ constant=(0,0,15) $$
 		OutFmt_g				: PsiFixFmt_t	:= (1, 2, 16);	-- Usually signed		$$ constant=(1,2,16) $$
 		InternalFmt_g			: PsiFixFmt_t	:= (1, 2, 22);	-- Must be signed		$$ constant=(1,2,22) $$
-		AngleIntFmt_g			: PsiFixFmt_t	:= (1, 0, 18);	-- Must be (1, -2, x)	$$ constant=(1,-2,23) $$
+		AngleIntFmt_g			: PsiFixFmt_t	:= (1, -2, 18);	-- Must be (1, -2, x)	$$ constant=(1,-2,23) $$
 		Iterations_g			: natural		:= 13;			--						$$ constant=21 $$
 		GainComp_g				: boolean		:= False;		--						$$ export=true $$
 		Round_g 				: PsiFixRnd_t	:= PsiFixTrunc;	--						$$ export=true $$
