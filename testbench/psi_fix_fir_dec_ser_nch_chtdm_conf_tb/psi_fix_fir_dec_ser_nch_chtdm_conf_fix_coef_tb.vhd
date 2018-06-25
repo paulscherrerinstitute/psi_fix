@@ -12,11 +12,11 @@ library ieee;
 library std;
 	use std.textio.all;
 
-library psi_tb;
-library psi_common;
-	use psi_tb.psi_tb_txt_util.all;
+library work;
+library work;
+	use work.psi_tb_txt_util.all;
 	use work.psi_fix_pkg.all;
-	use psi_common.psi_common_array_pkg.all;
+	use work.psi_common_array_pkg.all;
 
 entity psi_fix_fir_dec_ser_nch_chtdm_conf_fix_coef_tb is
 end entity psi_fix_fir_dec_ser_nch_chtdm_conf_fix_coef_tb;

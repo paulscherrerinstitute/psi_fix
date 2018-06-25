@@ -12,8 +12,8 @@ library ieee;
 	use ieee.numeric_std.all;
 	use ieee.math_real.all;
 
-library psi_common;
-	use psi_common.psi_common_math_pkg.all;
+library work;
+	use work.psi_common_math_pkg.all;
 	use work.psi_fix_pkg.all;
 	
 ------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ architecture rtl of psi_fix_mov_avg is
 	-- Formats
 	constant DiffFmt_c			: PsiFixFmt_t		:= (1, InFmt_g.I+1, InFmt_g.F);
 	constant SumFmt_c			: PsiFixFmt_t		:= (1, InFmt_g.I+AdditionalBits_c, InFmt_g.F);
-	constant GcInFmt_c			: PsiFixFmt_t		:= (1, InFmt_g.I, psi_common.psi_common_math_pkg.min(24-InFmt_g.I, SumFmt_c.F+AdditionalBits_c));
+	constant GcInFmt_c			: PsiFixFmt_t		:= (1, InFmt_g.I, work.psi_common_math_pkg.min(24-InFmt_g.I, SumFmt_c.F+AdditionalBits_c));
 	constant GcCoefFmt_c		: PsiFixFmt_t		:= (0, 1, 16);
 	
 	-- Gain correction coefficient calculation
@@ -138,7 +138,7 @@ begin
 	--------------------------------------------------------------------------
 	-- Component Instantiation
 	--------------------------------------------------------------------------		
-	i_del : entity psi_common.psi_common_delay
+	i_del : entity work.psi_common_delay
 		generic map (
 			Width_g			=> PsiFixSize(InFmt_g),
 			Delay_g			=> Taps_g,

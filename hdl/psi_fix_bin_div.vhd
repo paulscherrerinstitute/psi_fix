@@ -12,10 +12,10 @@ library ieee;
 	
 use work.psi_fix_pkg.all;
 		
-library psi_common;
+library work;
 
-	use psi_common.psi_common_logic_pkg.all;
-	use psi_common.psi_common_math_pkg.all;
+	use work.psi_common_logic_pkg.all;
+	use work.psi_common_math_pkg.all;
 	
 ------------------------------------------------------------------------------
 -- Entity Declaration

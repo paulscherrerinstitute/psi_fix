@@ -6,9 +6,9 @@ library ieee;
 	use ieee.numeric_std.all;
 	use ieee.math_real.all;
 	
-library psi_common;
-	use psi_common.psi_common_math_pkg.all;
-	use psi_common.psi_common_logic_pkg.all;
+library work;
+	use work.psi_common_math_pkg.all;
+	use work.psi_common_logic_pkg.all;
 
 ------------------------------------------------------------------------------
 -- Package Header

@@ -7,9 +7,9 @@ library ieee;
 	use ieee.numeric_std.all;
 	use ieee.math_real.all;
 	
-library psi_common;
-	use psi_common.psi_common_array_pkg.all;
-	use psi_common.psi_common_math_pkg.all;
+library work;
+	use work.psi_common_array_pkg.all;
+	use work.psi_common_math_pkg.all;
 	use work.psi_fix_pkg.all;
 
 ------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ architecture rtl of psi_fix_cic_int_fix_1ch is
 	constant DiffFmt_c				: PsiFixFmt_t		:= (InFmt_g.S, InFmt_g.I+Order_g+1, InFmt_g.F);
 	constant AccuFmt_c				: PsiFixFmt_t		:= (InFmt_g.S, InFmt_g.I+CicAddBits_c, InFmt_g.F);
 	constant ShiftInFmt_c			: PsiFixFmt_t		:= (InFmt_g.S, InFmt_g.I, InFmt_g.F+CicAddBits_c);
-	constant GcInFmt_c				: PsiFixFmt_t		:= (1, OutFmt_g.I, psi_common.psi_common_math_pkg.min(24-OutFmt_g.I, ShiftInFmt_c.F));
+	constant GcInFmt_c				: PsiFixFmt_t		:= (1, OutFmt_g.I, work.psi_common_math_pkg.min(24-OutFmt_g.I, ShiftInFmt_c.F));
 	constant ShiftOutFmt_c			: PsiFixFmt_t		:= (InFmt_g.S, InFmt_g.I, choose(AutoGainCorr_g, GcInFmt_c.F, OutFmt_g.F)+1);
 	constant GcCoefFmt_c			: PsiFixFmt_t		:= (0, 1, 16);
 	constant Gc_c					: std_logic_vector(PsiFixSize(GcCoefFmt_c)-1 downto 0) := PsiFixFromReal(2.0**real(CicAddBits_c)/real(CicGain_c), GcCoefFmt_c);

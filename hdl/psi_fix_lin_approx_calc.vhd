@@ -11,9 +11,9 @@ library ieee;
 	use ieee.std_logic_1164.all;
 	use ieee.numeric_std.all;
 	
-library psi_common;
+library work;
 	use work.psi_fix_pkg.all;
-	use psi_common.psi_common_math_pkg.all;
+	use work.psi_common_math_pkg.all;
 	
 ------------------------------------------------------------------------------
 -- Entity Declaration

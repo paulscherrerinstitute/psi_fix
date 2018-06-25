@@ -14,10 +14,10 @@ library ieee;
 	use ieee.numeric_std.all;
 	use ieee.math_real.all;
 	
-library psi_common;
+library work;
 	use work.psi_fix_pkg.all;
-	use psi_common.psi_common_array_pkg.all;
-	use psi_common.psi_common_math_pkg.all;
+	use work.psi_common_array_pkg.all;
+	use work.psi_common_math_pkg.all;
 	
 ------------------------------------------------------------------------------
 -- Entity Declaration

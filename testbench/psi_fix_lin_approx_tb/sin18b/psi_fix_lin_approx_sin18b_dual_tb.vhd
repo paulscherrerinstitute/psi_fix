@@ -8,11 +8,11 @@ library ieee;
 library std;
 	use std.textio.all;
 	
-library psi_tb;
-library psi_common;
+library work;
+library work;
 	use work.psi_fix_pkg.all;
-	use psi_common.psi_common_math_pkg.all;
-	use psi_tb.psi_tb_textfile_pkg.all;	
+	use work.psi_common_math_pkg.all;
+	use work.psi_tb_textfile_pkg.all;	
 	
 ------------------------------------------------------------------------------
 -- Entity Declaration

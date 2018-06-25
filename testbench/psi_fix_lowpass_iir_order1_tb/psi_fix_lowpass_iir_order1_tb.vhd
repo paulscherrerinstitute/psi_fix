@@ -11,9 +11,9 @@ library ieee;
 	use ieee.numeric_std.all;
 	use ieee.math_real.all;
 
-library psi_tb;
+library work;
 	use work.psi_fix_pkg.all;
-	use psi_tb.psi_tb_textfile_pkg.all;
+	use work.psi_tb_textfile_pkg.all;
 
 ------------------------------------------------------------
 -- Entity Declaration

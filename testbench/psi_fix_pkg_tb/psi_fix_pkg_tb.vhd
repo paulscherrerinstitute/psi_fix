@@ -5,9 +5,9 @@ library ieee;
 	use ieee.std_logic_1164.all;
 	use ieee.numeric_std.all;
 	
-library psi_tb;
+library work;
 	use work.psi_fix_pkg.all;
-	use psi_tb.psi_tb_txt_util.all;
+	use work.psi_tb_txt_util.all;
 	
 
 entity psi_fix_pkg_tb is
