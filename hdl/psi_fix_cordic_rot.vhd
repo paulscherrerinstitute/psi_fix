@@ -251,7 +251,6 @@ begin
 		InRdy <= not XinVld;
 	
 		p_cordic_serial : process(Clk)
-			variable Xshifted, Yshifted : std_logic_vector(PsiFixSize(InternalFmt_g)-1 downto 0);
 		begin		
 			if rising_edge(Clk) then
 				if Rst = '1' then

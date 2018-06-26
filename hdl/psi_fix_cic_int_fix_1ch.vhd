@@ -84,7 +84,6 @@ architecture rtl of psi_fix_cic_int_fix_1ch is
 		OutVld		: std_logic;
 	end record;	
 	signal r, r_next : two_process_r;
-	signal DbgOutRdyV : std_logic;
 
 begin
 	--------------------------------------------------------------------------
@@ -111,7 +110,7 @@ begin
 		else
 			OutRdy_v := '0';
 		end if;
-		DbgOutRdyV <= OutRdy_v;
+
 		-- Input Rdy
 		if r.Rcnt = 0 or (r.Rcnt = 1 and OutRdy_v = '1') then 
 			InRdy_v := '1';
