@@ -20,7 +20,7 @@ from scipy import signal, misc
 import os
 
 STIM_DIR = os.path.dirname(os.path.abspath(__file__)) + "/../Data"
-PLOT_ON = True
+PLOT_ON = False
 
 try:
     os.mkdir(STIM_DIR)
@@ -31,7 +31,7 @@ N = 8192  # N samples
 M = 256  #
 w0 = 2 / 5 * np.pi
 N0 = 0.1
-scale = np.full((1, N),(2**(16-1)-1))
+scale = np.full((1, N),(2**(16-1)-1), dtype='float64')
 sample = np.arange(0, N)
 
 s = np.cos(w0 * np.arange(N))   # source
@@ -111,8 +111,8 @@ if PLOT_ON:
     ax4.plot(rotQua,rotInp,'r+',label='rotation data')
     ax4.legend(loc=2)
 
-decim10Inp = signal.decimate(rotInp, 2, ftype='fir', zero_phase=True)
-decim10Qua = signal.decimate(rotQua, 2, ftype='fir', zero_phase=True)
+decim10Inp = signal.decimate(rotInp, 2, ftype='fir')
+decim10Qua = signal.decimate(rotQua, 2, ftype='fir')
 
 if PLOT_ON:
     fig3 = plt.figure()

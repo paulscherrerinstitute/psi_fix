@@ -15,14 +15,11 @@ from psi_fix_pkg import *
 
 class psi_fix_complex_mult:
     def __init__(self, inFmt: PsiFixFmt, outFmt: PsiFixFmt,
-                 coefFmt: PsiFixFmt, internalFmt: PsiFixFmt,
-                 round: PsiFixRnd, sat: PsiFixSat):
+                 coefFmt: PsiFixFmt, internalFmt: PsiFixFmt):
         self.inFmt = inFmt
         self.outFmt = outFmt
         self.coefFmt = coefFmt
         self.internalFmt = internalFmt
-        self.round = round
-        self.sat = sat
 
     def Process(self, ipath_i, qpath_i,
                 i1_i, i2_i, q1_i, q2_i):
@@ -38,22 +35,22 @@ class psi_fix_complex_mult:
 
         # process calculation
         rotInp1 = PsiFixMult(datInp, self.inFmt, coefI1, self.coefFmt,
-                             self.internalFmt, self.round, self.sat)
+                             self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
         rotInp2 = PsiFixMult(datQua, self.inFmt, coefI2, self.coefFmt,
-                             self.internalFmt, self.round, self.sat)
+                             self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
 
         rotQua1 = PsiFixMult(datInp, self.inFmt, coefQ1, self.coefFmt,
-                             self.internalFmt, self.round, self.sat)
+                             self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
         rotQua2 = PsiFixMult(datQua, self.inFmt, coefQ2, self.coefFmt,
-                             self.internalFmt, self.round, self.sat)
+                             self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
 
         sumInp = PsiFixSub(rotInp1, self.internalFmt, rotInp2, self.internalFmt,
-                           self.internalFmt, self.round, self.sat)
+                           self.internalFmt, PsiFixRnd.Round, PsiFixSat.Sat)
 
         sumQua = PsiFixAdd(rotQua1, self.internalFmt, rotQua2, self.internalFmt,
-                           self.internalFmt, self.round, self.sat)
+                           self.internalFmt, PsiFixRnd.Round, PsiFixSat.Sat)
 
-        outInp = PsiFixResize(sumInp, self.internalFmt, self.outFmt, self.round, self.sat)
-        outQua = PsiFixResize(sumQua, self.internalFmt, self.outFmt, self.round, self.sat)
+        outInp = PsiFixResize(sumInp, self.internalFmt, self.outFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+        outQua = PsiFixResize(sumQua, self.internalFmt, self.outFmt, PsiFixRnd.Round, PsiFixSat.Sat)
 
         return outInp, outQua
