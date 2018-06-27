@@ -31,7 +31,7 @@ entity psi_fix_complex_mult is
 	generic(RstPol_g      : std_logic   := '0'; -- set reset polarity
 	        Pipeline_g    : boolean     := false; -- when false 3 pipes stages, when false 6 pipes (increase Fmax)
 	        InFixFmt_g    : PsiFixFmt_t := (1, 0, 15); -- Input Fixed Point format 
-	        InternalFmt_g : PsiFixFmt_t := (1, 0, 15); -- Internal Calc. Fixed Point format
+	        InternalFmt_g : PsiFixFmt_t := (1, 0, 24); -- Internal Calc. Fixed Point format
 	        CoefFixFmt_g  : PsiFixFmt_t := (1, 0, 24); -- Matrix Coef Fixed Point format
 	        OutFmt_g      : PsiFixFmt_t := (1, 0, 24)); -- Output Fixed Point format
 	port(clk_i   : in  std_logic;       -- clk 
@@ -115,19 +115,19 @@ begin
 
 						rot_inp1_s <= PsiFixMult(ipath_i, InFixFmt_g,
 						                         coef_i1_cmd_s, CoefFixFmt_g,
-						                         InternalFmt_g, PsiFixRound, PsiFixSat);
+						                         InternalFmt_g, PsiFixTrunc, PsiFixWrap);
 
 						rot_inp2_s <= PsiFixMult(qpath_i, InFixFmt_g,
 						                         coef_i2_cmd_s, CoefFixFmt_g,
-						                         InternalFmt_g, PsiFixRound, PsiFixSat);
+						                         InternalFmt_g, PsiFixTrunc, PsiFixWrap);
 
 						rot_qua1_s <= PsiFixMult(ipath_i, InFixFmt_g,
 						                         coef_q1_cmd_s, CoefFixFmt_g,
-						                         InternalFmt_g, PsiFixRound, PsiFixSat);
+						                         InternalFmt_g, PsiFixTrunc, PsiFixWrap);
 
 						rot_qua2_s <= PsiFixMult(qpath_i, InFixFmt_g,
 						                         coef_q2_cmd_s, CoefFixFmt_g,
-						                         InternalFmt_g, PsiFixRound, PsiFixSat);
+						                         InternalFmt_g, PsiFixTrunc, PsiFixWrap);
 					end if;
 				end if;
 			end if;
@@ -213,16 +213,16 @@ begin
 					-----------------------------------------------------------------
 					rot_inp1_s    <= PsiFixMult(ipath_i, InFixFmt_g,
 					                            coef_i1_cmd_s, CoefFixFmt_g,
-					                            InternalFmt_g, PsiFixRound, PsiFixSat);
+					                            InternalFmt_g, PsiFixTrunc, PsiFixWrap);
 					rot_inp2_s    <= PsiFixMult(qpath_i, InFixFmt_g,
 					                            coef_i2_cmd_s, CoefFixFmt_g,
-					                            InternalFmt_g, PsiFixRound, PsiFixSat);
+					                            InternalFmt_g, PsiFixTrunc, PsiFixWrap);
 					rot_qua1_s    <= PsiFixMult(ipath_i, InFixFmt_g,
 					                            coef_q1_cmd_s, CoefFixFmt_g,
-					                            InternalFmt_g, PsiFixRound, PsiFixSat);
+					                            InternalFmt_g, PsiFixTrunc, PsiFixWrap);
 					rot_qua2_s    <= PsiFixMult(qpath_i, InFixFmt_g,
 					                            coef_q2_cmd_s, CoefFixFmt_g,
-					                            InternalFmt_g, PsiFixRound, PsiFixSat);
+					                            InternalFmt_g, PsiFixTrunc, PsiFixWrap);
 
 				end if;
 			end if;
