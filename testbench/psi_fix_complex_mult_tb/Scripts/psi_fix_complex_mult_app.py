@@ -49,7 +49,7 @@ q2 = np.cos(theta)
 #print(i1, i2, q1, q2)
 
 # call Model rotation matrix
-MatRot = psi_fix_complex_mult(inFmt, outFmt, coefFmt, internalFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+MatRot = psi_fix_complex_mult(inFmt, outFmt, coefFmt, internalFmt)
 rotX, rotY = MatRot.Process(x, y, i1, i2, q1, q2)
 
 #print(np.arctan2(y[0], x[0])*180/np.pi)
