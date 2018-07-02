@@ -202,6 +202,7 @@ begin
 	p_seq : process(Clk)
 	begin	
 		if rising_edge(Clk) then
+			assert Channels_g >= 2 report "###ERROR###: psi_fix_cic_dec_fix_nch_tdm_tdm: Channels_g must be >= 2" severity error;
 			r <= r_next;
 			if Rst = '1' then
 				r.VldAccu	<= (others => '0');	
