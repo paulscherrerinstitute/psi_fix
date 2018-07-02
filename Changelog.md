@@ -1,3 +1,15 @@
+## 1.6.0
+
+* Added Features
+  * Added psi\_fix\_lin\_approx\_sqrt18b (approximation of the square-root function)
+  * Added psi\_fix\_cic\_dec\_fix\_nch\_par\_tdm (multi-channel CIC filter with parallel input and TDM output)
+  * Added psi\_fix\_cic\_dec\_fix\_nch\_tdm\_tdm (multi-channel CIC filter with TDM input and output)
+* Bugfixes
+  * Fixed bugs in psi\_fix\_lin\_approx that prevented the sqrt approximation from working. These issues do not affect the existing approximation (sine).
+  * Fixed meismatch between model and implementation for psi\_fix\_complex\_mult
+* Changed Dependencies
+  * psi\_common >= 1.9.0
+
 ## 1.5.1
 
 * Added Features
