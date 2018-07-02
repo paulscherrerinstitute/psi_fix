@@ -61,7 +61,7 @@ for cfg in configs:
     if PLOT_ON:
         plt.plot(20*np.log10(abs(outp0)))
         plt.show()
-    outSig.append((outp0, outp1, outp1))
+    outSig.append((outp0, outp1, outp2))
     inSig.append((inSig0, inSig1, inSig2))
 
 
@@ -71,7 +71,7 @@ for cfg in configs:
 for nr, sig in enumerate(inSig):
     cfg = configs[nr]
     with open(STIM_DIR + "/input_o{}_r{}_dd{}_gc{}.txt".format(cfg.order, cfg.ratio, cfg.diffDel, cfg.gainCorr), "w+") as f:
-        for spl in sig:
+        for spl in zip(sig[0], sig[1], sig[2]):
             f.write("{} {} {}\n".format(PsiFixGetBitsAsInt(spl[0], inFmt),
                                         PsiFixGetBitsAsInt(spl[1], inFmt),
                                         PsiFixGetBitsAsInt(spl[2], inFmt)))
@@ -79,9 +79,9 @@ for nr, sig in enumerate(inSig):
 for nr, sig in enumerate(outSig):
     cfg = configs[nr]
     with open(STIM_DIR + "/output_o{}_r{}_dd{}_gc{}.txt".format(cfg.order, cfg.ratio, cfg.diffDel, cfg.gainCorr), "w+") as f:
-        for spl in sig:
-            f.write("{}\n".format(PsiFixGetBitsAsInt(spl[0], outFmt),
-                                  PsiFixGetBitsAsInt(spl[1], outFmt),
-                                  PsiFixGetBitsAsInt(spl[2], outFmt)))
+        for spl in zip(sig[0], sig[1], sig[2]):
+            f.write("{} {} {}\n".format(PsiFixGetBitsAsInt(spl[0], outFmt),
+                                        PsiFixGetBitsAsInt(spl[1], outFmt),
+                                        PsiFixGetBitsAsInt(spl[2], outFmt)))
 
 
