@@ -1,6 +1,6 @@
 --=================================================================
 --	Paul Scherrer Institut <PSI> Villigen, Schweiz
--- 	Copyright ©, 2018, Benoit STEF, all rights reserved 
+-- 	Copyright ï¿½, 2018, Benoit STEF, all rights reserved 
 --=================================================================
 -- unit		: psi_fix_complex_mult(RTL)
 -- file		: psi_fix_complex_mult.vhd
@@ -28,7 +28,7 @@ use ieee.numeric_std.all;
 use work.psi_fix_pkg.all;
 
 entity psi_fix_complex_mult is
-	generic(RstPol_g      : std_logic   := '0'; -- set reset polarity
+	generic(RstPol_g      : std_logic   := '1'; -- set reset polarity
 	        Pipeline_g    : boolean     := false; -- when false 3 pipes stages, when false 6 pipes (increase Fmax)
 	        InFixFmt_g    : PsiFixFmt_t := (1, 0, 15); -- Input Fixed Point format 
 	        InternalFmt_g : PsiFixFmt_t := (1, 0, 24); -- Internal Calc. Fixed Point format
@@ -65,8 +65,8 @@ architecture rtl of psi_fix_complex_mult is
 	signal sum_inp_s, sum_qua_s                      : std_logic_vector(PsiFixSize(InternalFmt_g) - 1 downto 0);
 	signal sum1_dff_s, sum2_dff_s                    : std_logic_vector(PsiFixSize(InternalFmt_g) - 1 downto 0);
 	--process pipeline
-	signal dff0_s, dff1_s, dff2_s                    : std_logic;
-	signal dff3_s, dff4_s, dff5_s                    : std_logic;
+	signal dff0_s, dff1_s, dff2_s                    : std_logic:='0';
+	signal dff3_s, dff4_s, dff5_s                    : std_logic:='0';
 
 	--uncomment to debug 
 	--signal dbg_rot_in_1, dbg_rot_in_2, dbg_rot_qua1, dbg_rot_qua2, dbg_sum_inp, dbg_sum_qua : real;
