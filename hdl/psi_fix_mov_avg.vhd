@@ -22,9 +22,9 @@ library work;
 -- $$ processes=stim,check $$
 entity psi_fix_mov_avg is
 	generic (
-	    InFmt_g 	: PsiFixFmt_t;	-- $$ constant=(1,0,10) $$
-		OutFmt_g 	: PsiFixFmt_t;	-- $$ constant=(1,1,12) $$
-		Taps_g		: positive;		-- $$ constant=7 $$
+	    InFmt_g 	: PsiFixFmt_t:=(1,0,16);	-- $$ constant=(1,0,10) $$
+		OutFmt_g 	: PsiFixFmt_t:=(1,0,16);	-- $$ constant=(1,1,12) $$
+		Taps_g		: positive:=5;		-- $$ constant=7 $$
 	    GainCorr_g	: string		:= "ROUGH";	-- ROUGH, NONE or EXACT $$ export=true $$
 		Round_g		: PsiFixRnd_t	:= PsiFixRound;
 		Sat_g		: PsiFixSat_t	:= PsiFixSat;
@@ -49,6 +49,9 @@ end entity;
 -- Architecture Declaration
 ------------------------------------------------------------------------------
 architecture rtl of psi_fix_mov_avg is
+	--
+	--attribute use_dsp48 : string;
+	--attribute use_dsp48 of rtl : architecture is "yes";
 
 	-- Constants
 	constant Gain_c				: integer			:= Taps_g;

@@ -56,6 +56,7 @@ end entity;
 -- Architecture Declaration
 ------------------------------------------------------------------------------
 architecture rtl of psi_fix_cordic_vect is
+	
 
 	-- *** Constants ***
 	constant AngleTableReal_c : t_areal(0 to 31)	:= (0.125, 				0.0737918088252,	0.0389895651887,	0.0197917120803,
@@ -178,6 +179,10 @@ begin
 		signal Z		: AngArr_t(0 to Iterations_g);
 		signal Vld		: std_logic_vector(0 to Iterations_g);
 		signal Quad		: t_aslv2(0 to Iterations_g);
+		--attribute use_dsp48 : string;
+    	--attribute use_dsp48 of X : signal is "yes";
+    	--attribute use_dsp48 of Y : signal is "yes";
+    	--attribute use_dsp48 of Z : signal is "yes";
 	begin
 		-- Pipelined implementation can take a sample every clock cycle
 		InRdy <= '1';
