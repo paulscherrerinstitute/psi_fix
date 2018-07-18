@@ -34,7 +34,6 @@ entity psi_fix_cordic_rot is
 		GainComp_g				: boolean		:= False;		--						$$ export=true $$
 		Round_g 				: PsiFixRnd_t	:= PsiFixTrunc;	--						$$ export=true $$
 		Sat_g					: PsiFixSat_t	:= PsiFixWrap;	--						$$ export=true $$
-		pl_stage_g				: boolean		:= false; 
 		Mode_g					: string		:= "PIPELINED"	-- PIPELINED or SERIAL	$$ export=true $$
 	);
 	port (
@@ -175,9 +174,7 @@ begin
 	--------------------------------------------	
 	g_pipelined : if Mode_g = "PIPELINED" generate
 		signal X, Y				: IntArr_t(0 to Iterations_g);
-		signal Xdff, Ydff		: IntArr_t(0 to Iterations_g);
 		signal Z				: AngArr_t(0 to Iterations_g);
-		signal Zdff				: AngArr_t(0 to Iterations_g);
 		signal Vld				: std_logic_vector(0 to Iterations_g);
 		signal Quad				: t_aslv2(0 to Iterations_g);
 		signal yQc, xQc			: std_logic_vector(PsiFixSize(InternalFmt_g)-1 downto 0);
@@ -196,44 +193,20 @@ begin
 					QcVld		<= '0';
 				else
 					-- Initialization
-					--X(0)	<= PsiFixResize(InAbs, InAbsFmt_g, InternalFmt_g, Round_g, Sat_g);
-					--Y(0)	<= (others => '0');
-					--Z(0)	<= PsiFixResize(InAng, InAngleFmt_g, AngleIntFmt_g, Round_g, PsiFixWrap);
+					X(0)	<= PsiFixResize(InAbs, InAbsFmt_g, InternalFmt_g, Round_g, Sat_g);
+					Y(0)	<= (others => '0');
+					Z(0)	<= PsiFixResize(InAng, InAngleFmt_g, AngleIntFmt_g, Round_g, PsiFixWrap);
 					Quad(0)	<= PsiFixResize(InAng, InAngleFmt_g, QuadFmt_c, PsiFixTrunc, PsiFixWrap);
 					Vld(0)	<= InVld;
 					
 					-- Cordic Iterations_g
 					Vld(1 to Vld'high) <= Vld(0 to Vld'high-1);
 					Quad(1 to Quad'high) <= Quad(0 to Quad'high-1);
-					if pl_stage_g then
-						
-						Xdff(0)	<= PsiFixResize(InAbs, InAbsFmt_g, InternalFmt_g, Round_g, Sat_g);
-						Ydff(0)	<= (others => '0');
-						Zdff(0)	<= PsiFixResize(InAng, InAngleFmt_g, AngleIntFmt_g, Round_g, PsiFixWrap);
-						
-						X(0) <= Xdff(0);
-						Y(0) <= Ydff(0);
-						Z(0) <= Zdff(0);
-						
-						for i in 0 to Iterations_g-1 loop
-							Xdff(i+1) <= CordicStepX(X(i), Y(i), Z(i), i);
-							X(i+1) 	  <= Xdff(i+1);
-							Ydff(i+1) <= CordicStepY(X(i), Y(i), Z(i), i);
-							Y(i+1) 	  <= Ydff(i+1);
-							Zdff(i+1) <= CordicStepZ(Z(i), i); 
-							Z(i+1) 	  <= Zdff(i+1);
-						end loop;
-					else
-						X(0)	<= PsiFixResize(InAbs, InAbsFmt_g, InternalFmt_g, Round_g, Sat_g);
-						Y(0)	<= (others => '0');
-						Z(0)	<= PsiFixResize(InAng, InAngleFmt_g, AngleIntFmt_g, Round_g, PsiFixWrap);
-					
-						for i in 0 to Iterations_g-1 loop
-							X(i+1) <= CordicStepX(X(i), Y(i), Z(i), i);
-							Y(i+1) <= CordicStepY(X(i), Y(i), Z(i), i);
-							Z(i+1) <= CordicStepZ(Z(i), i); 
-						end loop;
-					end if;
+					for i in 0 to Iterations_g-1 loop
+						X(i+1) <= CordicStepX(X(i), Y(i), Z(i), i);
+						Y(i+1) <= CordicStepY(X(i), Y(i), Z(i), i);
+						Z(i+1) <= CordicStepZ(Z(i), i); 
+					end loop;
 					
 					-- Quadrant Correction
 					QcVld <= Vld(Iterations_g);
