@@ -91,6 +91,7 @@ architecture rtl of psi_fix_cordic_vect is
 	
 	constant GcFmt_c		: PsiFixFmt_t												:= (0, 0, 17);
 	constant AngleIntExtFmt	: PsiFixFmt_t												:= (AngleIntFmt_g.S, max(AngleIntFmt_g.I, 1), AngleIntFmt_g.F);
+    constant AbsFmt_c       : PsiFixFmt_t                                               := (InFmt_g.S, InFmt_g.I+1, InFmt_g.F);
 	constant GcCoef_c		: std_logic_vector(PsiFixSize(GcFmt_c)-1 downto 0)			:= PsiFixFromReal(1.0/CordicGain(Iterations_g), GcFmt_c);
 	constant AngInt_0_5_c	: std_logic_vector(PsiFixSize(AngleIntExtFmt)-1 downto 0)	:= PsiFixFromReal(0.5, AngleIntExtFmt);
 	constant AngInt_1_0_c	: std_logic_vector(PsiFixSize(AngleIntExtFmt)-1 downto 0)	:= PsiFixFromReal(1.0, AngleIntExtFmt);
@@ -174,10 +175,13 @@ begin
 	-- Pipelined Implementation
 	--------------------------------------------	
 	g_pipelined : if Mode_g = "PIPELINED" generate
-		signal X, Y		: IntArr_t(0 to Iterations_g);
-		signal Z		: AngArr_t(0 to Iterations_g);
-		signal Vld		: std_logic_vector(0 to Iterations_g);
-		signal Quad		: t_aslv2(0 to Iterations_g);
+        signal XAbs, YAbs   : std_logic_vector(PsiFixSize(AbsFmt_c)-1 downto 0);
+        signal VldAbs       : std_logic;
+        signal QuadAbs      : std_logic_vector(1 downto 0);
+		signal X, Y		    : IntArr_t(0 to Iterations_g);
+		signal Z		    : AngArr_t(0 to Iterations_g);
+		signal Vld		    : std_logic_vector(0 to Iterations_g);
+		signal Quad		    : t_aslv2(0 to Iterations_g);
 	begin
 		-- Pipelined implementation can take a sample every clock cycle
 		InRdy <= '1';
@@ -188,14 +192,21 @@ begin
 			if rising_edge(Clk) then
 				if Rst = '1' then
 					Vld 	<= (others => '0');
+                    VldAbs  <= '0';
 					OutVld	<= '0';
 				else
 					-- Input registers
-					X(0)	<= PsiFixAbs(InI, InFmt_g, InternalFmt_g, Round_g, Sat_g);
-					Y(0)	<= PsiFixAbs(InQ, InFmt_g, InternalFmt_g, Round_g, Sat_g);
+                    VldAbs  <= InVld;
+                    XAbs    <= PsiFixAbs(InI, InFmt_g, AbsFmt_c, PsiFixTrunc, PsiFixWrap); -- truncation is okay since internal format is usually bigger than input
+                    YAbs    <= PsiFixAbs(InQ, InFmt_g, AbsFmt_c, PsiFixTrunc, PsiFixWrap); -- truncation is okay since internal format is usually bigger than input
+                    QuadAbs <= InI(InI'left) & InQ(InQ'left);
+                    
+                    -- Saturation
+                    X(0)	<= PsiFixResize(XAbs, AbsFmt_c, InternalFmt_g, PsiFixTrunc, Sat_g);
+					Y(0)	<= PsiFixResize(YAbs, AbsFmt_c, InternalFmt_g, PsiFixTrunc, Sat_g);
 					Z(0)	<= (others => '0');
-					Quad(0)	<= InI(InI'left) & InQ(InQ'left);
-					Vld(0)	<= InVld;
+					Quad(0)	<= QuadAbs;
+					Vld(0)	<= VldAbs;                    
 					
 					-- Cordic Iterations_g
 					Vld(1 to Vld'high) <= Vld(0 to Vld'high-1);
