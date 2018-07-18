@@ -47,6 +47,7 @@ architecture rtl of psi_fix_pol2cart_approx is
 	-- Constants
 	constant SinOutFmt_c		: PsiFixFmt_t		:= (1, 0, 17);
 	constant SinInFmt_c			: PsiFixFmt_t		:= (0, 0, 20);
+    constant MultFmt_c          : PsiFixFmt_t       := (1, InAbsFmt_g.I+SinOutFmt_c.I, InAbsFmt_g.F+SinOutFmt_c.F);
 	constant CosOffs_c			: std_logic_vector(PsiFixSize(SinInFmt_c)-1 downto 0)	:= PsiFixFromReal(0.25, SinInFmt_c);
 	
 	-- Types
@@ -54,13 +55,15 @@ architecture rtl of psi_fix_pol2cart_approx is
 	
 	-- Two Process Method
 	type two_process_r is record
-		VldIn				: std_logic_vector(0 to 9);
+		VldIn				: std_logic_vector(0 to 10);
 		AbsPipe				: Abs_t(0 to 8);
 		PhaseIn_0			: std_logic_vector(PsiFixSize(InAngleFmt_g)-1 downto 0);
 		PhaseSin_1			: std_logic_vector(PsiFixSize(SinInFmt_c)-1 downto 0);
 		PhaseCos_1			: std_logic_vector(PsiFixSize(SinInFmt_c)-1 downto 0);
-		OutI_9				: std_logic_vector(OutI'range);
-		OutQ_9				: std_logic_vector(OutQ'range);
+        MultI_9             : std_logic_vector(PsiFixSize(MultFmt_c)-1 downto 0);
+        MultQ_9             : std_logic_vector(PsiFixSize(MultFmt_c)-1 downto 0);
+		OutI_10				: std_logic_vector(OutI'range);
+		OutQ_10				: std_logic_vector(OutQ'range);
 	end record;	
 	signal r, r_next : two_process_r;
 	
@@ -117,15 +120,20 @@ begin
 		-- *** Stages 2 - 8 ***
 		-- Reserved for Linear approximation	
 
-		-- *** Stage 8 ***
+		-- *** Stage 9 ***
 		-- Output Multiplications
-		v.OutI_9 := PsiFixMult(r.AbsPipe(8), InAbsFmt_g, CosData_8, SinOutFmt_c, OutFmt_g, Round_g, Sat_g);
-		v.OutQ_9 := PsiFixMult(r.AbsPipe(8), InAbsFmt_g, SinData_8, SinOutFmt_c, OutFmt_g, Round_g, Sat_g);
+		v.MultI_9 := PsiFixMult(r.AbsPipe(8), InAbsFmt_g, CosData_8, SinOutFmt_c, MultFmt_c, PsiFixTrunc, PsiFixWrap);  -- Format is sufficient, so no rounding/truncation occures
+		v.MultQ_9 := PsiFixMult(r.AbsPipe(8), InAbsFmt_g, SinData_8, SinOutFmt_c, MultFmt_c, PsiFixTrunc, PsiFixWrap);  -- Format is sufficient, so no rounding/truncation occures
+        
+        -- *** Stage 10 ***
+        -- Output Format conversion
+        v.OutI_10 := PsiFixResize(   r.MultI_9, MultFmt_c, OutFmt_g, Round_g, Sat_g);
+        v.OutQ_10 := PsiFixResize(   r.MultQ_9, MultFmt_c, OutFmt_g, Round_g, Sat_g);
 
 		-- *** Outputs ***
-		OutVld 	<= r.VldIn(9);
-		OutQ	<= r.OutQ_9;
-		OutI	<= r.OutI_9;
+		OutVld 	<= r.VldIn(10);
+		OutQ	<= r.OutQ_10;
+		OutI	<= r.OutI_10;
 		
 		-- Apply to record
 		r_next <= v;
