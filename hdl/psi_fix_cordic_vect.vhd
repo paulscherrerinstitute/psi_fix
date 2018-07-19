@@ -34,7 +34,8 @@ entity psi_fix_cordic_vect is
 		GainComp_g				: boolean		:= False;		--						$$ export=true $$
 		Round_g 				: PsiFixRnd_t	:= PsiFixTrunc;	--						$$ export=true $$
 		Sat_g					: PsiFixSat_t	:= PsiFixWrap;	--						$$ export=true $$
-		Mode_g					: string		:= "SERIAL"	-- PIPELINED or SERIAL	$$ export=true $$
+		Mode_g					: string		:= "SERIAL";	-- PIPELINED or SERIAL	$$ export=true $$
+		PlStgPerIter_g			: integer range 1 to 2	:= 1	-- Number of pipeline stages per iteration (does only affect pipelined implementation)
 	);
 	port (
 		-- Control Signals
@@ -178,10 +179,10 @@ begin
         signal XAbs, YAbs   : std_logic_vector(PsiFixSize(AbsFmt_c)-1 downto 0);
         signal VldAbs       : std_logic;
         signal QuadAbs      : std_logic_vector(1 downto 0);
-		signal X, Y		    : IntArr_t(0 to Iterations_g);
-		signal Z		    : AngArr_t(0 to Iterations_g);
-		signal Vld		    : std_logic_vector(0 to Iterations_g);
-		signal Quad		    : t_aslv2(0 to Iterations_g);
+		signal X, Y		    : IntArr_t(0 to Iterations_g*PlStgPerIter_g);
+		signal Z		    : AngArr_t(0 to Iterations_g*PlStgPerIter_g);
+		signal Vld		    : std_logic_vector(0 to Iterations_g*PlStgPerIter_g);
+		signal Quad		    : t_aslv2(0 to Iterations_g*PlStgPerIter_g);
 	begin
 		-- Pipelined implementation can take a sample every clock cycle
 		InRdy <= '1';
@@ -212,23 +213,29 @@ begin
 					Vld(1 to Vld'high) <= Vld(0 to Vld'high-1);
 					Quad(1 to Quad'high) <= Quad(0 to Quad'high-1);
 					for i in 0 to Iterations_g-1 loop
-						X(i+1) <= CordicStepX(X(i), Y(i), i);
-						Y(i+1) <= CordicStepY(X(i), Y(i), i);
-						Z(i+1) <= CordicStepZ(Z(i), Y(i), i); 
-					end loop;
+						X(i*PlStgPerIter_g+1) <= CordicStepX(X(i*PlStgPerIter_g), Y(i*PlStgPerIter_g), i);
+						Y(i*PlStgPerIter_g+1) <= CordicStepY(X(i*PlStgPerIter_g), Y(i*PlStgPerIter_g), i);
+						Z(i*PlStgPerIter_g+1) <= CordicStepZ(Z(i*PlStgPerIter_g), Y(i*PlStgPerIter_g), i); 
+						-- Additional pipeline registers if required
+						for k in 2 to PlStgPerIter_g loop
+							X(i*PlStgPerIter_g+k) <= X(i*PlStgPerIter_g+k-1);
+							Y(i*PlStgPerIter_g+k) <= Y(i*PlStgPerIter_g+k-1);
+							Z(i*PlStgPerIter_g+k) <= Z(i*PlStgPerIter_g+k-1); 	
+						end loop;
+					end loop;					
 					
 					-- Output 
-					OutVld <= Vld(Iterations_g);
+					OutVld <= Vld(Iterations_g*PlStgPerIter_g);
 					if GainComp_g then
-						OutAbs <= PsiFixMult(X(Iterations_g), InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
+						OutAbs <= PsiFixMult(X(Iterations_g*PlStgPerIter_g), InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
 					else
-						OutAbs <= PsiFixResize(X(Iterations_g), InternalFmt_g, OutFmt_g, Round_g, Sat_g);
+						OutAbs <= PsiFixResize(X(Iterations_g*PlStgPerIter_g), InternalFmt_g, OutFmt_g, Round_g, Sat_g);
 					end if;
-					case Quad(Iterations_g) is
-						when "00"	=> 	OutAng <= PsiFixResize(Z(Iterations_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-						when "10"	=> 	OutAng <= PsiFixSub(AngInt_0_5_c, AngleIntExtFmt, Z(Iterations_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-						when "11"	=> 	OutAng <= PsiFixAdd(AngInt_0_5_c, AngleIntExtFmt, Z(Iterations_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-						when "01"	=> 	OutAng <= PsiFixSub(AngInt_1_0_c, AngleIntExtFmt, Z(Iterations_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
+					case Quad(Iterations_g*PlStgPerIter_g) is
+						when "00"	=> 	OutAng <= PsiFixResize(Z(Iterations_g*PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
+						when "10"	=> 	OutAng <= PsiFixSub(AngInt_0_5_c, AngleIntExtFmt, Z(Iterations_g*PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
+						when "11"	=> 	OutAng <= PsiFixAdd(AngInt_0_5_c, AngleIntExtFmt, Z(Iterations_g*PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
+						when "01"	=> 	OutAng <= PsiFixSub(AngInt_1_0_c, AngleIntExtFmt, Z(Iterations_g*PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
 						when others => null;
 					end case;
 				end if;

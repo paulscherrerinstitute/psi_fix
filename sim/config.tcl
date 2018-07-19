@@ -206,8 +206,9 @@ add_tb_run
 create_tb_run "psi_fix_cordic_vect_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_cordic_vect_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_cordic_vect_tb/Data"]
-tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound -gSat_g=PsiFixSat -gMode_g=PIPELINED" \
-						"-gFileFolder_g=$dataDir -gGainComp_g=false -gRound_g=PsiFixTrunc -gSat_g=PsiFixWrap -gMode_g=PIPELINED" \
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound -gSat_g=PsiFixSat -gMode_g=PIPELINED -gPlStgPerIter_g=1" \
+						"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound -gSat_g=PsiFixSat -gMode_g=PIPELINED -gPlStgPerIter_g=2" \
+						"-gFileFolder_g=$dataDir -gGainComp_g=false -gRound_g=PsiFixTrunc -gSat_g=PsiFixWrap -gMode_g=PIPELINED -gPlStgPerIter_g=1" \
 						"-gFileFolder_g=$dataDir -gGainComp_g=true -gRound_g=PsiFixRound -gSat_g=PsiFixSat -gMode_g=SERIAL" \
 						"-gFileFolder_g=$dataDir -gGainComp_g=false -gRound_g=PsiFixTrunc -gSat_g=PsiFixWrap -gMode_g=SERIAL"
 add_tb_run

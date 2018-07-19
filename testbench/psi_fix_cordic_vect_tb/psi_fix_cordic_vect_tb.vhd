@@ -26,7 +26,8 @@ entity psi_fix_cordic_vect_tb is
 		Round_g 		: string 		:= "PsiFixTrunc" ;	-- Pass as string, required by modelsim on linux
 		Sat_g 			: string 		:= "PsiFixWrap" ;	-- Pass as string, required by modelsim on linux
 		Mode_g 			: string 		:= "PIPELINED";
-		FileFolder_g	: string 		:= "../tesbench/psi_fix_cordic_vect_tb/Data"
+		FileFolder_g	: string 		:= "../tesbench/psi_fix_cordic_vect_tb/Data";
+		PlStgPerIter_g	: integer range 1 to 2	:= 1
 	);
 end entity;
 
@@ -82,7 +83,8 @@ begin
 			InternalFmt_g => InternalFmt_g,
 			AngleFmt_g => AngleFmt_g,
 			AngleIntFmt_g => AngleIntFmt_g,
-			Iterations_g => Iterations_g
+			Iterations_g => Iterations_g,
+			PlStgPerIter_g => PlStgPerIter_g
 		)
 		port map (
 			Clk => Clk,
