@@ -45,7 +45,7 @@ architecture tb of psi_fix_mod_cplx2real_tb is
 	--internal signals definition
 	signal clk_sti    : std_logic := '0';
 	signal rst_sti    : std_logic := RstPol_g;
-	signal str_sti    : std_logic := '1';
+	signal str_sti    : std_logic := '0';
 	signal data_I_sti : std_logic_vector(PsiFixSize(InFixFmt_c) - 1 downto 0):=(others=>'0');
 	signal data_Q_sti : std_logic_vector(PsiFixSize(InFixFmt_c) - 1 downto 0):=(others=>'0');
 	signal data_obs   : std_logic_vector(PsiFixSize(OutFixFmt_c) - 1 downto 0):=(others=>'0');
