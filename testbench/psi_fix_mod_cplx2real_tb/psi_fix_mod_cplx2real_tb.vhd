@@ -24,7 +24,8 @@ use work.psi_fix_pkg.all;
 entity psi_fix_mod_cplx2real_tb is 
 	generic(FileFolder_g : string    := "../testbench/psi_fix_mod_cplx2real_tb/Data";
 	        FreqClock_g  : real      := 100.0e6;
-	        RstPol_g     : std_logic := '1');
+	        RstPol_g     : std_logic := '1';
+			ClkPerSpl_g	 : integer	 := 1);
 end entity;
 
 architecture tb of psi_fix_mod_cplx2real_tb is
@@ -126,7 +127,7 @@ begin
 								Data(0)		=> data_I_sti, 
 								Data(1)		=> data_Q_sti,
 								Filepath	=> FileFolder_g & "/stimuli.txt", 
-								ClkPerSpl	=> 1,
+								ClkPerSpl	=> ClkPerSpl_g,
 								IgnoreLines => 1);		
 		
 		-- end of process !DO NOT EDIT!

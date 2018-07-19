@@ -248,6 +248,9 @@ add_tb_run
 
 create_tb_run "psi_fix_mod_cplx2real_tb"
 tb_run_add_pre_script "python3" "psi_fix_mod_cplx2real_app.py" "../testbench/psi_fix_mod_cplx2real_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_mod_cplx2real_tb/Data"]
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gClkPerSpl_g=1" \
+						"-gFileFolder_g=$dataDir -gClkPerSpl_g=10"
 add_tb_run
 
 
