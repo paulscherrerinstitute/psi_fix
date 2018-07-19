@@ -181,11 +181,12 @@ tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gPipeline_g=true" \
 add_tb_run
 
 create_tb_run "psi_fix_complex_mult_tb"
-tb_run_add_pre_script "python3" "cosim.py" "../testbench/psi_fix_complex_mult_tb/Scripts"
-tb_run_add_time_limit {100 us}
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_complex_mult_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_complex_mult_tb/Data"]
-tb_run_add_arguments 	"-gStimDir_g=$dataDir -gPipeline_g=true" \
-						"-gStimDir_g=$dataDir -gPipeline_g=false"
+set dataDir [file normalize "../testbench/psi_fix_complex_mult_tb/Data"]
+tb_run_add_arguments 	"-gStimDir_g=$dataDir -gPipeline_g=true -gClkPerSpl_g=1 -gFileFolder_g=$dataDir" \
+						"-gStimDir_g=$dataDir -gPipeline_g=false -gClkPerSpl_g=1 -gFileFolder_g=$dataDir" \
+						"-gStimDir_g=$dataDir -gPipeline_g=false -gClkPerSpl_g=5 -gFileFolder_g=$dataDir"
 add_tb_run
 
 create_tb_run "psi_fix_mov_avg_tb"
