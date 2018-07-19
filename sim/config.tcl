@@ -13,9 +13,9 @@ run_suppress 8684,3479,3813,8009,3812
 
 # Library
 add_sources $LibPath {
+    psi_common/hdl/psi_common_array_pkg.vhd \
 	psi_common/hdl/psi_common_math_pkg.vhd \
 	psi_common/hdl/psi_common_tdp_ram_rbw.vhd \
-	psi_common/hdl/psi_common_array_pkg.vhd \
 	psi_common/hdl/psi_common_logic_pkg.vhd \
 	psi_common/hdl/psi_common_sdp_ram_rbw.vhd \
 	psi_common/hdl/psi_common_delay.vhd \
@@ -56,6 +56,7 @@ add_sources "../hdl" {
 	psi_fix_pol2cart_approx.vhd \
 	psi_fix_cic_dec_fix_nch_par_tdm.vhd \
 	psi_fix_cic_dec_fix_nch_tdm_tdm.vhd \
+	psi_fix_mod_cplx2real.vhd \
 } -tag src
 
 # testbenches
@@ -88,6 +89,7 @@ add_sources "../testbench" {
 	psi_fix_pol2cart_approx_tb/psi_fix_pol2cart_approx_tb.vhd \
 	psi_fix_cic_dec_fix_nch_par_tdm_tb/psi_fix_cic_dec_fix_nch_par_tdm_tb.vhd \
 	psi_fix_cic_dec_fix_nch_tdm_tdm_tb/psi_fix_cic_dec_fix_nch_tdm_tdm_tb.vhd \
+	psi_fix_mod_cplx2real_tb/psi_fix_mod_cplx2real_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -242,6 +244,12 @@ tb_run_add_arguments 	"-gOrder_g=3 -gRatio_g=10 -gDiffDelay_g=1 -gAutoGainCorr_g
 						"-gOrder_g=4 -gRatio_g=6 -gDiffDelay_g=2 -gAutoGainCorr_g=False -gInFile_g=input_o4_r6_dd2_gcFalse.txt -gOutFile_g=output_o4_r6_dd2_gcFalse.txt -gDataDir_g=$dataDir -gIdleCycles_g=0"
 
 add_tb_run
+
+create_tb_run "psi_fix_mod_cplx2real_tb"
+tb_run_add_pre_script "python3" "psi_fix_mod_cplx2real_app.py" "../testbench/psi_fix_mod_cplx2real_tb/Scripts"
+add_tb_run
+
+
 
 
 
