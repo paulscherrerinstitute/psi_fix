@@ -18,7 +18,7 @@ import numpy as np
 import scipy.signal as sps
 from psi_fix_pkg import *
 
-PLOT_ON = False
+PLOT_ON = True
 
 ### Stimuli location
 STIM_DIR = os.path.dirname(os.path.abspath(__file__)) + "/../../psi_fix_mod_cplx2real_tb/Data/"
@@ -34,6 +34,14 @@ coefFmt     = PsiFixFmt(1, 1, 23)
 intFmt      = PsiFixFmt(1, 1, 23)
 outFmt      = PsiFixFmt(1, 1, 15)
 ratio = 10
+
+# write into text file
+# x = np.genfromtxt(STIM_DIR + "stimuli_inphase.txt")/(2**intFmt.F)
+# y = np.genfromtxt(STIM_DIR + "stimuli_quadrature.txt")/(2**intFmt.F)
+
+#x = np.full((sample), 4/5)
+#y = np.full((sample), -3/5)
+#scale = np.full((sample),(2**(16-1)))
 
 inpAngle = np.linspace(0, 2*np.pi, sample)
 inpAmp = np.linspace(0.01, 0.99, sample)
