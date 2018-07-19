@@ -18,7 +18,7 @@ import numpy as np
 import scipy.signal as sps
 from psi_fix_pkg import *
 
-PLOT_ON = False
+PLOT_ON = True
 
 ### Stimuli location
 STIM_DIR = os.path.dirname(os.path.abspath(__file__)) + "/../../psi_fix_mod_cplx2real_tb/Data/"
@@ -30,8 +30,8 @@ except FileExistsError:
 # Format definition
 sample = 8192
 inpFmt      = PsiFixFmt(1, 1, 15)
-coefFmt     = PsiFixFmt(1, 1, 23)
-intFmt      = PsiFixFmt(1, 1, 23)
+coefFmt     = PsiFixFmt(1, 1, 15)
+intFmt      = PsiFixFmt(1, 1, 15)
 outFmt      = PsiFixFmt(1, 1, 15)
 ratio = 10
 

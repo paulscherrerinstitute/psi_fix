@@ -18,16 +18,16 @@ class psi_fix_mod_cplx2real:
                         IntFmt  : PsiFixFmt,
                         OutFmt  : PsiFixFmt,
                  ratio: int):
-        self.InpFmt = InpFmt
-        self.OutFmt = OutFmt
-        self.CoefFmt = CoefFmt
-        self.IntFmt = IntFmt
-        self.ratio = ratio
+        self.InpFmt     = InpFmt
+        self.CoefFmt    = CoefFmt
+        self.IntFmt     = IntFmt
+        self.OutFmt     = OutFmt
+        self.ratio      = ratio
 
     def Process(self, data_I_i: np.ndarray, data_Q_i : np.ndarray):
         # resize real number to Fixed Point
-        multFmt = PsiFixFmt(self.InpFmt.S, self.InpFmt.I+self.CoefFmt.I,self.InpFmt.F+self.CoefFmt.F)
-        addFmt = PsiFixFmt(multFmt.S, multFmt.I+multFmt.I,multFmt.F)
+        multFmt = PsiFixFmt(self.InpFmt.S, 1+self.InpFmt.I+self.CoefFmt.I, self.InpFmt.F+self.CoefFmt.F)
+        addFmt = PsiFixFmt(self.IntFmt.S, self.IntFmt.I+self.IntFmt.I, self.IntFmt.F)
         datInp = PsiFixFromReal(data_I_i, self.InpFmt, errSat=True)
         datQua = PsiFixFromReal(data_Q_i, self.InpFmt, errSat=True)
 
@@ -48,8 +48,16 @@ class psi_fix_mod_cplx2real:
         mult_i_s = PsiFixMult(datInp, self.InpFmt, sinTable[cpt], self.CoefFmt, multFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
         mult_q_s = PsiFixMult(datQua, self.InpFmt, cosTable[cpt], self.CoefFmt, multFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
 
-        sum_s = PsiFixAdd(mult_i_s, multFmt, mult_q_s, multFmt, addFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        #resize internal before add
+        mult_i_dff_s = PsiFixResize(mult_i_s, multFmt, self.IntFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+        mult_q_dff_s = PsiFixResize(mult_q_s, multFmt, self.IntFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+
+        # adder
+        sum_s = PsiFixAdd(mult_i_dff_s, self.IntFmt, mult_q_dff_s, self.IntFmt, addFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+
+        #resize output
         rf_s = PsiFixResize(sum_s, addFmt, self.OutFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+
         rf_o = rf_s
         return rf_o
 
