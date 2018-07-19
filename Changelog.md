@@ -1,3 +1,12 @@
+## 1.7.0
+
+* Added Features
+  * Added psi\_fix\_mod\_cplx2real (modulator with complex input and real output)
+* Bugfixes
+  * Improved timing of psi\_fix\_cordic\_vect (has now one cycle more delay)
+  * Improved timing of psi\_fix\_complex\_mult (only round at the very output)
+  * Updated compile scripts to work with psi\_common >= 1.10.0
+
 ## 1.6.0
 
 * Added Features
