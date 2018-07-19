@@ -1,3 +1,7 @@
+## 1.7.1 [TO BE RELEASED]
+* Bugfixes
+  * Rewrote psi\_fix\_comples\_mult since it had an unclean interface and it contained errors in the strobe handling.
+
 ## 1.7.0
 
 * Added Features
