@@ -27,7 +27,7 @@ class psi_fix_mod_cplx2real:
     def Process(self, data_I_i: np.ndarray, data_Q_i : np.ndarray):
         # resize real number to Fixed Point
         multFmt = PsiFixFmt(self.InpFmt.S, 1+self.InpFmt.I+self.CoefFmt.I, self.InpFmt.F+self.CoefFmt.F)
-        addFmt = PsiFixFmt(self.IntFmt.S, self.IntFmt.I+self.IntFmt.I, self.IntFmt.F)
+        addFmt = PsiFixFmt(self.IntFmt.S, self.IntFmt.I+1, self.IntFmt.F)
         datInp = PsiFixFromReal(data_I_i, self.InpFmt, errSat=True)
         datQua = PsiFixFromReal(data_Q_i, self.InpFmt, errSat=True)
 

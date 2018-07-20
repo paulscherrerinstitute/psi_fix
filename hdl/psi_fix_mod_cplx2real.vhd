@@ -75,7 +75,7 @@ architecture rtl of psi_fix_mod_cplx2real is
 
 	-------------------------------------------------------------------------------
 	constant MultFmt_c                    : PsiFixFmt_t  := (1, InpFmt_g.I + CoefFmt_g.I + 1, CoefFmt_g.F + InpFmt_g.F);
-	constant AddFmt_c                     : PsiFixFmt_t  := (1, IntFmt_g.I + IntFmt_g.I, IntFmt_g.F);
+	constant AddFmt_c                     : PsiFixFmt_t  := (1, IntFmt_g.I + 1, IntFmt_g.F);
 	--Definitin within the above package
 	constant table_sin                    : coef_array_t := coef_sin_array_func;
 	constant table_cos                    : coef_array_t := coef_cos_array_func;
