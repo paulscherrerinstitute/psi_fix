@@ -49,8 +49,8 @@ class psi_fix_mod_cplx2real:
         mult_q_s = PsiFixMult(datQua, self.InpFmt, cosTable[cpt], self.CoefFmt, multFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
 
         #resize internal before add
-        mult_i_dff_s = PsiFixResize(mult_i_s, multFmt, self.IntFmt, PsiFixRnd.Round, PsiFixSat.Sat)
-        mult_q_dff_s = PsiFixResize(mult_q_s, multFmt, self.IntFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+        mult_i_dff_s = PsiFixResize(mult_i_s, multFmt, self.IntFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        mult_q_dff_s = PsiFixResize(mult_q_s, multFmt, self.IntFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
 
         # adder
         sum_s = PsiFixAdd(mult_i_dff_s, self.IntFmt, mult_q_dff_s, self.IntFmt, addFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)

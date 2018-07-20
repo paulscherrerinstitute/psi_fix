@@ -162,8 +162,8 @@ begin
 				                           MultFmt_c, PsiFixTrunc, PsiFixWrap);
 				-- *** stage 3 ***
 				str3_s       <= str2_s;
-				mult_i_dff_s <= PsiFixResize(mult_i_s, MultFmt_c, IntFmt_g, PsiFixRound, PsiFixSat);
-				mult_q_dff_s <= PsiFixResize(mult_q_s, MultFmt_c, IntFmt_g, PsiFixRound, PsiFixSat);
+				mult_i_dff_s <= PsiFixResize(mult_i_s, MultFmt_c, IntFmt_g, PsiFixTrunc, PsiFixWrap);
+				mult_q_dff_s <= PsiFixResize(mult_q_s, MultFmt_c, IntFmt_g, PsiFixTrunc, PsiFixWrap);
 				
 				-- *** stage 4 ***
 				str4_s       <= str3_s;
