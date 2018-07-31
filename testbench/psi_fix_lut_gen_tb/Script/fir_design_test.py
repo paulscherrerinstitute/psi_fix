@@ -76,6 +76,6 @@ fileName = "psi_fix_lut_test1"
 romStyle = "block"
 
 cfgLut = psi_fix_lut_cfg_settings(coefFmt,rstPol,fileName,romStyle)
-psi_fix_lut(cfgLut,a,"C:/Users/stef_b/git/GFA/RF/HIPA/LLRF_v1/FW_IFC1210/Lib/VHDL/tmp")
+psi_fix_lut(cfgLut,a,"../")
 
 show()

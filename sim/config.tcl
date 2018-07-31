@@ -90,6 +90,8 @@ add_sources "../testbench" {
 	psi_fix_cic_dec_fix_nch_par_tdm_tb/psi_fix_cic_dec_fix_nch_par_tdm_tb.vhd \
 	psi_fix_cic_dec_fix_nch_tdm_tdm_tb/psi_fix_cic_dec_fix_nch_tdm_tdm_tb.vhd \
 	psi_fix_mod_cplx2real_tb/psi_fix_mod_cplx2real_tb.vhd \
+	psi_fix_lut_gen_tb/psi_fix_lut_test1.vhd \
+	psi_fix_lut_gen_tb/psi_fix_lut_gen_tb.vhd \
 } -tag tb
 	
 #TB Runs

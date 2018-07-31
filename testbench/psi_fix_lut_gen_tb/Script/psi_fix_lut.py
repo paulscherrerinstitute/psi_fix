@@ -36,7 +36,7 @@ class psi_fix_lut:
         table = PsiFixFromReal(self.inp, self.cfg.coefFmt, errSat=True)
 
         #Read template
-        with open("../model/snippets/psi_fix_lut_tmpl.vhd", "r") as f:
+        with open("../../../model/snippets/psi_fix_lut_tmpl.vhd", "r") as f:
             content = f.read()
 
         #Modify content
