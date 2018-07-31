@@ -5,6 +5,10 @@
 #backup files
 *.bak
 
+#current test
+/test/*
+/model/snippets/psi_fix_lut_tmpl.vhd
+
 #Stimuli files for tbs
 /testbench/**/*.txt
 !/testbench/psi_fix_lin_approx_tb/**/*.txt
