@@ -154,7 +154,8 @@ architecture rtl of psi_fix_cordic_vect is
 		end if;			
 	end function;	
 	
-	
+	-- Attributes
+    attribute use_dsp48 : string;
 	
 	-- Types
 	type IntArr_t is array (natural range <>) of std_logic_vector(PsiFixSize(InternalFmt_g)-1 downto 0);
@@ -177,6 +178,7 @@ begin
 	--------------------------------------------	
 	g_pipelined : if Mode_g = "PIPELINED" generate
         signal XAbs, YAbs   : std_logic_vector(PsiFixSize(AbsFmt_c)-1 downto 0);
+        attribute use_dsp48 of XAbs, YAbs : signal is "no"; -- Never do absolute value calculation in DSP, is too slow
         signal VldAbs       : std_logic;
         signal QuadAbs      : std_logic_vector(1 downto 0);
 		signal X, Y		    : IntArr_t(0 to Iterations_g*PlStgPerIter_g);
