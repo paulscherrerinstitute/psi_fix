@@ -18,7 +18,7 @@ import numpy as np
 import scipy.signal as sps
 from psi_fix_pkg import *
 
-PLOT_ON = True
+PLOT_ON = False
 
 ### Stimuli location
 STIM_DIR = os.path.dirname(os.path.abspath(__file__)) + "/../../psi_fix_mod_cplx2real_tb/Data/"

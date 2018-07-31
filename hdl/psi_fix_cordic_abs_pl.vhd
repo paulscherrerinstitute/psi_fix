@@ -5,6 +5,10 @@
 -- cordic algorithm. The implementation is pipelined (i.e. it can take one
 -- input sample per clock cycle)
 
+-- !!! THIS ELEMENT IS DEPRECATED !!!
+-- Use psi_fix_cordic_vect instead. psi_fix_cordic_abs_pl will be removed in a 
+-- future version of the library.
+
 ------------------------------------------------------------------------------
 -- Libraries
 ------------------------------------------------------------------------------

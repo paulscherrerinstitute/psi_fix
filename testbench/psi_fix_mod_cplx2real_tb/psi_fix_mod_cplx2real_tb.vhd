@@ -21,11 +21,11 @@ use work.psi_fix_pkg.all;
 ------------------------------------------------------------
 -- Entity Declaration
 ------------------------------------------------------------
-entity psi_fix_mod_cplx2real_tb is
+entity psi_fix_mod_cplx2real_tb is 
 	generic(FileFolder_g : string    := "../testbench/psi_fix_mod_cplx2real_tb/Data";
 	        FreqClock_g  : real      := 100.0e6;
-	        FreqStr_g    : real      := 10.0e6;
-	        RstPol_g     : std_logic := '1');
+	        RstPol_g     : std_logic := '1';
+			ClkPerSpl_g	 : integer	 := 1);
 end entity;
 
 architecture tb of psi_fix_mod_cplx2real_tb is
@@ -33,78 +33,48 @@ architecture tb of psi_fix_mod_cplx2real_tb is
 	constant InFixFmt_c         : PsiFixFmt_t              := (1, 1, 15); --same as python model
 	constant CoefFixFmt_c       : PsiFixFmt_t              := (1, 1, 23); --same as python model
 	constant OutFixFmt_c        : PsiFixFmt_t              := (1, 1, 15); --same as python model
-	constant IntFmt_c           : PsiFixFmt_t              := (1, 1, 23); --same as python model
+	constant InternalFmt_c      : PsiFixFmt_t              := (1, 1, 23); --same as python model
 	--smthg
-	constant TbProcNr_stim_c    : integer                  := 0;
-	constant TbProcNr_check_c   : integer                  := 1;
-	signal ProcessDone          : std_logic_vector(0 to 1) := (others => '0');
-	constant AllProcessesDone_c : std_logic_vector(0 to 1) := (others => '1');
+	constant TbProcNr_stim_c  	: integer := 0;
+	constant TbProcNr_check_c 	: integer := 1;
+	signal ProcessDone 			: std_logic_vector(0 to 1) := (others => '0');
+	constant AllProcessesDone_c	: std_logic_vector(0 to 1) := (others => '1');
 	--timedef
-	constant period_c           : time                     := (1 sec)/FreqClock_g;
+	constant period_c : time := (1 sec)/FreqClock_g;
 
 	--internal signals definition
-	signal clk_sti    : std_logic                                              := '0';
-	signal rst_sti    : std_logic                                              := RstPol_g;
-	signal str_sti    : std_logic                                              := '0';
-	signal str        : std_logic                                              := '0';
-	signal data_I_sti : std_logic_vector(PsiFixSize(InFixFmt_c) - 1 downto 0)  := (others => '0');
-	signal data_Q_sti : std_logic_vector(PsiFixSize(InFixFmt_c) - 1 downto 0)  := (others => '0');
-	signal data_obs   : std_logic_vector(PsiFixSize(OutFixFmt_c) - 1 downto 0) := (others => '0');
-	signal str_obs    : std_logic                                              := '0';
-
+	signal clk_sti    : std_logic := '0';
+	signal rst_sti    : std_logic := RstPol_g;
+	signal str_sti    : std_logic := '0';
+	signal data_I_sti : std_logic_vector(PsiFixSize(InFixFmt_c) - 1 downto 0):=(others=>'0');
+	signal data_Q_sti : std_logic_vector(PsiFixSize(InFixFmt_c) - 1 downto 0):=(others=>'0');
+	signal data_obs   : std_logic_vector(PsiFixSize(OutFixFmt_c) - 1 downto 0):=(others=>'0');
+	signal str_obs    : std_logic :='0';
+	signal Vld_s 	  : std_logic;
+	
 	signal TbRunning : boolean := true;
-
-	procedure tb_str_proc(constant freq_clock : real      := 100.0E6;
-	                      constant freq_str   : real      := 1.0E6;
-	                      constant rst_pol_g  : std_logic := '1';
-	                      signal rst          : in std_logic;
-	                      signal clk          : in std_logic;
-	                      signal tb_run       : in boolean;
-	                      signal str_o        : out std_logic) is
-
-		variable count_v : integer range 0 to (integer(ceil(freq_clock/freq_str))) := 0;
-
-	begin
-		while tb_run loop
-			wait until rising_edge(clk);
-			if rst = rst_pol_g then
-				count_v := 0;
-				str_o   <= '0';
-			else
-				if count_v /= integer(ceil(freq_clock/freq_str)) - 1 then
-					str_o   <= '0';
-					count_v := count_v + 1;
-				else
-					str_o   <= '1';
-					count_v := 0;
-				end if;
-
-			end if;
-		end loop;
-	end procedure;
-
 begin
 
-	i_DUT : entity work.psi_fix_mod_cplx2real
+	DUT : entity work.psi_fix_mod_cplx2real
 		generic map(
-			IntFmt_g  => IntFmt_c,
 			RstPol_g  => RstPol_g,
 			InpFmt_g  => InFixFmt_c,
 			CoefFmt_g => CoefFixFmt_c,
+			IntFmt_g  => InternalFmt_c,
 			OutFmt_g  => OutFixFmt_c,
 			Ratio_g   => 10)
 		port map(
 			clk_i    => clk_sti,
 			rst_i    => rst_sti,
-			vld_i    => str and str_sti,
+			vld_i    => str_sti,
 			data_I_i => data_I_sti,
 			data_Q_i => data_Q_sti,
 			data_o   => data_obs,
 			str_o    => str_obs);
-
-		------------------------------------------------------------
-		-- Testbench Control !DO NOT EDIT!
-		------------------------------------------------------------
+			
+	------------------------------------------------------------
+	-- Testbench Control !DO NOT EDIT!
+	------------------------------------------------------------
 	p_tb_control : process
 	begin
 		wait until rst_sti = '0';
@@ -112,7 +82,7 @@ begin
 		TbRunning <= false;
 		wait;
 	end process;
-
+	
 	------------------------------------------------------------
 	-- Clocks !DO NOT EDIT!
 	------------------------------------------------------------
@@ -125,21 +95,8 @@ begin
 		end loop;
 		wait;
 	end process;
-
-	p_str : process
-	begin
-		while TbRunning loop
-			tb_str_proc(freq_clock => FreqClock_g,
-			            freq_str   => FreqStr_g,
-			            rst_pol_g  => RstPol_g,
-			            rst        => rst_sti,
-			            clk        => clk_sti,
-			            tb_run     => TbRunning,
-			            str_o      => str);
-		end loop;
-		wait;
-	end process;
-
+	
+	
 	------------------------------------------------------------
 	-- Resets
 	------------------------------------------------------------
@@ -152,7 +109,7 @@ begin
 		rst_sti <= '0';
 		wait;
 	end process;
-
+	
 	------------------------------------------------------------
 	-- Processes
 	------------------------------------------------------------
@@ -162,38 +119,39 @@ begin
 	begin
 		-- start of process !DO NOT EDIT
 		wait until rst_sti = '0';
-
+		
 		-- Apply Stimuli	
-		appy_textfile_content(Clk         => clk_sti,
-		                      Rdy         => str,
-		                      Vld         => str_sti,
-		                      Data(0)     => data_I_sti,
-		                      Data(1)     => data_Q_sti,
-		                      Filepath    => FileFolder_g & "/stimuli.txt",
-		                      ClkPerSpl   => 1,
-		                      IgnoreLines => 1);
-
+		appy_textfile_content(	Clk 		=> clk_sti, 
+								Rdy 		=> PsiTextfile_SigOne,
+								Vld 		=> str_sti, 
+								Data(0)		=> data_I_sti, 
+								Data(1)		=> data_Q_sti,
+								Filepath	=> FileFolder_g & "/stimuli.txt", 
+								ClkPerSpl	=> ClkPerSpl_g,
+								IgnoreLines => 1);		
+		
 		-- end of process !DO NOT EDIT!
 		ProcessDone(TbProcNr_stim_c) <= '1';
 		wait;
 	end process;
-
+	
+	
 	-- *** check ***
 	p_check : process
 	begin
 		-- start of process !DO NOT EDIT
 		wait until rst_sti = '0';
-
+		
 		-- Check
-		check_textfile_content(Clk         => clk_sti,
-		                       Rdy         => PsiTextfile_SigUnused,
-		                       Vld         => str_obs,
-		                       Data(0)     => data_obs,
-		                       Filepath    => FileFolder_g & "/model_result_IQmod.txt",
-		                       IgnoreLines => 0);
+		check_textfile_content(	Clk			=> clk_sti,
+								Rdy			=> PsiTextfile_SigUnused,
+								Vld			=> str_obs,
+								Data(0)		=> data_obs,
+								Filepath	=> FileFolder_g & "/model_result_IQmod.txt",
+								IgnoreLines => 0);
 		-- end of process !DO NOT EDIT!
 		ProcessDone(TbProcNr_check_c) <= '1';
 		wait;
-	end process;
+	end process;			
 
 end architecture;

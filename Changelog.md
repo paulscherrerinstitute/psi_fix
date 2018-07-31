@@ -1,6 +1,11 @@
-## 1.7.1 [TO BE RELEASED]
+## 1.7.1 
+
+* Added Features
+  * None
 * Bugfixes
-  * Rewrote psi\_fix\_comples\_mult since it had an unclean interface and it contained errors in the strobe handling.
+  * Rewrote psi\_fix\_complex\_mult since it had an unclean interface and it contained errors in the strobe handling.
+  * Bugfixes for psi\_fix\_mod\_cplx2real: Strobe handling was incorrect
+  * Miscellaneous timing optimizations
 
 ## 1.7.0
 
