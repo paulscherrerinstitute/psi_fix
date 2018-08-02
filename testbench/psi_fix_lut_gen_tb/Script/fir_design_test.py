@@ -54,12 +54,20 @@ def impz(b, a=1):
     bx.grid(True)
     subplots_adjust(hspace=0.5)
 
-#Dsign filter coeffcient
-PLOT = False
+
+PLOT_ON = False
+
+### Stimuli location
+STIM_DIR = os.path.dirname(os.path.abspath(__file__)) + "/../../psi_fix_lut_gen_tb/Data/"
+try:
+    os.mkdir(STIM_DIR)
+except FileExistsError:
+    pass
+
+
 n = 61
 a = signal.firwin(n, cutoff = 0.3, window = "hamming")
 print(a)
-
 
 #Frequency and phase response
 figure(1)
@@ -74,7 +82,8 @@ path     = "../"
 
 cfg = psi_fix_lut(a,coefFmt)
 c = psi_fix_lut.Process(cfg,np.arange(size(a)))
-#print(c)
+np.savetxt(STIM_DIR + 'model.txt', PsiFixGetBitsAsInt(c,coefFmt), fmt='% i', newline='\n', header='model')
+print(c)
 
 psi_fix_lut.Generate(cfg,path,fileName)
 
