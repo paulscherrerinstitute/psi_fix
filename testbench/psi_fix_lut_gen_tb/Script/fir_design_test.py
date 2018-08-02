@@ -8,9 +8,6 @@
 # Used in   : HIPA Upgrade Inj2 LLRF
 # HDL file  :
 # ==================================================================
-from psi_fix_pkg import *
-import numpy as np
-from psi_fix_pkg import *
 from pylab import *
 import scipy.signal as signal
 from psi_fix_lut import *
@@ -58,10 +55,11 @@ def impz(b, a=1):
     subplots_adjust(hspace=0.5)
 
 #Dsign filter coeffcient
-
+PLOT = False
 n = 61
 a = signal.firwin(n, cutoff = 0.3, window = "hamming")
 print(a)
+
 
 #Frequency and phase response
 figure(1)
@@ -71,11 +69,13 @@ impz(a)
 
 #generate VHDL file coefficient with cfg setting
 coefFmt  = PsiFixFmt(1,0,15)
-rstPol   = 1
 fileName = "psi_fix_lut_test1"
-romStyle = "block"
+path     = "../"
 
-cfgLut = psi_fix_lut_cfg_settings(coefFmt,rstPol,fileName,romStyle)
-psi_fix_lut(cfgLut,a,"../")
+cfg = psi_fix_lut(a,coefFmt)
+c = psi_fix_lut.Process(cfg,np.arange(size(a)))
+#print(c)
+
+psi_fix_lut.Generate(cfg,path,fileName)
 
 show()

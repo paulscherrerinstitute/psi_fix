@@ -12,32 +12,29 @@ use work.psi_common_math_pkg.all;
 ------------------------------------------------------------------------------
 -- Entity Declaration
 ------------------------------------------------------------------------------
-entity psi_fix_lut_test1 is
-	generic(
-		rst_pol_g : std_logic   := '1';		-- CFG 1
-		size_g    : natural     := 61; 			-- Format 61;
-		out_fmt_g : PsiFixFmt_t := (1, 0, 15) 		-- Format (1, 0, 15)
-	);
+entity psi_fix_lut_test1 is                          
+	generic(rst_pol_g 	: std_logic   := '1';
+			rom_stlye_g : string := "block"	);
 	port(
 		-- Control Signals
 		clk_i  : in  std_logic;
 		rst_i  : in  std_logic;
 		-- Input
-		radd_i : in  std_logic_vector(log2ceil(size_g) - 1 downto 0);
+		radd_i : in  std_logic_vector(log2ceil(61) - 1 downto 0);
 		rena_i : in  std_logic;
 		-- Output
-		data_o : out std_logic_vector(PsiFixSize(out_fmt_g) - 1 downto 0)
+		data_o : out std_logic_vector(PsiFixSize((1, 0, 15)) - 1 downto 0)
 	);
 end entity;
 
 ------------------------------------------------------------------------------
 -- Architecture Declaration
 ------------------------------------------------------------------------------
-architecture rtl of psi_fix_lut_test1 is
+architecture rtl of psi_fix_lut_test1 is       
 	-- Constants
-	constant out_fmt_c   : integer := PsiFixSize(out_fmt_g);
+	constant out_fmt_c   : integer := PsiFixSize((1, 0, 15));
 	-- Table
-	type table_t is array (0 to size_g - 1) of std_logic_vector(out_fmt_c - 1 downto 0);
+	type table_t is array (0 to 61 - 1) of std_logic_vector(out_fmt_c - 1 downto 0);
 	constant table_c     : table_t := (
 		std_logic_vector(to_signed(0,16)),
 		std_logic_vector(to_signed(24,16)),
@@ -99,15 +96,15 @@ architecture rtl of psi_fix_lut_test1 is
 		std_logic_vector(to_signed(12,16)),
 		std_logic_vector(to_signed(32,16)),
 		std_logic_vector(to_signed(24,16)),
-		std_logic_vector(to_signed(0,16)));
-	signal  temp_s       : std_logic_vector(out_fmt_c - 1 downto 0);
+		std_logic_vector(to_signed(0,16))); 
+	signal  temp_s       : std_logic_vector(out_fmt_c - 1 downto 0); 
 	--
 	attribute rom_style : string;
-	attribute rom_style of temp_s : signal is "block";
+	attribute rom_style of temp_s : signal is rom_stlye_g;
 begin
-
+	
 	temp_s <= table_c(to_integer(unsigned(radd_i)));
-
+	
 	-- *** Table ***
 	p_table : process(clk_i)
 	begin

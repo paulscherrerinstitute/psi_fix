@@ -69,9 +69,8 @@ begin
 
 	--insert your DUT
 	inst_dut : entity work.psi_fix_lut_test1
-		generic map(rst_pol_g => '1',
-		            size_g    => 61,
-		            out_fmt_g => data_fmt_c)
+		generic map(rst_pol_g 	 => '1',
+					rom_stlye_g  => "block")
 		port map(clk_i  => clk_sti,
 		         rst_i  => rst_sti,
 		         radd_i => radd_sti,
