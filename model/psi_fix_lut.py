@@ -16,36 +16,33 @@ import numpy as np
 
 
 class psi_fix_lut:
-    """
-            Constructor
-    """
+
     def __init__(self,
-                 inp        : np.ndarray,
-                 coefFmt    : PsiFixFmt):
+                 lut_content    : np.ndarray,
+                 coefFmt        : PsiFixFmt):
+        """
+        Constructor
+        """
         # Direct parameters
-        self.inp        = inp
-        self.coefFmt    = coefFmt
+        self.lut_content  = lut_content
+        self.coefFmt      = coefFmt
 
         #transform value to PsiFix format from Real
-        self.table      = PsiFixFromReal(self.inp, self.coefFmt, errSat=True)
+        self.table      = PsiFixFromReal(self.lut_content, self.coefFmt, errSat=True)
 
 
     def Process(self, idx:np.array):
         """
            LUT function
         """
-        self.idx = idx
-        for i in self.idx:
-            return self.table[idx]
+        return self.table[idx]
 
     def Generate(self,
-                 path       : str,
-                 fileName   : str):
+                 path         : str,
+                 entityName   : str):
         """
            Generate vhdl code
         """
-        self.path = path
-        self.fileName = fileName
 
         # Get path of the fix python files
         filepath = os.path.realpath(__file__)
@@ -57,7 +54,7 @@ class psi_fix_lut:
             content = f.read()
 
         #Modify content
-        content = content.replace("<ENTITY_NAME>",  self.fileName)
+        content = content.replace("<ENTITY_NAME>",  entityName)
         content = content.replace("<OUT_FMT>", str(self.coefFmt))
         content = content.replace("<SIZE>", str(np.size(self.table)))
 
@@ -76,5 +73,5 @@ class psi_fix_lut:
         content = content.replace("<TABLE_CONTENT>", "\n\t\t".join(tableLines))
 
         #write generated file
-        with open(path + "/" + self.fileName + ".vhd", "w+") as f:
+        with open(path + "/" + entityName + ".vhd", "w+") as f:
             f.write(content)
