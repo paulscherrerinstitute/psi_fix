@@ -40,6 +40,7 @@ class psi_fix_lin_cfg_settings:
 
 class psi_fix_lin_approx:
 
+    SNIPPETS_PATH = os.path.dirname(__file__) + "/snippets"
 
     #Standard configurations of the approximation
     class CONFIGS:
@@ -189,7 +190,7 @@ class psi_fix_lin_approx:
         entityName = "psi_fix_lin_approx_" + self.cfg.name
 
         #Read template
-        with open("snippets/psi_fix_lin_approx_tmpl.vhd", "r") as f:
+        with open(self.SNIPPETS_PATH + "/psi_fix_lin_approx_tmpl.vhd", "r") as f:
             content = f.read()
 
         #Modify content
@@ -247,7 +248,7 @@ class psi_fix_lin_approx:
             actualOut = self.Approximate(input)
 
             # Read template
-            with open("snippets/psi_fix_lin_approx_tb_tmpl.vhd", "r") as f:
+            with open(self.SNIPPETS_PATH + "/psi_fix_lin_approx_tb_tmpl.vhd", "r") as f:
                 content = f.read()
 
             #Modify content
