@@ -1,3 +1,13 @@
+## 1.8.0
+
+* Added Features
+  * Added psi\_fix\_lut (python based VHDL code generator for LUTs, including simulation model)
+  * Added psi\_fix\_pkg\_writer (python based VHDL package generator to pass constants from python to VHDL)
+* Bugfixes and Improvements
+  * Timing optimization in the cectoring cordic
+* Deprecated features
+  * psi\_fix\_cordic\_abs\_pl is deprecated (can be replaced by psi\_fix\_cordic\_vect)
+
 ## 1.7.1 
 
 * Added Features
