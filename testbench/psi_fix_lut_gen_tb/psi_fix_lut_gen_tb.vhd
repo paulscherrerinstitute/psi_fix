@@ -25,12 +25,13 @@ use work.psi_common_math_pkg.all;
 use work.psi_tb_textfile_pkg.all;
 
 entity psi_fix_lut_gen_tb is
-	generic(freq_clk_g : real := 100.0E6);
+	generic(FileFolder_g	: string 	:= "../testbench/psi_fix_lut_gen_tb/Data");
 end entity;
 
 architecture tb of psi_fix_lut_gen_tb is
 
-	constant period_c   	: time        := (1 sec)/freq_clk_g;
+	constant clk_freq_c		: real		  := 100.0E6;
+	constant period_c   	: time        := (1 sec)/clk_freq_c;
 	
 	constant data_fmt_c 	: PsiFixFmt_t := (1, 0, 15);
 	signal tb_run       	: boolean     := true;
@@ -62,7 +63,7 @@ begin
 								Rdy			=> PsiTextfile_SigUnused,
 								Vld			=> rena_sti,
 								Data(0)		=> data_obs,
-								Filepath	=> "../testbench/psi_fix_lut_gen_tb/Data/model.txt",
+								Filepath	=> (FileFolder_g & "/model.txt"),
 								IgnoreLines => 1);
 		process_done_s <= '1';
 	end process;

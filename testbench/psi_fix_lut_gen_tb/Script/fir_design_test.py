@@ -8,6 +8,8 @@
 # Used in   : HIPA Upgrade Inj2 LLRF
 # HDL file  :
 # ==================================================================
+import sys
+sys.path.append("../../../model")
 from pylab import *
 import scipy.signal as signal
 from psi_fix_lut import *
@@ -70,10 +72,11 @@ a = signal.firwin(n, cutoff = 0.3, window = "hamming")
 print(a)
 
 #Frequency and phase response
-figure(1)
-mfreqz(a)
-figure(2)
-impz(a)
+if PLOT_ON:
+    figure(1)
+    mfreqz(a)
+    figure(2)
+    impz(a)
 
 #generate VHDL file coefficient with cfg setting
 coefFmt  = PsiFixFmt(1,0,15)

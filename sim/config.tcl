@@ -11,6 +11,12 @@ add_library psi_fix
 compile_suppress 135,1236,1073
 run_suppress 8684,3479,3813,8009,3812
 
+#Run scripts that generate code before it is compilec
+set old_dir [pwd]
+cd ../testbench/psi_fix_lut_gen_tb/Script
+exec python3 fir_design_test.py
+cd $old_dir
+
 # Library
 add_sources $LibPath {
     psi_common/hdl/psi_common_array_pkg.vhd \
@@ -254,6 +260,12 @@ tb_run_add_pre_script "python3" "psi_fix_mod_cplx2real_app.py" "../testbench/psi
 set dataDir [file normalize "../testbench/psi_fix_mod_cplx2real_tb/Data"]
 tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gClkPerSpl_g=1" \
 						"-gFileFolder_g=$dataDir -gClkPerSpl_g=10"
+add_tb_run
+
+create_tb_run "psi_fix_lut_gen_tb"
+#Pre-Script is executed prior to compilation because it geenrates code to be compiled
+set dataDir [file normalize "../testbench/psi_fix_lut_gen_tb/Data"]
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir"
 add_tb_run
 
 
