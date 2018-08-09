@@ -195,7 +195,7 @@ begin
 		if r.Vld(0) = '1' then
 			-- Start calculation (data from all channels available)
 			if unsigned(r.ChannelNr(0)) = Channels_g-1 then
-				if unsigned(r.DecCnt_1) = 0 then
+				if (unsigned(r.DecCnt_1) = 0) or (MaxRatio_g = 0) then
 					v.Tap0Addr_1	:= r.TapWrAddr_1;
 					v.TapCnt_1		:= Taps;
 					v.CalcOn(1)		:= '1';

@@ -161,7 +161,7 @@ begin
 		
 		v.First(1) := '0';
 		if r.Vld(0) = '1' then			
-			if unsigned(r.DecCnt_1) = 0 then
+			if (unsigned(r.DecCnt_1) = 0) or (MaxRatio_g = 1) then
 				v.DecCnt_1	:= Ratio;
 				v.TapCnt_1	:= Taps;
 				v.CalcOn(1)	:= '1';
