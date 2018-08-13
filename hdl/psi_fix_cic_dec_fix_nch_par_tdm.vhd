@@ -51,6 +51,7 @@ architecture rtl of psi_fix_cic_dec_fix_nch_par_tdm is
 	constant DiffFmt_c				: PsiFixFmt_t		:= (OutFmt_g.S, InFmt_g.I, OutFmt_g.F + Order_g + 1);
 	constant GcInFmt_c				: PsiFixFmt_t		:= (1, OutFmt_g.I, work.psi_common_math_pkg.min(24-OutFmt_g.I, DiffFmt_c.F));
 	constant GcCoefFmt_c			: PsiFixFmt_t		:= (0, 1, 16);
+	constant GcMultFmt_c			: PsiFixFmt_t		:= (1, GcInFmt_c.I+GcCoefFmt_c.I, GcInFmt_c.F+GcCoefFmt_c.F);
 	constant Gc_c					: std_logic_vector(PsiFixSize(GcCoefFmt_c)-1 downto 0) := PsiFixFromReal(2.0**real(CicAddBits_c)/real(CicGain_c), GcCoefFmt_c);
 	
 	-- Types
@@ -71,9 +72,10 @@ architecture rtl of psi_fix_cic_dec_fix_nch_par_tdm is
 		VldDiff		: std_logic_vector(1 to Order_g);	
 		DiffVal		: Diff_t(1 to Order_g);
 		-- GC Stages
-		GcVld		: std_logic_vector(0 to 1);
+		GcVld		: std_logic_vector(0 to 2);
 		GcIn_0		: std_logic_vector(PsiFixSize(GcInFmt_c)-1 downto 0);
-		GcOut_1		: std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);
+		GcMult_1	: std_logic_vector(PsiFixSize(GcMultFmt_c)-1 downto 0);
+		GcOut_2		: std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);
 		-- Output
 		Outp		: std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);
 		OutVld		: std_logic;
@@ -171,15 +173,16 @@ begin
 			v.GcIn_0	:= PsiFixResize(r.DiffVal(Order_g), DiffFmt_c, GcInFmt_c, PsiFixRound, PsiFixSat);
 			
 			-- *** Gain Correction Stage 1 ***
-			v.GcOut_1	:= PsiFixMult(	r.GcIn_0, GcInFmt_c,
+			v.GcMult_1	:= PsiFixMult(	r.GcIn_0, GcInFmt_c,
 										Gc_c, GcCoefFmt_c,
-										OutFmt_g, PsiFixRound, PsiFixSat);
+										GcMultFmt_c, PsiFixTrunc, PsiFixWrap);	-- Round/Truncation in next stage
+			v.GcOut_2	:= PsiFixResize(r.GcMult_1, GcMultFmt_c, OutFmt_g, PsiFixRound, PsiFixSat);
 		end if;
 		
 		-- *** Output Assignment ***
 		if AutoGainCorr_g then
-			v.Outp := r.GcOut_1;
-			v.OutVld := r.GcVld(1);
+			v.Outp := r.GcOut_2;
+			v.OutVld := r.GcVld(2);
 		else
 			v.Outp := PsiFixResize(r.DiffVal(Order_g), DiffFmt_c, OutFmt_g, PsiFixRound, PsiFixSat);
 			v.OutVld := r.VldDiff(Order_g);
