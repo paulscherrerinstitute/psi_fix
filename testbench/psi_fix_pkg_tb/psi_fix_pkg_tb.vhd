@@ -546,8 +546,105 @@ begin
 		CheckBoolean(	true, 
 						PsiFixInRange(PsiFixFromReal(15.5, (0, 4, 2)), (0, 4, 2),
 									 (0, 5, 0), PsiFixRound),
-						"rounding OK 2");							
-		
+						"rounding OK 2");	
+
+		-- *** PsiFixCompare ***
+		print("*** PsiFixCompare ***");		
+		CheckBoolean(	true, 
+						PsiFixCompare(	"a<b",
+										PsiFixFromReal(1.25, (0, 4, 2)), (0, 4, 2),
+										PsiFixFromReal(1.5, (0, 2, 1)), (0, 2, 1)),
+						"a<b unsigned unsigned true");		
+		CheckBoolean(	false, 
+						PsiFixCompare(	"a<b",
+										PsiFixFromReal(1.5, (0, 4, 2)), (0, 4, 2),
+										PsiFixFromReal(1.5, (0, 2, 1)), (0, 2, 1)),
+						"a<b unsigned unsigned false");	
+		CheckBoolean(	true, 
+						PsiFixCompare(	"a<b",
+										PsiFixFromReal(1.25, (1, 4, 2)), (1, 4, 2),
+										PsiFixFromReal(1.5, (0, 2, 1)), (0, 2, 1)),
+						"a<b signed unsigned true");		
+		CheckBoolean(	false, 
+						PsiFixCompare(	"a<b",
+										PsiFixFromReal(2.5, (0, 4, 2)), (0, 4, 2),
+										PsiFixFromReal(1.5, (1, 2, 1)), (1, 2, 1)),
+						"a<b unsigned signed false");	
+		CheckBoolean(	true, 
+						PsiFixCompare(	"a<b",
+										PsiFixFromReal(-1.25, (1, 4, 2)), (1, 4, 2),
+										PsiFixFromReal(-1.0, (1, 2, 1)), (1, 2, 1)),
+						"a<b signed signed true");		
+		CheckBoolean(	false, 
+						PsiFixCompare(	"a<b",
+										PsiFixFromReal(-0.5, (1, 4, 2)), (1, 4, 2),
+										PsiFixFromReal(-1.5, (1, 2, 1)), (1, 2, 1)),
+						"a<b signed signed false");		
+						
+		CheckBoolean(	true, 
+						PsiFixCompare(	"a=b",
+										PsiFixFromReal(1.5, (1, 4, 2)), (1, 4, 2),
+										PsiFixFromReal(1.5, (0, 2, 1)), (0, 2, 1)),
+						"a=b signed unsigned true");		
+		CheckBoolean(	false, 
+						PsiFixCompare(	"a=b",
+										PsiFixFromReal(2.5, (0, 4, 2)), (0, 4, 2),
+										PsiFixFromReal(-1.5, (1, 2, 1)), (1, 2, 1)),
+						"a=b unsigned signed false");	
+
+		CheckBoolean(	true, 
+						PsiFixCompare(	"a>b",
+										PsiFixFromReal(2.5, (1, 4, 2)), (1, 4, 2),
+										PsiFixFromReal(1.5, (0, 2, 1)), (0, 2, 1)),
+						"a>b signed unsigned true");		
+		CheckBoolean(	false, 
+						PsiFixCompare(	"a>b",
+										PsiFixFromReal(1.5, (0, 4, 2)), (0, 4, 2),
+										PsiFixFromReal(1.5, (1, 2, 1)), (1, 2, 1)),
+						"a>b unsigned signed false");	
+
+		CheckBoolean(	true, 
+						PsiFixCompare(	"a>=b",
+										PsiFixFromReal(2.5, (1, 4, 2)), (1, 4, 2),
+										PsiFixFromReal(1.5, (0, 2, 1)), (0, 2, 1)),
+						"a>=b signed unsigned true 1");	
+		CheckBoolean(	true, 
+						PsiFixCompare(	"a>=b",
+										PsiFixFromReal(1.5, (1, 4, 2)), (1, 4, 2),
+										PsiFixFromReal(1.5, (0, 2, 1)), (0, 2, 1)),
+						"a>=b signed unsigned true 2");							
+		CheckBoolean(	false, 
+						PsiFixCompare(	"a>=b",
+										PsiFixFromReal(1.25, (0, 4, 2)), (0, 4, 2),
+										PsiFixFromReal(1.5, (1, 2, 1)), (1, 2, 1)),
+						"a>=b unsigned signed false 1");
+
+		CheckBoolean(	true, 
+						PsiFixCompare(	"a<=b",
+										PsiFixFromReal(-2.5, (1, 4, 2)), (1, 4, 2),
+										PsiFixFromReal(1.5, (0, 2, 1)), (0, 2, 1)),
+						"a<=b signed unsigned true 1");	
+		CheckBoolean(	true, 
+						PsiFixCompare(	"a<=b",
+										PsiFixFromReal(1.5, (1, 4, 2)), (1, 4, 2),
+										PsiFixFromReal(1.5, (0, 2, 1)), (0, 2, 1)),
+						"a<=b signed unsigned true 2");							
+		CheckBoolean(	false, 
+						PsiFixCompare(	"a<=b",
+										PsiFixFromReal(0.25, (0, 4, 2)), (0, 4, 2),
+										PsiFixFromReal(-1.5, (1, 2, 1)), (1, 2, 1)),
+						"a<=b unsigned signed false 1");						
+						
+		CheckBoolean(	false, 
+						PsiFixCompare(	"a!=b",
+										PsiFixFromReal(1.5, (1, 4, 2)), (1, 4, 2),
+										PsiFixFromReal(1.5, (0, 2, 1)), (0, 2, 1)),
+						"a!=b signed unsigned false");		
+		CheckBoolean(	true, 
+						PsiFixCompare(	"a!=b",
+										PsiFixFromReal(2.5, (0, 4, 2)), (0, 4, 2),
+										PsiFixFromReal(-1.5, (1, 2, 1)), (1, 2, 1)),
+						"a!=b unsigned signed true");		
 		wait;
 	end process;
 

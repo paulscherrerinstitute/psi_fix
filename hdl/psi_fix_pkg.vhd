@@ -131,6 +131,13 @@ package psi_fix_pkg is
 							rFmt 	: PsiFixFmt_t;
 							rnd		: PsiFixRnd_t 	:= PsiFixTrunc)
 							return boolean;
+		
+	-- Allowed comparisons: "a=b", "a<b", "a>b", "a<=b", "a>=b",  "a!=b"
+	function PsiFixCompare(	comparison	: string;
+							a			: std_logic_vector;
+							aFmt		: PsiFixFmt_t;
+							b			: std_logic_vector;
+							bFmt		: PsiFixFmt_t) return boolean;
 								
 	--------------------------------------------------------------------------
 	-- VHDL Only
@@ -540,6 +547,39 @@ package body psi_fix_pkg is
 		end if;
 		report "PsiFixSatFromString: Illegal value - " & s severity error;
 		return PsiFixWrap;
+	end function;
+	
+	-- *** PsiFixSatFromString ***
+	-- Allowed comparisons: "a=b", "a<b", "a>b", "a<=b", "a>=b", "a!=b"
+	function PsiFixCompare(	comparison	: string;
+							a			: std_logic_vector;
+							aFmt		: PsiFixFmt_t;
+							b			: std_logic_vector;
+							bFmt		: PsiFixFmt_t) return boolean is
+		constant FullFmt_c	: PsiFixFmt_t	:= (max(aFmt.S+0, bFmt.S), max(aFmt.I+0, bFmt.I), max(aFmt.F+0, bFmt.F));
+		variable AFull_v	: std_logic_vector(PsiFixSize(FullFmt_c)-1 downto 0);
+		variable BFull_v	: std_logic_vector(PsiFixSize(FullFmt_c)-1 downto 0);
+	begin
+		-- Check operator
+		-- Convert to same type
+		AFull_v	:= PsiFixResize(a, aFmt, FullFmt_c);
+		BFull_v := PsiFixResize(b, bFmt, FullFmt_c);
+		-- Convert to unsigned representation with offset
+		if FullFmt_c.S = 1 then
+			AFull_v(AFull_v'high) := not AFull_v(AFull_v'high);
+			BFull_v(BFull_v'high) := not BFull_v(BFull_v'high);
+		end if;
+		-- Copare
+		if 		comparison = "a=b" 	then return unsigned(AFull_v) = unsigned(BFull_v);
+		elsif 	comparison = "a<b" 	then return unsigned(AFull_v) < unsigned(BFull_v);
+		elsif	comparison = "a>b"	then return unsigned(AFull_v) > unsigned(BFull_v);
+		elsif	comparison = "a<=b" then return unsigned(AFull_v) <= unsigned(BFull_v);
+		elsif	comparison = "a>=b" then return unsigned(AFull_v) >= unsigned(BFull_v);
+		elsif	comparison = "a!=b"	then return unsigned(AFull_v) /= unsigned(BFull_v);
+		else	report "###ERROR###: PsiFixCompare illegal comparison type [" & comparison & "]" severity error;
+				return false;
+		end if;
+		
 	end function;
 	
 	
