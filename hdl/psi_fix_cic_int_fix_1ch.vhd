@@ -135,14 +135,16 @@ begin
 			v.VldDiff(0) 	:= '1';
 			v.Input_0		:= InData;
 			v.Rdy_0			:= '0';
-		elsif InRdy_v = '1' then
+		elsif InRdy_v = '1' or r.VldDiff(1) = '0' then
 			v.VldDiff(0) 	:= '0';
 			v.Rdy_0			:= '1';
 		end if;
 		
 		-- *** Stage Diff 1 ***
 		-- First differentiator
-		if r.VldDiff(0) = '1' and InRdy_v = '1' then
+		if r.VldDiff(0) = '1' and (InRdy_v = '1' or r.VldDiff(1) = '0') then
+			v.VldDiff(1) := '1';
+			v.VldDiff(0) := '0';
 			if DiffDelay_g = 1 then
 				DiffDel_v := r.DiffLast(1);
 			else
@@ -159,7 +161,9 @@ begin
 		-- *** Diff Stages ***
 		-- Differentiators
 		for stage in 1 to Order_g-1 loop
-			if r.VldDiff(stage) = '1' and InRdy_v = '1' then
+			if r.VldDiff(stage) = '1' and (InRdy_v = '1' or r.VldDiff(stage+1) = '0') then
+				v.VldDiff(stage+1) := '1';
+				v.VldDiff(stage) := r.VldDiff(stage-1);
 				if DiffDelay_g = 1 then
 					DiffDel_v := r.DiffLast(stage+1);
 				else
