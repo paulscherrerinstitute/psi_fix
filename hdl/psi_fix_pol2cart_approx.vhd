@@ -112,7 +112,7 @@ begin
 									
 		-- *** Stage 1 ***
 		-- Sine and cosine phase
-		v.PhaseSin_1 := PsiFixResize(	r.PhaseIn_0, InAngleFmt_g, SinInFmt_c, Round_g, Sat_g);
+		v.PhaseSin_1 := PsiFixResize(	r.PhaseIn_0, InAngleFmt_g, SinInFmt_c, Round_g, PsiFixWrap);
 		v.PhaseCos_1 := PsiFixAdd(	r.PhaseIn_0, InAngleFmt_g, 
 									CosOffs_c, SinInFmt_c,
 									SinInFmt_c, Round_g, PsiFixWrap);
