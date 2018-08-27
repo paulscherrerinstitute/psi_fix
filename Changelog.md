@@ -1,3 +1,13 @@
+## 1.9.0
+
+* Added Features
+  * Add PsiFixCompare function for to psi\_fix\_pkg (comparison of two fixed-point numbers with individual formats)
+* Bugfixes
+  * Made decimatin FIR filters working with MaxRatio\_g=1
+  * Added pipeline stage to CIC gain correction multiplier to relax timing
+  * Fixed behavior of psi\_fix\_cic\_int\_fix\_1ch for 100% output duty cycle
+  * Fixed bittrueness issue in psi\_fix\_pol2cart\_approx
+
 ## 1.8.0
 
 * Added Features
