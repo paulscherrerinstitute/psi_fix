@@ -79,7 +79,7 @@ begin
 		wait;
 	end process;
 	
-	InData <= std_logic_vector(to_unsigned(SigIn(0), InData'length));
+	InData <= PsiFixFromBitsAsInt(SigIn(0), InFmt_c);
 	p_stimuli : process
 	begin
 		Rst <= '1';
@@ -104,7 +104,7 @@ begin
 		wait;
 	end process;
 
-	SigOut(0) <= to_integer(signed(OutData));
+	SigOut(0) <= PsiFixGetBitsAsInt(OutData, OutFmt_c);
 	p_response : process
 	begin
 		

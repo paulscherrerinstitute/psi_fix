@@ -47,6 +47,8 @@ architecture sim of <ENTITY_NAME>_tb is
 	
 	-- Tb Signals
 	signal TbRunning	: boolean	:= true;
+	signal SigIn		: TextfileData_t(0 to 0) := (others => 0);
+	signal SigOut		: TextfileData_t(0 to 0) := (others => 0);	
 	
 	
 begin
@@ -76,6 +78,7 @@ begin
 		wait;
 	end process;
 	
+	InData <= PsiFixFromBitsAsInt(SigIn(0), InFmt_c);
 	p_stimuli : process
 	begin
 		Rst <= '1';
@@ -86,10 +89,10 @@ begin
 		wait for 1 us;
 		
 		-- Apply StimuliDir_g
-		appy_textfile_content(	Clk 		=> Clk, 
+		ApplyTextfileContent(	Clk 		=> Clk, 
 								Rdy 		=> PsiTextfile_SigOne,
 								Vld 		=> InVld, 
-								Data(0)		=> InData, 
+								Data		=> SigIn, 
 								Filepath	=> StimuliDir_g & "/stimuli.txt", 
 								ClkPerSpl	=> 1);		
 		
@@ -100,16 +103,16 @@ begin
 		wait;
 	end process;
 	
+	SigOut(0) <= PsiFixGetBitsAsInt(OutData, OutFmt_c);
 	p_response : process
 	begin
 		
 		-- Check
-		check_textfile_content(	Clk				=> Clk,
+		CheckTextfileContent(	Clk				=> Clk,
 								Rdy				=> PsiTextfile_SigUnused,
 								Vld				=> OutVld,
-								Data(0)			=> OutData,
-								Filepath		=> StimuliDir_g & "/response.txt",
-								SignedCompare	=> OutFmt_c.S = 1);
+								Data			=> SigOut,
+								Filepath		=> StimuliDir_g & "/response.txt");
 		
 		-- Finish
 		wait;
