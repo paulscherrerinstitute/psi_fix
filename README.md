@@ -1,10 +1,12 @@
 # General Information
 
+This library contains bittrue implementations in VHDL (for synthesis) and Python (for fast simulations) of standard signal processing components. For the fixed-point arithmetics, the library *en\_cl\_fix* provided by [Enclustra GmbH](www.enclustra.com) is used.
+
 ## Maintainer
 Oliver Bründler [oliver.bruendler@psi.ch]
 
-## Authors
-Oliver Bründler [oliver.bruendler@psi.ch]
+## License
+This library is published under [PSI HDL Library License](License.txt), which is [LGPL](LGPL2_1.txt) plus some additional exceptions to clarify the LGPL terms in the context of firmware development.
 
 ## Changelog
 See [Changelog](Changelog.md)
@@ -43,11 +45,12 @@ The required folder structure looks as given below (folder names must be matched
 
 Alternatively the repository [psi\_fpga\_all](https://github.com/paulscherrerinstitute/psi_fpga_all) can be used. This repo contains all FPGA related repositories as submodules in the correct folder structure.
 * TCL
-  * [PsiSim](https://github.com/paulscherrerinstitute/PsiSim) 
+  * [PsiSim](https://github.com/paulscherrerinstitute/PsiSim) (2.0.0 or higher)
 * VHDL
-  * [psi\_common](https://github.com/paulscherrerinstitute/psi_common)
-  * [psi\_tb](https://github.com/paulscherrerinstitute/psi_tb)
-  * [en\_cl\_fix](https://github.com/paulscherrerinstitute/en_cl_fix) (fork of a a library provided by Enclustra GmbH)
+  * [**psi\_fix**](https://github.com/paulscherrerinstitute/psi_fix)
+  * [psi\_common](https://github.com/paulscherrerinstitute/psi_common) (2.0.0 or higher)
+  * [psi\_tb](https://github.com/paulscherrerinstitute/psi_tb) (2.0.0 or higher)
+  * [en\_cl\_fix](https://github.com/paulscherrerinstitute/en_cl_fix) (1.1.0 or higher) - fork of a a library provided by Enclustra GmbH
     * [Original Location](https://github.com/enclustra/en_cl_fix)
 
 ## External
