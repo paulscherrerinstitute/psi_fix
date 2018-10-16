@@ -55,6 +55,23 @@ def PsiFix2ClFix(arg):
     else:
         raise Exception("PsiFix2ClFix(): unsupported argument type")
 
+def ClFix2PsiFix(arg):
+    if type(arg) is FixFormat:
+        signBits = 0
+        if arg.Signed:
+            signBits = 1
+        return PsiFixFmt(signBits, arg.IntBits, arg.FracBits)
+    elif type(arg) is FixRound:
+        if arg == FixRound.NonSymPos_s: return PsiFixRnd.Round
+        elif arg == FixRound.Trunc_s: return PsiFixRnd.Trunc
+        else: raise Exception("PsiFix2ClFix(): unsupported rounding mode")
+    elif type(arg) is FixSaturate:
+        if arg == FixSaturate.None_s: return PsiFixSat.Wrap
+        elif arg == FixSaturate.Sat_s: return PsiFixSat.Sat
+        else: raise Exception("PsiFix2ClFix(): unsupported saturation mode")
+    else:
+        raise Exception("PsiFix2ClFix(): unsupported argument type")
+
 
 ########################################################################################################################
 # Bittrue available in VHDL

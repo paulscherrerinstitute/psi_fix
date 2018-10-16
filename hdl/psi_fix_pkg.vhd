@@ -46,6 +46,15 @@ package psi_fix_pkg is
 								
 	function PsiFix2ClFix(	fmt : PsiFixFmt_t)
 							return FixFormat_t;
+							
+	function ClFix2PsiFix(	rnd : FixRound_t)
+							return PsiFixRnd_t;
+								
+	function ClFix2PsiFix(	sat : FixSaturate_t)
+							return PsiFixSat_t;
+								
+	function ClFix2PsiFix(	fmt : FixFormat_t)
+							return PsiFixFmt_t;							
 
 	--------------------------------------------------------------------------
 	-- Bittrue available in Python
@@ -207,6 +216,34 @@ package body psi_fix_pkg is
 							return FixFormat_t is
 	begin
 		return ((fmt.S=1), fmt.I, fmt.F);
+	end function;
+	
+	function ClFix2PsiFix(	rnd : FixRound_t)
+							return PsiFixRnd_t is
+	begin
+		case rnd is
+			when NonSymPos_s	=> 	return PsiFixRound;
+			when Trunc_s		=> 	return PsiFixTrunc;
+			when others			=> 	report "psi_fix_pkg: Unsupported Rounding Mode (only Round/Trunc are supported)" severity error;
+									return PsiFixTrunc;
+		end case;	
+	end function;
+								
+	function ClFix2PsiFix(	sat : FixSaturate_t)
+							return PsiFixSat_t is
+	begin
+		case sat is
+			when Sat_s			=> 	return PsiFixSat;
+			when None_s			=> 	return PsiFixWrap;
+			when others			=> 	report "psi_fix_pkg: Unsupported Saturation Mode (only Sat/Wrap are supported)" severity error;
+									return PsiFixWrap;
+		end case;	
+	end function;
+								
+	function ClFix2PsiFix(	fmt : FixFormat_t)
+							return PsiFixFmt_t is
+	begin
+		return (choose(fmt.Signed, 1, 0), fmt.Intbits, fmt.FracBits);
 	end function;
 
 	--------------------------------------------------------------------------
