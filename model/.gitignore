@@ -1,0 +1,7 @@
+#Pycharm Files
+**/.idea/**/*
+*.pyc
+
+#Example outputs
+Example/**/*
+!Example/*.py

@@ -1,0 +1,13 @@
+#Pycharm files
+**/.idea/**/*
+*.pyc
+
+#backup files
+*.bak
+
+#Stimuli files for tbs
+/testbench/**/*.txt
+!/testbench/psi_fix_lin_approx_tb/**/*.txt
+
+#Ignore temporary generated files
+testbench/psi_fix_lut_gen_tb/psi_fix_lut_test1.vhd

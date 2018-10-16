@@ -1,0 +1,30 @@
+The FIR filters are named the following way:
+
+psi_fix_fir_<decimation>_<calculation-handling>_<channels>_<channel-handling>_<coefficient-handling>_<architecture>
+
+<decimation>
+dec		Decimating FIR filter
+-		If omitted, the filter cannot decimate
+
+<calculation-handling>
+ser		Serial calculation (one multiplier calculates one tap after the other)
+par		Parallel calculation (one multiplier per tap is used, one sample per clock cycle can be processed)
+semi		Everything between
+
+<channels>
+nch		Multi-channel (channel count configurable)
+1ch		Single-channel
+
+<channel-handling>
+chpar		All channels arrive in parallel and can be calculated in parallel
+chtdm		Channels are calculated one after the other
+
+<coefficient-handling>
+conf		Coefficients can be written, all channels use the same cofficients
+fix		Coefficients are fixed, all channels use the same coefficients
+confch		Same as conf but different coefficients per channel
+fixch		Same as fix but different coefficients per channel		
+
+<architecture>
+x7		Xilinx seven series
+-		If omitted, the implementation is not architecture specific

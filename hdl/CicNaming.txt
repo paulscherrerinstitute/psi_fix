@@ -1,0 +1,29 @@
+The CIC filters are named the following way:
+
+psi_fix_cic_<int/dec>_<ratio-handling>_<channels>_<input-handling>_<output-handling>_<architecture>
+
+<ratio-handling>
+fix		Ratio is compile-time defined
+cfg		Ratio is configurable
+
+<int/dec>
+int		Interpolating CIC
+dec		Decimating CIC
+
+<channels>
+nch		Multi-channel (channel count configurable)
+1ch		Single-channel
+
+<input-handling>
+par		Channels are taken in in parallel
+tdm		Channels are taken in in TDM mode
+-		Omitted for single channel implementations
+
+<output-handling>
+par		Channels are output in parallel
+tdm		Channels are output in TDM mode	
+-		Omitted for single channel implementations
+
+<architecture>
+x7		Xilinx seven series
+-		If omitted, the implementation is not architecture specific
