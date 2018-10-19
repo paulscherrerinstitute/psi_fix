@@ -121,9 +121,9 @@ def PsiFixShiftLeft(a, aFmt : PsiFixFmt,
                     shift : int, maxShift : int,
                     rFmt : PsiFixFmt,
                     rnd: PsiFixRnd = PsiFixRnd.Trunc, sat: PsiFixSat = PsiFixSat.Wrap):
-    if shift > maxShift:
+    if np.any(shift > maxShift):
         raise ValueError("PsiFixShiftLeft: shift must be <= maxShift")
-    if shift < 0:
+    if np.any(shift < 0):
         raise ValueError("PsiFixShiftLeft: shift must be > 0")
     fullFmt = PsiFixFmt(max(aFmt.S, rFmt.S), max(aFmt.I+maxShift, rFmt.I), max(aFmt.F, rFmt.F))
     fullA = PsiFixResize(a, aFmt, fullFmt)
@@ -134,9 +134,9 @@ def PsiFixShiftRight(a, aFmt : PsiFixFmt,
                      shift : int, maxShift : int,
                      rFmt : PsiFixFmt,
                      rnd: PsiFixRnd = PsiFixRnd.Trunc, sat: PsiFixSat = PsiFixSat.Wrap):
-    if shift > maxShift:
+    if np.any(shift > maxShift):
         raise ValueError("PsiFixShiftRight: shift must be <= maxShift")
-    if shift < 0:
+    if np.any(shift < 0):
         raise ValueError("PsiFixShiftRight: shift must be > 0")
     fullFmt = PsiFixFmt(max(aFmt.S, rFmt.S), max(aFmt.I, rFmt.I), max(aFmt.F+maxShift, rFmt.F+1))   #Additional bit for rounding
     fullA = PsiFixResize(a, aFmt, fullFmt)
