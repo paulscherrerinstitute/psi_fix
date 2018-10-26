@@ -61,7 +61,6 @@ architecture rtl of psi_fix_mod_cplx2real is
 	function coef_sin_array_func return coef_array_t is
 		variable array_v : coef_array_t;
 	begin
-		report("scale " & to_string(integer(coef_scale_c*2.0**25.0)));
 		for i in 0 to Ratio_g - 1 loop
 			array_v(i) := PsiFixFromReal(sin(2.0*MATH_PI*real(i)/real(Ratio_g))*coef_scale_c, CoefFmt_g);
 		end loop;
