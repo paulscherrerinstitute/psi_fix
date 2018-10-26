@@ -33,6 +33,7 @@ add_sources $LibPath {
 	psi_common/hdl/psi_common_sdp_ram.vhd \
 	psi_common/hdl/psi_common_delay.vhd \
 	psi_common/hdl/psi_common_par_tdm.vhd \
+	psi_common/hdl/psi_common_sync_fifo.vhd \
 } -tag lib
 
 # Library TB
@@ -75,6 +76,7 @@ add_sources "../hdl" {
 	psi_fix_cic_dec_fix_nch_tdm_tdm.vhd \
 	psi_fix_mod_cplx2real.vhd \
 	psi_fix_complex_addsub.vhd \
+	psi_fix_complex_abs.vhd \
 } -tag src
 
 # testbenches
@@ -110,6 +112,7 @@ add_sources "../testbench" {
 	psi_fix_lut_gen_tb/psi_fix_lut_test1.vhd \
 	psi_fix_lut_gen_tb/psi_fix_lut_gen_tb.vhd \
 	psi_fix_complex_addsub_tb/psi_fix_complex_addsub_tb.vhd \
+	psi_fix_complex_abs_tb/psi_fix_complex_abs_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -281,6 +284,12 @@ create_tb_run "psi_fix_complex_addsub_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_complex_addsub_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_complex_addsub_tb/Data"]
 tb_run_add_arguments 	"-gFileFolder_g=$dataDir"
+add_tb_run
+
+create_tb_run "psi_fix_complex_abs_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_complex_abs_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_complex_abs_tb/Data"]
+tb_run_add_arguments "-gFileFolder_g=$dataDir"
 add_tb_run
 
 
