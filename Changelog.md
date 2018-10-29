@@ -1,3 +1,9 @@
+## 1.9.1
+* Added Features
+  * None
+* Bugfixes
+  * Modify psi\_fix shift range checks in python models to work with np.ndarray instead of scalars
+
 ## 1.9.0
 
 * Added Features
