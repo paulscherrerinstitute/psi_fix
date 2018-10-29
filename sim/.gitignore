@@ -16,3 +16,6 @@ transcript
 
 #Stacktraces
 *_stacktrace.*
+
+#GHDL library files
+*.cf
