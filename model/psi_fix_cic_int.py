@@ -108,7 +108,7 @@ class psi_fix_cic_int:
         else:
             sigSftUns = (intOut << (addFracPlaces - self.shift)) % (1 << int(PsiFixSize(self.shiftOutFmt)))
         signBitValue = 1 << int(PsiFixSize(self.shiftOutFmt) - 1)
-        sigSftInt = np.where(sigSftUns > signBitValue, sigSftUns - 2 * signBitValue, sigSftUns)
+        sigSftInt = np.where(sigSftUns >= signBitValue, sigSftUns - 2 * signBitValue, sigSftUns)
         sigSft = PsiFixFromBitsAsInt(sigSftInt, self.shiftOutFmt)
 
         # Gain Compensation

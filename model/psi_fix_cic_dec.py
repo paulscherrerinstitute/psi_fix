@@ -87,7 +87,7 @@ class psi_fix_cic_dec:
         else:
             sigDecSft = (sigDecFull << (addFracPlaces - self.shift)) % (1 << int(PsiFixSize(self.diffFmt)))
         signBitValue = 1 << int(PsiFixSize(self.diffFmt) - 1)
-        sigDecSft = np.where(sigDecSft > signBitValue, sigDecSft - 2 * signBitValue, sigDecSft)
+        sigDecSft = np.where(sigDecSft >= signBitValue, sigDecSft - 2 * signBitValue, sigDecSft)
         sigDec = PsiFixFromBitsAsInt(sigDecSft, self.diffFmt)
         # Do differentiation
         sigDiff = []
