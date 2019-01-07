@@ -1,4 +1,15 @@
+## 2.1.0
+
+* Added Features
+  * Implemented psi\_fix\_complex\_abs (absolute value calculation using sum of squares)
+  * Added more documentation (power point presentation)
+* Bugfixes
+  * PsiFixShiftLeft/Right range checks in Python did not work for nd.array type
+  * Remove GHDL binary files from GIT
+  * CIC Python model did not work when the output of the filter was at the absolute lower bound
+
 ## 2.0.0
+
 * First open Source Release
 * Added Features
   * Support GHDL as Simulator
