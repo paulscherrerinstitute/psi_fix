@@ -37,17 +37,18 @@ entity psi_fix_demod_real2cplx is
 	    InFmt_g 	: PsiFixFmt_t;					-- $$ constant=(1,0,15) $$
 		OutFmt_g	: PsiFixFmt_t;					-- $$ constant=(1,0,16) $$
 		CoefBits_g	: positive		:= 18;			-- $$ constant=25 $$
+		Channels_g	: natural		:= 1;			-- $$ constant=2 $$
 	    Ratio_g   	: natural     	:= 5			-- $$ constant=5 $$
 	);
 	port(
 		clk_i				: in  	std_logic; 												-- $$ type=clk; freq=100e6 $$
 		rst_i				: in  	std_logic; 												-- $$ type=rst; clk=clk_i $$
 		str_i				: in	std_logic;												
-		data_i				: in  	std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);	
+		data_i				: in  	std_logic_vector(PsiFixSize(InFmt_g)*Channels_g - 1 downto 0);	
 		phi_offset_i		: in	std_logic_vector(log2ceil(Ratio_g) - 1 downto 0);
 		--
-		data_I_o			: out 	std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-		data_Q_o			: out 	std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+		data_I_o			: out 	std_logic_vector(PsiFixSize(OutFmt_g)*Channels_g - 1 downto 0);
+		data_Q_o			: out 	std_logic_vector(PsiFixSize(OutFmt_g)*Channels_g - 1 downto 0);
 		str_o				: out	std_logic
 	);
 end entity;
@@ -94,24 +95,28 @@ architecture RTL of psi_fix_demod_real2cplx is
 	attribute rom_style of nonIQ_table_sin, nonIQ_table_cos : constant is "distributed";
 	
 	
-	
-	type OutPipe_t is array (natural range <>) of std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+	type MultArray_t 	is array (0 to Channels_g-1) 	of std_logic_vector(PsiFixSize(MultFmt_c) - 1 downto 0);
+	type InArray_t 		is array (0 to Channels_g-1) 	of std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
+	type OutArray_t 	is array (0 to Channels_g-1)	of std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
 	--
 	signal cptInt					: integer range 0 to Ratio_g - 1 := 0;		
 	signal cpt_s                    : integer range 0 to Ratio_g - 1 := 0;
-	signal mult_i_s                 : std_logic_vector(PsiFixSize(MultFmt_c) - 1 downto 0);
-	signal mult_q_s                 : std_logic_vector(PsiFixSize(MultFmt_c) - 1 downto 0);
+	signal mult_i_s                 : MultArray_t;
+	signal mult_q_s                 : MultArray_t;
 	--
-	signal mult_i_dff_s             : std_logic_vector(PsiFixSize(MultFmt_c) - 1 downto 0);
-	signal mult_q_dff_s             : std_logic_vector(PsiFixSize(MultFmt_c) - 1 downto 0);
-	signal mult_i_dff2_s            : std_logic_vector(PsiFixSize(MultFmt_c) - 1 downto 0);
-	signal mult_q_dff2_s            : std_logic_vector(PsiFixSize(MultFmt_c) - 1 downto 0);
+	signal mult_i_dff_s             : MultArray_t;
+	signal mult_q_dff_s             : MultArray_t;
+	signal mult_i_dff2_s            : MultArray_t;
+	signal mult_q_dff2_s            : MultArray_t;
 	signal coef_i_s                 : std_logic_vector(PsiFixSize(CoefFmt_c) - 1 downto 0);
 	signal coef_q_s                 : std_logic_vector(PsiFixSize(CoefFmt_c) - 1 downto 0);
-	signal data_s                   : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-	signal data_dff_s                : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
+	signal data_s                   : InArray_t;
+	signal data_dff_s               : InArray_t;
+	signal out_q_s					: OutArray_t;
+	signal out_i_s					: OutArray_t;
 	signal strIn					: std_logic_vector(0 to 4);
 	signal RstPos					: std_logic;
+	signal out_str_s				: std_logic_vector(0 to Channels_g-1);
 	
 begin 
 
@@ -124,13 +129,17 @@ begin
 	begin
 		if rising_edge(clk_i) then
 			if rst_i = RstPol_g then
-				data_s      <= (others => '0');
-				data_dff_s  <= (others => '0');
+				data_s      <= (others => (others => '0'));
+				data_dff_s  <= (others => (others => '0'));
 				strIn		<= (others => '0');
 			else
 				strIn(0)					<= str_i;
 				strIn(1 to strIn'high)		<= strIn(0 to strIn'high-1);
-				data_s          	<= data_i;		
+				-- Channel Splitting
+				for i in 0 to Channels_g-1 loop
+					data_s(i)          			<= data_i((i+1)*PsiFixSize(InFmt_g)-1 downto i*PsiFixSize(InFmt_g));		
+				end loop;
+				-- Delay
 				data_dff_s			<= data_s;
 			end if;
 		end if;
@@ -184,39 +193,48 @@ begin
 	begin
 		if rising_edge(clk_i) then
 			if rst_i = RstPol_g then
-				mult_i_s      	<= (others => '0');
-				mult_i_dff_s  	<= (others => '0');
-				mult_i_dff2_s 	<= (others => '0');
+				mult_i_s      	<= (others => (others => '0'));
+				mult_i_dff_s  	<= (others => (others => '0'));
+				mult_i_dff2_s 	<= (others => (others => '0'));
 				coef_i_s 		<= (others => '0');
 			else
+				-- Coef shared for all channels
 				coef_i_s 	 <= nonIQ_table_sin(cpt_s);
-				mult_i_s       <= PsiFixMult(data_dff_s, InFmt_g,
-				                             coef_i_s, CoefFmt_c,
-				                             MultFmt_c, PsiFixTrunc, PsiFixWrap);
+				
+				-- Processing per channel
+				for i in 0 to Channels_g-1 loop
+					mult_i_s(i) <= PsiFixMult(	data_dff_s(i), InFmt_g,
+												coef_i_s, CoefFmt_c,
+												MultFmt_c, PsiFixTrunc, PsiFixWrap);
+				end loop;
 				mult_i_dff_s   <= mult_i_s;
 				mult_i_dff2_s  <= mult_i_dff_s;
 			end if;
 		end if;
 	end process;
-	
-	i_mov_avg_i : entity work.psi_fix_mov_avg
-		generic map (
-			InFmt_g 	=> MultFmt_c,
-			OutFmt_g 	=> OutFmt_g,
-			Taps_g		=> Ratio_g,
-			GainCorr_g	=> "NONE",
-			Round_g		=> PsiFixRound,
-			Sat_g		=> PsiFixSat,
-			OutRegs_g	=> 2
-		)
-		port map (
-			Clk			=> clk_i,
-			Rst			=> RstPos,
-			InVld		=> strIn(4),										
-			InData		=> mult_i_dff2_s,
-			OutVld		=> str_o,										
-			OutData		=> data_I_o
-		);
+	g_mov_avg_i	: for i in 0 to Channels_g-1 generate
+		i_mov_avg : entity work.psi_fix_mov_avg
+			generic map (
+				InFmt_g 	=> MultFmt_c,
+				OutFmt_g 	=> OutFmt_g,
+				Taps_g		=> Ratio_g,
+				GainCorr_g	=> "NONE",
+				Round_g		=> PsiFixRound,
+				Sat_g		=> PsiFixSat,
+				OutRegs_g	=> 2
+			)
+			port map (
+				Clk			=> clk_i,
+				Rst			=> RstPos,
+				InVld		=> strIn(4),										
+				InData		=> mult_i_dff2_s(i),
+				OutVld		=> out_str_s(i),										
+				OutData		=> out_i_s(i)
+			);
+			
+		data_I_o((i+1)*PsiFixSize(OutFmt_g)-1 downto i*PsiFixSize(OutFmt_g)) <= out_i_s(i);
+	end generate;
+	str_o <= out_str_s(0);
 
 	--===========================================================================
 	-- Q PATH
@@ -225,38 +243,47 @@ begin
 	begin
 		if rising_edge(clk_i) then
 			if rst_i = RstPol_g then
-				mult_q_s      <= (others => '0');
-				mult_q_dff_s  <= (others => '0');
-				mult_q_dff2_s <= (others => '0');
+				mult_q_s      <= (others => (others => '0'));
+				mult_q_dff_s  <= (others => (others => '0'));
+				mult_q_dff2_s <= (others => (others => '0'));
 				coef_q_s 	  <= (others => '0');
 			else
+				-- Coef shared for all channels
 				coef_q_s 		<= nonIQ_table_cos(cpt_s);
-				mult_q_s       	<= PsiFixMult(data_dff_s, InFmt_g,
-				                              coef_q_s, CoefFmt_c,
-				                              MultFmt_c, PsiFixTrunc, PsiFixWrap);
+				
+				-- Processing per channel
+				for i in 0 to Channels_g-1 loop
+					mult_q_s(i) <= PsiFixMult(	data_dff_s(i), InFmt_g,
+												coef_q_s, CoefFmt_c,
+												MultFmt_c, PsiFixTrunc, PsiFixWrap);
+				end loop;
 				mult_q_dff_s   <= mult_q_s;
 				mult_q_dff2_s  <= mult_q_dff_s;
 			end if;
 		end if;
 	end process;
 
-	i_mov_avg_q : entity work.psi_fix_mov_avg
-		generic map (
-			InFmt_g 	=> MultFmt_c,
-			OutFmt_g 	=> OutFmt_g,
-			Taps_g		=> Ratio_g,
-			GainCorr_g	=> "NONE",
-			Round_g		=> PsiFixRound,
-			Sat_g		=> PsiFixSat,
-			OutRegs_g	=> 2
-		)
-		port map (
-			Clk			=> clk_i,
-			Rst			=> RstPos,
-			InVld		=> strIn(4),										
-			InData		=> mult_q_dff2_s,
-			OutVld		=> open,										
-			OutData		=> data_Q_o
-		);
+	g_mov_avg_q : for i in 0 to Channels_g-1 generate
+		i_mov_avg : entity work.psi_fix_mov_avg
+			generic map (
+				InFmt_g 	=> MultFmt_c,
+				OutFmt_g 	=> OutFmt_g,
+				Taps_g		=> Ratio_g,
+				GainCorr_g	=> "NONE",
+				Round_g		=> PsiFixRound,
+				Sat_g		=> PsiFixSat,
+				OutRegs_g	=> 2
+			)
+			port map (
+				Clk			=> clk_i,
+				Rst			=> RstPos,
+				InVld		=> strIn(4),										
+				InData		=> mult_q_dff2_s(i),
+				OutVld		=> open,										
+				OutData		=> out_q_s(i)
+			);
+			
+		data_Q_o((i+1)*PsiFixSize(OutFmt_g)-1 downto i*PsiFixSize(OutFmt_g)) <= out_q_s(i);
+	end generate;
 
 end architecture;

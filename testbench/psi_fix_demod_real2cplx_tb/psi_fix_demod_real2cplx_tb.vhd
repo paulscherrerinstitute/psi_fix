@@ -57,24 +57,28 @@ architecture sim of psi_fix_demod_real2cplx_tb is
 	signal clk_i : std_logic := '0';
 	signal rst_i : std_logic := '1';
 	signal str_i : std_logic := '0';
-	signal data_i : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0) := (others => '0');
-	signal data_I_o : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
-	signal data_Q_o : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
+	signal data1_i : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0) := (others => '0');
+	signal data2_i : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0) := (others => '0');
+	signal data_i  : std_logic_vector(2*PsiFixSize(InFmt_g) - 1 downto 0) := (others => '0');
+	signal data_I_o : std_logic_vector(2*PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
+	signal data_Q_o : std_logic_vector(2*PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
 	signal str_o : std_logic := '0';
 	signal phi_offset_16 : std_logic_vector(data_i'range) := (others => '0');
-	signal SigIn					: TextfileData_t(0 to 1)	:= (others => 0);
-	signal SigOut					: TextfileData_t(0 to 1)	:= (others => 0);	
+	signal SigIn					: TextfileData_t(0 to 2)	:= (others => 0);
+	signal SigOut					: TextfileData_t(0 to 3)	:= (others => 0);	
 	
 begin
 	------------------------------------------------------------
 	-- DUT Instantiation
 	------------------------------------------------------------
+	data_i <= data2_i & data1_i;
 	i_dut : entity work.psi_fix_demod_real2cplx
 		generic map (
 			RstPol_g => RstPol_g,
 			InFmt_g => InFmt_g,
 			OutFmt_g => OutFmt_g,
-			CoefBits_g => CoefBits_g
+			CoefBits_g => CoefBits_g,
+			Channels_g => 2
 		)
 		port map (
 			clk_i => clk_i,
@@ -130,8 +134,9 @@ begin
 	-- Processes
 	------------------------------------------------------------
 	-- *** stim ***
-	data_i <= std_logic_vector(to_signed(SigIn(0), data_i'length));
-	phi_offset_16 <= std_logic_vector(to_unsigned(SigIn(1), phi_offset_16'length));
+	data1_i <= std_logic_vector(to_signed(SigIn(0), data1_i'length));
+	data2_i <= std_logic_vector(to_signed(SigIn(1), data2_i'length));
+	phi_offset_16 <= std_logic_vector(to_unsigned(SigIn(2), phi_offset_16'length));
 	p_stim : process
 	begin
 		-- start of process !DO NOT EDIT
@@ -152,8 +157,10 @@ begin
 	end process;
 	
 	-- *** check ***
-	SigOut(0) <= to_integer(signed(data_I_o));
-	SigOut(1) <= to_integer(signed(data_Q_o));
+	SigOut(0) <= to_integer(signed(data_I_o(1*PsiFixSize(OutFmt_g)-1 downto 0*PsiFixSize(OutFmt_g))));
+	SigOut(1) <= to_integer(signed(data_Q_o(1*PsiFixSize(OutFmt_g)-1 downto 0*PsiFixSize(OutFmt_g))));
+	SigOut(2) <= to_integer(signed(data_I_o(2*PsiFixSize(OutFmt_g)-1 downto 1*PsiFixSize(OutFmt_g))));
+	SigOut(3) <= to_integer(signed(data_Q_o(2*PsiFixSize(OutFmt_g)-1 downto 1*PsiFixSize(OutFmt_g))));	
 	p_check : process
 	begin
 		-- start of process !DO NOT EDIT
