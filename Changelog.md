@@ -1,3 +1,11 @@
+## 2.2.0
+
+* Added Features
+  * Implemented psi\_fix\_phase\_unwrap (phase unwrapping)
+  * Added multi channel support for psi\_fix\_demod\_real2cplx
+* Bugfixes
+  * None
+
 ## 2.1.0
 
 * Added Features
