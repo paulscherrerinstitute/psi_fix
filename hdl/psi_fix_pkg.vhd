@@ -36,6 +36,14 @@ package psi_fix_pkg is
 	type PsiFixSat_t is (PsiFixWrap, PsiFixSat);
 	
 	--------------------------------------------------------------------------
+	-- Helpers
+	--------------------------------------------------------------------------		
+	function PsiFixChooseFmt(	sel 	: boolean;
+								fmtA	: PsiFixFmt_t;
+								fmtB	: PsiFixFmt_t)
+								return PsiFixFmt_t;	-- fmtA if true, otherwise fmtB
+	
+	--------------------------------------------------------------------------
 	-- Conversions between PSI and Enclustra Definitions
 	--------------------------------------------------------------------------	
 	function PsiFix2ClFix(	rnd : PsiFixRnd_t)
@@ -186,6 +194,21 @@ end psi_fix_pkg;
 -- Package Body
 ------------------------------------------------------------------------------
 package body psi_fix_pkg is 
+
+	--------------------------------------------------------------------------
+	-- Helpers
+	--------------------------------------------------------------------------		
+	function PsiFixChooseFmt(	sel 	: boolean;
+								fmtA	: PsiFixFmt_t;
+								fmtB	: PsiFixFmt_t)
+								return PsiFixFmt_t is
+	begin
+		if sel then
+			return fmtA;
+		else
+			return fmtB;
+		end if;
+	end function;
 
 	--------------------------------------------------------------------------
 	-- Conversions between PSI and Enclustra Definitions

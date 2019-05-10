@@ -77,6 +77,7 @@ add_sources "../hdl" {
 	psi_fix_mod_cplx2real.vhd \
 	psi_fix_complex_addsub.vhd \
 	psi_fix_complex_abs.vhd \
+	psi_fix_phase_unwrap.vhd \
 } -tag src
 
 # testbenches
@@ -113,6 +114,7 @@ add_sources "../testbench" {
 	psi_fix_lut_gen_tb/psi_fix_lut_gen_tb.vhd \
 	psi_fix_complex_addsub_tb/psi_fix_complex_addsub_tb.vhd \
 	psi_fix_complex_abs_tb/psi_fix_complex_abs_tb.vhd \
+	psi_fix_phase_unwrap_tb/psi_fix_phase_unwrap_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -290,6 +292,14 @@ create_tb_run "psi_fix_complex_abs_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_complex_abs_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_complex_abs_tb/Data"]
 tb_run_add_arguments "-gFileFolder_g=$dataDir"
+add_tb_run
+
+create_tb_run "psi_fix_phase_unwrap_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_phase_unwrap_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_phase_unwrap_tb/Data"]
+tb_run_add_arguments "-gFileFolder_g=$dataDir -gStimuliSet_g=S -gVldDutyCycle_g=5" \
+					 "-gFileFolder_g=$dataDir -gStimuliSet_g=U -gVldDutyCycle_g=5" \
+					 "-gFileFolder_g=$dataDir -gStimuliSet_g=S -gVldDutyCycle_g=1"
 add_tb_run
 
 
