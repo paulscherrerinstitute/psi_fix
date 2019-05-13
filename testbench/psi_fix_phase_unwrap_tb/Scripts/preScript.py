@@ -76,10 +76,10 @@ try:
 except FileExistsError:
     pass
 
-np.savetxt(STIM_DIR + "/inputS.txt",
+np.savetxt(STIM_DIR + "/InputS.txt",
            (PsiFixGetBitsAsInt(stimFixS, IN_FMT_S)),
            fmt="%i", header="Input")
-np.savetxt(STIM_DIR + "/inputU.txt",
+np.savetxt(STIM_DIR + "/InputU.txt",
            (PsiFixGetBitsAsInt(stimFixU, IN_FMT_U)),
            fmt="%i", header="Input")
 np.savetxt(STIM_DIR + "/OutputS.txt",

@@ -137,7 +137,7 @@ begin
 								Rdy 		=> PsiTextfile_SigOne,
 								Vld 		=> InVld, 
 								Data		=> SigIn, 
-								Filepath	=> FileFolder_g & choose(StimuliSet_g = "S", "/inputS.txt", "/inputU.txt"), 
+								Filepath	=> FileFolder_g & choose(StimuliSet_g = "S", "/InputS.txt", "/inputU.txt"), 
 								ClkPerSpl	=> VldDutyCycle_g,
 								IgnoreLines => 1);	
 		
@@ -159,7 +159,7 @@ begin
 								Rdy			=> PsiTextfile_SigUnused,
 								Vld			=> OutVld,
 								Data		=> SigOut,
-								Filepath	=> FileFolder_g & choose(StimuliSet_g = "S", "/outputS.txt", "/outputU.txt"),
+								Filepath	=> FileFolder_g & choose(StimuliSet_g = "S", "/OutputS.txt", "/outputU.txt"),
 								IgnoreLines => 1);
 		
 		-- end of process !DO NOT EDIT!
