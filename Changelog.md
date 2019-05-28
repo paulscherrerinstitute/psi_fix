@@ -1,3 +1,10 @@
+## 2.3.1
+
+* Added Features
+  * none
+* Bugfixes
+  * Fixed stimuli file name in psi\_fix\_white\_noise TB to also work on linux (case was incorrect)
+
 ## 2.3.0
 
 * Added Features
