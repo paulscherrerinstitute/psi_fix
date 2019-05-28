@@ -10,6 +10,7 @@
 from psi_fix_pkg import *
 import numpy as np
 from scipy.misc import derivative
+from scipy import stats
 import matplotlib.pyplot as plt
 import os
 
@@ -60,6 +61,19 @@ class psi_fix_lin_approx:
     ####################################################################################################################
     SNIPPETS_PATH = os.path.dirname(__file__) + "/snippets"
 
+    #Function Definitions
+    GAUSSIFY_TABLE = stats.norm.ppf(np.linspace(0.001,0.999,1025))/3
+    GAUSSIFY_TABLE = np.maximum(-1, GAUSSIFY_TABLE)
+    GAUSSIFY_TABLE = np.minimum(1, GAUSSIFY_TABLE)
+
+    @classmethod
+    def _Gaussify(cls, values):
+        idxExact = (values / 2 + 0.5) * 1024
+        idx = np.array(idxExact, dtype=np.int)
+        offset = idxExact - idx
+        return cls.GAUSSIFY_TABLE[idx] + offset * (cls.GAUSSIFY_TABLE[idx + 1] - cls.GAUSSIFY_TABLE[idx])
+
+
     #Standard configurations of the approximation
     class CONFIGS:
         Sin18Bit = psi_fix_lin_cfg_settings(
@@ -79,7 +93,16 @@ class psi_fix_lin_approx:
                         points=512,
                         name="sqrt18b",
                         validRange=(0.25,(1-(2**-17))**2))
-        all = [Sin18Bit, Sqrt18Bit]
+        Gaussify20Bit = psi_fix_lin_cfg_settings(
+                        function=lambda x: psi_fix_lin_approx._Gaussify(x),
+                        inFmt=PsiFixFmt(1,0,19),
+                        outFmt=PsiFixFmt(1,0,19),
+                        offsFmt=PsiFixFmt(1,0,21),
+                        gradFmt=PsiFixFmt(0,5,9),
+                        points=1024,
+                        name="gaussify20b",
+                        validRange=(-1,1))
+        all = [Sin18Bit, Sqrt18Bit, Gaussify20Bit]
 
     ####################################################################################################################
     # Static Methods
@@ -92,6 +115,10 @@ class psi_fix_lin_approx:
     @classmethod
     def ConfigSqrt18Bit(cls):
         return psi_fix_lin_approx.CONFIGS.Sqrt18Bit
+
+    @classmethod
+    def ConfigGaussify20Bit(cls):
+        return psi_fix_lin_approx.CONFIGS.Gaussify20Bit
 
     @classmethod
     def Design(cls, cfg : psi_fix_lin_cfg_settings, simPoints : int = 100000, simRange : tuple = None):
@@ -314,7 +341,7 @@ class psi_fix_lin_approx:
 #To design a new filter, uncomment the code below, replace the configuration with the new one to be optimized and run
 #this file as script.
 
-#psi_fix_lin_approx.Design(psi_fix_lin_approx.CONFIGS.Sqrt18Bit)
+#psi_fix_lin_approx.Design(psi_fix_lin_approx.CONFIGS.Gaussify20Bit,simRange=(-0.99,0.99))
 #exit()
 
 ########################################################################################################################

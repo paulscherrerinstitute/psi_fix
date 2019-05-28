@@ -22,10 +22,9 @@ library ieee;
 ------------------------------------------------------------
 -- Entity Declaration
 ------------------------------------------------------------
-entity psi_fix_white_noise_tb is
+entity psi_fix_noise_awgn_tb is
 	generic (
-		FileFolder_g	: string 		:= "../testbench/psi_fix_white_noise_tb/Data";
-		StimuliSet_g	: string		:= "S"; -- "S" = signed, "U" = unsigned
+		FileFolder_g	: string 		:= "../testbench/psi_fix_noise_awgn_tb/Data";
 		VldDutyCycle_g	: integer		:= 5
 	);
 end entity;
@@ -33,12 +32,10 @@ end entity;
 ------------------------------------------------------------
 -- Architecture
 ------------------------------------------------------------
-architecture sim of psi_fix_white_noise_tb is
+architecture sim of psi_fix_noise_awgn_tb is
 		
 	-- *** Constants ***
-	constant OutFmtS_c		: PsiFixFmt_t	:= (1, 2, 15);
-	constant OutFmtU_c		: PsiFixFmt_t	:= (0, 2, 13);
-	constant OutFmt_c		: PsiFixFmt_t	:= PsiFixChooseFmt(StimuliSet_g = "S", OutFmtS_c, OutFmtU_c);
+	constant OutFmt_c		: PsiFixFmt_t	:= (1,0,15);
 	
 	-- *** TB Control ***
 	signal TbRunning : boolean := True;
@@ -61,7 +58,7 @@ begin
 	------------------------------------------------------------
 	-- DUT Instantiation
 	------------------------------------------------------------
-	i_dut : entity work.psi_fix_white_noise
+	i_dut : entity work.psi_fix_noise_awgn
 		generic map (
 			OutFmt_g		=> OutFmt_c
 		)
@@ -140,12 +137,7 @@ begin
 	end process;
 	
 	-- *** response ***
-	g_signed : if StimuliSet_g = "S" generate
-		SigOut(0) <= to_integer(signed(OutData));
-	end generate;
-	g_unsigned : if StimuliSet_g = "U" generate
-		SigOut(0) <= to_integer(unsigned(OutData));
-	end generate;	
+	SigOut(0) <= to_integer(signed(OutData));	
 	p_response : process
 	begin
 		-- start of process !DO NOT EDIT
@@ -156,7 +148,7 @@ begin
 								Rdy			=> PsiTextfile_SigUnused,
 								Vld			=> OutVld,
 								Data		=> SigOut,
-								Filepath	=> FileFolder_g & choose(StimuliSet_g = "S", "/output_S.txt", "/Output_U.txt"),
+								Filepath	=> FileFolder_g & "/output.txt",
 								IgnoreLines => 1);
 		
 		-- end of process !DO NOT EDIT!

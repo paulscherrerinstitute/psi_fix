@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 --  All rights reserved.
---  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -49,7 +48,7 @@ architecture sim of psi_fix_lin_approx_sin18b_tb is
 	-- Tb Signals
 	signal TbRunning	: boolean	:= true;
 	signal SigIn		: TextfileData_t(0 to 0) := (others => 0);
-	signal SigOut		: TextfileData_t(0 to 0) := (others => 0);
+	signal SigOut		: TextfileData_t(0 to 0) := (others => 0);	
 	
 	
 begin
@@ -103,16 +102,16 @@ begin
 		TbRunning <= False;
 		wait;
 	end process;
-
+	
 	SigOut(0) <= PsiFixGetBitsAsInt(OutData, OutFmt_c);
 	p_response : process
 	begin
 		
 		-- Check
-		CheckTextfileContent(	Clk			=> Clk,
-								Rdy			=> PsiTextfile_SigUnused,
-								Vld			=> OutVld,
-								Data		=> SigOut,
+		CheckTextfileContent(	Clk				=> Clk,
+								Rdy				=> PsiTextfile_SigUnused,
+								Vld				=> OutVld,
+								Data			=> SigOut,
 								Filepath		=> StimuliDir_g & "/response.txt");
 		
 		-- Finish

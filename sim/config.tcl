@@ -61,6 +61,7 @@ add_sources "../hdl" {
 	psi_fix_lin_approx_sin18b.vhd \
 	psi_fix_lin_approx_sin18b_dual.vhd \
 	psi_fix_lin_approx_sqrt18b.vhd \
+	psi_fix_lin_approx_gaussify20b.vhd \
 	psi_fix_cic_dec_fix_1ch.vhd \
 	psi_fix_cic_int_fix_1ch.vhd \
 	psi_fix_bin_div.vhd \
@@ -79,6 +80,7 @@ add_sources "../hdl" {
 	psi_fix_complex_abs.vhd \
 	psi_fix_phase_unwrap.vhd \
 	psi_fix_white_noise.vhd \
+	psi_fix_noise_awgn.vhd \
 } -tag src
 
 # testbenches
@@ -87,6 +89,7 @@ add_sources "../testbench" {
 	psi_fix_lin_approx_tb/sin18b/psi_fix_lin_approx_sin18b_tb.vhd \
 	psi_fix_lin_approx_tb/sin18b/psi_fix_lin_approx_sin18b_dual_tb.vhd \
 	psi_fix_lin_approx_tb/sqrt18b/psi_fix_lin_approx_sqrt18b_tb.vhd \
+	psi_fix_lin_approx_tb/gaussify20b/psi_fix_lin_approx_gaussify20b_tb.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb_case0_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb_case1_pkg.vhd \
@@ -117,6 +120,7 @@ add_sources "../testbench" {
 	psi_fix_complex_abs_tb/psi_fix_complex_abs_tb.vhd \
 	psi_fix_phase_unwrap_tb/psi_fix_phase_unwrap_tb.vhd \
 	psi_fix_white_noise_tb/psi_fix_white_noise_tb.vhd \
+	psi_fix_noise_awgn_tb/psi_fix_noise_awgn_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -138,6 +142,11 @@ add_tb_run
 
 create_tb_run "psi_fix_lin_approx_sqrt18b_tb"
 set dataDir [file normalize "../testbench/psi_fix_lin_approx_tb/sqrt18b"]
+tb_run_add_arguments "-gStimuliDir_g=$dataDir"
+add_tb_run
+
+create_tb_run "psi_fix_lin_approx_gaussify20b_tb"
+set dataDir [file normalize "../testbench/psi_fix_lin_approx_tb/gaussify20b"]
 tb_run_add_arguments "-gStimuliDir_g=$dataDir"
 add_tb_run
 
@@ -312,6 +321,13 @@ set dataDir [file normalize "../testbench/psi_fix_white_noise_tb/Data"]
 tb_run_add_arguments "-gFileFolder_g=$dataDir -gStimuliSet_g=S -gVldDutyCycle_g=5" \
 					 "-gFileFolder_g=$dataDir -gStimuliSet_g=U -gVldDutyCycle_g=5" \
 					 "-gFileFolder_g=$dataDir -gStimuliSet_g=S -gVldDutyCycle_g=1"
+add_tb_run
+
+create_tb_run "psi_fix_noise_awgn_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_noise_awgn_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_noise_awgn_tb/Data"]
+tb_run_add_arguments "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5" \
+					 "-gFileFolder_g=$dataDir -gVldDutyCycle_g=1"
 add_tb_run
 
 

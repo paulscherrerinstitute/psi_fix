@@ -21,7 +21,7 @@ library work;
 ------------------------------------------------------------------------------
 -- Entity Declaration
 ------------------------------------------------------------------------------
-entity psi_fix_lin_approx_sqrt18b_tb is
+entity psi_fix_lin_approx_gaussify20b_tb is
 	generic (
 		StimuliDir_g		: string		:= "../testbench/psi_fix_lin_approx_tb/sin18b"
 	);
@@ -30,11 +30,11 @@ end entity;
 ------------------------------------------------------------------------------
 -- Architecture Declaration
 ------------------------------------------------------------------------------
-architecture sim of psi_fix_lin_approx_sqrt18b_tb is
+architecture sim of psi_fix_lin_approx_gaussify20b_tb is
 
 	-- constants
-	constant InFmt_c		: PsiFixFmt_t		:= (0, 0, 20);
-	constant OutFmt_c		: PsiFixFmt_t		:= (0, 0, 17);
+	constant InFmt_c		: PsiFixFmt_t		:= (1, 0, 19);
+	constant OutFmt_c		: PsiFixFmt_t		:= (1, 0, 19);
 	constant ClkPeriod_c	: time				:= 10 ns;
 
 	-- Signals
@@ -53,7 +53,7 @@ architecture sim of psi_fix_lin_approx_sqrt18b_tb is
 	
 begin
 
-	i_dut : entity work.psi_fix_lin_approx_sqrt18b 
+	i_dut : entity work.psi_fix_lin_approx_gaussify20b 
 		port map (
 			-- Control Signals
 			Clk			=> Clk,
