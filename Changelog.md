@@ -1,3 +1,14 @@
+## 2.3.0
+
+* Added Features
+  * Implemented psi\_fix\_white\_noise (white noise generator, uniform distribution)
+  * Implemented psi\_fix\_noise\_awgn (white noise generator, gaussian distribution)
+* Bugfixes
+  * Made GHDL simulation working by skipping psi\_fix\_mod\_cplx2real (only in GHDL) because it fails due to a GHDL bug.
+* Changed Dependencies
+  * PsiSim >= 2.1.0
+  * en\_cl\_fix >= 1.1.2
+
 ## 2.2.0
 
 * Added Features
@@ -27,6 +38,10 @@
   * Modified entity and port names for better consistency
   * Use en\_cl\_fix package from Enclustra for fixed point math
   * Removed psi\_fix\_cordic\_abs\_pl (deprecated since 1.8.0)
+* Changed Dependencies
+  * PsiSim >= 2.0.0
+  * en\_cl\_fix >= 1.1.1
+  * psi\_common >= 2.0.0
 
 ## 1.9.0
 
