@@ -156,7 +156,7 @@ begin
 								Rdy			=> PsiTextfile_SigUnused,
 								Vld			=> OutVld,
 								Data		=> SigOut,
-								Filepath	=> FileFolder_g & choose(StimuliSet_g = "S", "/output_S.txt", "/Output_U.txt"),
+								Filepath	=> FileFolder_g & choose(StimuliSet_g = "S", "/output_S.txt", "/output_U.txt"),
 								IgnoreLines => 1);
 		
 		-- end of process !DO NOT EDIT!
