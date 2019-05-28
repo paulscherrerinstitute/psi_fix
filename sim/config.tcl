@@ -276,6 +276,8 @@ tb_run_add_pre_script "python3" "psi_fix_mod_cplx2real_app.py" "../testbench/psi
 set dataDir [file normalize "../testbench/psi_fix_mod_cplx2real_tb/Data"]
 tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gClkPerSpl_g=1" \
 						"-gFileFolder_g=$dataDir -gClkPerSpl_g=10"
+#Skipped for GHDL because of bug in GHDL (sin() is not 100% bittrue)
+tb_run_skip GHDL
 add_tb_run
 
 create_tb_run "psi_fix_lut_gen_tb"
