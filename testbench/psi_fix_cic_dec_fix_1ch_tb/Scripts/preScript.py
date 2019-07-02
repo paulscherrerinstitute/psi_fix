@@ -49,6 +49,7 @@ configs = []
 configs.append(CfgInfo(order=3, ratio=10, diffDel=1, gainCorr=True))
 configs.append(CfgInfo(order=4, ratio=9, diffDel=2, gainCorr=True))
 configs.append(CfgInfo(order=4, ratio=6, diffDel=2, gainCorr=False))
+configs.append(CfgInfo(order=6, ratio=5001, diffDel=2, gainCorr=True))
 
 inSig = []
 outSig = []
