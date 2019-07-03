@@ -7,10 +7,12 @@ import os
 import sys
 import unittest
 
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+
 ##################################
 # Modelsim
 ##################################
-os.chdir("../sim")
+os.chdir(THIS_DIR + "/../sim")
 os.system("vsim -batch -do ci.do -logfile Transcript.transcript")
 
 with open("Transcript.transcript") as f:
@@ -26,7 +28,7 @@ if "SIMULATIONS COMPLETED SUCCESSFULLY" not in content:
 ##################################
 # Python Unit Test
 ##################################
-os.chdir("../unittest")
+os.chdir(THIS_DIR + "/../unittest")
 sys.path.append(".")
 from psi_fix_pkg_test import *
 res = unittest.main(exit=False)
