@@ -49,7 +49,7 @@ end entity;
 
 architecture rtl of psi_fix_cic_dec_fix_1ch is 
 	-- Constants
-	constant CicGain_c				: integer			:= (Ratio_g*DiffDelay_g)**Order_g;
+	constant CicGain_c				: real				:= (real(Ratio_g)*real(DiffDelay_g))**real(Order_g);
 	constant CicAddBits_c			: integer			:= log2ceil(CicGain_c);
 	constant Shift_c				: integer			:= CicAddBits_c;
 	constant AccuFmt_c				: PsiFixFmt_t		:= (InFmt_g.S, InFmt_g.I+CicAddBits_c, InFmt_g.F);
