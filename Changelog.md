@@ -1,3 +1,12 @@
+## 2.3.2
+
+* Added Features
+  * Added dependency resolution script
+* Bugfixes
+  * Fixed simulation mismatch for CIC filters with high gain
+* Changed Dependencies
+  * psi\_common >= 2.5.0
+
 ## 2.3.1
 
 * Added Features
