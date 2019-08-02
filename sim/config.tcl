@@ -183,7 +183,8 @@ tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_cic_dec_fix
 set dataDir [file normalize "../testbench/psi_fix_cic_dec_fix_1ch_tb/Data"]
 tb_run_add_arguments 	"-gOrder_g=3 -gRatio_g=10 -gDiffDelay_g=1 -gAutoGainCorr_g=True -gInFile_g=input_o3_r10_dd1_gcTrue.txt -gOutFile_g=output_o3_r10_dd1_gcTrue.txt -gDataDir_g=$dataDir -gIdleCycles_g=5" \
 						"-gOrder_g=4 -gRatio_g=9 -gDiffDelay_g=2 -gAutoGainCorr_g=True -gInFile_g=input_o4_r9_dd2_gcTrue.txt -gOutFile_g=output_o4_r9_dd2_gcTrue.txt -gDataDir_g=$dataDir -gIdleCycles_g=0" \
-						"-gOrder_g=4 -gRatio_g=6 -gDiffDelay_g=2 -gAutoGainCorr_g=False -gInFile_g=input_o4_r6_dd2_gcFalse.txt -gOutFile_g=output_o4_r6_dd2_gcFalse.txt -gDataDir_g=$dataDir -gIdleCycles_g=0"
+						"-gOrder_g=4 -gRatio_g=6 -gDiffDelay_g=2 -gAutoGainCorr_g=False -gInFile_g=input_o4_r6_dd2_gcFalse.txt -gOutFile_g=output_o4_r6_dd2_gcFalse.txt -gDataDir_g=$dataDir -gIdleCycles_g=0" \
+						"-gOrder_g=6 -gRatio_g=5001 -gDiffDelay_g=2 -gAutoGainCorr_g=True -gInFile_g=input_o6_r5001_dd2_gcTrue.txt -gOutFile_g=output_o6_r5001_dd2_gcTrue.txt -gDataDir_g=$dataDir -gIdleCycles_g=0"
 
 add_tb_run
 

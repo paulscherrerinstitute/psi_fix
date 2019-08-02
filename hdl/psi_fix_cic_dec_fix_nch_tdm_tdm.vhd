@@ -50,15 +50,15 @@ end entity;
 
 architecture rtl of psi_fix_cic_dec_fix_nch_tdm_tdm is 
 	-- Constants
-	constant CicGain_c				: integer			:= (Ratio_g*DiffDelay_g)**Order_g;
-	constant CicAddBits_c			: integer			:= log2ceil(CicGain_c);
+	constant CicGain_c				: real				:= (real(Ratio_g)*real(DiffDelay_g))**real(Order_g);
+	constant CicAddBits_c			: natural			:= log2ceil(CicGain_c);
 	constant Shift_c				: integer			:= CicAddBits_c;
 	constant AccuFmt_c				: PsiFixFmt_t		:= (InFmt_g.S, InFmt_g.I+CicAddBits_c, InFmt_g.F);
 	constant DiffFmt_c				: PsiFixFmt_t		:= (OutFmt_g.S, InFmt_g.I, OutFmt_g.F + Order_g + 1);
 	constant GcInFmt_c				: PsiFixFmt_t		:= (1, OutFmt_g.I, work.psi_common_math_pkg.min(24-OutFmt_g.I, DiffFmt_c.F));
 	constant GcCoefFmt_c			: PsiFixFmt_t		:= (0, 1, 16);
 	constant GcMultFmt_c			: PsiFixFmt_t		:= (1, GcInFmt_c.I+GcCoefFmt_c.I, GcInFmt_c.F+GcCoefFmt_c.F);
-	constant Gc_c					: std_logic_vector(PsiFixSize(GcCoefFmt_c)-1 downto 0) := PsiFixFromReal(2.0**real(CicAddBits_c)/real(CicGain_c), GcCoefFmt_c);
+	constant Gc_c					: std_logic_vector(PsiFixSize(GcCoefFmt_c)-1 downto 0) := PsiFixFromReal(2.0**real(CicAddBits_c)/CicGain_c, GcCoefFmt_c);
 	
 	-- Types
 	type Accus_t is array (natural range <>) of std_logic_vector(PsiFixSize(AccuFmt_c)-1 downto 0);
