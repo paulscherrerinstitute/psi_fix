@@ -171,8 +171,13 @@ class psi_fix_lin_approx:
         if designMode:
             minIdx = self._GetTblIdx(cfg.validRange[0])
             maxIdx = self._GetTblIdx(cfg.validRange[1])
-            print("gradients: {} ... {}".format(min(gradients[minIdx:maxIdx+1]), max(gradients[minIdx:maxIdx+1])))
-            print("offsets: {} ... {}".format(min(offsets[minIdx:maxIdx+1]), max(offsets[minIdx:maxIdx+1])))
+            #For input containing negativ numbers, the negative numbers are stored in the upper half of the table.
+            if minIdx < maxIdx:
+                usedIdx = range(minIdx, maxIdx+1)
+            else:
+                usedIdx = list(range(0,minIdx+1)) + list(range(maxIdx,len(gradients)))
+            print("gradients: {} ... {}".format(min(gradients[usedIdx]), max(gradients[usedIdx])))
+            print("offsets: {} ... {}".format(min(offsets[usedIdx]), max(offsets[usedIdx])))
             print("table memory width: {}".format(PsiFixSize(self.cfg.offsFmt)+PsiFixSize(self.cfg.gradFmt)))
         self.gradTable = PsiFixFromReal(gradients, self.cfg.gradFmt, errSat=False)
         self.offsTable = PsiFixFromReal(offsets, self.cfg.offsFmt, errSat=False)
