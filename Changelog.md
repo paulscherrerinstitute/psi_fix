@@ -1,3 +1,8 @@
+## 2.3.3
+
+* Bugfixes
+  *  For *psi\_fix\_lin\_approx* the Design mode of the python modl did crash for signed input ranges (no effect on implementation) 
+
 ## 2.3.2
 
 * Added Features
