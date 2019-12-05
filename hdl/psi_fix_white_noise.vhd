@@ -84,7 +84,7 @@ begin
 		end loop;
 		
 		-- *** Update LFSRs ***
-		if InVld then
+		if InVld = '1' then
 			for i in 0 to OutBits_c-1 loop
 				v.Lfsr(i) 		:= ShiftLeft(r.Lfsr(i), 1);
 				v.Lfsr(i)(0)	:= r.Lfsr(i)(31) xor r.Lfsr(i)(20) xor r.Lfsr(i)(26) xor r.Lfsr(i)(25);
