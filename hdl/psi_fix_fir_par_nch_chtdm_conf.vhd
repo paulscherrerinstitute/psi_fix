@@ -35,11 +35,11 @@ entity psi_fix_fir_par_nch_chtdm_conf is
 		OutFmt_g				: PsiFixFmt_t	:= (1, 0, 17);			-- $$ constant=(1,2,13) $$
 		CoefFmt_g				: PsiFixFmt_t	:= (1, 0, 17);			-- $$ constant=(1,0,17) $$
 		Channels_g				: natural		:= 1;					-- $$ export=true $$
-		Taps_g					: natural		:= 13;					-- $$ export=true $$
+		Taps_g					: natural		:= 48;					-- $$ export=true $$
 		Rnd_g					: PsiFixRnd_t	:= PsiFixRound;
 		Sat_g					: PsiFixSat_t	:= PsiFixSat;
 		UseFixCoefs_g			: boolean		:= true;
-		FixCoefs_g				: t_areal		:= (0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.11, 0.12, 0.13)	
+		FixCoefs_g				: t_areal		:= (0.0, 0.0)	
 	);
 	port (
 		-- Control Signals
