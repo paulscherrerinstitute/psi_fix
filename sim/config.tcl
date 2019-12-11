@@ -57,6 +57,8 @@ add_sources $LibPath {
 add_sources "../hdl" {
 	psi_fix_fir_dec_ser_nch_chpar_conf.vhd \
 	psi_fix_fir_dec_ser_nch_chtdm_conf.vhd \
+	psi_fix_mult_add_stage.vhd \
+	psi_fix_fir_par_nch_chtdm_conf.vhd \
 	psi_fix_lin_approx_calc.vhd \
 	psi_fix_lin_approx_sin18b.vhd \
 	psi_fix_lin_approx_sin18b_dual.vhd \
@@ -100,6 +102,8 @@ add_sources "../testbench" {
 	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_tb_case1_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_tb.vhd \
 	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_fix_coef_tb.vhd \
+	psi_fix_fir_par_nch_chtdm_conf_tb/psi_fix_fir_par_nch_chtdm_conf_tb_coefs_pkg.vhd \
+	psi_fix_fir_par_nch_chtdm_conf_tb/psi_fix_fir_par_nch_chtdm_conf_tb.vhd \
 	psi_fix_bin_div_tb/psi_fix_bin_div_tb.vhd \
 	psi_fix_cic_dec_fix_1ch_tb/psi_fix_cic_dec_fix_1ch_tb.vhd \
 	psi_fix_cic_int_fix_1ch_tb/psi_fix_cic_int_fix_1ch_tb.vhd \
@@ -170,6 +174,15 @@ tb_run_add_arguments 	"-gStimuliPath_g=$dataDir -gDutyCycle_g=32 -gRamBehavior_g
 add_tb_run
 
 create_tb_run "psi_fix_fir_dec_ser_nch_chtdm_conf_fix_coef_tb"
+add_tb_run
+
+create_tb_run "psi_fix_fir_par_nch_chtdm_conf_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_fir_par_nch_chtdm_conf_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_fir_par_nch_chtdm_conf_tb/Data"]
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gChannels_g=1 -gTaps_g=48 -gClkPerSpl_g=1 -gUseFixCoefs_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=1 -gUseFixCoefs_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=1 -gTaps_g=48 -gClkPerSpl_g=5 -gUseFixCoefs_g=true" \
+						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=5 -gUseFixCoefs_g=true"
 add_tb_run
 
 create_tb_run "psi_fix_bin_div_tb"
