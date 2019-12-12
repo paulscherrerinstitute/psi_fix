@@ -31,6 +31,7 @@ use work.psi_fix_pkg.all;
 -- $$ processes=stim,check $$
 entity psi_fix_mod_cplx2real is
 	generic(RstPol_g  : std_logic   := '1'; 	   -- $$ constant = '1' $$
+            PlStages_g : integer range 5 to 6 := 5;
 	        InpFmt_g  : PsiFixFmt_t := (1, 1, 15); -- $$ constant=(1,1,15) $$
 	        CoefFmt_g : PsiFixFmt_t := (1, 1, 15); -- $$ constant=(1,1,15) $$
 	        IntFmt_g : PsiFixFmt_t  := (1, 1, 15); -- $$ constant=(1,1,15) $$
@@ -87,7 +88,9 @@ architecture rtl of psi_fix_mod_cplx2real is
 	constant table_cos                    : coef_array_t := coef_cos_array_func;
 	-------------------------------------------------------------------------------
 	signal sin_s                          : std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);
+	signal sin1_s                         : std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);						  
 	signal cos_s                          : std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);
+	signal cos1_s                         : std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);
 	signal mult_i_s                       : std_logic_vector(PsiFixSize(MultFmt_c) - 1 downto 0);
 	signal mult_i_dff_s                   : std_logic_vector(PsiFixSize(IntFmt_g) - 1 downto 0);
 	signal mult_q_s                       : std_logic_vector(PsiFixSize(MultFmt_c) - 1 downto 0);
@@ -100,13 +103,15 @@ architecture rtl of psi_fix_mod_cplx2real is
 	-------------------------------------------------------------------------------
 	--signal cos_dff_s                      : std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);
 	--signal sin_dff_s                      : std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);
-	signal str1_s, str2_s, str3_s, str4_s : std_logic;
+	signal str1_s, str2_s, str3_s, str4_s, str5_s : std_logic;
 	
 	--uncomment for debugging
 	--signal dbg_multi_s, dbg_multq_s       : real:=0.0;
 	--signal dbg_cos_s, dbg_sin_s           : real:=0.0;
 	signal datInp_s : std_logic_vector(PsiFixSize(InpFmt_g) - 1 downto 0);
+	signal datInp1_s : std_logic_vector(PsiFixSize(InpFmt_g) - 1 downto 0);
 	signal datQua_s : std_logic_vector(PsiFixSize(InpFmt_g) - 1 downto 0);
+	signal datQua1_s : std_logic_vector(PsiFixSize(InpFmt_g) - 1 downto 0);
 
 begin
 	------------------------------------------------
@@ -152,33 +157,52 @@ begin
 				str2_s <= '0';
 				str3_s <= '0';
 				str4_s <= '0';
+				str5_s <= '0';
 			else
 				-- *** stage 1 ***
 				str1_s       <= InVld;
 				datInp_s     <= InInpDat;
 				datQua_s     <= InQuaDat;
 				
-				-- *** stage 2 ***
+				-- *** stage 2 (optional) ***
+				sin1_s <= sin_s;
+				cos1_s <= cos_s;
 				str2_s       <= str1_s;
+				datInp1_s <= datInp_s;
+				datQua1_s <= datQua_s;
+				
+				-- *** stage 3 ***
+				if PlStages_g > 5 then
+					str3_s       <= str2_s;
+					mult_i_s     <= PsiFixMult(sin1_s, CoefFmt_g,
+											   datInp1_s, InpFmt_g,
+											   MultFmt_c, PsiFixTrunc, PsiFixWrap);
+					mult_q_s     <= PsiFixMult(cos1_s, CoefFmt_g,
+											   datQua1_s, InpFmt_g,
+											   MultFmt_c, PsiFixTrunc, PsiFixWrap);
+				else
+					str3_s       <= str1_s;
 				mult_i_s     <= PsiFixMult(sin_s, CoefFmt_g,
 				                           datInp_s, InpFmt_g,
 				                           MultFmt_c, PsiFixTrunc, PsiFixWrap);
 				mult_q_s     <= PsiFixMult(cos_s, CoefFmt_g,
 				                           datQua_s, InpFmt_g,
 				                           MultFmt_c, PsiFixTrunc, PsiFixWrap);
-				-- *** stage 3 ***
-				str3_s       <= str2_s;
+				end if;
+											   
+				-- *** stage 4 ***
+				str4_s       <= str3_s;
 				mult_i_dff_s <= PsiFixResize(mult_i_s, MultFmt_c, IntFmt_g, PsiFixTrunc, PsiFixWrap);
 				mult_q_dff_s <= PsiFixResize(mult_q_s, MultFmt_c, IntFmt_g, PsiFixTrunc, PsiFixWrap);
 				
-				-- *** stage 4 ***
-				str4_s       <= str3_s;
+				-- *** stage 5 ***
+				str5_s       <= str4_s;
 				sum_s        <= PsiFixAdd(mult_i_dff_s, IntFmt_g,
 				                          mult_q_dff_s, IntFmt_g,
 				                          AddFmt_c, PsiFixTrunc, PsiFixWrap);
-				-- *** stage 5 ***
+				-- *** stage 6 ***
 				OutDat       <= PsiFixResize(sum_s, AddFmt_c, OutFmt_g, PsiFixRound, PsiFixSat);
-				OutVld        <= str4_s;
+				OutVld        <= str5_s;
 			end if;
 		end if;
 	end process;

@@ -26,6 +26,7 @@ use work.psi_fix_pkg.all;
 entity psi_fix_mod_cplx2real_tb is 
 	generic(FileFolder_g : string    := "../testbench/psi_fix_mod_cplx2real_tb/Data";
 	        FreqClock_g  : real      := 100.0e6;
+			PlStages_g   : integer range 5 to 6 := 5;
 	        RstPol_g     : std_logic := '1';
 			ClkPerSpl_g	 : integer	 := 1);
 end entity;
@@ -62,6 +63,7 @@ begin
 	DUT : entity work.psi_fix_mod_cplx2real
 		generic map(
 			RstPol_g  => RstPol_g,
+			PlStages_g => PlStages_g,
 			InpFmt_g  => InFixFmt_c,
 			CoefFmt_g => CoefFixFmt_c,
 			IntFmt_g  => InternalFmt_c,
