@@ -83,7 +83,8 @@ add_sources "../hdl" {
 	psi_fix_complex_abs.vhd \
 	psi_fix_phase_unwrap.vhd \
 	psi_fix_white_noise.vhd \
-	psi_fix_noise_awgn.vhd \
+    psi_fix_noise_awgn.vhd \
+    psi_fix_fir_3tap_hbw_dec2.vhd \
 } -tag src
 
 # testbenches
@@ -127,7 +128,8 @@ add_sources "../testbench" {
 	psi_fix_complex_abs_tb/psi_fix_complex_abs_tb.vhd \
 	psi_fix_phase_unwrap_tb/psi_fix_phase_unwrap_tb.vhd \
 	psi_fix_white_noise_tb/psi_fix_white_noise_tb.vhd \
-	psi_fix_noise_awgn_tb/psi_fix_noise_awgn_tb.vhd \
+    psi_fix_noise_awgn_tb/psi_fix_noise_awgn_tb.vhd \
+    psi_fix_fir_3tap_hbw_dec2_tb/psi_fix_fir_3tap_hbw_dec2_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -364,7 +366,19 @@ tb_run_add_arguments "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5" \
 add_tb_run
 
 
+create_tb_run "psi_fix_fir_3tap_hbw_dec2_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_fir_3tap_hbw_dec2_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_fir_3tap_hbw_dec2_tb/Data"]
+tb_run_add_arguments "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5 -gChannels_g=1 -gInFile_g=inChannels1SeparateTrue.txt -gOutFile_g=outChannels1SeparateTrue.txt"  \
+    "-gFileFolder_g=$dataDir -gVldDutyCycle_g=1 -gChannels_g=2 -gSeparate_g=false -gInFile_g=inChannels2SeparateFalse.txt -gOutFile_g=outChannels2SeparateFalse.txt" \
+    "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5 -gChannels_g=4 -gSeparate_g=false -gInFile_g=inChannels4SeparateFalse.txt -gOutFile_g=outChannels4SeparateFalse.txt" \
+    "-gFileFolder_g=$dataDir -gVldDutyCycle_g=1 -gChannels_g=1 -gInFile_g=inChannels1SeparateTrue.txt -gOutFile_g=outChannels1SeparateTrue.txt" \
+    "-gFileFolder_g=$dataDir -gVldDutyCycle_g=1 -gChannels_g=2 -gInFile_g=inChannels2SeparateTrue.txt -gOutFile_g=outChannels2SeparateTrue.txt" \
+    "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5 -gChannels_g=2 -gInFile_g=inChannels2SeparateTrue.txt -gOutFile_g=outChannels2SeparateTrue.txt" \
+    "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5 -gChannels_g=4 -gInFile_g=inChannels4SeparateTrue.txt -gOutFile_g=outChannels4SeparateTrue.txt"
+    
 
+add_tb_run
 
 
 
