@@ -40,15 +40,13 @@ MAX_CHANNELS = 4
 DATA_LEN = 512
 
 inData = PsiFixFromReal(np.random.random((MAX_CHANNELS,DATA_LEN))*0.9999-0.5, inFmt)
-inDataShifted = inData.copy()
 outData = np.zeros((MAX_CHANNELS,DATA_LEN//2))
 
 for ch in range(0, MAX_CHANNELS):
     inData[ch,0:16] = 0.0
     f = psi_fix_fir(inFmt, outFmt, coefFmt)
     outData[ch] = f.Filter(inData[ch], 2, h)
-    inDataShifted[ch,0] = inData[ch,0]
-    inDataShifted[ch,1:]=inData[ch,0:-1]
+    inData[ch,1:]=inData[ch,0:-1]
 
 for separate in [True, False]:
     for channels in [1,2,4]:
@@ -60,10 +58,10 @@ for separate in [True, False]:
                         line = line + "{} {} ".format(int(PsiFixGetBitsAsInt(inData[ch,i], inFmt)), int(PsiFixGetBitsAsInt(inData[ch,i+1], inFmt)))
                     f.writelines(line+"\n")
             else:
-                for i in range(0,inDataShifted.shape[1],2*channels):
+                for i in range(0,inData.shape[1],2*channels):
                     line = ""
                     for ch in range(0,2*channels,2):
-                        line = line + "{} {} ".format(int(PsiFixGetBitsAsInt(inDataShifted[1,i+ch], inFmt)), int(PsiFixGetBitsAsInt(inDataShifted[1,i+ch+1], inFmt)))
+                        line = line + "{} {} ".format(int(PsiFixGetBitsAsInt(inData[1,i+ch], inFmt)), int(PsiFixGetBitsAsInt(inData[1,i+ch+1], inFmt)))
                     f.writelines(line+"\n")
 
         with open(STIM_DIR + "/outChannels{}Separate{}.txt".format(int(channels), separate), "w+") as f:                

@@ -113,11 +113,11 @@ begin
       if Separate_g then
         for v_i in 0 to inDataS'high/2 loop
           -- first input
-          v.in3Sig(v_i) := r.InData(v_i*2);
+          v.in3Sig(v_i) := r.InData(v_i*2+1);
           -- second input
-          v.in3Sig(v_i+1*Channels_g) := r.InData(v_i*2+1);
+          v.in3Sig(v_i+1*Channels_g) := InDataS(v_i*2);
           -- third input
-          v.in3Sig(v_i+2*Channels_g) := InDataS(v_i*2);
+          v.in3Sig(v_i+2*Channels_g) := InDataS(v_i*2+1);
         end loop;
       else
         v.in3Sig(0) := r.InData(r.InData'high);
@@ -177,4 +177,5 @@ begin
   end process;
 
 end;
+
 
