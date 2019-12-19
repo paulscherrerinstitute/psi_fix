@@ -2,10 +2,12 @@
 
 This library contains bittrue implementations in VHDL (for synthesis) and Python (for fast simulations) of standard signal processing components. For the fixed-point arithmetics, the library *en\_cl\_fix* provided by [Enclustra GmbH](www.enclustra.com) is used.
 
-## Maintainers
-Oliver Bründler [oliver.bruendler@psi.ch]
-
+## Maintainer
 Radoslaw Rybaniec [radoslaw.rybaniec@psi.ch]
+
+## Authors
+* Oliver Bründler [oli.bruendler@gmx.ch]
+* Radoslaw Rybaniec [radoslaw.rybaniec@psi.ch]
 
 ## License
 This library is published under [PSI HDL Library License](License.txt), which is [LGPL](LGPL2_1.txt) plus some additional exceptions to clarify the LGPL terms in the context of firmware development.
