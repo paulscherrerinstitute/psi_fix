@@ -1,3 +1,16 @@
+## 2.4.0
+
+* Added Features
+  * Implemented psi\_fix\_mult\_add\_stage (multiply-add stage)
+  * Implemented psi\_fix\_fir\_par\_nch\_chtdm\_conf (fully parallel FIR filter)
+  * Implemented psi\_fix\_fir\_dec\_semi\_nch\_chtdm\_conf (semi parallel TDM-multi-channel FIR filter)
+  * Implemented psi\_fix\_fir\_3tap\_hbw\_dec2 (decimating by 2 half-bandwidth filter)
+  * In psi\_fix\_mod\_cplx2real added option for additional pipeline stage for better timing performance
+* Improvements
+  * In psi\_fix\_cic\_int\_fix\_1ch added more pipeline registers for gain compensation to improve timing
+* Changed Dependencies
+  * psi\_common >= 2.5.1
+
 ## 2.3.3
 
 * Bugfixes
