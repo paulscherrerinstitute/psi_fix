@@ -57,6 +57,9 @@ add_sources $LibPath {
 add_sources "../hdl" {
 	psi_fix_fir_dec_ser_nch_chpar_conf.vhd \
 	psi_fix_fir_dec_ser_nch_chtdm_conf.vhd \
+	psi_fix_mult_add_stage.vhd \
+	psi_fix_fir_par_nch_chtdm_conf.vhd \
+	psi_fix_fir_dec_semi_nch_chtdm_conf.vhd \
 	psi_fix_lin_approx_calc.vhd \
 	psi_fix_lin_approx_sin18b.vhd \
 	psi_fix_lin_approx_sin18b_dual.vhd \
@@ -80,7 +83,8 @@ add_sources "../hdl" {
 	psi_fix_complex_abs.vhd \
 	psi_fix_phase_unwrap.vhd \
 	psi_fix_white_noise.vhd \
-	psi_fix_noise_awgn.vhd \
+    psi_fix_noise_awgn.vhd \
+    psi_fix_fir_3tap_hbw_dec2.vhd \
 } -tag src
 
 # testbenches
@@ -100,6 +104,10 @@ add_sources "../testbench" {
 	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_tb_case1_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_tb.vhd \
 	psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_fix_coef_tb.vhd \
+	psi_fix_fir_par_nch_chtdm_conf_tb/psi_fix_fir_par_nch_chtdm_conf_tb_coefs_pkg.vhd \
+	psi_fix_fir_par_nch_chtdm_conf_tb/psi_fix_fir_par_nch_chtdm_conf_tb.vhd \
+	psi_fix_fir_dec_semi_nch_chtdm_conf_tb/psi_fix_fir_dec_semi_nch_chtdm_conf_tb_coefs_pkg.vhd \
+	psi_fix_fir_dec_semi_nch_chtdm_conf_tb/psi_fix_fir_dec_semi_nch_chtdm_conf_tb.vhd \
 	psi_fix_bin_div_tb/psi_fix_bin_div_tb.vhd \
 	psi_fix_cic_dec_fix_1ch_tb/psi_fix_cic_dec_fix_1ch_tb.vhd \
 	psi_fix_cic_int_fix_1ch_tb/psi_fix_cic_int_fix_1ch_tb.vhd \
@@ -120,7 +128,8 @@ add_sources "../testbench" {
 	psi_fix_complex_abs_tb/psi_fix_complex_abs_tb.vhd \
 	psi_fix_phase_unwrap_tb/psi_fix_phase_unwrap_tb.vhd \
 	psi_fix_white_noise_tb/psi_fix_white_noise_tb.vhd \
-	psi_fix_noise_awgn_tb/psi_fix_noise_awgn_tb.vhd \
+    psi_fix_noise_awgn_tb/psi_fix_noise_awgn_tb.vhd \
+    psi_fix_fir_3tap_hbw_dec2_tb/psi_fix_fir_3tap_hbw_dec2_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -171,6 +180,29 @@ add_tb_run
 
 create_tb_run "psi_fix_fir_dec_ser_nch_chtdm_conf_fix_coef_tb"
 add_tb_run
+
+create_tb_run "psi_fix_fir_par_nch_chtdm_conf_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_fir_par_nch_chtdm_conf_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_fir_par_nch_chtdm_conf_tb/Data"]
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gChannels_g=1 -gTaps_g=48 -gClkPerSpl_g=1 -gUseFixCoefs_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=1 -gUseFixCoefs_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=1 -gTaps_g=48 -gClkPerSpl_g=5 -gUseFixCoefs_g=true" \
+						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=5 -gUseFixCoefs_g=true"
+add_tb_run
+
+create_tb_run "psi_fix_fir_dec_semi_nch_chtdm_conf_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_fir_dec_semi_nch_chtdm_conf_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_fir_dec_semi_nch_chtdm_conf_tb/Data"]
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gChannels_g=1 -gTaps_g=48 -gClkPerSpl_g=10 -gUseFixCoefs_g=true -gMultipliers_g=8 -gRatio_g=3 -gRamBehavior_g=WBR -gFullInpRateSupport_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=10 -gUseFixCoefs_g=false  -gMultipliers_g=10 -gRatio_g=3 -gRamBehavior_g=RBW -gFullInpRateSupport_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=2 -gUseFixCoefs_g=true  -gMultipliers_g=8 -gRatio_g=3 -gRamBehavior_g=RBW -gFullInpRateSupport_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=2 -gTaps_g=160 -gClkPerSpl_g=2 -gUseFixCoefs_g=false  -gMultipliers_g=40 -gRatio_g=12 -gRamBehavior_g=RBW -gFullInpRateSupport_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=2 -gUseFixCoefs_g=true  -gMultipliers_g=24 -gRatio_g=1 -gRamBehavior_g=WBR -gFullInpRateSupport_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=1 -gTaps_g=48 -gClkPerSpl_g=10 -gUseFixCoefs_g=false -gMultipliers_g=8 -gRatio_g=3 -gRamBehavior_g=WBR -gFullInpRateSupport_g=true" \
+						"-gFileFolder_g=$dataDir -gChannels_g=1 -gTaps_g=48 -gClkPerSpl_g=1 -gUseFixCoefs_g=true -gMultipliers_g=16 -gRatio_g=3 -gRamBehavior_g=WBR -gFullInpRateSupport_g=true" \
+						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=1 -gUseFixCoefs_g=false -gMultipliers_g=16 -gRatio_g=3 -gRamBehavior_g=WBR -gFullInpRateSupport_g=true"
+add_tb_run
+
 
 create_tb_run "psi_fix_bin_div_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_bin_div_tb/Scripts"
@@ -284,8 +316,10 @@ add_tb_run
 create_tb_run "psi_fix_mod_cplx2real_tb"
 tb_run_add_pre_script "python3" "psi_fix_mod_cplx2real_app.py" "../testbench/psi_fix_mod_cplx2real_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_mod_cplx2real_tb/Data"]
-tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gClkPerSpl_g=1" \
-						"-gFileFolder_g=$dataDir -gClkPerSpl_g=10"
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gClkPerSpl_g=1 -gPlStages_g=5" \
+						"-gFileFolder_g=$dataDir -gClkPerSpl_g=1 -gPlStages_g=6" \
+						"-gFileFolder_g=$dataDir -gClkPerSpl_g=10 -gPlStages_g=5" \
+						"-gFileFolder_g=$dataDir -gClkPerSpl_g=10 -gPlStages_g=6"
 #Skipped for GHDL because of bug in GHDL (sin() is not 100% bittrue)
 tb_run_skip GHDL
 add_tb_run
@@ -332,7 +366,19 @@ tb_run_add_arguments "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5" \
 add_tb_run
 
 
+create_tb_run "psi_fix_fir_3tap_hbw_dec2_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_fir_3tap_hbw_dec2_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_fir_3tap_hbw_dec2_tb/Data"]
+tb_run_add_arguments "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5 -gChannels_g=1 -gInFile_g=inChannels1SeparateTrue.txt -gOutFile_g=outChannels1SeparateTrue.txt"  \
+    "-gFileFolder_g=$dataDir -gVldDutyCycle_g=1 -gChannels_g=2 -gSeparate_g=false -gInFile_g=inChannels2SeparateFalse.txt -gOutFile_g=outChannels2SeparateFalse.txt" \
+    "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5 -gChannels_g=4 -gSeparate_g=false -gInFile_g=inChannels4SeparateFalse.txt -gOutFile_g=outChannels4SeparateFalse.txt" \
+    "-gFileFolder_g=$dataDir -gVldDutyCycle_g=1 -gChannels_g=1 -gInFile_g=inChannels1SeparateTrue.txt -gOutFile_g=outChannels1SeparateTrue.txt" \
+    "-gFileFolder_g=$dataDir -gVldDutyCycle_g=1 -gChannels_g=2 -gInFile_g=inChannels2SeparateTrue.txt -gOutFile_g=outChannels2SeparateTrue.txt" \
+    "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5 -gChannels_g=2 -gInFile_g=inChannels2SeparateTrue.txt -gOutFile_g=outChannels2SeparateTrue.txt" \
+    "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5 -gChannels_g=4 -gInFile_g=inChannels4SeparateTrue.txt -gOutFile_g=outChannels4SeparateTrue.txt"
+    
 
+add_tb_run
 
 
 

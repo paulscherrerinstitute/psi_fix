@@ -83,10 +83,12 @@ architecture rtl of psi_fix_cic_int_fix_1ch is
 		-- Accu section
 		Accu		: Accus_t(1 to Order_g);		
 		-- GC Stages
-		GcVld		: std_logic_vector(0 to 2);
+		GcVld		: std_logic_vector(0 to 4);
 		GcIn_0		: std_logic_vector(PsiFixSize(GcInFmt_c)-1 downto 0);
-		GcMult_1	: std_logic_vector(PsiFixSize(GcMultFmt_c)-1 downto 0);
-		GcOut_2		: std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);
+		GcIn_1		: std_logic_vector(PsiFixSize(GcInFmt_c)-1 downto 0);
+		GcIn_2		: std_logic_vector(PsiFixSize(GcInFmt_c)-1 downto 0);
+		GcMult_3	: std_logic_vector(PsiFixSize(GcMultFmt_c)-1 downto 0);
+		GcOut_4		: std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);
 		-- Output
 		Outp		: std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);
 		OutVld		: std_logic;
@@ -221,22 +223,31 @@ begin
 		if AutoGainCorr_g then
 			-- *** Gain Correction Stage 0 ***
 			if OutRdy_v = '1' then
+				-- *** GC Stage 0 ***
 				v.GcVld(0)	:= r.VldAccu(Order_g);
 				v.GcIn_0	:= PsiFixResize(Sft_v, ShiftOutFmt_c, GcInFmt_c, PsiFixRound, PsiFixSat);
 			
-				-- *** Gain Correction Stage 1 ***
-				v.GcMult_1	:= PsiFixMult(	r.GcIn_0, GcInFmt_c,
+				-- *** GC Stage 1 ***
+				v.GcIn_1	:= r.GcIn_0;
+				
+				-- *** GC Stage 2 ***
+				v.GcIn_2	:= r.GcIn_1;
+			
+				-- *** Gain Correction Stage 3 ***
+				v.GcMult_3	:= PsiFixMult(	r.GcIn_2, GcInFmt_c,
 											Gc_c, GcCoefFmt_c,
 											GcMultFmt_c, PsiFixTrunc, PsiFixWrap);	-- Round/Truncation in next stage
-				v.GcOut_2	:= PsiFixResize(r.GcMult_1, GcMultFmt_c, OutFmt_g, PsiFixRound, PsiFixSat);
+											
+				-- *** Gain Correction Stage 4 ***
+				v.GcOut_4	:= PsiFixResize(r.GcMult_3, GcMultFmt_c, OutFmt_g, PsiFixRound, PsiFixSat);
 			end if;
 		end if;
 		
 		-- *** Output Assignment ***
 		if OutRdy_v = '1' then
 			if AutoGainCorr_g then
-				v.Outp := r.GcOut_2;
-				v.OutVld := r.GcVld(2);
+				v.Outp := r.GcOut_4;
+				v.OutVld := r.GcVld(4);
 			else
 				v.Outp := PsiFixResize(Sft_v, ShiftOutFmt_c, OutFmt_g, PsiFixRound, PsiFixSat);
 				v.OutVld := r.VldAccu(Order_g);
