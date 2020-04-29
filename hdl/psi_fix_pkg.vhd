@@ -211,6 +211,36 @@ package body psi_fix_pkg is
 			return fmtB;
 		end if;
 	end function;
+	
+	function PsiFixStrToInt(	str		: string) return integer is
+		variable Idx_v : integer := str'low;
+		variable IsNeg_v : boolean := false;
+		variable ValAbs_v : integer := 0;
+	begin
+		-- skip leading white-spaces
+		while (Idx_v <= str'high) and str(Idx_v) = ' ' loop
+			Idx_v := Idx_v + 1;
+		end loop;
+		
+		-- Check signal
+		if (Idx_v <= str'high) and (str(Idx_v) = '-') then
+			IsNeg_v := true;
+			Idx_v := Idx_v + 1;
+		end if;
+		
+		-- Parse Integer
+		while (Idx_v <= str'high) and (str(Idx_v) <= '9') and (str(Idx_v) >= '0') loop
+			ValAbs_v := ValAbs_v*10 + (character'pos(str(Idx_v))-character'pos('0'));
+			Idx_v := Idx_v + 1;
+		end loop;
+		
+		-- Return
+		if IsNeg_v then
+			return -ValAbs_v;
+		else
+			return ValAbs_v;
+		end if;
+	end function;
 
 	--------------------------------------------------------------------------
 	-- Conversions between PSI and Enclustra Definitions
@@ -562,9 +592,9 @@ package body psi_fix_pkg is
 		assert FirstCommaIdx_v >= 0 report "PsiFixFmtFromString: First comma not found" severity error;
 		assert SecondCommaIdx_v >= 0 report "PsiFixFmtFromString: Second comman not found" severity error;
 		assert CloseBraceIdx_v >= 0 report "PsiFixFmtFromString: No closing brace found" severity error;		
-		Format_v.S := integer'value(str(OpenBraceIdx_v+1 to FirstCommaIdx_v-1));
-		Format_v.I := integer'value(str(FirstCommaIdx_v+1 to SecondCommaIdx_v-1));
-		Format_v.F := integer'value(str(SecondCommaIdx_v+1 to CloseBraceIdx_v-1));
+		Format_v.S := PsiFixStrToInt(str(OpenBraceIdx_v+1 to FirstCommaIdx_v-1));
+		Format_v.I := PsiFixStrToInt(str(FirstCommaIdx_v+1 to SecondCommaIdx_v-1));
+		Format_v.F := PsiFixStrToInt(str(SecondCommaIdx_v+1 to CloseBraceIdx_v-1));
 		assert (Format_v.S = 0) or (Format_v.S = 1) report "PsiFixFmtFromString: Sign must be 1 or 0" severity error;
 		return Format_v;
 	end function;	
