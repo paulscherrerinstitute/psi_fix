@@ -164,7 +164,7 @@ class psi_fix_lin_approx:
         fullRange = inputRange[1] - inputRange[0]
         step = fullRange / self.cfg.points
         centers = np.arange(inputRange[0] + step / 2, inputRange[1], step)
-        if self.cfg.inFmt.S is 1:
+        if self.cfg.inFmt.S == 1:
             centers = np.concatenate((centers[int(centers.size / 2):], centers[0:int(centers.size / 2)]))
         gradients = derivative(self.cfg.function, centers, dx=1e-6)
         offsets = self.cfg.function(centers)

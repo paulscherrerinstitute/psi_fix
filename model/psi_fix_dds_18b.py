@@ -30,7 +30,7 @@ class psi_fix_dds_18b:
         :param phaseFmt: Format of the phase accumulator
         """
         #check out Fmt
-        if phaseFmt.S is 1:
+        if phaseFmt.S == 1:
             raise ValueError("DwcDdsModel currently only supports unsigned phase formats, got {}".format(phaseFmt))
         self.phaseFmt = phaseFmt
         self.sineApprox = psi_fix_lin_approx(psi_fix_lin_approx.CONFIGS.Sin18Bit)
