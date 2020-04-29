@@ -14,6 +14,7 @@ library ieee;
 library work;
 	use work.psi_fix_pkg.all;
 	use work.psi_tb_txt_util.all;
+	use work.psi_tb_compare_pkg.all;
 	
 
 entity psi_fix_pkg_tb is
@@ -63,6 +64,7 @@ begin
 	-- TB Control
 	-------------------------------------------------------------------------
 	p_control : process
+		variable Fmt_v	: PsiFixFmt_t;
 	begin
 		-- *** PsiFixSize ***
 		print("*** PsiFixSize ***");
@@ -645,7 +647,40 @@ begin
 						PsiFixCompare(	"a!=b",
 										PsiFixFromReal(2.5, (0, 4, 2)), (0, 4, 2),
 										PsiFixFromReal(-1.5, (1, 2, 1)), (1, 2, 1)),
-						"a!=b unsigned signed true");		
+						"a!=b unsigned signed true");	
+						
+						
+		-- *** PsiFixFmtFromString ***
+		print("*** PsiFixFmtFromString ***");		
+		Fmt_v := PsiFixFmtFromString("(1,0,15)");
+		IntCompare(Fmt_v.S, 1, "PsiFixFmtFromString 0.S");
+		IntCompare(Fmt_v.I, 0, "PsiFixFmtFromString 0.I");
+		IntCompare(Fmt_v.F, 15, "PsiFixFmtFromString 0.F");
+		Fmt_v := PsiFixFmtFromString(" (1,0,15)");
+		IntCompare(Fmt_v.S, 1, "PsiFixFmtFromString 1.S");
+		IntCompare(Fmt_v.I, 0, "PsiFixFmtFromString 1.I");
+		IntCompare(Fmt_v.F, 15, "PsiFixFmtFromString 1.F");
+		Fmt_v := PsiFixFmtFromString("(1,2,15) ");
+		IntCompare(Fmt_v.S, 1, "PsiFixFmtFromString 2.S");
+		IntCompare(Fmt_v.I, 2, "PsiFixFmtFromString 2.I");
+		IntCompare(Fmt_v.F, 15, "PsiFixFmtFromString 2.F");
+		Fmt_v := PsiFixFmtFromString("(0 ,0,15)");
+		IntCompare(Fmt_v.S, 0, "PsiFixFmtFromString 3.S");
+		IntCompare(Fmt_v.I, 0, "PsiFixFmtFromString 3.I");
+		IntCompare(Fmt_v.F, 15, "PsiFixFmtFromString 3.F");
+		Fmt_v := PsiFixFmtFromString("(0 ,-3, 15)");
+		IntCompare(Fmt_v.S, 0, "PsiFixFmtFromString 4.S");
+		IntCompare(Fmt_v.I, -3, "PsiFixFmtFromString 4.I");
+		IntCompare(Fmt_v.F, 15, "PsiFixFmtFromString 4.F");
+		Fmt_v := PsiFixFmtFromString("( 0 , 0, -15  )");
+		IntCompare(Fmt_v.S, 0, "PsiFixFmtFromString 5.S");
+		IntCompare(Fmt_v.I, 0, "PsiFixFmtFromString 5.I");
+		IntCompare(Fmt_v.F, -15, "PsiFixFmtFromString 5.F");
+		Fmt_v := PsiFixFmtFromString("(0    , 0 , 15)");
+		IntCompare(Fmt_v.S, 0, "PsiFixFmtFromString 6.S");
+		IntCompare(Fmt_v.I, 0, "PsiFixFmtFromString 6.I");
+		IntCompare(Fmt_v.F, 15, "PsiFixFmtFromString 6.F");
+		
 		wait;
 	end process;
 

@@ -187,6 +187,8 @@ package psi_fix_pkg is
 									
 	function PsiFixSatFromString(	s 	: string)
 									return PsiFixSat_t;
+									
+	function PsiFixFmtFromString(	str	: string) return PsiFixFmt_t;
   
 end psi_fix_pkg;	 
 
@@ -535,6 +537,37 @@ package body psi_fix_pkg is
 	begin
 		return cl_fix_compare(comparison, a, PsiFix2ClFix(aFmt), b, PsiFix2ClFix(bFmt));		
 	end function;
+	
+	-- *** PsiFixFmtFromString ***
+	function PsiFixFmtFromString(	str	: string) return PsiFixFmt_t is
+		variable Format_v 			: PsiFixFmt_t;
+		variable OpenBraceIdx_v		: integer := -1;
+		variable FirstCommaIdx_v	: integer := -1;
+		variable SecondCommaIdx_v	: integer := -1;
+		variable CloseBraceIdx_v	: integer := -1;
+	begin
+		-- Parse Format
+		for i in str'low to str'high loop
+			if (OpenBraceIdx_v = -1) and (str(i) = '(') then
+				OpenBraceIdx_v := i;
+			elsif (FirstCommaIdx_v = -1) and (str(i) = ',') then
+				FirstCommaIdx_v := i;
+			elsif (SecondCommaIdx_v = -1) and (str(i) = ',') then
+				SecondCommaIdx_v := i;
+			elsif (CloseBraceIdx_v = -1) and (str(i) = ')') then
+				CloseBraceIdx_v := i;
+			end if;
+		end loop;
+		assert OpenBraceIdx_v >= 0 report "PsiFixFmtFromString: No opening brace found" severity error;
+		assert FirstCommaIdx_v >= 0 report "PsiFixFmtFromString: First comma not found" severity error;
+		assert SecondCommaIdx_v >= 0 report "PsiFixFmtFromString: Second comman not found" severity error;
+		assert CloseBraceIdx_v >= 0 report "PsiFixFmtFromString: No closing brace found" severity error;		
+		Format_v.S := integer'value(str(OpenBraceIdx_v+1 to FirstCommaIdx_v-1));
+		Format_v.I := integer'value(str(FirstCommaIdx_v+1 to SecondCommaIdx_v-1));
+		Format_v.F := integer'value(str(SecondCommaIdx_v+1 to CloseBraceIdx_v-1));
+		assert (Format_v.S = 0) or (Format_v.S = 1) report "PsiFixFmtFromString: Sign must be 1 or 0" severity error;
+		return Format_v;
+	end function;	
 	
 	
 end psi_fix_pkg;
