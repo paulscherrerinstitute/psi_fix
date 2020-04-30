@@ -189,6 +189,8 @@ package psi_fix_pkg is
 									return PsiFixSat_t;
 									
 	function PsiFixFmtFromString(	str	: string) return PsiFixFmt_t;
+	
+	function PsiFixFmtToString(	aFmt : PsiFixFmt_t) return string;
   
 end psi_fix_pkg;	 
 
@@ -598,6 +600,12 @@ package body psi_fix_pkg is
 		assert (Format_v.S = 0) or (Format_v.S = 1) report "PsiFixFmtFromString: Sign must be 1 or 0" severity error;
 		return Format_v;
 	end function;	
+	
+	-- *** PsiFixFmtToString ***
+	function PsiFixFmtToString(	aFmt : PsiFixFmt_t) return string is
+	begin
+		return "(" & to_string(aFmt.S) & ", " & to_string(aFmt.I) & ", " & to_string(aFmt.F) & ")"; 
+	end function;
 	
 	
 end psi_fix_pkg;

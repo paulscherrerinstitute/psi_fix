@@ -681,6 +681,12 @@ begin
 		IntCompare(0, Fmt_v.I, "PsiFixFmtFromString 6.I");
 		IntCompare(15, Fmt_v.F, "PsiFixFmtFromString 6.F");
 		
+		-- *** PsiFixFmtToString ***
+		print("*** PsiFixFmtToString ***");
+		assert "(1, -2, 15)" = PsiFixFmtToString((1, -2, 15)) 
+			report "###ERROR###: Wrong string fmt received" 
+			severity error;
+		
 		wait;
 	end process;
 
