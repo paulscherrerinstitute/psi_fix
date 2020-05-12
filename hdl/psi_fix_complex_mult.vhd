@@ -32,7 +32,9 @@ entity psi_fix_complex_mult is
 		InternalFmt_g : PsiFixFmt_t := (1, 1, 24); -- Internal Calc. Fixed Point format									$$ constant=(1,1,24) $$
 		OutFmt_g      : PsiFixFmt_t := (1, 0, 20); -- Output Fixed Point format											$$ constant=(1,0,20) $$
 		Round_g       : PsiFixRnd_t := PsiFixRound; --																	$$ constant=PsiFixRound $$
-		Sat_g         : PsiFixSat_t := PsiFixSat --																		$$ constant=PsiFixSat $$
+		Sat_g         : PsiFixSat_t := PsiFixSat; --																	$$ constant=PsiFixSat $$
+		InAIsCplx_g	  : boolean		:= true;
+		InBIsCplx_g	  : boolean		:= true
 	);
 	port(
 		InClk     	: in  std_logic;      -- clk 																			$$ type=clk; freq=100e6 $$
@@ -109,14 +111,26 @@ begin
 			v.MrII := r.MultII;
 			v.MrQQ := r.MultQQ;
 		end if;
-		v.MultIQ := PsiFixMult(choose(Pipeline_g, r.AiIn, InIADat), InAFmt_g,
-		                       choose(Pipeline_g, r.BqIn, InQBDat), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
-		v.MultQI := PsiFixMult(choose(Pipeline_g, r.AqIn, InQADat), InAFmt_g,
-		                       choose(Pipeline_g, r.BiIn, InIBDat), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
 		v.MultII := PsiFixMult(choose(Pipeline_g, r.AiIn, InIADat), InAFmt_g,
-		                       choose(Pipeline_g, r.BiIn, InIBDat), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
-		v.MultQQ := PsiFixMult(choose(Pipeline_g, r.AqIn, InQADat), InAFmt_g,
-		                       choose(Pipeline_g, r.BqIn, InQBDat), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
+		                       choose(Pipeline_g, r.BiIn, InIBDat), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);		
+		if InBIsCplx_g then
+			v.MultIQ := PsiFixMult(choose(Pipeline_g, r.AiIn, InIADat), InAFmt_g,
+								   choose(Pipeline_g, r.BqIn, InQBDat), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
+		else
+			v.MultIQ := (others => '0');
+		end if;
+		if InAIsCplx_g then
+			v.MultQI := PsiFixMult(choose(Pipeline_g, r.AqIn, InQADat), InAFmt_g,
+								   choose(Pipeline_g, r.BiIn, InIBDat), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
+		else
+			v.MultQI := (others => '0');
+		end if;
+		if InAIsCplx_g and InBIsCplx_g then
+			v.MultQQ := PsiFixMult(choose(Pipeline_g, r.AqIn, InQADat), InAFmt_g,
+								   choose(Pipeline_g, r.BqIn, InQBDat), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
+		else
+			v.MultQQ := (others => '0');
+		end if;
 
 		-- *** Additions ***
 		v.SumI := PsiFixSub(choose(Pipeline_g, r.MrII, r.MultII), InternalFmt_g,
