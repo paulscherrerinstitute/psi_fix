@@ -22,7 +22,7 @@ class psi_fix_noise_awgn:
     # Constructor
     ####################################################################################################################
     def __init__(self, outFmt : PsiFixFmt, seed : int = 0xA38E3C1D):
-        if (outFmt.S is 0) or (outFmt.I > 0):
+        if (outFmt.S == 0) or (outFmt.I > 0):
             raise Exception("psi_fix_noise_awgn: Output format must be [1,0,x]")
         if (outFmt.F > 19):
             raise Exception("psi_fix_noise_awgn: Maximum number of fractional bits is 19")
