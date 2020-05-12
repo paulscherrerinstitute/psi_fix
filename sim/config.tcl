@@ -193,6 +193,7 @@ add_tb_run
 create_tb_run "psi_fix_fir_dec_semi_nch_chtdm_conf_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_fir_dec_semi_nch_chtdm_conf_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_fir_dec_semi_nch_chtdm_conf_tb/Data"]
+tb_run_add_time_limit "5000 us"
 tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gChannels_g=1 -gTaps_g=48 -gClkPerSpl_g=10 -gUseFixCoefs_g=true -gMultipliers_g=8 -gRatio_g=3 -gRamBehavior_g=WBR -gFullInpRateSupport_g=false" \
 						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=10 -gUseFixCoefs_g=false  -gMultipliers_g=10 -gRatio_g=3 -gRamBehavior_g=RBW -gFullInpRateSupport_g=false" \
 						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=2 -gUseFixCoefs_g=true  -gMultipliers_g=8 -gRatio_g=3 -gRamBehavior_g=RBW -gFullInpRateSupport_g=false" \

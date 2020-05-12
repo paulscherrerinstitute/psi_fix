@@ -45,7 +45,8 @@ entity psi_fix_fir_dec_semi_nch_chtdm_conf is
 		UseFixCoefs_g			: boolean		:= true;
 		FullInpRateSupport_g	: boolean		:= false;
 		RamBehavior_g			: string		:= "RBW";		-- "RBW" = read-before-write, "WBR" = write-before-read
-		FixCoefs_g				: t_areal		:= (0.0, 0.0)	
+		FixCoefs_g				: t_areal		:= (0.0, 0.0);
+		ImplFlushIf_g			: boolean		:= false
 	);
 	port (
 		-- Control Signals
@@ -60,7 +61,10 @@ entity psi_fix_fir_dec_semi_nch_chtdm_conf is
 		-- Coefficient interface		
 		CoefWr		: in	std_logic											:= '0';
 		CoefAddr	: in	std_logic_vector(log2ceil(Taps_g)-1 downto 0)		:= (others => '0');
-		CoefWrData	: in	std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0)	:= (others => '0')
+		CoefWrData	: in	std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0)	:= (others => '0');
+		-- Delay-line flushing interface
+		FlushMem	: in	std_logic											:= '0';
+		FlushDone	: out	std_logic
 	);
 end entity;
 		
@@ -119,6 +123,10 @@ architecture rtl of psi_fix_fir_dec_semi_nch_chtdm_conf is
 		CoefWrStg		: std_logic_vector(0 to Multipliers_g-1);
 		CoefWrDataStg	: std_logic_vector(CoefWrData'range);
 		CoefAddrStg		: CoefAddr_a(0 to Multipliers_g-1);
+		-- Memory Flusing
+		FlushActive		: std_logic;
+		FlushAddr		: std_logic_vector(RamAddrBits_c-1 downto 0);
+		FlushDone		: std_logic;
 	end record;
 	signal r, r_next : two_process_r;
 	
@@ -170,7 +178,7 @@ begin
 	-- Combinatorial Process
 	--------------------------------------------
 	p_comb : process(	r, InVld, InData, AccuChain, AccuVld,
-						CoefWrData, CoefAddr, CoefWr)
+						CoefWrData, CoefAddr, CoefWr, FlushMem)
 		variable v : two_process_r;
 		variable StartLoop_v	: boolean;
 		
@@ -270,6 +278,24 @@ begin
 		v.CoefRdAddr(3)	:= r.CoefRdIdx_2;
 		v.TapRdAddr(3)	:= std_logic_vector(r.CalcChannel_2) & std_logic_vector(signed(r.TapRdAddr_2) - TapsPerStage_c + 1);
 		
+		-- *** Memory Flushing (happens outside of pipeline)
+		v.FlushDone	:= '0';
+		if ImplFlushIf_g then
+			-- start flushing
+			if FlushMem = '1' then
+				v.FlushActive 	:= '1';
+				v.FlushAddr		:= (others => '0');
+			-- End flushing
+			elsif signed(r.FlushAddr) = -1 then
+				v.FlushActive	:= '0';
+				v.FlushDone		:= '1';
+				v.FlushAddr		:= (others => '0');
+			-- Continue Flushing
+			elsif r.FlushActive = '1' then
+				v.FlushAddr		:= std_logic_vector(unsigned(r.FlushAddr) + 1);
+			end if;
+		end if;
+		
 		-- *** Output Summation ***
 		v.OutVld_n(8)	:= '0';
 		if r.CalcRunning(7+Multipliers_g) = '1' and AccuVld(7+Multipliers_g) = '1' then
@@ -305,6 +331,7 @@ begin
 		-- *** Outputs ***	
 		OutData	<= r.OutData_10n;
 		OutVld	<= r.OutVld_n(10);
+		FlushDone <= r.FlushDone;
 		
 		-- *** Assign to signal ***
 		r_next <= v;
@@ -326,6 +353,8 @@ begin
 				r.TapUpdWrAddr_0	<= (others => '0');
 				r.CalcRunning		<= (others => '0');
 				r.CoefWrStg			<= (others => '0');
+				r.FlushActive		<= '0';
+				r.FlushDone			<= '0';
 			end if;
 		end if;
 	end process;
@@ -337,6 +366,8 @@ begin
 	AccuChain(7)	<= (others => '0');
 	g_mac : for i in 0 to Multipliers_g-1 generate
 		signal DataWrAddr_1i 	: std_logic_vector(RamAddrBits_c-1 downto 0);
+		signal DataWr			: std_logic;
+		signal DataDin			: std_logic_vector(InData'range);
 		signal RdData_4i		: std_logic_vector(InData'range);
 		signal Coef_4i			: std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
 		constant StageCoefs_c	: Coef_a(0 to TapsPerStage_c-1)	:= GetCoefs(i);
@@ -345,7 +376,16 @@ begin
 	begin
 	
 		-- *** Tap Data RAM***
-		DataWrAddr_1i <= std_logic_vector(r.ChCnt(i+1)) & std_logic_vector(r.TapUpdAddr(i+1));
+		g_noflush : if not ImplFlushIf_g generate
+			DataWrAddr_1i 	<= std_logic_vector(r.ChCnt(i+1)) & std_logic_vector(r.TapUpdAddr(i+1));
+			DataWr			<= r.Vld(i+1);
+			DataDin			<= DataInChain(i+1);
+		end generate;
+		g_flush : if ImplFlushIf_g generate
+			DataWrAddr_1i 	<= std_logic_vector(r.ChCnt(i+1)) & std_logic_vector(r.TapUpdAddr(i+1)) when r.FlushActive = '0' else r.FlushAddr;
+			DataWr			<= r.Vld(i+1) when r.FlushActive = '0' else '1';
+			DataDin			<= DataInChain(i+1) when r.FlushActive = '0' else (others => '0');
+		end generate;
 
 		i_data_ram : entity work.psi_common_tdp_ram
 			generic map (
@@ -356,8 +396,8 @@ begin
 			port map (
 				ClkA		=> Clk,
 				AddrA		=> DataWrAddr_1i,
-				WrA			=> r.Vld(i+1),
-				DinA		=> DataInChain(i+1),
+				WrA			=> DataWr,
+				DinA		=> DataDin,
 				DoutA		=> RamRdData,
 				ClkB		=> Clk,
 				AddrB		=> r.TapRdAddr(3+i),
@@ -374,7 +414,7 @@ begin
 					Width_g			=> PsiFixSize(InFmt_g),
 					Delay_g			=> Channels_g*TapsPerStage_c,
 					Resource_g		=> "AUTO",
-					RstState_g		=> false,
+					RstState_g		=> ImplFlushIf_g,	-- the tap delay only needs to be reset cleanly if the memory can be flushed too. Otherwise leftovers are in memory anyways.
 					RamBehavior_g	=> RamBehavior_g
 				)
 				port map (

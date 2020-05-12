@@ -40,7 +40,8 @@ entity psi_fix_fir_dec_semi_nch_chtdm_conf_tb is
 		Multipliers_g : positive := 8;
 		Ratio_g	: positive := 3;
 		RamBehavior_g : string := "RBW";	
-		FileFolder_g : string := "../testbench/psi_fix_fir_dec_semi_nch_chtdm_conf_tb/Data"
+		FileFolder_g : string := "../testbench/psi_fix_fir_dec_semi_nch_chtdm_conf_tb/Data";
+		ImplFlushIf_g : boolean	:= true
 	);
 end entity;
 
@@ -82,6 +83,8 @@ architecture sim of psi_fix_fir_dec_semi_nch_chtdm_conf_tb is
 	signal CoefWr : std_logic := '0';
 	signal CoefAddr : std_logic_vector(log2ceil(Taps_g)-1 downto 0) := (others => '0');
 	signal CoefWrData : std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0) := (others => '0');
+	signal FlushMem : std_logic := '0';
+	signal FlushDone : std_logic := '0';
 	
 	signal SigIn					: TextfileData_t(0 to 0)	:= (others => 0);
 	signal SigOut					: TextfileData_t(0 to 0)	:= (others => 0);	
@@ -123,7 +126,8 @@ begin
 			FullInpRateSupport_g => FullInpRateSupport_g,
 			RamBehavior_g => RamBehavior_g,
 			Rnd_g => Rnd_g,
-			Sat_g => Sat_g
+			Sat_g => Sat_g,
+			ImplFlushIf_g => ImplFlushIf_g
 		)
 		port map (
 			Clk => Clk,
@@ -134,7 +138,9 @@ begin
 			OutData => OutData,
 			CoefWr => CoefWr,
 			CoefAddr => CoefAddr,
-			CoefWrData => CoefWrData
+			CoefWrData => CoefWrData,
+			FlushMem => FlushMem,
+			FlushDone => FlushDone
 		);
 	
 	------------------------------------------------------------
@@ -163,20 +169,6 @@ begin
 	
 	
 	------------------------------------------------------------
-	-- Resets
-	------------------------------------------------------------
-	p_rst_Rst : process
-	begin
-		wait for 1 us;
-		-- Wait for two clk edges to ensure reset is active for at least one edge
-		wait until rising_edge(Clk);
-		wait until rising_edge(Clk);
-		Rst <= '0';
-		wait;
-	end process;
-	
-	
-	------------------------------------------------------------
 	-- Processes
 	------------------------------------------------------------
 	-- *** stim ***
@@ -187,7 +179,11 @@ begin
 		variable Coef   : integer;
 	begin
 		-- start of process !DO NOT EDIT
-		wait until Rst = '0';
+		wait for 1 us;
+		-- Wait for two clk edges to ensure reset is active for at least one edge
+		wait until rising_edge(Clk);
+		wait until rising_edge(Clk);
+		Rst <= '0';
 		wait until rising_edge(Clk);
 		
 		if not UseFixCoefs_g then		
@@ -220,6 +216,36 @@ begin
 								ClkPerSpl		=> ClkPerSpl_g,							
 								IgnoreLines		=> 1,
 								DataOnlyOnVld	=> true);	
+								
+		-- In case flush-interface is implemented, try out if not leftovers are present after flushing
+		if ImplFlushIf_g then
+			-- Wait until first stimuli run faded out
+			wait for 10 us;
+			
+			-- Reset filter	
+			wait until rising_edge(Clk);
+			Rst <= '1';
+			wait until rising_edge(Clk);
+			Rst <= '0';					
+			
+			-- Flush Memory
+			wait until rising_edge(Clk);
+			FlushMem <= '1';
+			wait until rising_edge(Clk);
+			FlushMem <= '0';
+			wait until rising_edge(Clk) and FlushDone = '1';
+					
+			
+			-- Second stimuli run
+			ApplyTextfileContent(	Clk 			=> Clk, 
+									Rdy 			=> PsiTextfile_SigOne,
+									Vld 			=> InVld, 
+									Data			=> SigIn, 
+									Filepath		=> FileFolder_g & "/" & InFile_c,
+									ClkPerSpl		=> ClkPerSpl_g,							
+									IgnoreLines		=> 1,
+									DataOnlyOnVld	=> true);				
+		end if;
 		
 		-- end of process !DO NOT EDIT!
 		ProcessDone(TbProcNr_stim_c) <= '1';
@@ -240,6 +266,16 @@ begin
 								Data		=> SigOut,
 								Filepath	=> FileFolder_g & "/" & OutFile_c,
 								IgnoreLines => 1);
+								
+		-- In case flush-interface is implemented, try out if not leftovers are present after flushing
+		if ImplFlushIf_g then
+			CheckTextfileContent(	Clk			=> Clk,
+									Rdy			=> PsiTextfile_SigUnused,
+									Vld			=> OutVld,
+									Data		=> SigOut,
+									Filepath	=> FileFolder_g & "/" & OutFile_c,
+									IgnoreLines => 1);
+		end if;
 		
 		-- end of process !DO NOT EDIT!
 		ProcessDone(TbProcNr_resp_c) <= '1';
