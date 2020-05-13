@@ -103,7 +103,6 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chpar_conf is
 		Accu_6			: Accu_t;
 		Output_7		: Out_t;
 		OutVld_7		: std_logic;
-		FirstTapLoop_2	: std_logic;
 		FirstTapLoop_3	: std_logic;
 		TapRdAddr_3 	: std_logic_vector(log2ceil(MaxTaps_g)-1 downto 0);
 		ReplaceZero_4	: std_logic;
@@ -183,39 +182,35 @@ begin
 		-- Tap read address
 		v.TapRdAddr_2 	:= std_logic_vector(unsigned(r.Tap0Addr_1) - unsigned(r.TapCnt_1));
 		v.CoefRdAddr_2	:= r.TapCnt_1;
-		
-		if r.Vld(1) = '1' then
-			-- all taps are written at least once
-			if unsigned(r.TapWrAddr_1) = unsigned(Taps) then
-				v.FirstTapLoop_2 := '0';
-			end if;
-		end if;			
+				
 		
 		-- *** Stage 3 ***
 		-- Pipelining
-		v.FirstTapLoop_3 	:= r.FirstTapLoop_2;
 		v.TapRdAddr_3		:= r.TapRdAddr_2;
 		
 		-- *** Stage 4 ***
 		-- Multiplier input registering
 		for i in 0 to Channels_g-1 loop
 			-- Replace taps that are not yet written with zeros for bittrueness
-			if r.ReplaceZero_4 = '0' or unsigned(r.TapRdAddr_3) = 0 then
+			if r.ReplaceZero_4 = '0' or unsigned(r.TapRdAddr_3) <= unsigned(Ratio) then
 				v.MultInTap_4(i)	:= DataRamDout_3(PsiFixSize(InFmt_g)*(i+1)-1 downto PsiFixSize(InFmt_g)*i);
 			else
 				v.MultInTap_4(i)	:= (others => '0');
 			end if;
-			-- Detect when the Zero-replacement can be stopped since the taps are already filled with correct data
-			if r.FirstTapLoop_3 = '0' then
-				v.ReplaceZero_4	:= '0';
-			elsif r.CalcOn(3) = '1' then				
-				if r.Last(3) = '1' then
-					v.ReplaceZero_4	:= '1';
-				elsif unsigned(r.TapRdAddr_3) = 0 then
-					v.ReplaceZero_4	:= '0';
-				end if;
-			end if;
 		end loop;
+		-- Detect when the Zero-replacement can be stopped since the taps are already filled with correct data
+		if r.FirstTapLoop_3 = '0' then
+			v.ReplaceZero_4	:= '0';
+		elsif r.CalcOn(3) = '1' then	
+			if r.First(3) = '1' and unsigned(r.TapRdAddr_3) <= unsigned(Ratio) then
+				v.ReplaceZero_4	:= '0';
+				v.FirstTapLoop_3 := '0';
+			elsif r.Last(3) = '1' then
+				v.ReplaceZero_4	:= '1';
+			elsif unsigned(r.TapRdAddr_3) = 0 then
+				v.ReplaceZero_4	:= '0';
+			end if;
+		end if;		
 		v.MultInCoef_4	:= CoefRamDout_3;
 		
 		-- *** Stage 5 *** 
@@ -277,8 +272,8 @@ begin
 				r.CalcOn			<= (others => '0');
 				r.OutVld_7			<= '0';
 				r.Last				<= (others => '0');
-				r.FirstTapLoop_2	<= '1';
 				r.ReplaceZero_4		<= '1';
+				r.FirstTapLoop_3	<= '1';
 			end if;
 		end if;
 	end process;
