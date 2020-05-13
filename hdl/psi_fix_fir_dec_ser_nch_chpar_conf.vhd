@@ -60,7 +60,9 @@ entity psi_fix_fir_dec_ser_nch_chpar_conf is
 		CoefWr		: in	std_logic											:= '0';
 		CoefAddr	: in	std_logic_vector(log2ceil(MaxTaps_g)-1 downto 0)	:= (others => '0');
 		CoefWrData	: in	std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0)	:= (others => '0');
-		CoefRdData	: out	std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0)
+		CoefRdData	: out	std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
+		-- Status Output
+		CalcOngoing	: out	std_logic
 	);
 end entity;
 		
@@ -106,6 +108,8 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chpar_conf is
 		FirstTapLoop_3	: std_logic;
 		TapRdAddr_3 	: std_logic_vector(log2ceil(MaxTaps_g)-1 downto 0);
 		ReplaceZero_4	: std_logic;
+		-- Status
+		CalcOngoing		: std_logic;
 	end record;
 	signal r, r_next : two_process_r;
 	
@@ -245,12 +249,20 @@ begin
 			end loop;
 			v.OutVld_7 := r.CalcOn(6);
 		end if;
+		
+		-- *** Status Output ***
+		if (unsigned(r.Vld) /= 0) or (unsigned(r.CalcOn) /= 0) then
+			v.CalcOngoing := '1';
+		else
+			v.CalcOngoing := '0';
+		end if;
 				
 		-- *** Outputs ***
 		OutVld	<= r.OutVld_7;
 		for i in 0 to Channels_g-1 loop
 			OutData(PsiFixSize(OutFmt_g)*(i+1)-1 downto PsiFixSize(OutFmt_g)*i)	<= r.Output_7(i);
-		end loop;		
+		end loop;	
+		CalcOngoing <= r.CalcOngoing or r.Vld(0);
 		
 		-- *** Assign to signal ***
 		r_next <= v;
@@ -273,6 +285,7 @@ begin
 				r.OutVld_7			<= '0';
 				r.Last				<= (others => '0');
 				r.ReplaceZero_4		<= '1';
+				r.CalcOngoing		<= '0';
 				r.FirstTapLoop_3	<= '1';
 			end if;
 		end if;
