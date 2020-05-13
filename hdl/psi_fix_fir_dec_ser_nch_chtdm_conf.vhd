@@ -92,6 +92,7 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chtdm_conf is
 
 	-- Two process method
 	type two_process_r is record
+		FirstAfterRst	: std_logic;
 		Vld				: std_logic_vector(0 to 1);	
 		InSig			: InData_a(0 to 1);
 		ChannelNr		: ChNr_a(0 to 3);
@@ -160,8 +161,9 @@ begin
 		
 		-- Calculate channel number
 		if InVld = '1' then
-			if unsigned(r.ChannelNr(0)) = Channels_g-1 then
+			if unsigned(r.ChannelNr(0)) = Channels_g-1 or r.FirstAfterRst = '1' then
 				v.ChannelNr(0)	:= (others => '0');
+				v.FirstAfterRst	:= '0';
 			else
 				v.ChannelNr(0)	:= std_logic_vector(unsigned(r.ChannelNr(0)) + 1);
 			end if;
@@ -296,7 +298,7 @@ begin
 			r <= r_next;
 			if Rst = '1' then	
 				r.Vld 				<= (others => '0');
-				r.ChannelNr(0)		<= (others => '1');
+				r.ChannelNr(0)		<= (others => '0');
 				r.CalcChnl_1		<= (others => '0');
 				r.TapWrAddr_1		<= (others => '0');
 				r.DecCnt_1			<= (others => '0');
@@ -304,6 +306,7 @@ begin
 				r.OutVld_7			<= '0';
 				r.Last				<= (others => '0');
 				r.ReplaceZero_4		<= '1';
+				r.FirstAfterRst		<= '1';
 				r.FirstTapLoop_3	<= '1';
 			end if;
 		end if;
