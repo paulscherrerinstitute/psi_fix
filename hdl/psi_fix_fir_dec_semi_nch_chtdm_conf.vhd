@@ -364,7 +364,6 @@ begin
 				r.ChCnt(0)			<= (others => '0');
 				r.TapUpdWrAddr_0	<= (others => '0');
 				r.CalcRunning		<= (others => '0');
-				r.CoefWrStg			<= (others => '0');
 				r.FlushActive		<= '0';
 				r.FlushDone			<= '0';
 				r.CalcOngoing		<= '0';
