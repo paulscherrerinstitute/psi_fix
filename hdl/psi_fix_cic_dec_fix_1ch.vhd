@@ -39,7 +39,9 @@ entity psi_fix_cic_dec_fix_1ch is
 		InData						: in	std_logic_vector(PsiFixSize(InFmt_g)-1 downto 0);
 		InVld						: in	std_logic;
 		OutData						: out	std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);
-		OutVld						: out	std_logic
+		OutVld						: out	std_logic;
+		-- Status Output
+		CalcOngoing					: out	std_logic
 	);
 end entity;
 
@@ -84,6 +86,8 @@ architecture rtl of psi_fix_cic_dec_fix_1ch is
 		-- Output
 		Outp		: std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);
 		OutVld		: std_logic;
+		-- Status
+		CalcOngoing		: std_logic;
 	end record;	
 	signal r, r_next : two_process_r;
 	
@@ -187,6 +191,13 @@ begin
 			v.GcOut_2	:= PsiFixResize(r.GcMult_1, GcMultFmt_c, OutFmt_g, PsiFixRound, PsiFixSat);
 		end if;
 		
+		-- *** Status Output ***
+		if (unsigned(r.VldAccu) /= 0) or (unsigned(r.VldDiff) /= 0) or (unsigned(r.GcVld) /= 0) then -- OutVld omitted because of 1 cycle PL delay
+			v.CalcOngoing := '1';
+		else
+			v.CalcOngoing := '0';
+		end if;		
+
 		-- *** Output Assignment ***
 		if AutoGainCorr_g then
 			v.Outp := r.GcOut_2;
@@ -195,6 +206,7 @@ begin
 			v.Outp := PsiFixResize(r.DiffVal(Order_g), DiffFmt_c, OutFmt_g, PsiFixRound, PsiFixSat);
 			v.OutVld := r.VldDiff(Order_g);
 		end if;
+		CalcOngoing <= r.CalcOngoing or r.VldAccu(0);
 		
 		-- Apply to record
 		r_next <= v;
@@ -215,14 +227,15 @@ begin
 		if rising_edge(Clk) then
 			r <= r_next;
 			if Rst = '1' then
-				r.VldAccu	<= (others => '0');	
-				r.Accu		<= (others => (others => '0'));
-				r.Rcnt		<= 0;
-				r.VldDiff	<= (others => '0');
-				r.DiffLast	<= (others => (others => '0'));
-				r.DiffLast2	<= (others => (others => '0'));
-				r.GcVld		<= (others => '0');
-				r.OutVld	<= '0';
+				r.VldAccu		<= (others => '0');	
+				r.Accu			<= (others => (others => '0'));
+				r.Rcnt			<= 0;
+				r.VldDiff		<= (others => '0');
+				r.DiffLast		<= (others => (others => '0'));
+				r.DiffLast2		<= (others => (others => '0'));
+				r.GcVld			<= (others => '0');
+				r.OutVld		<= '0';
+				r.CalcOngoing	<= '0';
 			end if;
 		end if;
 	end process;
