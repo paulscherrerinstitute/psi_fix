@@ -84,7 +84,7 @@ architecture rtl of psi_fix_fir_dec_semi_nch_chtdm_conf is
 	constant ChSelBits_c		: natural	:= log2ceil(Channels_g);
 	
 	-- Constants
-	constant AccuFmt_c			: PsiFixFmt_t	:= (1, OutFmt_g.I+1, InFmt_g.F + CoefFmt_g.F);
+	constant AccuFmt_c			: PsiFixFmt_t	:= (1, InFmt_g.I+CoefFmt_g.I+log2ceil(Multipliers_g), InFmt_g.F + CoefFmt_g.F);
 	constant RoundFmt_c			: PsiFixFmt_t	:= (1, AccuFmt_c.I+1, OutFmt_g.F);
 	constant CyclesPerCalc_c	: integer		:= integer(ceil(real(Taps_g)/real(Multipliers_g)));
 	
