@@ -55,6 +55,7 @@ add_sources $LibPath {
 
 # project sources
 add_sources "../hdl" {
+	psi_fix_resize.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf.vhd \
 	psi_fix_fir_dec_ser_nch_chtdm_conf.vhd \
 	psi_fix_mult_add_stage.vhd \
@@ -130,6 +131,7 @@ add_sources "../testbench" {
 	psi_fix_white_noise_tb/psi_fix_white_noise_tb.vhd \
     psi_fix_noise_awgn_tb/psi_fix_noise_awgn_tb.vhd \
     psi_fix_fir_3tap_hbw_dec2_tb/psi_fix_fir_3tap_hbw_dec2_tb.vhd \
+	psi_fix_resize_tb/psi_fix_resize_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -377,8 +379,9 @@ tb_run_add_arguments "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5 -gChannels_g=1 
     "-gFileFolder_g=$dataDir -gVldDutyCycle_g=1 -gChannels_g=2 -gInFile_g=inChannels2SeparateTrue.txt -gOutFile_g=outChannels2SeparateTrue.txt" \
     "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5 -gChannels_g=2 -gInFile_g=inChannels2SeparateTrue.txt -gOutFile_g=outChannels2SeparateTrue.txt" \
     "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5 -gChannels_g=4 -gInFile_g=inChannels4SeparateTrue.txt -gOutFile_g=outChannels4SeparateTrue.txt"
-    
+add_tb_run
 
+create_tb_run "psi_fix_resize_tb"
 add_tb_run
 
 
