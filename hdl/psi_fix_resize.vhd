@@ -68,7 +68,7 @@ begin
 	--------------------------------------------------------------------------
 	-- Combinatorial Process
 	--------------------------------------------------------------------------
-	p_comb : process(r, InVld, InData, OutRdy, RndRdy)
+	p_comb : process(r, InVld, InData, OutRdy, RndRdy, SatRdy)
 		variable v : two_process_r;
 		variable Blocked_v : boolean;
 	begin
@@ -84,7 +84,7 @@ begin
 		
 		-- Saturation Stage
 		SatRdy <= not (r.SatVld) or OutRdy;
-		if OutRdy = '1' then
+		if SatRdy = '1' then
 			v.SatVld := r.RndVld;
 			v.SatReg := PsiFixResize(r.RndReg, RndFmt_c, OutFmt_g, PsiFixTrunc, Sat_g);
 		end if;
