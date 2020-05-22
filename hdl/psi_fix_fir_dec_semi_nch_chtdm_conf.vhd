@@ -141,7 +141,7 @@ architecture rtl of psi_fix_fir_dec_semi_nch_chtdm_conf is
 	begin
 		if UseFixCoefs_g then
 			for i in 0 to TapsPerStage_c-1 loop
-				if stage*TapsPerStage_c+i < Taps_g then
+				if (stage*TapsPerStage_c+i < Taps_g) and (stage*TapsPerStage_c+i < FixCoefs_g'length) then
 					Coefs_v(i)	:= PsiFixFromReal(FixCoefs_g(stage*TapsPerStage_c+i), CoefFmt_g);
 				end if;
 			end loop;
