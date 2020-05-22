@@ -604,7 +604,7 @@ package body psi_fix_pkg is
 	-- *** PsiFixFmtToString ***
 	function PsiFixFmtToString(	aFmt : PsiFixFmt_t) return string is
 	begin
-		return "(" & to_string(aFmt.S) & ", " & to_string(aFmt.I) & ", " & to_string(aFmt.F) & ")"; 
+		return "(" & integer'image(aFmt.S) & ", " & integer'image(aFmt.I) & ", " & integer'image(aFmt.F) & ")"; 
 	end function;
 	
 	
