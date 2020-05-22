@@ -36,6 +36,7 @@ entity psi_fix_fir_dec_semi_nch_chtdm_conf_tb is
 		Taps_g : natural := 48;
 		ClkPerSpl_g : positive := 10;
 		UseFixCoefs_g : boolean := true;
+		InitCoefs_g : boolean := false;
 		FullInpRateSupport_g : boolean := false;
 		Multipliers_g : positive := 8;
 		Ratio_g	: positive := 3;
@@ -92,7 +93,7 @@ architecture sim of psi_fix_fir_dec_semi_nch_chtdm_conf_tb is
 	function GetFixCoefs return t_areal is
 		constant ZeroCoefs : t_areal(0 to Taps_g-1) := (others => 0.0);
 	begin
-		if UseFixCoefs_g then
+		if UseFixCoefs_g or InitCoefs_g then
 			if Ratio_g = 3 and Taps_g = 48 then
 				return Coefs_R3_48Taps; -- from package
 			elsif Ratio_g = 1 and Taps_g = 48 then
@@ -122,7 +123,7 @@ begin
 			OutFmt_g => OutFmt_g,
 			CoefFmt_g => CoefFmt_g,
 			UseFixCoefs_g => UseFixCoefs_g,
-			FixCoefs_g => GetFixCoefs,
+			Coefs_g => GetFixCoefs,
 			FullInpRateSupport_g => FullInpRateSupport_g,
 			RamBehavior_g => RamBehavior_g,
 			Rnd_g => Rnd_g,
@@ -186,7 +187,7 @@ begin
 		Rst <= '0';
 		wait until rising_edge(Clk);
 		
-		if not UseFixCoefs_g then		
+		if not UseFixCoefs_g and not InitCoefs_g then		
 			-- Write Coefficients
 			if not UseFixCoefs_g then
 				file_open(fp, FileFolder_g & "/" & CoefsFile_c, read_mode);

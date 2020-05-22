@@ -102,7 +102,7 @@ begin
 			OutFmt_g => OutFmt_g,
 			CoefFmt_g => CoefFmt_g,
 			UseFixCoefs_g => UseFixCoefs_g,
-			FixCoefs_g => GetFixCoefs
+			Coefs_g => GetFixCoefs
 		)
 		port map (
 			Clk => Clk,
