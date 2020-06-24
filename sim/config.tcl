@@ -244,8 +244,11 @@ add_tb_run
 create_tb_run "psi_fix_dds_18b_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_dds_18b_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_dds_18b_tb/Data"]
-tb_run_add_arguments 	"-gFileFolder_c=$dataDir -gIdleCycles_g=0" \
-						"-gFileFolder_c=$dataDir -gIdleCycles_g=5"
+tb_run_add_arguments 	"-gFileFolder_c=$dataDir -gIdleCycles_g=0 -gTdmChannels_g=1" \
+						"-gFileFolder_c=$dataDir -gIdleCycles_g=5 -gTdmChannels_g=1" \
+						"-gFileFolder_c=$dataDir -gIdleCycles_g=0 -gTdmChannels_g=2" \
+						"-gFileFolder_c=$dataDir -gIdleCycles_g=5 -gTdmChannels_g=2"
+tb_run_add_time_limit "1000 us"
 add_tb_run
 
 create_tb_run "psi_fix_lowpass_iir_order1_tb"
