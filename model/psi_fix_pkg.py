@@ -23,6 +23,8 @@ class PsiFixFmt:
         self.S = S
         self.I = I
         self.F = F
+        if PsiFixSize(self) > 53:
+            raise Exception("PsiFixFmt: Format exceeding 53 bits (double range), bittrueness is not guaranteed!")
 
     def __str__(self):
         return "({}, {}, {})".format(self.S, self.I, self.F)
