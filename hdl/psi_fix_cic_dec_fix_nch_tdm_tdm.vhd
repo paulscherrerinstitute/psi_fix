@@ -53,7 +53,7 @@ end entity;
 architecture rtl of psi_fix_cic_dec_fix_nch_tdm_tdm is 
 	-- Constants
 	constant CicGain_c				: real				:= (real(Ratio_g)*real(DiffDelay_g))**real(Order_g);
-	constant CicAddBits_c			: natural			:= log2ceil(CicGain_c);
+	constant CicAddBits_c			: natural			:= log2ceil(CicGain_c-0.1); -- WORKAROUND: Vivado does real calculations imprecisely. With the -0.1, wrong results are avoided.
 	constant Shift_c				: integer			:= CicAddBits_c;
 	constant AccuFmt_c				: PsiFixFmt_t		:= (InFmt_g.S, InFmt_g.I+CicAddBits_c, InFmt_g.F);
 	constant DiffFmt_c				: PsiFixFmt_t		:= (OutFmt_g.S, InFmt_g.I, OutFmt_g.F + Order_g + 1);

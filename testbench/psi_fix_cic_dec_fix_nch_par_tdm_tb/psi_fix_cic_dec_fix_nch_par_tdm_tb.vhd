@@ -119,7 +119,7 @@ begin
 		wait for 1 us;
 		
 		-- Test file content (bittrueness)
-		print(DataDir_g & "/" & InFile_g);
+		--print(DataDir_g & "/" & InFile_g);
 		file_open(fIn, DataDir_g & "/" & InFile_g,read_mode);
 		wait until rising_edge(Clk);
 		while not endfile(fIn) loop
