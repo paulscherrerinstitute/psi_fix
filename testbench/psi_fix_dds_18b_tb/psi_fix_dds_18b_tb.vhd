@@ -18,11 +18,13 @@ library work;
 	use work.psi_tb_txt_util.all;
 	use work.psi_fix_pkg.all;
 	use work.psi_tb_textfile_pkg.all;
+	use work.psi_common_math_pkg.all;
 
 entity psi_fix_dds_18b_tb is
 	generic (
 		FileFolder_c		: string 	:= "../testbench/psi_fix_dds_18b_tb/Data";
-		IdleCycles_g		: integer	:= 0
+		IdleCycles_g		: integer	:= 0;
+		TdmChannels_g		: positive	:= 1
 	);
 end entity psi_fix_dds_18b_tb;
 
@@ -31,8 +33,8 @@ architecture sim of psi_fix_dds_18b_tb is
 	-------------------------------------------------------------------------
 	-- File Names
 	-------------------------------------------------------------------------
-	constant ConfigFile		: string	:= "Config.txt";
-	constant SinCosFile		: string	:= "SinCos.txt";
+	constant ConfigFile		: string	:= choose(TdmChannels_g=1, "Config.txt", "Config2Ch.txt");
+	constant SinCosFile		: string	:= choose(TdmChannels_g=1, "SinCos.txt", "SinCos2Ch.txt");
 
 	-------------------------------------------------------------------------
 	-- TB Defnitions
@@ -57,6 +59,7 @@ architecture sim of psi_fix_dds_18b_tb is
 	signal PhaseStep				: std_logic_vector(PsiFixSize(PhaseFmt_c)-1 downto 0)	:= (others => '0');
 	signal PhaseOffs				: std_logic_vector(PsiFixSize(PhaseFmt_c)-1 downto 0)	:= (others => '0');
 	signal Restart					: std_logic			:= '0';
+	signal AssertRestart			: std_logic			:= '0';
 	signal SigIn					: TextfileData_t(0 to 1);
 	signal SigOut					: TextfileData_t(0 to 1);
 
@@ -67,7 +70,8 @@ begin
 	-------------------------------------------------------------------------
 	i_dut : entity work.psi_fix_dds_18b
 		generic map (
-			PhaseFmt_g	=> PhaseFmt_c
+			PhaseFmt_g	=> PhaseFmt_c,
+			TdmChannels_g => TdmChannels_g
 		)
 		port map (
 			-- Control Signals
@@ -118,15 +122,6 @@ begin
 		Rst <= '0';
 		wait for 1 us;
 		
-		-- Apply Configuration
-		ApplyTextfileContent(	Clk 		=> Clk, 
-								Rdy 		=> PsiTextfile_SigOne,
-								Vld 		=> PsiTextfile_SigUnused, 
-								Data		=> SigIn,
-								Filepath	=> FileFolder_c & "/" & ConfigFile,
-								IgnoreLines	=> 1);	
-		
-		
 		-- *** Case 0: Bittrueness ***
 		print("Case 0: Bittrueness");
 		TestCase <= 0;
@@ -134,8 +129,9 @@ begin
 		ApplyTextfileContent(	Clk 		=> Clk, 
 								Rdy 		=> PsiTextfile_SigOne,
 								Vld 		=> InVld, 
-								Data		=> PsiTextfile_SigUnusedData, 
-								Filepath	=> FileFolder_c & "/" & SinCosFile, 
+								Data		=> SigIn, 
+								Filepath	=> FileFolder_c & "/" & ConfigFile,
+								IgnoreLines	=> 1,
 								ClkPerSpl	=> IdleCycles_g+1);	
 		wait until ResponseDone = 0;
 		
@@ -144,23 +140,36 @@ begin
 		TestCase <= 1;
 		-- Restart
 		wait until rising_edge(Clk);
-		Restart <= '1';
+		AssertRestart <= '1';
 		wait until rising_edge(Clk);
-		Restart <= '0';
+		AssertRestart <= '0';
 		-- Apply Inputs
 		-- File reading only required for determining number of samples
 		ApplyTextfileContent(	Clk 		=> Clk, 
 								Rdy 		=> PsiTextfile_SigOne,
 								Vld 		=> InVld, 
-								Data		=> PsiTextfile_SigUnusedData, 
-								Filepath	=> FileFolder_c & "/" & SinCosFile, 
+								Data		=> SigIn, 
+								Filepath	=> FileFolder_c & "/" & ConfigFile, 
+								IgnoreLines	=> 1,
 								ClkPerSpl	=> IdleCycles_g+1,
-								MaxLines	=> 10);		
+								MaxLines	=> 11);		
 		wait until ResponseDone = 1;		
 		
 		-- TB done
 		wait for 1 us;
 		TbRunning <= false;
+		wait;
+	end process;
+	
+	-- Assert restart for exactly one sample
+	p_restart : process
+	begin
+		wait until rising_edge(Clk) and AssertRestart = '1';
+		Restart <= '1';
+		for ch in 0 to TdmChannels_g-1 loop
+			wait until rising_edge(Clk) and InVld = '1';
+		end loop;
+		Restart <= '0';
 		wait;
 	end process;
 	
@@ -174,7 +183,8 @@ begin
 								Rdy			=> PsiTextfile_SigUnused,
 								Vld			=> OutVld,
 								Data		=> SigOut,
-								Filepath	=> FileFolder_c & "/" & SinCosFile);
+								Filepath	=> FileFolder_c & "/" & SinCosFile,
+								IgnoreLines	=> 1);
 		
 		ResponseDone <= 0;
 		
@@ -185,7 +195,8 @@ begin
 								Vld			=> OutVld,
 								Data		=> SigOut,
 								Filepath	=> FileFolder_c & "/" & SinCosFile,
-								MaxLines	=> 10);
+								IgnoreLines	=> 1,
+								MaxLines	=> 11);
 		ResponseDone <= 1;		
 	
 		-- TB done

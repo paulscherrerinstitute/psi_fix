@@ -22,7 +22,9 @@ library work;
 ------------------------------------------------------------------------------	
 entity psi_fix_dds_18b is
 	generic (
-		PhaseFmt_g					: PsiFixFmt_t		:= (0, 0, 31)
+		PhaseFmt_g					: PsiFixFmt_t		:= (0, 0, 31);
+		TdmChannels_g				: positive			:= 1;
+		RamBehavior_g				: string			:= "RBW"
 	);
 	port
 	(
@@ -55,6 +57,7 @@ architecture rtl of psi_fix_dds_18b is
 	-- Two Process Method
 	type two_process_r is record
 		VldIn				: std_logic_vector(0 to 9);
+		FirstSplCnt_0		: integer range 0 to TdmChannels_g;
 		PhaseAccu_0			: std_logic_vector(PsiFixSize(PhaseFmt_g)-1 downto 0);
 		PhaseOffs_0			: std_logic_vector(PsiFixSize(PhaseFmt_g)-1 downto 0);
 		PhaseOffs_1			: std_logic_vector(PsiFixSize(PhaseFmt_g)-1 downto 0);
@@ -66,6 +69,8 @@ architecture rtl of psi_fix_dds_18b is
 	-- Component Connection Signals
 	signal SinVld, CosVld		: std_logic;
 	signal SinData, CosData		: std_logic_vector(PsiFixSize(SinOutFmt_c)-1 downto 0);
+	signal PhaseAccu 			: std_logic_vector(PsiFixSize(PhaseFmt_g)-1 downto 0);
+	signal PhaseAccu_Next 		: std_logic_vector(PsiFixSize(PhaseFmt_g)-1 downto 0);
 	
 
 begin
@@ -87,7 +92,7 @@ begin
 	--------------------------------------------------------------------------
 	p_comb : process(	r, InVld, 
 						PhaseStep, PhaseOffs, Restart,
-						SinData, CosData)	
+						SinData, CosData, PhaseAccu)	
 		variable v : two_process_r;
 	begin	
 		-- hold variables stable
@@ -102,13 +107,20 @@ begin
 		v.PhaseOffs_0 := PhaseOffs;
 		
 		-- Phase accu (count after sample to start at zero)
-		if Restart = '1' then	
-			v.PhaseAccu_0	:= (others => '0');
-		elsif r.VldIn(0) = '1' then
-			v.PhaseAccu_0	:= PsiFixAdd(	r.PhaseAccu_0, PhaseFmt_g,
-											PhaseStep, PhaseFmt_g,
-											PhaseFmt_g);
+		if InVld = '1' then
+			-- Phase zero must be output for the first sample after reset, this is achieved by r.FirstSplCnt_0
+			if Restart = '1' or r.FirstSplCnt_0 /= 0 then	
+				v.PhaseAccu_0	:= (others => '0');
+			else
+				v.PhaseAccu_0	:= PsiFixAdd(	PhaseAccu, PhaseFmt_g,
+												PhaseStep, PhaseFmt_g,
+												PhaseFmt_g);
+			end if;		
+			if r.FirstSplCnt_0 /= 0 then
+				v.FirstSplCnt_0 := r.FirstSplCnt_0 - 1;
+			end if;
 		end if;
+		PhaseAccu_Next <= v.PhaseAccu_0;
 		
 		-- *** Stage 1 ***
 		-- Phase offset 
@@ -146,6 +158,7 @@ begin
 			if Rst = '1' then
 				r.PhaseAccu_0	<= (others => '0');
 				r.VldIn			<= (others => '0');
+				r.FirstSplCnt_0	<= TdmChannels_g;
 			end if;
 		end if;
 	end process;
@@ -168,6 +181,22 @@ begin
 			OutDataA	=> SinData,
 			OutVldB		=> CosVld,
 			OutDataB	=> CosData		
+		);
+		
+	i_accu : entity work.psi_common_delay
+		generic map (
+			Width_g			=> PsiFixSize(PhaseFmt_g),
+			Delay_g			=> TdmChannels_g,
+			Resource_g		=> "AUTO",
+			RstState_g		=> true,
+			RamBehavior_g   => RamBehavior_g
+		)
+		port map (
+			Clk     => Clk,
+			Rst     => Rst,
+			InData  => PhaseAccu_Next,
+			InVld   => InVld,
+			OutData => PhaseAccu
 		);
  
 end rtl;
