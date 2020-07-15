@@ -56,6 +56,7 @@ add_sources $LibPath {
 # project sources
 add_sources "../hdl" {
 	psi_fix_resize.vhd \
+	psi_fix_param_ram.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf.vhd \
 	psi_fix_fir_dec_ser_nch_chtdm_conf.vhd \
 	psi_fix_mult_add_stage.vhd \
@@ -132,6 +133,7 @@ add_sources "../testbench" {
     psi_fix_noise_awgn_tb/psi_fix_noise_awgn_tb.vhd \
     psi_fix_fir_3tap_hbw_dec2_tb/psi_fix_fir_3tap_hbw_dec2_tb.vhd \
 	psi_fix_resize_tb/psi_fix_resize_tb.vhd \
+	psi_fix_param_ram_tb/psi_fix_param_ram_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -170,6 +172,8 @@ tb_run_add_arguments 	"-gStimuliPath_g=$dataDir -gDutyCycle_g=32 -gRamBehavior_g
 add_tb_run
 
 create_tb_run "psi_fix_fir_dec_ser_nch_chpar_conf_fix_coef_tb"
+tb_run_add_arguments 	"-gTestRaminit_g=true" \
+						"-gTestRaminit_g=false"
 add_tb_run
 
 create_tb_run "psi_fix_fir_dec_ser_nch_chtdm_conf_tb"
@@ -181,6 +185,8 @@ tb_run_add_arguments 	"-gStimuliPath_g=$dataDir -gDutyCycle_g=32 -gRamBehavior_g
 add_tb_run
 
 create_tb_run "psi_fix_fir_dec_ser_nch_chtdm_conf_fix_coef_tb"
+tb_run_add_arguments 	"-gTestRaminit_g=true" \
+						"-gTestRaminit_g=false"
 add_tb_run
 
 create_tb_run "psi_fix_fir_par_nch_chtdm_conf_tb"
@@ -196,14 +202,14 @@ create_tb_run "psi_fix_fir_dec_semi_nch_chtdm_conf_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_fir_dec_semi_nch_chtdm_conf_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_fir_dec_semi_nch_chtdm_conf_tb/Data"]
 tb_run_add_time_limit "5000 us"
-tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gChannels_g=1 -gTaps_g=48 -gClkPerSpl_g=10 -gUseFixCoefs_g=true -gMultipliers_g=8 -gRatio_g=3 -gRamBehavior_g=WBR -gFullInpRateSupport_g=false" \
-						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=10 -gUseFixCoefs_g=false  -gMultipliers_g=10 -gRatio_g=3 -gRamBehavior_g=RBW -gFullInpRateSupport_g=false" \
-						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=2 -gUseFixCoefs_g=true  -gMultipliers_g=8 -gRatio_g=3 -gRamBehavior_g=RBW -gFullInpRateSupport_g=false" \
-						"-gFileFolder_g=$dataDir -gChannels_g=2 -gTaps_g=160 -gClkPerSpl_g=2 -gUseFixCoefs_g=false  -gMultipliers_g=40 -gRatio_g=12 -gRamBehavior_g=RBW -gFullInpRateSupport_g=false" \
-						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=2 -gUseFixCoefs_g=true  -gMultipliers_g=24 -gRatio_g=1 -gRamBehavior_g=WBR -gFullInpRateSupport_g=false" \
-						"-gFileFolder_g=$dataDir -gChannels_g=1 -gTaps_g=48 -gClkPerSpl_g=10 -gUseFixCoefs_g=false -gMultipliers_g=8 -gRatio_g=3 -gRamBehavior_g=WBR -gFullInpRateSupport_g=true" \
-						"-gFileFolder_g=$dataDir -gChannels_g=1 -gTaps_g=48 -gClkPerSpl_g=1 -gUseFixCoefs_g=true -gMultipliers_g=16 -gRatio_g=3 -gRamBehavior_g=WBR -gFullInpRateSupport_g=true" \
-						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=1 -gUseFixCoefs_g=false -gMultipliers_g=16 -gRatio_g=3 -gRamBehavior_g=WBR -gFullInpRateSupport_g=true"
+tb_run_add_arguments 	"-gFileFolder_g=$dataDir -gChannels_g=1 -gTaps_g=48 -gClkPerSpl_g=10 -gUseFixCoefs_g=true -gMultipliers_g=8 -gRatio_g=3 -gRamBehavior_g=WBR -gFullInpRateSupport_g=false -gInitCoefs_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=10 -gUseFixCoefs_g=false  -gMultipliers_g=10 -gRatio_g=3 -gRamBehavior_g=RBW -gFullInpRateSupport_g=false -gInitCoefs_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=2 -gUseFixCoefs_g=true  -gMultipliers_g=8 -gRatio_g=3 -gRamBehavior_g=RBW -gFullInpRateSupport_g=false -gInitCoefs_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=2 -gTaps_g=160 -gClkPerSpl_g=2 -gUseFixCoefs_g=false  -gMultipliers_g=40 -gRatio_g=12 -gRamBehavior_g=RBW -gFullInpRateSupport_g=false -gInitCoefs_g=true" \
+						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=2 -gUseFixCoefs_g=true  -gMultipliers_g=24 -gRatio_g=1 -gRamBehavior_g=WBR -gFullInpRateSupport_g=false -gInitCoefs_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=1 -gTaps_g=48 -gClkPerSpl_g=10 -gUseFixCoefs_g=false -gMultipliers_g=8 -gRatio_g=3 -gRamBehavior_g=WBR -gFullInpRateSupport_g=true -gInitCoefs_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=1 -gTaps_g=48 -gClkPerSpl_g=1 -gUseFixCoefs_g=true -gMultipliers_g=16 -gRatio_g=3 -gRamBehavior_g=WBR -gFullInpRateSupport_g=true -gInitCoefs_g=false" \
+						"-gFileFolder_g=$dataDir -gChannels_g=3 -gTaps_g=48 -gClkPerSpl_g=1 -gUseFixCoefs_g=false -gMultipliers_g=16 -gRatio_g=3 -gRamBehavior_g=WBR -gFullInpRateSupport_g=true -gInitCoefs_g=false"
 add_tb_run
 
 
@@ -382,6 +388,9 @@ tb_run_add_arguments "-gFileFolder_g=$dataDir -gVldDutyCycle_g=5 -gChannels_g=1 
 add_tb_run
 
 create_tb_run "psi_fix_resize_tb"
+add_tb_run
+
+create_tb_run "psi_fix_param_ram_tb"
 add_tb_run
 
 

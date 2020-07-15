@@ -39,7 +39,7 @@ entity psi_fix_fir_par_nch_chtdm_conf is
 		Rnd_g					: PsiFixRnd_t	:= PsiFixRound;
 		Sat_g					: PsiFixSat_t	:= PsiFixSat;
 		UseFixCoefs_g			: boolean		:= true;
-		FixCoefs_g				: t_areal		:= (0.0, 0.0)	
+		Coefs_g					: t_areal		:= (0.0, 0.0)	
 	);
 	port (
 		-- Control Signals
@@ -78,6 +78,7 @@ architecture rtl of psi_fix_fir_par_nch_chtdm_conf is
 	type Coef_a is array (natural range <>) of std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
 	signal CoefReg		: Coef_a(0 to Taps_g-1);
 	signal CoefWe		: std_logic_vector(0 to Taps_g-1);
+	signal CoefRstDone	: std_logic		:= '0';
 	
 begin
 	--------------------------------------------------------------------------
@@ -89,13 +90,8 @@ begin
 			-- Valid chain
 			DspVldChain(1 to DspVldChain'high) <= InVld & DspVldChain(1 to DspVldChain'high-1);
 			-- Coefficient handling (writable or fixed)
-			if UseFixCoefs_g then
-				CoefWe <= (others => '1');
-				for i in 0 to Taps_g-1 loop
-					CoefReg(i) <= PsiFixFromReal(FixCoefs_g(i), CoefFmt_g);
-				end loop;
-			else
-				CoefWe <= (others => '0');
+			CoefWe <= (others => '0');
+			if not UseFixCoefs_g then
 				CoefReg <= (others => CoefWrData);
 				if CoefWr = '1' and unsigned(CoefAddr) < Taps_g then
 					CoefWe(to_integer(unsigned(CoefAddr))) <= '1';
@@ -103,7 +99,18 @@ begin
 			end if;
 			-- Reset
 			if Rst = '1' then
-				DspVldChain<= (others => '0');
+				-- Make sure coefficients are initialized
+				if CoefRstDone = '0' then
+					CoefWe <= (others => '1');
+					for i in 0 to Taps_g-1 loop
+						CoefReg(i) <= PsiFixFromReal(Coefs_g(i), CoefFmt_g);
+					end loop;
+				end if;
+				
+				-- Reset values
+				DspVldChain <= (others => '0');
+			else 
+				CoefRstDone <= '1';
 			end if;
 		end if;
 	end process;

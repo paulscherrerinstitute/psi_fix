@@ -24,6 +24,9 @@ library work;
 	use work.psi_common_array_pkg.all;
 
 entity psi_fix_fir_dec_ser_nch_chpar_conf_fix_coef_tb is
+	generic (
+		TestRamInit_g : boolean := false
+	);
 end entity psi_fix_fir_dec_ser_nch_chpar_conf_fix_coef_tb;
 
 architecture sim of psi_fix_fir_dec_ser_nch_chpar_conf_fix_coef_tb is
@@ -70,8 +73,8 @@ begin
 			MaxTaps_g			=> 10,
 			Rnd_g				=> PsiFixTrunc,
 			Sat_g				=> PsiFixSat,
-			UseFixCoefs_g		=> true,
-			FixCoefs_g			=> Coefs_c
+			UseFixCoefs_g		=> not TestRamInit_g,
+			Coefs_g				=> Coefs_c
 		)
 		port map (
 			-- Control Signals

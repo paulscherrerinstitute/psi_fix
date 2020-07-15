@@ -42,10 +42,10 @@ entity psi_fix_fir_dec_semi_nch_chtdm_conf is
 		Taps_g					: natural		:= 32;	
 		Rnd_g					: PsiFixRnd_t	:= PsiFixRound;
 		Sat_g					: PsiFixSat_t	:= PsiFixSat;
-		UseFixCoefs_g			: boolean		:= true;
+		UseFixCoefs_g			: boolean		:= false;
 		FullInpRateSupport_g	: boolean		:= false;
 		RamBehavior_g			: string		:= "RBW";		-- "RBW" = read-before-write, "WBR" = write-before-read
-		FixCoefs_g				: t_areal		:= (0.0, 0.0);
+		Coefs_g					: t_areal		:= (0.1, 0.2);
 		ImplFlushIf_g			: boolean		:= false
 	);
 	port (
@@ -141,11 +141,23 @@ architecture rtl of psi_fix_fir_dec_semi_nch_chtdm_conf is
 	begin
 		if UseFixCoefs_g then
 			for i in 0 to TapsPerStage_c-1 loop
-				if (stage*TapsPerStage_c+i < Taps_g) and (stage*TapsPerStage_c+i < FixCoefs_g'length) then
-					Coefs_v(i)	:= PsiFixFromReal(FixCoefs_g(stage*TapsPerStage_c+i), CoefFmt_g);
+				if (stage*TapsPerStage_c+i < Taps_g) and (stage*TapsPerStage_c+i < Coefs_g'length) then
+					Coefs_v(i)	:= PsiFixFromReal(Coefs_g(stage*TapsPerStage_c+i), CoefFmt_g);
 				end if;
 			end loop;
 		end if;
+		return Coefs_v;
+	end function;
+	
+	function GetCoefsReal(	stage : integer) return t_areal is
+		variable Coefs_v 	: t_areal(0 to TapsPerStage_c-1) := (others => 0.0);
+		variable Idx_v		: natural	:= stage*Multipliers_g;
+	begin
+		for i in 0 to TapsPerStage_c-1 loop
+			if (stage*TapsPerStage_c+i < Taps_g) and (stage*TapsPerStage_c+i < Coefs_g'length) then
+				Coefs_v(i)	:= Coefs_g(stage*TapsPerStage_c+i);
+			end if;
+		end loop;
 		return Coefs_v;
 	end function;
 	
@@ -326,7 +338,7 @@ begin
 			
 			for m in 0 to Multipliers_g-1 loop
 				if unsigned(CoefAddr) >= m*TapsPerStage_c and unsigned(CoefAddr) < (m+1)*TapsPerStage_c then
-					v.CoefWrStg(m) := '1';
+					v.CoefWrStg(m) := CoefWr;
 				end if;
 				v.CoefAddrStg(m)	:= std_logic_vector(resize(unsigned(CoefAddr) - m*TapsPerStage_c, v.CoefAddrStg(m)'length));
 			end loop;
@@ -382,7 +394,8 @@ begin
 		signal DataDin			: std_logic_vector(InData'range);
 		signal RdData_4i		: std_logic_vector(InData'range);
 		signal Coef_4i			: std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
-		constant StageCoefs_c	: Coef_a(0 to TapsPerStage_c-1)	:= GetCoefs(i);
+		constant StageCoefs_c	: Coef_a(0 to TapsPerStage_c-1)		:= GetCoefs(i);
+		constant StageCoefsR_c	: t_areal(0 to TapsPerStage_c-1)	:= GetCoefsReal(i);
 		signal RamRdData		: std_logic_vector(InData'range);
 		signal FullRateDel		: std_logic_vector(InData'range);
 	begin
@@ -468,23 +481,43 @@ begin
 			signal RdAddr	: std_logic_vector(log2ceil(TapsPerStage_c)-1 downto 0);
 		begin
 			RdAddr <= std_logic_vector(r.CoefRdAddr(3+i)(RdAddr'range));
-			i_coef_ram : entity work.psi_common_sdp_ram
+			i_coef_ram : entity work.psi_fix_param_ram
 				generic map (
 					Depth_g		=> 2**log2ceil(TapsPerStage_c),
-					Width_g		=> PsiFixSize(CoefFmt_g),
-					IsAsync_g	=> false,
-					Behavior_g	=> RamBehavior_g
+					Fmt_g		=> CoefFmt_g,
+					Behavior_g	=> RamBehavior_g,
+					Init_g		=> StageCoefsR_c
 				)
 				port map (
-					Clk		=> Clk,
-					RdClk	=> Clk,
-					WrAddr	=> r.CoefAddrStg(i),
-					Wr		=> r.CoefWrStg(i),
-					WrData	=> r.CoefWrDataStg,
-					RdAddr	=> RdAddr,
-					Rd		=> '1',
-					RdData	=> Coef_4i
+					ClkA	=> Clk,
+					AddrA	=> r.CoefAddrStg(i),
+					WrA		=> r.CoefWrStg(i),
+					DinA	=> r.CoefWrDataStg,
+					DoutA	=> open,
+					ClkB	=> Clk,
+					AddrB	=> RdAddr,
+					WrB		=> '0',
+					DinB	=> (others => '0'),
+					DoutB	=> Coef_4i
 				);
+			
+			--i_coef_ram : entity work.psi_common_sdp_ram
+			--	generic map (
+			--		Depth_g		=> 2**log2ceil(TapsPerStage_c),
+			--		Width_g		=> PsiFixSize(CoefFmt_g),
+			--		IsAsync_g	=> false,
+			--		Behavior_g	=> RamBehavior_g
+			--	)
+			--	port map (
+			--		Clk		=> Clk,
+			--		RdClk	=> Clk,
+			--		WrAddr	=> r.CoefAddrStg(i),
+			--		Wr		=> r.CoefWrStg(i),
+			--		WrData	=> r.CoefWrDataStg,
+			--		RdAddr	=> RdAddr,
+			--		Rd		=> '1',
+			--		RdData	=> Coef_4i
+			--	);
 		end generate;
 
 		-- *** Multiply and Add ***

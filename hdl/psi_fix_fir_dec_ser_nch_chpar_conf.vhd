@@ -39,7 +39,7 @@ entity psi_fix_fir_dec_ser_nch_chpar_conf is
 		Rnd_g					: PsiFixRnd_t					:= PsiFixRound;
 		Sat_g					: PsiFixSat_t					:= PsiFixSat;
 		UseFixCoefs_g			: boolean						:= false;
-		FixCoefs_g				: t_areal						:= (0.0, 0.0);
+		Coefs_g				: t_areal						:= (0.0, 0.0);
 		RamBehavior_g			: string						:= "RBW"	-- RBW = Read before write, WBR = Write before read
 	);
 	port (
@@ -119,7 +119,7 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chpar_conf is
 	signal CoefRamDout_3	: std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
 	
 	-- coef ROM
-	type CoefRom_t is array (FixCoefs_g'low to FixCoefs_g'high) of std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
+	type CoefRom_t is array (Coefs_g'low to Coefs_g'high) of std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
 	signal CoefRom 	: CoefRom_t;
 	
 	
@@ -296,11 +296,12 @@ begin
 	--------------------------------------------
 	-- Coefficient RAM for configurable coefficients
 	g_nFixCoef : if not UseFixCoefs_g generate
-		i_coef_ram : entity work.psi_common_tdp_ram
+		i_coef_ram : entity work.psi_fix_param_ram
 			generic map (
 				Depth_g		=> CoefMemDepthApplied_c,
-				Width_g		=> PsiFixSize(CoefFmt_g),
-				Behavior_g	=> RamBehavior_g
+				Fmt_g		=> CoefFmt_g,
+				Behavior_g	=> RamBehavior_g,
+				Init_g		=> Coefs_g
 			)
 			port map (
 				ClkA		=> CoefClk,
@@ -320,7 +321,7 @@ begin
 	g_FixCoef : if UseFixCoefs_g generate
 		-- Table must be generated outside of the ROM process to make code synthesizable
 		g_CoefTable : for i in CoefRom'low to CoefRom'high generate
-			CoefRom(i) <= PsiFixFromReal(FixCoefs_g(i), CoefFmt_g);
+			CoefRom(i) <= PsiFixFromReal(Coefs_g(i), CoefFmt_g);
 		end generate;
 	
 		-- Assign unused outputs
