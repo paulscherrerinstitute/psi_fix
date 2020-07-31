@@ -99,6 +99,12 @@ begin
 		CheckStdlv(	"010", 	
 					PsiFixFromReal(	4.0, (1, 3, -1)), 
 					"FixFromReal Wrong: Negative Fractional Bits");	
+		CheckStdlv(	"011", 	
+					PsiFixFromReal(	4.0, (1, 0, 2)), 
+					"FixFromReal Wrong: Saturate upper limit");	
+		CheckStdlv(	"100", 	
+					PsiFixFromReal(	-4.0, (1, 0, 2)), 
+					"FixFromReal Wrong: Saturate lower limit");
 					
 		-- *** PsiFixToReal ***
 		print("*** PsiFixToReal ***");
