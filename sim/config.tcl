@@ -89,6 +89,7 @@ add_sources "../hdl" {
     psi_fix_noise_awgn.vhd \
     psi_fix_fir_3tap_hbw_dec2.vhd \
 	psi_fix_cic_dec_cfg_1ch.vhd \
+	psi_fix_cic_dec_cfg_nch_par_tdm.vhd \
 } -tag src
 
 # testbenches
@@ -137,6 +138,7 @@ add_sources "../testbench" {
 	psi_fix_resize_tb/psi_fix_resize_tb.vhd \
 	psi_fix_param_ram_tb/psi_fix_param_ram_tb.vhd \
 	psi_fix_cic_dec_cfg_1ch_tb/psi_fix_cic_dec_cfg_1ch_tb.vhd \
+	psi_fix_cic_dec_cfg_nch_par_tdm_tb/psi_fix_cic_dec_cfg_nch_par_tdm_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -408,6 +410,16 @@ tb_run_add_arguments 	"-gOrder_g=3 -gRatio_g=10 -gDiffDelay_g=1 -gAutoGainCorr_g
 						"-gOrder_g=6 -gRatio_g=5001 -gDiffDelay_g=2 -gAutoGainCorr_g=True -gInFile_g=input_o6_r5001_dd2_gcTrue.txt -gOutFile_g=output_o6_r5001_dd2_gcTrue.txt -gDataDir_g=$dataDir -gIdleCycles_g=0"
 
 add_tb_run
+
+create_tb_run "psi_fix_cic_dec_cfg_nch_par_tdm_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_cic_dec_cfg_nch_par_tdm_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_cic_dec_cfg_nch_par_tdm_tb/Data"]
+tb_run_add_arguments 	"-gOrder_g=3 -gRatio_g=10 -gDiffDelay_g=1 -gAutoGainCorr_g=True -gInFile_g=input_o3_r10_dd1_gcTrue.txt -gOutFile_g=output_o3_r10_dd1_gcTrue.txt -gDataDir_g=$dataDir -gIdleCycles_g=5" \
+						"-gOrder_g=4 -gRatio_g=9 -gDiffDelay_g=2 -gAutoGainCorr_g=True -gInFile_g=input_o4_r9_dd2_gcTrue.txt -gOutFile_g=output_o4_r9_dd2_gcTrue.txt -gDataDir_g=$dataDir -gIdleCycles_g=0" \
+						"-gOrder_g=4 -gRatio_g=6 -gDiffDelay_g=2 -gAutoGainCorr_g=False -gInFile_g=input_o4_r6_dd2_gcFalse.txt -gOutFile_g=output_o4_r6_dd2_gcFalse.txt -gDataDir_g=$dataDir -gIdleCycles_g=0"
+
+add_tb_run
+
 
 
 
