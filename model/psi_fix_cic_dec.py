@@ -49,7 +49,9 @@ class psi_fix_cic_dec:
         self.cicGain = (ratio*diffDelay)**order
         self.cicAddBits = ceil(log2(self.cicGain))
         self.shift = self.cicAddBits
-        self.accuFmt = PsiFixFmt(inFmt.S, inFmt.I+self.cicAddBits, inFmt.F)
+        # CIC implementation does not rely on double-precision numbers for accumulators because they tend to
+        # be quite large.
+        self.accuFmt = PsiFixFmt(inFmt.S, inFmt.I+self.cicAddBits, inFmt.F, suppressRangeCheck=True)
         self.diffFmt = PsiFixFmt(outFmt.S, inFmt.I, outFmt.F+order+1)
         self.gcInFmt = PsiFixFmt(1, outFmt.I, min(24-outFmt.I, self.diffFmt.F))
         #Constants

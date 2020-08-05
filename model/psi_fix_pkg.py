@@ -18,13 +18,15 @@ from en_cl_fix_pkg import *
 ########################################################################################################################
 # Helper Classes
 ########################################################################################################################
+class BittruenessNotGuaranteed(Exception): pass
+
 class PsiFixFmt:
-    def __init__(self, S : int, I : int, F : int):
+    def __init__(self, S : int, I : int, F : int, suppressRangeCheck : bool = False):
         self.S = S
         self.I = I
         self.F = F
-        if PsiFixSize(self) > 53:
-            raise Exception("PsiFixFmt: Format exceeding 53 bits (double range), bittrueness is not guaranteed!")
+        if PsiFixSize(self) > 53 and not suppressRangeCheck:
+            raise BittruenessNotGuaranteed("PsiFixFmt: Format exceeding 53 bits (double range), bittrueness is not guaranteed!")
 
     def __str__(self):
         return "({}, {}, {})".format(self.S, self.I, self.F)
