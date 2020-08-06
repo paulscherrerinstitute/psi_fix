@@ -14,3 +14,4 @@ testbench/psi_fix_lut_gen_tb/psi_fix_lut_test1.vhd
 
 #Simulation artifacts
 *.ghw
+*.transcript
