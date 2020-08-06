@@ -1,0 +1,11 @@
+
+******************************************************
+*** Run psi_fix.psi_fix_cic_dec_cfg_1ch_tb
+******************************************************
+Running Pre Script
+
+Running Simulation
+ghdl --elab-run --ieee=synopsys --std=08 -frelaxed-rules -Wno-shared --work=psi_fix psi_fix_cic_dec_cfg_1ch_tb -gOrder_g=3 -gRatio_g=10 -gDiffDelay_g=1 -gAutoGainCorr_g=True -gInFile_g=input_o3_r10_dd1_gcTrue.txt -gOutFile_g=output_o3_r10_dd1_gcTrue.txt -gDataDir_g=C:/PALib/PALib_FPGA/Lib/Firmware/VHDL/psi_fix/testbench/psi_fix_cic_dec_cfg_1ch_tb/Data -gIdleCycles_g=5 --ieee-asserts=disable
+psi_fix - Compile psi_fix_cic_dec_cfg_1ch.vhd
+psi_fix - Compile psi_fix_cic_dec_cfg_1ch.vhd
+psi_fix - Compile psi_fix_cic_dec_cfg_1ch_tb.vhd
