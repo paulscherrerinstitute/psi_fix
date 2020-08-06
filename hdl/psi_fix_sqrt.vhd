@@ -18,7 +18,7 @@ library ieee;
 ------------------------------------------------------------------------------	
 -- $$ tbpkg=psi_lib.psi_tb_textfile_pkg,psi_lib.psi_tb_txt_util $$
 -- $$ processes=stimuli,response $$
-entity psi_fix_sqrt_approx is
+entity psi_fix_sqrt is
 	generic (
 		InFmt_g			: PsiFixFmt_t   := (0,0,15); -- Must be unsigned, wuare root not defined for negative numbers
 		OutFmt_g		: PsiFixFmt_t   := (0,1,15);
@@ -44,7 +44,7 @@ end entity;
 -- Architecture section
 ------------------------------------------------------------------------------
 
-architecture rtl of psi_fix_sqrt_approx is 
+architecture rtl of psi_fix_sqrt is 
 
 	-- Constants
 	constant InFmtNorm_c			: PsiFixFmt_t	:= (0, 0, InFmt_g.I+InFmt_g.F);
@@ -87,7 +87,7 @@ begin
 	--------------------------------------------------------------------------
 	-- Assertions
 	--------------------------------------------------------------------------	
-	assert InFmt_g.S = 0 report "###ERROR###: psi_fix_sqrt_approx InFmt_g must be unsigned!" severity error;
+	assert InFmt_g.S = 0 report "###ERROR###: psi_fix_sqrt InFmt_g must be unsigned!" severity error;
 
 	--------------------------------------------------------------------------
 	-- Combinatorial Process

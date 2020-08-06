@@ -22,16 +22,16 @@ library ieee;
 ------------------------------------------------------------
 -- Entity Declaration
 ------------------------------------------------------------
-entity psi_fix_sqrt_approx_tb is
+entity psi_fix_sqrt_tb is
 	generic (
-		FileFolder_g	: string 		:= "../testbench/psi_fix_sqrt_approx_tb/Data"
+		FileFolder_g	: string 		:= "../testbench/psi_fix_sqrt_tb/Data"
 	);
 end entity;
 
 ------------------------------------------------------------
 -- Architecture
 ------------------------------------------------------------
-architecture sim of psi_fix_sqrt_approx_tb is
+architecture sim of psi_fix_sqrt_tb is
 	-- *** Fixed Generics ***
 	constant InFmt_g		: PsiFixFmt_t	:= (0, 2, 14);
 	constant OutFmt_g		: PsiFixFmt_t	:= (1, 0, 15);
@@ -63,7 +63,7 @@ begin
 	------------------------------------------------------------
 	-- DUT Instantiation
 	------------------------------------------------------------
-	i_dut : entity work.psi_fix_sqrt_approx
+	i_dut : entity work.psi_fix_sqrt
 		generic map (
 			InFmt_g => InFmt_g,
 			OutFmt_g => OutFmt_g,

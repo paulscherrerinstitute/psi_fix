@@ -10,10 +10,10 @@ from matplotlib import pyplot as plt
 ########################################################################################################################
 # Model Definition
 ########################################################################################################################
-class psi_fix_sqrt_approx:
+class psi_fix_sqrt:
 
     def __init__(self, inFmt : PsiFixFmt, outFmt : PsiFixFmt, rnd : PsiFixRnd = PsiFixRnd.Trunc, sat : PsiFixSat = PsiFixSat.Wrap):
-        assert inFmt.S == 0, "class psi_fix_sqrt_approx: inFmt must be unsigned, square root for negative numbers is not defined"
+        assert inFmt.S == 0, "class psi_fix_sqrt: inFmt must be unsigned, square root for negative numbers is not defined"
         self._inFmt = inFmt
         self._outFmt = outFmt
         self._sat = sat

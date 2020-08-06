@@ -7,7 +7,7 @@ sys.path.append("../../../model")
 ########################################################################################################################
 # Import Statements
 ########################################################################################################################
-from psi_fix_sqrt_approx import psi_fix_sqrt_approx
+from psi_fix_sqrt import psi_fix_sqrt
 from psi_fix_pkg import *
 import numpy as np
 from matplotlib import pyplot as plt
@@ -38,7 +38,7 @@ stim = np.concatenate(([1/8, 1/4, 1/2, 1, 2, 4], stimSimple, stimRand))
 stimQuant = PsiFixFromReal(stim, IN_FMT, errSat=False)
 
 #Simulation
-model = psi_fix_sqrt_approx(IN_FMT, OUT_FMT, PsiFixRnd.Round, PsiFixSat.Sat)
+model = psi_fix_sqrt(IN_FMT, OUT_FMT, PsiFixRnd.Round, PsiFixSat.Sat)
 out = model.Process(stimQuant)
 
 ########################################################################################################################
