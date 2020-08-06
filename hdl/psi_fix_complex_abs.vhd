@@ -55,7 +55,7 @@ architecture rtl of psi_fix_complex_abs is
 	constant LimFmt_c				: PsiFixFmt_t	:= (0, 0, AddFmt_c.F);			-- 2*15=30 fractional bits
 	constant SqrtInFmt_c			: PsiFixFmt_t	:= (0, 0, 20);
 	constant SqrtOutFmt_c			: PsiFixFmt_t	:= (0, 0, 17);
-	constant MaxSft_c				: natural		:= InFmtNorm_c.F-1;
+	constant MaxSft_c				: natural		:= (InFmtNorm_c.F/2*2);
 	constant SftStgBeforeApprox_c	: natural		:= log2ceil(MaxSft_c);
 	constant SftStgAfterApprox_c	: natural		:= SftStgBeforeApprox_c/2;
 	constant OutSftFmt_c			: PsiFixFmt_t	:= (0, 0, OutFmtNorm_c.F);

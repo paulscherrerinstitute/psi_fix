@@ -51,8 +51,8 @@ architecture rtl of psi_fix_sqrt_approx is
 	constant OutFmtNorm_c			: PsiFixFmt_t	:= (OutFmt_g.S, 0, OutFmt_g.I+OutFmt_g.F+1); -- rounding bit is kept
 	constant SqrtInFmt_c			: PsiFixFmt_t	:= (0, 0, 20);
 	constant SqrtOutFmt_c			: PsiFixFmt_t	:= (0, 0, 17);
-	constant MaxSft_c				: natural		:= InFmtNorm_c.F-1;
-	constant SftStgBeforeApprox_c	: natural		:= log2ceil(MaxSft_c);
+	constant MaxSft_c				: natural		:= (InFmtNorm_c.F/2*2);	
+	constant SftStgBeforeApprox_c	: natural		:= log2(MaxSft_c);
 	constant SftStgAfterApprox_c	: natural		:= SftStgBeforeApprox_c/2;
 	constant OutSftFmt_c			: PsiFixFmt_t	:= (OutFmt_g.S, 0, OutFmtNorm_c.F);
 	constant NormSft_c				: integer		:= (InFmt_g.I+1)/2*2;
