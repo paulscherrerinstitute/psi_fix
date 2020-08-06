@@ -87,6 +87,7 @@ add_sources "../hdl" {
 	psi_fix_white_noise.vhd \
     psi_fix_noise_awgn.vhd \
     psi_fix_fir_3tap_hbw_dec2.vhd \
+	psi_fix_sqrt_approx.vhd \
 } -tag src
 
 # testbenches
@@ -134,6 +135,7 @@ add_sources "../testbench" {
     psi_fix_fir_3tap_hbw_dec2_tb/psi_fix_fir_3tap_hbw_dec2_tb.vhd \
 	psi_fix_resize_tb/psi_fix_resize_tb.vhd \
 	psi_fix_param_ram_tb/psi_fix_param_ram_tb.vhd \
+	psi_fix_sqrt_approx_tb/psi_fix_sqrt_approx_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -394,6 +396,12 @@ create_tb_run "psi_fix_resize_tb"
 add_tb_run
 
 create_tb_run "psi_fix_param_ram_tb"
+add_tb_run
+
+create_tb_run "psi_fix_sqrt_approx_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_sqrt_approx_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_sqrt_approx_tb/Data"]
+tb_run_add_arguments "-gFileFolder_g=$dataDir"
 add_tb_run
 
 
