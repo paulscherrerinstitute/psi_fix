@@ -11,6 +11,7 @@ from enum import Enum
 import numpy as np
 import os
 import sys
+import contextlib
 #Iimport en_cl_fix package
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../en_cl_fix/python/src")
 from en_cl_fix_pkg import *
@@ -18,14 +19,19 @@ from en_cl_fix_pkg import *
 ########################################################################################################################
 # Helper Classes
 ########################################################################################################################
+
+
 class BittruenessNotGuaranteed(Exception): pass
 
 class PsiFixFmt:
-    def __init__(self, S : int, I : int, F : int, suppressRangeCheck : bool = False):
+
+    __enable_range_check = False
+
+    def __init__(self, S : int, I : int, F : int):
         self.S = S
         self.I = I
         self.F = F
-        if PsiFixSize(self) > 53 and not suppressRangeCheck:
+        if PsiFixSize(self) > 53 and self.__enable_range_check:
             raise BittruenessNotGuaranteed("PsiFixFmt: Format exceeding 53 bits (double range), bittrueness is not guaranteed!")
 
     def __str__(self):
@@ -33,6 +39,18 @@ class PsiFixFmt:
 
     def __eq__(self, other):
         return (self.S == other.S) and (self.I == other.I) and (self.F == other.F)
+
+    @classmethod
+    def EnableRangeCheck(cls, ena : bool):
+        cls.__enable_range_check = ena
+
+    @classmethod
+    @contextlib.contextmanager
+    def WithRangeCheckDisabled(cls):
+        enaBefore = cls.__enable_range_check
+        cls.EnableRangeCheck(False)
+        yield
+        cls.EnableRangeCheck(enaBefore)
 
 class PsiFixRnd(Enum):
     Round = 0
