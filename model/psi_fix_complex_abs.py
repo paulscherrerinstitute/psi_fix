@@ -62,7 +62,7 @@ class psi_fix_complex_abs:
         sqrtIn = PsiFixShiftLeft(lim, self._limFmt, sft, self._limFmt.F, psi_fix_lin_approx.CONFIGS.Sqrt18Bit.inFmt, PsiFixRnd.Trunc)
         resSqrt = self._sqrt.Approximate(sqrtIn)
         sftIn = PsiFixResize(resSqrt, psi_fix_lin_approx.CONFIGS.Sqrt18Bit.outFmt, self._outFmtNorm)
-        resSft = PsiFixShiftRight(sftIn, self._outFmtNorm, sft / 2, self._limFmt.F / 2 + 1, self._outFmtNorm)
+        resSft = PsiFixShiftRight(sftIn, self._outFmtNorm, sft / 2, np.ceil(self._limFmt.F / 2 + 1), self._outFmtNorm)
         return PsiFixShiftLeft(resSft, self._outFmtNorm, self._inFmt.I, self._inFmt.I, self._outFmt, self._rnd, self._sat)
 
 

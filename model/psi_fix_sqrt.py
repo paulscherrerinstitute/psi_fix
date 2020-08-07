@@ -42,7 +42,7 @@ class psi_fix_sqrt:
         sqrtIn = PsiFixShiftLeft(d_norm, self._inFmt, sft, self._inFmt.F, psi_fix_lin_approx.CONFIGS.Sqrt18Bit.inFmt, PsiFixRnd.Trunc)
         resSqrt = self._sqrt.Approximate(sqrtIn)
         sftIn = PsiFixResize(resSqrt, psi_fix_lin_approx.CONFIGS.Sqrt18Bit.outFmt, self._outFmtNorm)
-        resSft = PsiFixShiftRight(sftIn, self._outFmtNorm, sft / 2, self._inFmt.F / 2 + 1, self._outFmtNorm)
+        resSft = PsiFixShiftRight(sftIn, self._outFmtNorm, sft / 2, np.ceil(self._inFmt.F / 2 + 1), self._outFmtNorm, PsiFixRnd.Trunc, PsiFixSat.Wrap)
         denorm = PsiFixShiftLeft(resSft, self._outFmtNorm, normSft/2, normSft/2, self._outFmt, self._rnd, self._sat)
         return denorm
 
