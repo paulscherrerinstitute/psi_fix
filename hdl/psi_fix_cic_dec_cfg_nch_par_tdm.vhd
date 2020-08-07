@@ -125,7 +125,7 @@ begin
 	-- Combinatorial Process
 	--------------------------------------------------------------------------
 	p_comb : process(	r, InData, InVld,
-						DiffIn_0, VldDiff_0, DiffDel, CfgRatio, CfgShift)	
+						DiffIn_0, VldDiff_0, DiffDel, CfgRatio, CfgShift, ParTdmOutVld, ShiftVld)	
 		variable v : two_process_r;
 	begin
 		-- hold variables stable
@@ -166,7 +166,7 @@ begin
 		
 		-- *** Shift ***
 		-- Shifter implemented as separate component, see below
-		if r.VldAccu(Order_g) = '1' then
+		if ParTdmOutVld = '1' then
 			v.SftVldCnt := r.SftVldCnt + 1;			
 		end if;
 		if ShiftVld = '1' then
