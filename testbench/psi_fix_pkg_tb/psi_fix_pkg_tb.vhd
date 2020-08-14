@@ -105,6 +105,9 @@ begin
 		CheckStdlv(	"100", 	
 					PsiFixFromReal(	-4.0, (1, 0, 2)), 
 					"FixFromReal Wrong: Saturate lower limit");
+		CheckStdlv( X"FFFF00000000",
+					PsiFixFromReal(281470681743360.0, (0,48,0)),
+					"FixFromReal: Wrong for large number");
 					
 		-- *** PsiFixToReal ***
 		print("*** PsiFixToReal ***");
