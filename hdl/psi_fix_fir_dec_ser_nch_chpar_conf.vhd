@@ -77,12 +77,14 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chpar_conf is
 	-- Constants
 	constant MultFmt_c	: PsiFixFmt_t		:= (max(InFmt_g.S, CoefFmt_g.S), InFmt_g.I+CoefFmt_g.I, InFmt_g.F+CoefFmt_g.F);
 	constant AccuFmt_c	: PsiFixFmt_t		:= (1, OutFmt_g.I+1, InFmt_g.F + CoefFmt_g.F);
+	constant RndFmt_c	: PsiFixFmt_t		:= (1, OutFmt_g.I+1, OutFmt_g.F);
 
 	-- types
 	type InData_t is array (0 to Channels_g-1) of std_logic_vector(PsiFixSize(InFmt_g)-1 downto 0);
 	type InData_a is array (natural range <>) of InData_t;
 	type Mult_t is array (0 to Channels_g-1) of std_logic_vector(PsiFixSize(MultFmt_c)-1 downto 0);
 	type Accu_t is array (0 to Channels_g-1) of std_logic_vector(PsiFixSize(AccuFmt_c)-1 downto 0);
+	type Rnd_t is array (0 to Channels_g-1) of std_logic_vector(PsiFixSize(RndFmt_c)-1 downto 0);
 	type Out_t is array (0 to Channels_g-1) of std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);
 	
 
@@ -103,8 +105,10 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chpar_conf is
 		MultInCoef_4	: std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
 		MultOut_5		: Mult_t;
 		Accu_6			: Accu_t;
-		Output_7		: Out_t;
-		OutVld_7		: std_logic;
+		Rnd_7			: Rnd_t;
+		RndVld_7		: std_logic;
+		Output_8		: Out_t;
+		OutVld_8		: std_logic;
 		FirstTapLoop_3	: std_logic;
 		TapRdAddr_3 	: std_logic_vector(log2ceil(MaxTaps_g)-1 downto 0);
 		ReplaceZero_4	: std_logic;
@@ -241,14 +245,22 @@ begin
 		end loop;		
 		
 		-- *** Stage 7 ***
-		-- Output Handling
-		v.OutVld_7 := '0';
+		-- Rounding
+		v.RndVld_7 := '0';
 		if r.Last(6) = '1' then
 			for i in 0 to Channels_g-1 loop
-				v.Output_7(i)	:= PsiFixResize(	r.Accu_6(i) , AccuFmt_c, OutFmt_g, Rnd_g, Sat_g);
+				v.Rnd_7(i)	:= PsiFixResize(r.Accu_6(i), AccuFmt_c, RndFmt_c, Rnd_g, PsiFixWrap);
 			end loop;
-			v.OutVld_7 := r.CalcOn(6);
-		end if;
+			v.RndVld_7 := r.CalcOn(6);
+		end if;		
+		
+		-- *** Stage 8 ***
+		-- Output Handling and saturation
+		v.OutVld_8 := r.RndVld_7;
+		for i in 0 to Channels_g-1 loop
+			v.Output_8(i)	:= PsiFixResize(r.Rnd_7(i), RndFmt_c, OutFmt_g, PsiFixTrunc, Sat_g);
+		end loop;
+
 		
 		-- *** Status Output ***
 		if (unsigned(r.Vld) /= 0) or (unsigned(r.CalcOn) /= 0) then
@@ -258,9 +270,9 @@ begin
 		end if;
 				
 		-- *** Outputs ***
-		OutVld	<= r.OutVld_7;
+		OutVld	<= r.OutVld_8;
 		for i in 0 to Channels_g-1 loop
-			OutData(PsiFixSize(OutFmt_g)*(i+1)-1 downto PsiFixSize(OutFmt_g)*i)	<= r.Output_7(i);
+			OutData(PsiFixSize(OutFmt_g)*(i+1)-1 downto PsiFixSize(OutFmt_g)*i)	<= r.Output_8(i);
 		end loop;	
 		CalcOngoing <= r.CalcOngoing or r.Vld(0);
 		
@@ -282,7 +294,8 @@ begin
 				r.TapWrAddr_1		<= (others => '0');
 				r.DecCnt_1			<= (others => '0');
 				r.CalcOn			<= (others => '0');
-				r.OutVld_7			<= '0';
+				r.RndVld_7			<= '0';
+				r.OutVld_8			<= '0';
 				r.Last				<= (others => '0');
 				r.ReplaceZero_4		<= '1';
 				r.CalcOngoing		<= '0';

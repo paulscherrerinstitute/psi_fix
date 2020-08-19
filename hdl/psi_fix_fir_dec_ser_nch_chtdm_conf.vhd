@@ -82,12 +82,14 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chtdm_conf is
 	-- Constants
 	constant MultFmt_c	: PsiFixFmt_t		:= (max(InFmt_g.S, CoefFmt_g.S), InFmt_g.I+CoefFmt_g.I, InFmt_g.F+CoefFmt_g.F);
 	constant AccuFmt_c	: PsiFixFmt_t		:= (1, OutFmt_g.I+1, InFmt_g.F + CoefFmt_g.F);
+	constant RndFmt_c	: PsiFixFmt_t		:= (1, OutFmt_g.I+1, OutFmt_g.F);
 
 	-- types
 	subtype InData_t 	is std_logic_vector(PsiFixSize(InFmt_g)-1 downto 0);
 	type InData_a 		is array (natural range <>) of InData_t;
 	subtype Mult_t 		is  std_logic_vector(PsiFixSize(MultFmt_c)-1 downto 0);
 	subtype Accu_t 		is  std_logic_vector(PsiFixSize(AccuFmt_c)-1 downto 0);
+	subtype Rnd_t 		is  std_logic_vector(PsiFixSize(RndFmt_c)-1 downto 0);
 	subtype Out_t 		is  std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);
 	type ChNr_a			is array (natural range <>) of std_logic_vector(log2ceil(Channels_g)-1 downto 0);
 	
@@ -113,8 +115,10 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chtdm_conf is
 		MultInCoef_4	: std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
 		MultOut_5		: Mult_t;
 		Accu_6			: Accu_t;
-		Output_7		: Out_t;
-		OutVld_7		: std_logic;
+		Rnd_7			: Rnd_t;
+		RndVld_7		: std_logic;
+		Output_8		: Out_t;
+		OutVld_8		: std_logic;
 		FirstTapLoop_3	: std_logic;
 		TapRdAddr_3 	: std_logic_vector(DataMemAddBits_c-1 downto 0);
 		ReplaceZero_4	: std_logic;
@@ -274,25 +278,29 @@ begin
 									AccuIn_v, AccuFmt_c,
 									AccuFmt_c); -- Overflows compensate at the end of the calculation and rounding not required
 	
-		
 		-- *** Stage 7 ***
-		-- Output Handling
-		v.OutVld_7 := '0';
+		-- Rounding
+		v.RndVld_7 := '0';
 		if r.Last(6) = '1' then
-			v.Output_7	:= PsiFixResize(r.Accu_6 , AccuFmt_c, OutFmt_g, Rnd_g, Sat_g);
-			v.OutVld_7 := r.CalcOn(6);
-		end if;
+			v.Rnd_7		:= PsiFixResize(r.Accu_6, AccuFmt_c, RndFmt_c, Rnd_g, PsiFixWrap);
+			v.RndVld_7 	:= r.CalcOn(6);
+		end if;	
+		
+		-- *** Stage 8 ***
+		-- Output Handling and saturation
+		v.OutVld_8 := r.RndVld_7;
+		v.Output_8 := PsiFixResize(r.Rnd_7, RndFmt_c, OutFmt_g, PsiFixTrunc, Sat_g);
 		
 		-- *** Status Output ***
-		if (unsigned(r.Vld) /= 0) or (unsigned(r.CalcOn) /= 0) then
+		if (unsigned(r.Vld) /= 0) or (unsigned(r.CalcOn) /= 0) or (r.RndVld_7 = '1') then
 			v.CalcOngoing := '1';
 		else
 			v.CalcOngoing := '0';
 		end if;
 				
 		-- *** Outputs ***
-		OutVld	<= r.OutVld_7;
-		OutData	<= r.Output_7;		
+		OutVld	<= r.OutVld_8;
+		OutData	<= r.Output_8;		
 		CalcOngoing	<= r.CalcOngoing or r.Vld(0);
 		
 		-- *** Assign to signal ***
@@ -315,7 +323,8 @@ begin
 				r.TapWrAddr_1		<= (others => '0');
 				r.DecCnt_1			<= (others => '0');
 				r.CalcOn			<= (others => '0');
-				r.OutVld_7			<= '0';
+				r.RndVld_7			<= '0';
+				r.OutVld_8			<= '0';
 				r.Last				<= (others => '0');
 				r.ReplaceZero_4		<= '1';
 				r.CalcOngoing		<= '0';
