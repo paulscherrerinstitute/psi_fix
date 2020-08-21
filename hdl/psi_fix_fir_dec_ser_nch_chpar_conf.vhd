@@ -263,7 +263,7 @@ begin
 
 		
 		-- *** Status Output ***
-		if (unsigned(r.Vld) /= 0) or (unsigned(r.CalcOn) /= 0) then
+		if (unsigned(r.Vld) /= 0) or (unsigned(r.CalcOn) /= 0) or (r.RndVld_7 = '1') then
 			v.CalcOngoing := '1';
 		else
 			v.CalcOngoing := '0';
