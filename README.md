@@ -42,7 +42,7 @@ Stable releases are tagged in the form *major*.*minor*.*bugfix*.
 * If only bugs are fixed (i.e. no functional changes are applied), the *bugfix* version is incremented
 
 <!-- DO NOT CHANGE FORMAT: this section is parsed to resolve dependencies -->
- 
+
 # Dependencies (Library)
 
 ## Dependencies (Library)
@@ -56,7 +56,7 @@ Alternatively the repository [psi\_fpga\_all](https://github.com/paulscherrerins
   * [**psi\_fix**](https://github.com/paulscherrerinstitute/psi_fix)
   * [psi\_common](https://github.com/paulscherrerinstitute/psi_common) (2.13.0 or higher)
   * [psi\_tb](https://github.com/paulscherrerinstitute/psi_tb) (2.5.0 or higher)
-  * [en\_cl\_fix](https://github.com/paulscherrerinstitute/en_cl_fix) (1.1.5 or higher) - fork of a a library provided by Enclustra GmbH<br>[Original Location](https://github.com/enclustra/en_cl_fix)
+  * [en\_cl\_fix](https://github.com/paulscherrerinstitute/en_cl_fix) (1.1.6 or higher) - fork of a a library provided by Enclustra GmbH<br>[Original Location](https://github.com/enclustra/en_cl_fix)
 
 <!-- END OF PARSED SECTION -->
 
@@ -128,7 +128,7 @@ Some examples are given below:
 | [0,4,0]       | 0 ... 15          | iiii.        | 5           | 0101.        |
 | [0,4,2]       | 0 ... 15.75       | iiii.ff      | 5.25        | 0101.01      |
 | [1,4,-2]      | -16 ... 12        | sii--.       | -8          | 110--.       |
-| [1,-2,4]      | -0.25 ... +0.1875 | s.--ff       | 0.125       | 0.--10       | 
+| [1,-2,4]      | -0.25 ... +0.1875 | s.--ff       | 0.125       | 0.--10       |
 
 
 
