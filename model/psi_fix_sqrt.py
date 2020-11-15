@@ -44,7 +44,7 @@ class psi_fix_sqrt:
         sftIn = PsiFixResize(resSqrt, psi_fix_lin_approx.CONFIGS.Sqrt18Bit.outFmt, self._outFmtNorm)
         resSft = PsiFixShiftRight(sftIn, self._outFmtNorm, sft / 2, np.ceil(self._inFmt.F / 2 + 1), self._outFmtNorm, PsiFixRnd.Trunc, PsiFixSat.Wrap)
         denorm = PsiFixShiftLeft(resSft, self._outFmtNorm, normSft/2, normSft/2, self._outFmt, self._rnd, self._sat)
-        return denorm
+        return np.where(data==0,0,denorm)
 
 
 
