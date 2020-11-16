@@ -102,7 +102,16 @@ class psi_fix_lin_approx:
                         points=1024,
                         name="gaussify20b",
                         validRange=(-1,1))
-        all = [Sin18Bit, Sqrt18Bit, Gaussify20Bit]
+        Invert18Bit = psi_fix_lin_cfg_settings(
+                        function=lambda  x: 1.0/x,
+                        inFmt=PsiFixFmt(0,1,18),
+                        outFmt=PsiFixFmt(0,0,18),
+                        offsFmt=PsiFixFmt(1,0,21),
+                        gradFmt=PsiFixFmt(1,0,14),
+                        points=1024,
+                        name="inv18b",
+                        validRange=(1, 2-(2**-20)))
+        all = [Sin18Bit, Sqrt18Bit, Gaussify20Bit, Invert18Bit]
 
     ####################################################################################################################
     # Static Methods
@@ -346,7 +355,7 @@ class psi_fix_lin_approx:
 #To design a new filter, uncomment the code below, replace the configuration with the new one to be optimized and run
 #this file as script.
 
-#psi_fix_lin_approx.Design(psi_fix_lin_approx.CONFIGS.Gaussify20Bit,simRange=(-0.99,0.99))
+#psi_fix_lin_approx.Design(psi_fix_lin_approx.CONFIGS.Invert18Bit,simRange=(1,1.999))
 #exit()
 
 ########################################################################################################################

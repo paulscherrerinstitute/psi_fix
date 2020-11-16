@@ -68,6 +68,7 @@ add_sources "../hdl" {
 	psi_fix_lin_approx_sin18b_dual.vhd \
 	psi_fix_lin_approx_sqrt18b.vhd \
 	psi_fix_lin_approx_gaussify20b.vhd \
+	psi_fix_lin_approx_inv18b.vhd \
 	psi_fix_cic_dec_fix_1ch.vhd \
 	psi_fix_cic_int_fix_1ch.vhd \
 	psi_fix_bin_div.vhd \
@@ -92,6 +93,7 @@ add_sources "../hdl" {
 	psi_fix_cic_dec_cfg_nch_par_tdm.vhd \
 	psi_fix_cic_dec_cfg_nch_tdm_tdm.vhd \
 	psi_fix_sqrt.vhd \
+	psi_fix_inv.vhd \
 } -tag src
 
 # testbenches
@@ -101,6 +103,7 @@ add_sources "../testbench" {
 	psi_fix_lin_approx_tb/sin18b/psi_fix_lin_approx_sin18b_dual_tb.vhd \
 	psi_fix_lin_approx_tb/sqrt18b/psi_fix_lin_approx_sqrt18b_tb.vhd \
 	psi_fix_lin_approx_tb/gaussify20b/psi_fix_lin_approx_gaussify20b_tb.vhd \
+	psi_fix_lin_approx_tb/inv18b/psi_fix_lin_approx_inv18b_tb.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb_case0_pkg.vhd \
 	psi_fix_fir_dec_ser_nch_chpar_conf_tb/psi_fix_fir_dec_ser_nch_chpar_conf_tb_case1_pkg.vhd \
@@ -143,6 +146,7 @@ add_sources "../testbench" {
 	psi_fix_cic_dec_cfg_nch_par_tdm_tb/psi_fix_cic_dec_cfg_nch_par_tdm_tb.vhd \
 	psi_fix_cic_dec_cfg_nch_tdm_tdm_tb/psi_fix_cic_dec_cfg_nch_tdm_tdm_tb.vhd \
 	psi_fix_sqrt_tb/psi_fix_sqrt_tb.vhd \
+	psi_fix_inv_tb/psi_fix_inv_tb.vhd \
 } -tag tb
 	
 #TB Runs
@@ -169,6 +173,11 @@ add_tb_run
 
 create_tb_run "psi_fix_lin_approx_gaussify20b_tb"
 set dataDir [file normalize "../testbench/psi_fix_lin_approx_tb/gaussify20b"]
+tb_run_add_arguments "-gStimuliDir_g=$dataDir"
+add_tb_run
+
+create_tb_run "psi_fix_lin_approx_inv18b_tb"
+set dataDir [file normalize "../testbench/psi_fix_lin_approx_tb/inv18b"]
 tb_run_add_arguments "-gStimuliDir_g=$dataDir"
 add_tb_run
 
@@ -439,6 +448,13 @@ tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_sqrt_tb/Scr
 set dataDir [file normalize "../testbench/psi_fix_sqrt_tb/Data"]
 tb_run_add_arguments "-gFileFolder_g=$dataDir"
 add_tb_run
+
+create_tb_run "psi_fix_inv_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_inv_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_inv_tb/Data"]
+tb_run_add_arguments "-gFileFolder_g=$dataDir"
+add_tb_run
+
 
 
 
