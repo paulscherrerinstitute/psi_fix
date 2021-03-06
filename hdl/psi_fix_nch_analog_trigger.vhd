@@ -1,4 +1,19 @@
 ------------------------------------------------------------------------------
+--  Copyright (c) 2021 by Paul Scherrer Institute, Switzerland
+--  All rights reserved.
+--  Authors: Benoit Stef 
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+-- Description
+------------------------------------------------------------------------------
+-- This block allows generating trigger out of sevral input signals with fixed 
+-- point format, parameter here are mapped in tdm fashion to reduce resources usage
+-- and not parallelize comparator, care must be taken on strobe input number of channel 
+-- and clock frequency
+
+
+------------------------------------------------------------------------------
 -- Pkg for type definition
 ------------------------------------------------------------------------------
 library ieee;
