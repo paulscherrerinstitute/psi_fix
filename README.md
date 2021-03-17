@@ -8,6 +8,7 @@ Radoslaw Rybaniec [radoslaw.rybaniec@psi.ch]
 ## Authors
 * Oliver Bründler [oli.bruendler@gmx.ch]
 * Radoslaw Rybaniec [radoslaw.rybaniec@psi.ch]
+* Benoît Stef [benoit.stef@psi.ch]
 
 ## License
 This library is published under [PSI HDL Library License](License.txt), which is [LGPL](LGPL2_1.txt) plus some additional exceptions to clarify the LGPL terms in the context of firmware development.
