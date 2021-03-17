@@ -73,15 +73,17 @@ begin
           min_s <= '0';
         end if;
 
-        --***align output strobe to comparison values **
-        if str1_s = '1' then
-          min_o <= min_s;
-          max_o <= max_s;
-        else
-          min_o <= '0';
-          max_o <= '0';
-        end if;       
+       
       end if;
+     
+       --***align output strobe to comparison values **
+      if str1_s = '1' then
+        min_o <= min_s;
+        max_o <= max_s;
+      else
+        min_o <= '0';
+        max_o <= '0';
+      end if;       
     end if;
   end process;
 

@@ -23,12 +23,11 @@ use work.psi_tb_txt_util.all;
 use work.psi_fix_pkg.all;
 
 entity psi_fix_comparator_tb is
-  generic(freq_clk_g : real        := 100.0E6;
-          fmt_g      : PsiFixFmt_t := (1, 0, 15));
+  generic(fmt_g      : PsiFixFmt_t := (1, 0, 15));
 end entity;
 
 architecture tb of psi_fix_comparator_tb is
-
+  constant freq_clk_g : real        := 100.0E6;
   constant period_c  : time      := (1 sec) / freq_clk_g;
   signal clk_sti     : std_logic := '0';
   signal rst_sti     : std_logic := '1';

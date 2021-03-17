@@ -465,6 +465,14 @@ set dataDir [file normalize "../testbench/psi_fix_inv_tb/Data"]
 tb_run_add_arguments "-gFileFolder_g=$dataDir"
 add_tb_run
 
+create_tb_run "psi_fix_comparator_tb"
+add_tb_run
+
+create_tb_run "psi_fix_nch_analog_trigger_tdm_tb"
+tb_run_add_arguments 	"-gch_nb_g=4" \
+                      "-gch_nb_g=8" \
+                      "-gch_nb_g=16"
+add_tb_run
 
 
 

@@ -28,12 +28,12 @@ use work.psi_fix_pkg.all;
 use work.psi_fix_nch_analog_trigger_tdm_pkg.all;
 
 entity psi_fix_nch_analog_trigger_tdm_tb is
-  generic(ch_nb_g : natural range 2 to 10 := 8); -- number of channel for tb if one want to increase this value the ratio between clock must be adapted
+  generic(ch_nb_g : natural range 4 to 18 := 16); -- number of channel for tb if one want to increase this value the ratio between clock must be adapted
 end entity;
 
 architecture tb of psi_fix_nch_analog_trigger_tdm_tb is
   constant freq_clk_g  : real                                                              := 100.0E6; -- clock frequency arbitrary chosen
-  constant ratio_g     : real                                                              := 10.0; -- ratio between clock and data strobe
+  constant ratio_g     : real                                                              := 20.0; -- ratio between clock and data strobe
   --internal signals
   constant bit_c       : integer                                                           := PsiFixSize(SIGNAL_FMT_c);
   constant period_c    : time                                                              := (1 sec) / freq_clk_g;
@@ -72,6 +72,7 @@ architecture tb of psi_fix_nch_analog_trigger_tdm_tb is
     end loop;
     return data_v;
   end function;
+  signal trig_dff : std_logic;
   -------------------------------------------------------------------------------------------------------------
 begin
 
@@ -103,8 +104,7 @@ begin
 
   --*** DUT ***
   inst_dut : entity work.psi_fix_nch_analog_trigger_tdm
-    generic map(latency_g => 10,        --obvisouly with the number channel this has to be modified
-                ch_nb_g   => ch_nb_g,
+    generic map(ch_nb_g   => ch_nb_g,
                 fix_fmt_g => SIGNAL_FMT_c)
     port map(clk_i      => clk_sti,
              rst_i      => rst_sti,
@@ -160,6 +160,7 @@ begin
   proc_deserializer : process(clk_sti)
   begin
     if rising_edge(clk_sti) then
+      trig_dff <= trig_obs;
       if rst_sti = '1' then
         for i in 0 to ch_nb_g - 1 loop
           check_array_s(i) <= (others => '0');
@@ -203,7 +204,7 @@ begin
     end loop;
     wait for 100 * period_c;
     param_sti.mask_min_ena(0) <= '1';   --only activ min for ch   
-    wait until trig_obs = '1';
+    wait until trig_dff = '1';
     print("[INFO]: Check channel 0 trigger Min");
     assert check_array_s(0) < to_uslv(100, bit_c) report "***ERROR***: Ch 0 has min Thld 100 trig occurs but data is above thld min" severity error;
     wait for 100 * period_c;
@@ -215,7 +216,7 @@ begin
     param_sti.trig.TrgArm     <= '1';   --rearm
     wait for 100 * period_c;
     param_sti.mask_max_ena(0) <= '1';   --activ max for ch 0
-    wait until trig_obs = '1';
+    wait until trig_dff = '1';
     print("[INFO]: Check channel 0 trigger Max");
     assert check_array_s(0) > to_uslv(5000, bit_c) report "***ERROR***: Ch 0 has max Thld 5000 trig occurs but data is under thld min" severity error;
     wait for 100 * period_c;
@@ -226,26 +227,30 @@ begin
     wait for 10 * period_c;
     param_sti.trig.TrgArm     <= '1';   --rearm trigger
     param_sti.mask_min_ena(3) <= '1';   --active min ch3
-    wait until trig_obs = '1';
+    wait until trig_dff = '1';
     print("[INFO]: Check channel 3 trigger Min");
     assert from_sslv(check_array_s(3)) < 100 report "***ERROR***: Ch 3 has min Thld 100 trig occurs but data is above thld min" severity error;
     wait for 100 * period_c;
     ------------------------------------------------------------
-    print("[INFO]: Test externa signal align");
+    print("[INFO]: Test external signal align");
     param_sti.mask_min_ena    <= (others => '0'); --deactiv min for ch 
     param_sti.mask_max_ena    <= (others => '0'); --deactiv max for ch 0
-    param_sti.trig.TrgArm     <= '0';
+    param_sti.trig.TrgArm     <= '0';--disarm trigger
     wait for 10 * period_c;
-    param_sti.trig.TrgArm     <= '1';
+   
+    param_sti.trig.TrgArm     <= '1';--rearm trigger
     wait until str_sti = '0';
+    wait until rising_edge(str_sti);
+    wait until rising_edge(str_sti);
     PulseSig(ext_sti, clk_sti);
     wait until trig_obs = '1';
     wait for 50 * period_c;
+   -- wait until rising_edge(str_sti);
     param_sti.clr_ext_trig    <= '1';   -- clear external
     param_sti.trig.TrgArm     <= '0';   -- dearm
     wait for 20 * period_c;
     param_sti.trig.TrgArm     <= '1';
-    wait until idx_s = 5;
+    --wait until idx_s = 5;
 
     tb_run_s <= false;
     wait;

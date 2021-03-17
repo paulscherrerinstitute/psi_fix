@@ -59,8 +59,7 @@ use work.psi_fix_nch_analog_trigger_tdm_pkg.all;
 
 --@formatter:off
 entity psi_fix_nch_analog_trigger_tdm is
-  generic(latency_g   : natural      := 10;
-          ch_nb_g     : natural      := 8;
+  generic(ch_nb_g     : natural      := 8;
           fix_fmt_g   : PsiFixFmt_t  := SIGNAL_FMT_c);
   port(   clk_i       : in  std_logic;                              --processing clock
           rst_i       : in  std_logic;                              --Reset  processing '1' <=> active high 
@@ -186,7 +185,7 @@ begin
   inst_delay_data : entity work.psi_common_multi_pl_stage 
     generic map(Width_g  => len_c,
                 UseRdy_g => false,
-                Stages_g => latency_g)
+                Stages_g => 10)
     port map(-- @suppress 
              Clk     => clk_i,
              Rst     => rst_i,
