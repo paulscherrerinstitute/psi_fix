@@ -7,8 +7,9 @@
 ------------------------------------------------------------------------------
 -- Description
 ------------------------------------------------------------------------------
--- This block allows generating triggers out of several input signals with fixed 
--- point format and external trigger capability
+-- This block allows generating triggers out of several "analog" input signals 
+-- with fixed point format and several external triggers
+-- The number of trigger generated is also extendable
 
 ------------------------------------------------------------------------------
 -- RTL HDL file
@@ -27,27 +28,27 @@ entity psi_fix_nch_analog_trigger_tdm is
           trig_ext_nb_g : natural      := 1;                                              --number of input external trigger
           fix_fmt_g     : PsiFixFmt_t  := (1,0,15);                                       --FP format
           trig_nb_g     : natural      := 1);                                             --number of output trigger
-  port(   clk_i       : in  std_logic;                                                    --processing clock
-          rst_i       : in  std_logic;                                                    --Reset  processing '1' <=> active high 
+  port(   clk_i         : in  std_logic;                                                  --processing clock
+          rst_i         : in  std_logic;                                                  --Reset  processing '1' <=> active high 
           --*** signals ***
-          dat_i       : in  std_logic_vector(PsiFixSize(fix_fmt_g)- 1 downto 0);          --// Data Input
-          str_i       : in  std_logic;                                                    --TDM Strobe Input
-          ext_i       : in  std_logic_vector(trig_ext_nb_g-1 downto 0);                   --external trigger input
-          --*** paramters ***
+          dat_i         : in  std_logic_vector(PsiFixSize(fix_fmt_g)- 1 downto 0);        --// Data Input
+          str_i         : in  std_logic;                                                  --TDM Strobe Input
+          ext_i         : in  std_logic_vector(trig_ext_nb_g-1 downto 0);                 --external trigger input
+          --*** parameters ***
           mask_min_i    : in std_logic_vector(trig_nb_g*ch_nb_g-1 downto 0);              --mask min results
           mask_max_i    : in std_logic_vector(trig_nb_g*ch_nb_g-1 downto 0);              --mask max results
-          mask_ext_i    : in std_logic_vector(trig_nb_g*trig_ext_nb_g-1 downto 0);        --
+          mask_ext_i    : in std_logic_vector(trig_nb_g*trig_ext_nb_g-1 downto 0);        --mask external trigger
           thld_min_i    : in std_logic_vector(ch_nb_g*PsiFixSize(fix_fmt_g)-1 downto 0);  --thld to set max window
           thld_max_i    : in std_logic_vector(ch_nb_g*PsiFixSize(fix_fmt_g)-1 downto 0);  --thld to set Min window
           trig_clr_ext_i: in std_logic_vector(trig_nb_g*trig_ext_nb_g-1 downto 0);                                    
           trig_mode_i   : in std_logic_vector(trig_nb_g-1 downto 0);                      -- Trigger mode (0:Continuous,1:Single) configuration register
           trig_arm_i    : in std_logic_vector(trig_nb_g-1   downto 0);                    -- Arm/dis--arm the trigger, rising edge sensitive
           --*** out ***
-          dat_pipe_o  : out std_logic_vector(PsiFixSize(fix_fmt_g)-1 downto 0);           --data out pipelined   for recording
-          str_pipe_o  : out std_logic;                                                    --strobe out pipelined for recording
+          dat_pipe_o    : out std_logic_vector(PsiFixSize(fix_fmt_g)-1 downto 0);         --data out pipelined   for recording
+          str_pipe_o    : out std_logic;                                                  --strobe out pipelined for recording
           --*** status ***
-          trig_o      : out std_logic_vector(trig_nb_g-1 downto 0);                       --trigger out
-          is_arm_o    : out std_logic_vector(trig_nb_g-1 downto 0));                      --trigger is armed
+          trig_o        : out std_logic_vector(trig_nb_g-1 downto 0);                     --trigger out
+          is_arm_o      : out std_logic_vector(trig_nb_g-1 downto 0));                    --trigger is armed
 end entity;
 --@formatter:on
 
@@ -63,7 +64,6 @@ architecture RTL of psi_fix_nch_analog_trigger_tdm is
   signal mask_max_array_s : array_mask_t;
   
   type array_ext_t is array (0 to trig_nb_g-1) of std_logic_vector(trig_ext_nb_g-1 downto 0);
-  
   --=================================================================
   -- Comparator mngt signals
   --=================================================================
@@ -84,13 +84,15 @@ architecture RTL of psi_fix_nch_analog_trigger_tdm is
   signal max_trig_s             : array_mask_t;--std_logic_vector(ch_nb_g - 1 downto 0);
   signal min_trig_s             : array_mask_t;--std_logic_vector(ch_nb_g - 1 downto 0);
   signal trig_s                 : std_logic_vector(trig_nb_g-1 downto 0);
+  signal trig_os                : std_logic_vector(trig_nb_g-1 downto 0);
   --=================================================================
   -- External Trigger mngt signals
   --=================================================================
-  signal trig_ext_array_s     : array_ext_t; -- external trigger input array
-  signal trig_ext_array_dff_s : array_ext_t;
-  signal ext_trig_array_s     : array_ext_t;
-  signal ext_flg_array_s      : array_ext_t;
+  signal trig_ext_array_s     : array_ext_t;  --external trigger input array
+  signal trig_ext_array_dff_s : array_ext_t;  --external trigger input dff array used for edge detect
+  signal ext_trig_array_s     : array_ext_t;  --external trigger used for trigger
+  signal ext_flg_array_s      : array_ext_t;  --external trigger flag array
+  signal mask_ext_array_s     : array_ext_t;
 begin
   
   --*** helpers construc ***
@@ -221,6 +223,7 @@ begin
   gene_ext_array : for i in 0 to trig_nb_g -1 generate
   begin
     trig_ext_array_s(i)<= ext_i;
+    mask_ext_array_s(i)<= mask_ext_i((i+1)*trig_ext_nb_g-1 downto i*trig_ext_nb_g);
   end generate;
   
   proc_ext_trig_align : process(clk_i)
@@ -237,11 +240,11 @@ begin
                 --*** rising_edge_detect
                 if trig_ext_array_dff_s(j)(k) = '0' and trig_ext_array_s(j)(k) = '1' then
                   ext_flg_array_s(j)(k) <= '1';
-                elsif  trig_clr_ext_i(k)= '1' then
+                elsif  trig_clr_ext_i(k)= '1' or trig_os(j)='1'then
                   ext_flg_array_s(j)(k) <= '0';
                 end if;
                 --*** sync with str
-                if comp_str_s = '1' and mask_ext_i(k) = '1' then
+                if comp_str_s = '1' and mask_ext_array_s(j)(k) = '1' then
                   ext_trig_array_s(j)(k) <= ext_flg_array_s(j)(k);
                 else
                   ext_trig_array_s(j)(k) <= '0';
@@ -256,18 +259,18 @@ begin
   gene_trigger_nb : for i in 0 to trig_nb_g-1 generate 
   begin
     inst_trig : entity work.psi_common_trigger_digital
-     generic map(digital_input_number_g    => 1,
-                 rst_pol_g                 => '1')
-     port map(   InClk                     => clk_i,
-                 InRst                     => rst_i,
-                 InTrgModeCfg(0)           => trig_mode_i(i),
-                 InTrgArmCfg               => trig_arm_i(i),
+     generic map(digital_input_number_g    => 1,              --one trigger input
+                 rst_pol_g                 => '1')            --rst pol set to '1'
+     port map(   InClk                     => clk_i,          --input clock
+                 InRst                     => rst_i,          --reset
+                 InTrgModeCfg(0)           => trig_mode_i(i), --single shot mode or continuous
+                 InTrgArmCfg               => trig_arm_i(i),  --arming trigger
                  InTrgEdgeCfg              => "10",           --rising edge forced
                  InTrgDigitalSourceCfg(0)  => '0',            --don't care
-                 InDigitalTrg(0)           => trig_s(i),
-                 InExtDisarm               => '0',
-                 OutTrgIsArmed             => is_arm_o(i),
-                 OutTrigger                => trig_o(i));
-                 
+                 InDigitalTrg(0)           => trig_s(i),      --trigger input
+                 InExtDisarm               => '0',            --don't care
+                 OutTrgIsArmed             => is_arm_o(i),    --trigger status is armed
+                 OutTrigger                => trig_os(i));     --trigger output
+  trig_o <= trig_os;              
   end generate;
 end architecture;

@@ -229,7 +229,7 @@ begin
     wait for 100 * period_c;
     print("[INFO]: Check if trigger is dearmed");
     assert is_arm_obs(0) = '0' report "***ERROR***: trigger is not dearmed but raised" severity error;
-     trig_arm_sti(0)     <= '0';
+    trig_arm_sti(0)     <= '0';
     mask_min_sti(0) <= '0';             --dactiv min for ch
     wait for 10 * period_c;
     trig_arm_sti(0)     <= '1';        --rearm
@@ -297,12 +297,13 @@ begin
     ------------------------------------------------------------
     if trig_nb_g > 1 then
       print("[INFO]: Test trigger 2");
-      mask_ext_sti(trig_nb_g) <= '1';         -- set trigger 2 mask external
+      trig_clr_ext_sti(0)     <= '0';         -- clear external
+      mask_ext_sti(trig_nb_g*trig_ext_nb_g-1) <= '1';         -- set trigger 2 mask external
       trig_arm_sti(1)         <= '1';         -- arm  
       wait until rising_edge(str_sti);
       wait until rising_edge(str_sti);
-      PulseSig(ext_sti(trig_nb_g), clk_sti);  --generate external trigger   
-      wait until trig_obs(0) = '1';
+      PulseSig(ext_sti(trig_ext_nb_g-1), clk_sti);  --generate external trigger   
+      wait until trig_obs(trig_nb_g-1) = '1';
       wait for 50 * period_c;
     end if;
     tb_run_s <= false;
