@@ -1,3 +1,11 @@
+## 3.1.0
+* Added Features
+  * Added psi\_fix\_nch\_analog\_trigger\_tdm
+  * Added psi\_fix\_comparator
+* Changed Dependencies
+  * psi\_common >= 2.15.0
+   
+
 ## 3.0.0
 * Changes (not reverse compatiable)
   * In FIR filters renamed generic FixCoefs\_g to Coefs\_g
