@@ -1,3 +1,36 @@
+## 3.0.0
+* Changes (not reverse compatiable)
+  * In FIR filters renamed generic FixCoefs\_g to Coefs\_g
+* Added Features
+  * Added support for numbers bigger than 32 bits
+  * PsiFixFmtFromString
+  * In psi\_fix\_complex\_mult added option to save resources when multiplication is Complex x Real
+  * In psi\_fix\_fir\_dec\_semi\_nch\_chtdm\_conf added flushing interface 
+  * In FIR filters added CalcOngoing output
+  * In psi\_fix\_fir\_dec\_semi\_nch\_chtdm\_conf allow writing coefficients during reset
+  * In CIC filters added status output 
+    * This feature allows higher level algorithms to detect if they still expect output from the CIC or if the CIC is currently idling.
+  * Implemented pipeline psi\_fix\_resize (psi\_fix\_resize.vhd)
+  * In psi\_fix\_dds\_18b added multi channel TDM support
+  * In PsiFixFmt added warning if input exceeds the limit of bittrueness
+  * Implemented psi\_fix\_cic\_dec\_cfg\_1ch
+  * Implemented psi\_fix\_cic\_dec\_cfg\_nch\_par\_tdm
+  * Implemented psi\_fix\_cic\_dec\_cfg\_nch\_tdm\_tdm
+  * Implemented psi\_fix\_sqrt
+  * Added Matlab functions to convert fixed point formats between psi and en\_cl conventions conveniently (fix\_cl2psi.m and fix\_psi2cl.m)
+  * Implemented psi\_fix\_inv (inversion 1/x)
+* Bugfixes
+  * In serial FIR filters fixed replacement of outdated data by zero
+  * In psi\_fix\_fir\_dec\_ser\_nch\_chtdm\_conf fixed behavior after reset
+  * In psi\_fix\_fir\_dec\_semi\_nch\_chtdm\_conf prevented wrong behavior for large intermediate result
+* Improved timing
+  * In psi\_fix\_fir\_dec\_ser\_nch\_chpar\_conf by splitting round & saturate into two stages at the output
+  * In psi\_fix\_fir\_dec\_ser\_nch\_chtdm\_conf by splitting round & saturate into two stages at the output
+* Changed Dependencies
+  * psi\_common >= 2.13.0
+  * en\_cl\_fix >= 1.1.8
+
+
 ## 2.4.1
 * Changed Dependencies
   * psi\_tb >= 2.5.0
