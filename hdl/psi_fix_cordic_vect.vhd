@@ -199,11 +199,6 @@ begin
 		p_cordic_pipelined : process(Clk)
 		begin
 			if rising_edge(Clk) then
-				if Rst = '1' then
-					Vld 	<= (others => '0');
-                    VldAbs  <= '0';
-					OutVld	<= '0';
-				else
 					-- Input registers
                     VldAbs  <= InVld;
                     XAbs    <= PsiFixAbs(InI, InFmt_g, AbsFmt_c, PsiFixTrunc, PsiFixWrap); -- truncation is okay since internal format is usually bigger than input
@@ -246,7 +241,11 @@ begin
 						when "01"	=> 	OutAng <= PsiFixSub(AngInt_1_0_c, AngleIntExtFmt, Z(Iterations_g*PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
 						when others => null;
 					end case;
-				end if;
+                    if Rst = '1' then
+                      Vld 	 <= (others => '0');
+                      VldAbs <= '0';
+                      OutVld <= '0';
+                    end if;
 			end if;
 		end process;
 	end generate;
@@ -270,12 +269,6 @@ begin
 		p_cordic_serial : process(Clk)
 		begin		
 			if rising_edge(Clk) then
-				if Rst = '1' then
-					XinVld	<= '0';
-					IterCnt	<= 0;			
-					OutVld 	<= '0';
-					CordVld <= '0';
-				else
 					-- Input latching
 					if XinVld = '0' and InVld = '1' then
 						XinVld <= '1';
@@ -326,8 +319,13 @@ begin
 							when others => null;
 						end case;
 					end if;
-				end if;
-			end if;
+                    if Rst = '1' then
+                      XinVld	<= '0';
+                      IterCnt	<= 0;			
+                      OutVld 	<= '0';
+                      CordVld <= '0';
+                    end if;
+            end if;
 		end process;
 	end generate;
 end;	

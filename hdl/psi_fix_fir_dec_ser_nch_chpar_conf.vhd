@@ -30,10 +30,10 @@ library work;
 ------------------------------------------------------------------------------
 entity psi_fix_fir_dec_ser_nch_chpar_conf is
 	generic (
-		InFmt_g					: PsiFixFmt_t					:= (1, 0, 17);	
-		OutFmt_g				: PsiFixFmt_t					:= (1, 0, 17);	
-		CoefFmt_g				: PsiFixFmt_t					:= (1, 0, 17);
-		Channels_g				: natural						:= 2;
+		InFmt_g					: PsiFixFmt_t					:= (1, 0, 24);	
+		OutFmt_g				: PsiFixFmt_t					:= (1, 0, 24);	
+		CoefFmt_g				: PsiFixFmt_t					:= (1, 1, 30);
+		Channels_g				: natural						:= 16;
 		MaxRatio_g				: natural						:= 8;
 		MaxTaps_g				: natural						:= 1024;
 		Rnd_g					: PsiFixRnd_t					:= PsiFixRound;
@@ -97,7 +97,6 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chpar_conf is
 		CalcOn			: std_logic_vector(1 to 6);
 		Last			: std_logic_vector(1 to 6);
 		First 			: std_logic_vector(1 to 5);
-		MultInTap_4		: InData_t;
 		MultInCoef_4	: std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
 		MultOut_5		: Mult_t;
 		Accu_6			: Accu_t;
@@ -109,6 +108,11 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chpar_conf is
 		ReplaceZero_4	: std_logic;
 	end record;
 	signal r, r_next : two_process_r;
+
+    type two_process_r2 is record
+		MultInTap_4		: InData_t;
+	end record;
+	signal r2, r_next2 : two_process_r2;
 	
 	-- Component Interface Signals
 	signal DataRamDin_1		: std_logic_vector(PsiFixSize(InFmt_g)*Channels_g-1 downto 0);
@@ -119,20 +123,24 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chpar_conf is
 	type CoefRom_t is array (FixCoefs_g'low to FixCoefs_g'high) of std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
 	signal CoefRom 	: CoefRom_t;
 	
-	
+    attribute use_dsp : string;
+    attribute use_dsp of r2 : signal is "no";
+    
 begin
 	--------------------------------------------
 	-- Combinatorial Process
 	--------------------------------------------
-	p_comb : process(r, InVld, InData,
+	p_comb : process(r, r2, InVld, InData,
 					Ratio, Taps,
 					DataRamDout_3, CoefRamDout_3)
-		variable v : two_process_r;
+      variable v : two_process_r;
+      variable v2 : two_process_r2;
 		variable AccuIn_v	: std_logic_vector(PsiFixSize(AccuFmt_c)-1 downto 0);
 	begin
 		-- *** Hold variables stable ***
 		v := r;
-		
+		v2 := r2;
+        
 		-- *** Pipe Handling ***
 		v.Vld(v.Vld'low+1 to v.Vld'high)				:= r.Vld(r.Vld'low to r.Vld'high-1);
 		v.InSig(v.InSig'low+1 to v.InSig'high)			:= r.InSig(r.InSig'low to r.InSig'high-1);
@@ -201,9 +209,9 @@ begin
 		for i in 0 to Channels_g-1 loop
 			-- Replace taps that are not yet written with zeros for bittrueness
 			if r.ReplaceZero_4 = '0' or unsigned(r.TapRdAddr_3) = 0 then
-				v.MultInTap_4(i)	:= DataRamDout_3(PsiFixSize(InFmt_g)*(i+1)-1 downto PsiFixSize(InFmt_g)*i);
+				v2.MultInTap_4(i)	:= DataRamDout_3(PsiFixSize(InFmt_g)*(i+1)-1 downto PsiFixSize(InFmt_g)*i);
 			else
-				v.MultInTap_4(i)	:= (others => '0');
+				v2.MultInTap_4(i)	:= (others => '0');
 			end if;
 			-- Detect when the Zero-replacement can be stopped since the taps are already filled with correct data
 			if r.FirstTapLoop_3 = '0' then
@@ -221,7 +229,7 @@ begin
 		-- *** Stage 5 *** 
 		-- Multiplication
 		for i in 0 to Channels_g-1 loop
-			v.MultOut_5(i)	:= PsiFixMult(	r.MultInTap_4(i), InFmt_g,
+			v.MultOut_5(i)	:= PsiFixMult(	r2.MultInTap_4(i), InFmt_g,
 											r.MultInCoef_4, CoefFmt_g,
 											MultFmt_c); -- Full precision, no rounding or saturation required
 		end loop;
@@ -259,6 +267,7 @@ begin
 		
 		-- *** Assign to signal ***
 		r_next <= v;
+        r_next2 <= v2;
 	end process;
 	
 
@@ -269,7 +278,8 @@ begin
 	p_seq : process(Clk)
 	begin	
 		if rising_edge(Clk) then	
-			r <= r_next;
+          r <= r_next;
+          r2 <= r_next2;
 			if Rst = '1' then	
 				r.Vld 				<= (others => '0');
 				r.TapWrAddr_1		<= (others => '0');
