@@ -105,8 +105,6 @@ def PsiFixFromReal(a,
                    rFmt : PsiFixFmt,
                    errSat : bool = True):
     # PsiFix specific implementation because of the errSat parameter that does not exist in cl_fix
-    if np.ndim(a) == 0:
-        a = np.array(a, ndmin=1)
     if errSat:
         if np.max(a) > PsiFixUpperBound(rFmt):
             raise ValueError("PsiFixFromReal: Number {} could not be represented by format {}".format(np.max(a), rFmt))
