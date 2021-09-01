@@ -108,17 +108,19 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chtdm_conf is
 		CalcChnl_2		: std_logic_vector(log2ceil(Channels_g)-1 downto 0);
 		TapRdAddr_2		: std_logic_vector(DataMemAddBits_c-1 downto 0);
 		CoefRdAddr_2	: std_logic_vector(log2ceil(MaxTaps_g)-1 downto 0);
-		CalcOn			: std_logic_vector(1 to 6);
-		Last			: std_logic_vector(1 to 6);
-		First 			: std_logic_vector(1 to 5);
-		MultInTap_4		: InData_t;
+		CalcOn			: std_logic_vector(1 to 7);
+		Last			: std_logic_vector(1 to 7);
+		First 			: std_logic_vector(1 to 6);
+		MultInTap_4		: InData_t;		
 		MultInCoef_4	: std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
-		MultOut_5		: Mult_t;
-		Accu_6			: Accu_t;
-		Rnd_7			: Rnd_t;
-		RndVld_7		: std_logic;
-		Output_8		: Out_t;
-		OutVld_8		: std_logic;
+		MultInTap_5		: InData_t;
+		MultInCoef_5	: std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0);
+		MultOut_6		: Mult_t;
+		Accu_7			: Accu_t;
+		Rnd_8			: Rnd_t;
+		RndVld_8		: std_logic;
+		Output_9		: Out_t;
+		OutVld_9		: std_logic;
 		FirstTapLoop_3	: std_logic;
 		TapRdAddr_3 	: std_logic_vector(DataMemAddBits_c-1 downto 0);
 		ReplaceZero_4	: std_logic;
@@ -261,46 +263,51 @@ begin
 		end if;
 		v.MultInCoef_4	:= CoefRamDout_3;
 		
-		-- *** Stage 5 *** 
+		-- ** Stage 5 **
+		-- Multiplier input registers
+		v.MultInTap_5	:= r.MultInTap_4;
+		v.MultInCoef_5	:= r.MultInCoef_4;
+		
+		-- *** Stage 6 *** 
 		-- Multiplication
-		v.MultOut_5	:= PsiFixMult(	r.MultInTap_4, InFmt_g,
-									r.MultInCoef_4, CoefFmt_g,
+		v.MultOut_6	:= PsiFixMult(	r.MultInTap_5, InFmt_g,
+									r.MultInCoef_5, CoefFmt_g,
 									MultFmt_c); -- Full precision, no rounding or saturation required
 
-		-- *** Stage 6 ***
+		-- *** Stage 7 ***
 		-- Accumulator
-		if r.First(5) = '1' then
+		if r.First(6) = '1' then
 			AccuIn_v := (others => '0');
 		else
-			AccuIn_v := r.Accu_6;
+			AccuIn_v := r.Accu_7;
 		end if;
-		v.Accu_6	:= PsiFixAdd(	r.MultOut_5, MultFmt_c,
+		v.Accu_7	:= PsiFixAdd(	r.MultOut_6, MultFmt_c,
 									AccuIn_v, AccuFmt_c,
 									AccuFmt_c); -- Overflows compensate at the end of the calculation and rounding not required
 	
-		-- *** Stage 7 ***
+		-- *** Stage 8 ***
 		-- Rounding
-		v.RndVld_7 := '0';
-		if r.Last(6) = '1' then
-			v.Rnd_7		:= PsiFixResize(r.Accu_6, AccuFmt_c, RndFmt_c, Rnd_g, PsiFixWrap);
-			v.RndVld_7 	:= r.CalcOn(6);
+		v.RndVld_8 := '0';
+		if r.Last(7) = '1' then
+			v.Rnd_8		:= PsiFixResize(r.Accu_7, AccuFmt_c, RndFmt_c, Rnd_g, PsiFixWrap);
+			v.RndVld_8 	:= r.CalcOn(7);
 		end if;	
 		
-		-- *** Stage 8 ***
+		-- *** Stage 9 ***
 		-- Output Handling and saturation
-		v.OutVld_8 := r.RndVld_7;
-		v.Output_8 := PsiFixResize(r.Rnd_7, RndFmt_c, OutFmt_g, PsiFixTrunc, Sat_g);
+		v.OutVld_9 := r.RndVld_8;
+		v.Output_9 := PsiFixResize(r.Rnd_8, RndFmt_c, OutFmt_g, PsiFixTrunc, Sat_g);
 		
 		-- *** Status Output ***
-		if (unsigned(r.Vld) /= 0) or (unsigned(r.CalcOn) /= 0) or (r.RndVld_7 = '1') then
+		if (unsigned(r.Vld) /= 0) or (unsigned(r.CalcOn) /= 0) or (r.RndVld_8 = '1') then
 			v.CalcOngoing := '1';
 		else
 			v.CalcOngoing := '0';
 		end if;
 				
 		-- *** Outputs ***
-		OutVld	<= r.OutVld_8;
-		OutData	<= r.Output_8;		
+		OutVld	<= r.OutVld_9;
+		OutData	<= r.Output_9;		
 		CalcOngoing	<= r.CalcOngoing or r.Vld(0);
 		
 		-- *** Assign to signal ***
@@ -323,8 +330,8 @@ begin
 				r.TapWrAddr_1		<= (others => '0');
 				r.DecCnt_1			<= (others => '0');
 				r.CalcOn			<= (others => '0');
-				r.RndVld_7			<= '0';
-				r.OutVld_8			<= '0';
+				r.RndVld_8			<= '0';
+				r.OutVld_9			<= '0';
 				r.Last				<= (others => '0');
 				r.ReplaceZero_4		<= '1';
 				r.CalcOngoing		<= '0';
