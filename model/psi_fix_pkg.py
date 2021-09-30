@@ -105,17 +105,12 @@ def PsiFixFromReal(a,
                    rFmt : PsiFixFmt,
                    errSat : bool = True):
     # PsiFix specific implementation because of the errSat parameter that does not exist in cl_fix
-    x = np.floor(a*(2**rFmt.F)+0.5)/2**rFmt.F
-    if np.ndim(a) == 0:
-        a = np.array(a, ndmin=1)
     if errSat:
         if np.max(a) > PsiFixUpperBound(rFmt):
-            raise ValueError("PsiFixFromReal: Number {} could not be represented by format {}".format(max(a), rFmt))
+            raise ValueError("PsiFixFromReal: Number {} could not be represented by format {}".format(np.max(a), rFmt))
         if np.min(a) < PsiFixLowerBound(rFmt):
-            raise ValueError("PsiFixFromReal: Number {} could not be represented by format {}".format(min(a), rFmt))
-    x = np.where(x > PsiFixUpperBound(rFmt), PsiFixUpperBound(rFmt), x)
-    x = np.where(x < PsiFixLowerBound(rFmt), PsiFixLowerBound(rFmt), x)
-    return x
+            raise ValueError("PsiFixFromReal: Number {} could not be represented by format {}".format(np.min(a), rFmt))
+    return cl_fix_from_real(a, PsiFix2ClFix(rFmt), FixSaturate.Sat_s)
 
 def PsiFixFromBitsAsInt(a : int, aFmt : PsiFixFmt):
     return cl_fix_from_bits_as_int(a, PsiFix2ClFix(aFmt))
@@ -172,10 +167,7 @@ def PsiFixShiftLeft(a, aFmt : PsiFixFmt,
         raise ValueError("PsiFixShiftLeft: shift must be <= maxShift")
     if np.any(shift < 0):
         raise ValueError("PsiFixShiftLeft: shift must be > 0")
-    fullFmt = PsiFixFmt(max(aFmt.S, rFmt.S), max(aFmt.I+maxShift, rFmt.I), max(aFmt.F, rFmt.F))
-    fullA = PsiFixResize(a, aFmt, fullFmt)
-    fullOut = fullA*2**shift
-    return PsiFixResize(fullOut, fullFmt, rFmt, rnd, sat)
+    return cl_fix_shift(a, PsiFix2ClFix(aFmt), shift, PsiFix2ClFix(rFmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat))
 
 def PsiFixShiftRight(a, aFmt : PsiFixFmt,
                      shift : int, maxShift : int,
@@ -186,10 +178,7 @@ def PsiFixShiftRight(a, aFmt : PsiFixFmt,
         raise ValueError("PsiFixShiftRight: shift must be <= maxShift")
     if np.any(shift < 0):
         raise ValueError("PsiFixShiftRight: shift must be > 0")
-    fullFmt = PsiFixFmt(max(aFmt.S, rFmt.S), max(aFmt.I, rFmt.I), max(aFmt.F+maxShift, rFmt.F+1))   #Additional bit for rounding
-    fullA = PsiFixResize(a, aFmt, fullFmt)
-    fullOut = fullA * 2**-shift
-    return PsiFixResize(fullOut, fullFmt, rFmt, rnd, sat)
+    return cl_fix_shift(a, PsiFix2ClFix(aFmt), -shift, PsiFix2ClFix(rFmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat))
 
 def PsiFixUpperBound(rFmt : PsiFixFmt):
     return cl_fix_max_value(PsiFix2ClFix(rFmt))
