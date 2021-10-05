@@ -57,7 +57,7 @@ Alternatively the repository [psi\_fpga\_all](https://github.com/paulscherrerins
   * [**psi\_fix**](https://github.com/paulscherrerinstitute/psi_fix)
   * [psi\_common](https://github.com/paulscherrerinstitute/psi_common) (2.15.0 or higher)
   * [psi\_tb](https://github.com/paulscherrerinstitute/psi_tb) (2.5.0 or higher)
-  * [en\_cl\_fix](https://github.com/paulscherrerinstitute/en_cl_fix) (1.1.8 or higher) - fork of a a library provided by Enclustra GmbH<br>[Original Location](https://github.com/enclustra/en_cl_fix)
+  * [en\_cl\_fix](https://github.com/paulscherrerinstitute/en_cl_fix) (1.2.0 or higher) - fork of a a library provided by Enclustra GmbH<br>[Original Location](https://github.com/enclustra/en_cl_fix)
 
 <!-- END OF PARSED SECTION -->
 
