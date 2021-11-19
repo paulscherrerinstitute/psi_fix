@@ -39,8 +39,8 @@ offset = 3
 #y = np.full((sample), -3/5)
 #scale = np.full((sample),(2**(16-1)))
 
-inpAngle = np.linspace(0, 2*np.pi, sample) #2*np.pi, sample)
-inpAmp = np.linspace(0.01, 0.99, sample) #0.01
+inpAngle = np.linspace(0, 0, sample) #2*np.pi, sample)
+inpAmp = np.linspace(0.99, 0.99, sample) #0.01
 datQua = PsiFixFromReal(inpAmp*np.sin(inpAngle), inpFmt, errSat=False)
 datInp = PsiFixFromReal(inpAmp*np.cos(inpAngle), inpFmt, errSat=False)
 

@@ -115,7 +115,7 @@ architecture rtl of psi_fix_mod_cplx2real is
   signal datInp1_s    : std_logic_vector(PsiFixSize(InpFmt_g) - 1 downto 0);
   signal datQua_s     : std_logic_vector(PsiFixSize(InpFmt_g) - 1 downto 0);
   signal datQua1_s    : std_logic_vector(PsiFixSize(InpFmt_g) - 1 downto 0);
-  signal debug0_s     : unsigned(log2ceil(Ratio_g*Offset_g)-1 downto 0);  
+  --signal debug0_s     : unsigned(log2ceil(Ratio_g*Offset_g)-1 downto 0);  
 begin
   ------------------------------------------------
   --dbg_cos_s   <= PsiFixToReal(cos_s, CoefFmt_g);
@@ -145,7 +145,7 @@ begin
     end if;
     sin_s <= table_sin(cpt_v);          --TODO perhaps add dff stage to help timing
     cos_s <= table_cos(cpt_v);          --TODO perhaps add dff stage to help timing
-    debug0_s <= to_unsigned(cpt_v,log2ceil(Ratio_g*Offset_g));
+    --debug0_s <= to_unsigned(cpt_v,log2ceil(Ratio_g*Offset_g));
   end process;
   
   -------------------------------------------------------------------------------
