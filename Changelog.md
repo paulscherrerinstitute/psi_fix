@@ -1,3 +1,10 @@
+## 3.2.0
+* Added Features
+  * Added wide fixed-point support for Python (>53 bits)
+* Changed Dependencies
+  * en\_cl\_fix >= 1.2.0
+
+
 ## 3.1.0
 * Added Features
   * Added psi\_fix\_nch\_analog\_trigger\_tdm
