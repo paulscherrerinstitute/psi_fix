@@ -31,6 +31,8 @@ package psi_fix_pkg is
 		F	: integer;				-- Fractional bits
 	end record;
 	
+	type PsiFixFmtArray_t is array(natural range<>) of PsiFixFmt_t;
+	
 	type PsiFixRnd_t is (PsiFixRound, PsiFixTrunc);
 	
 	type PsiFixSat_t is (PsiFixWrap, PsiFixSat);
@@ -55,6 +57,9 @@ package psi_fix_pkg is
 	function PsiFix2ClFix(	fmt : PsiFixFmt_t)
 							return FixFormat_t;
 							
+	function PsiFix2ClFix(	fmts : PsiFixFmtArray_t)
+							return FixFormatArray_t;
+							
 	function ClFix2PsiFix(	rnd : FixRound_t)
 							return PsiFixRnd_t;
 								
@@ -62,8 +67,11 @@ package psi_fix_pkg is
 							return PsiFixSat_t;
 								
 	function ClFix2PsiFix(	fmt : FixFormat_t)
-							return PsiFixFmt_t;							
-
+							return PsiFixFmt_t;
+							
+	function ClFix2PsiFix(	fmts : FixFormatArray_t)
+							return PsiFixFmtArray_t;
+							
 	--------------------------------------------------------------------------
 	-- Bittrue available in Python
 	--------------------------------------------------------------------------	
@@ -275,6 +283,16 @@ package body psi_fix_pkg is
 		return ((fmt.S=1), fmt.I, fmt.F);
 	end function;
 	
+	function PsiFix2ClFix(	fmts : PsiFixFmtArray_t)
+							return FixFormatArray_t is
+		variable Fmts_v : FixFormatArray_t(fmts'range);
+	begin
+		for i in fmts'range loop
+			Fmts_v(i) := PsiFix2ClFix(fmts(i));
+		end loop;
+		return Fmts_v;
+	end function;
+	
 	function ClFix2PsiFix(	rnd : FixRound_t)
 							return PsiFixRnd_t is
 	begin
@@ -301,6 +319,16 @@ package body psi_fix_pkg is
 							return PsiFixFmt_t is
 	begin
 		return (choose(fmt.Signed, 1, 0), fmt.Intbits, fmt.FracBits);
+	end function;
+	
+	function ClFix2PsiFix(	fmts : FixFormatArray_t)
+							return PsiFixFmtArray_t is
+		variable Fmts_v : PsiFixFmtArray_t(fmts'range);
+	begin
+		for i in fmts'range loop
+			Fmts_v(i) := ClFix2PsiFix(fmts(i));
+		end loop;
+		return Fmts_v;
 	end function;
 
 	--------------------------------------------------------------------------
