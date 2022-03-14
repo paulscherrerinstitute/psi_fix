@@ -194,8 +194,7 @@ def PsiFixInRange(a, aFmt : PsiFixFmt,
 ########################################################################################################################
 # Python only (helpers)
 ########################################################################################################################
-# Currently none
 
-
-
-
+def PsiFixWriteFormats(fmts, names, filename):
+    # Note: Do not convert to FixFormat. Rely on PsiFixFmt.__str__ to format the string correctly.
+    cl_fix_write_formats(fmts, names, filename)

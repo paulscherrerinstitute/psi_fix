@@ -64,7 +64,8 @@ begin
 	-- TB Control
 	-------------------------------------------------------------------------
 	p_control : process
-		variable Fmt_v	: PsiFixFmt_t;
+		variable Fmt_v		: PsiFixFmt_t;
+		variable FmtArray_v	: PsiFixFmtArray_t(0 to 1);
 	begin
 		-- *** PsiFixSize ***
 		print("*** PsiFixSize ***");
@@ -694,6 +695,20 @@ begin
 		print("*** PsiFixFmtToString ***");
 		assert "(1, -2, 15)" = PsiFixFmtToString((1, -2, 15)) 
 			report "###ERROR###: Wrong string fmt received" 
+			severity error;
+		
+		-- *** ClFix2PsiFix (PsiFixFmt_t) ***
+		print("*** ClFix2PsiFix (PsiFixFmt_t) ***");
+		Fmt_v := (1,0,15);
+		assert ClFix2PsiFix(PsiFix2ClFix(Fmt_v)) = Fmt_v
+			report "###ERROR###: PsiFixFmt_t -> FixFormat_t -> PsiFixFmt_t failed" 
+			severity error;
+		
+		-- *** ClFix2PsiFix (PsiFixFmtArray_t) ***
+		print("*** ClFix2PsiFix (PsiFixFmtArray_t) ***");
+		FmtArray_v := ((0,-2,3), (1,0,15));
+		assert ClFix2PsiFix(PsiFix2ClFix(FmtArray_v)) = FmtArray_v
+			report "###ERROR###: PsiFixFmtArray_t -> FixFormatArray_t -> PsiFixFmtArray_t failed" 
 			severity error;
 		
 		wait;
