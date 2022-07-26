@@ -23,7 +23,8 @@ class psi_fix_mod_cplx2real:
                         CoefFmt : PsiFixFmt,
                         IntFmt  : PsiFixFmt,
                         OutFmt  : PsiFixFmt,
-                        ratio: int):
+                        ratio   : int,
+                        offset  : int):
         """
         Constructor for the modulator model object
         :param InpFmt: Input fixed-point format
@@ -31,12 +32,14 @@ class psi_fix_mod_cplx2real:
         :param IntFmt: Internal format (see documentation)
         :param OutFmt: Output fixed-point format
         :param ratio: Ratio Fsample/Fcarrier (must be integer!)
+        :param offset: NCO counter offset (must be integer!)
         """
         self.InpFmt     = InpFmt
         self.CoefFmt    = CoefFmt
         self.IntFmt     = IntFmt
         self.OutFmt     = OutFmt
         self.ratio      = ratio
+        self.offset     = offset
 
     ####################################################################################################################
     # Public Methods
@@ -57,11 +60,12 @@ class psi_fix_mod_cplx2real:
         # ROM pointer
         # Generate phases (use integer to prevent floating point precision errors)
         phaseSteps = np.ones(data_I_i.size, dtype=np.int64)
-        phaseSteps[0] = 0  # start at zero
-        cptInt = np.cumsum(phaseSteps, dtype=np.int64) % self.ratio
-        cptIntOffs = cptInt + 1
+        phaseSteps[0] = 1  # start at zero
+        cptInt = np.cumsum(phaseSteps+self.offset-1, dtype=np.int64) % self.ratio
+        cptIntOffs = cptInt
+        print(cptInt)
         cpt = np.where(cptIntOffs > self.ratio - 1, cptIntOffs - self.ratio, cptIntOffs)
-
+        print(cpt)
         # Get Sin/Cos value
         scale = 1.0 - 2.0 ** -self.CoefFmt.F
         sinTable = PsiFixFromReal(np.sin(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.CoefFmt)

@@ -13,7 +13,7 @@ import numpy as np
 import scipy.signal as sps
 from psi_fix_pkg import *
 
-PLOT_ON = False
+PLOT_ON = True
 
 ### Stimuli location
 STIM_DIR = os.path.dirname(os.path.abspath(__file__)) + "/../../psi_fix_mod_cplx2real_tb/Data/"
@@ -29,6 +29,7 @@ coefFmt     = PsiFixFmt(1, 1, 23)
 intFmt      = PsiFixFmt(1, 1, 23)
 outFmt      = PsiFixFmt(1, 1, 15)
 ratio = 10
+offset = 3
 
 # write into text file
 # x = np.genfromtxt(STIM_DIR + "stimuli_inphase.txt")/(2**intFmt.F)
@@ -38,8 +39,8 @@ ratio = 10
 #y = np.full((sample), -3/5)
 #scale = np.full((sample),(2**(16-1)))
 
-inpAngle = np.linspace(0, 2*np.pi, sample)
-inpAmp = np.linspace(0.01, 0.99, sample)
+inpAngle = np.linspace(0, 0, sample) #2*np.pi, sample)
+inpAmp = np.linspace(0.99, 0.99, sample) #0.01
 datQua = PsiFixFromReal(inpAmp*np.sin(inpAngle), inpFmt, errSat=False)
 datInp = PsiFixFromReal(inpAmp*np.cos(inpAngle), inpFmt, errSat=False)
 
@@ -49,7 +50,7 @@ packInput = np.column_stack((PsiFixGetBitsAsInt(datInp, inpFmt),
 np.savetxt(STIM_DIR + '/stimuli.txt', packInput, fmt='% 4d', delimiter=' ', newline='\n', header='inp qua')
 
 
-mod = psi_fix_mod_cplx2real(inpFmt, coefFmt, intFmt, outFmt, ratio)
+mod = psi_fix_mod_cplx2real(inpFmt, coefFmt, intFmt, outFmt, ratio, offset)
 results = mod.Process(datInp, datQua)
 
 if PLOT_ON:
