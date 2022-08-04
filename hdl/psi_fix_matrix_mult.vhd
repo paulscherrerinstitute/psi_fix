@@ -7,8 +7,8 @@
 ----------------------------------------------------------------------------------
 -- Description: 
 ----------------------------------------------------------------------------------
--- 
--- 
+-- A generic matrices multiplier, pipeline based. Receives as input two matrices 
+-- A and B and gives the output of the following multiplicatgion A * B = C.
 -- 
 ----------------------------------------------------------------------------------
 
@@ -46,11 +46,11 @@ entity psi_fix_matrix_mult is
           clk_i     : in    std_logic;                                                                  -- Input clock
           strb_i    : in    std_logic;                                                                  -- Input strobe
 
-          data_A_i  : in    std_logic_vector( (matA_N_g*matA_M_g*PsiFixSize(InFmt_g)) - 1 downto 0 );   -- Input data (an array of [Order_g - 1] elements with the InFmt_g size)
-          data_B_i  : in    std_logic_vector( (matB_N_g*matB_M_g*PsiFixSize(InFmt_g)) - 1 downto 0 );
+          data_A_i  : in    std_logic_vector( (matA_N_g*matA_M_g*PsiFixSize(InFmt_g)) - 1 downto 0 );   -- Input data matrix A 
+          data_B_i  : in    std_logic_vector( (matB_N_g*matB_M_g*PsiFixSize(InFmt_g)) - 1 downto 0 );   -- Input data matrix B
 
           strb_o    : out   std_logic;                                                                  -- Output strobe
-          data_o    : out   std_logic_vector( (matA_N_g*matB_M_g*PsiFixSize(OutFmt_g)) - 1 downto 0 )   -- Output data (an array of [Order_g - 1] elements with the OutFmt_g size)
+          data_o    : out   std_logic_vector( (matA_N_g*matB_M_g*PsiFixSize(OutFmt_g)) - 1 downto 0 )   -- Output data [A * B] matrix
     );
 end psi_fix_matrix_mult;
 
@@ -69,7 +69,7 @@ architecture behavioral of psi_fix_matrix_mult is
 
     type two_process_r is record
         -- Registers always present
-        strb     : std_logic_vector(4 downto 0);
+        strb     :   std_logic_vector(4 downto 0);
 
         matA_s   :   data_matrix_t(0 to (matA_N_g-1), 0 to (matA_M_g-1)) (PsiFixSize(InFmt_g) - 1 downto 0);
         matB_s   :   data_matrix_t(0 to (matB_N_g-1), 0 to (matB_M_g-1)) (PsiFixSize(InFmt_g) - 1 downto 0);
@@ -82,14 +82,11 @@ architecture behavioral of psi_fix_matrix_mult is
 
     end record;
 
-
-    -- CONSTANT
-    ---------------
-
     -- SIGNAL
     ---------------
 
     signal r, r_next    : two_process_r;
+
 begin
 
     assert (matA_M_g = matB_N_g) report "###ERROR###: psi_fix_matrix_mult: Matrices have incompatible dimensions" severity error;
