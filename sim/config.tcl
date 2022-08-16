@@ -103,6 +103,7 @@ add_sources "../hdl" {
   psi_fix_comparator.vhd \
   psi_fix_nch_analog_trigger_tdm.vhd \
   psi_fix_matrix_mult.vhd \
+  psi_fix_ss_solver.vhd
 } -tag src
 
 # testbenches
@@ -159,6 +160,7 @@ add_sources "../testbench" {
   psi_fix_comparator_tb/psi_fix_comparator_tb.vhd \
   psi_fix_nch_analog_trigger_tdm_tb/psi_fix_nch_analog_trigger_tdm_tb.vhd \
   psi_fix_matrix_mult_tb/psi_fix_matrix_mult_tb.vhd \
+  psi_fix_ss_solver_tb/psi_fix_ss_solver_tb.vhd 
 } -tag tb
 	
 #TB Runs
@@ -483,6 +485,11 @@ tb_run_add_arguments    "-gFileFolder_g=$dataDir -gFileIn_g=\"/input_2x2_2x2.txt
                         "-gFileFolder_g=$dataDir -gFileIn_g=\"/input_2x3_3x1.txt\" -gFileOut_g=\"/output_2x3_3x1.txt\" -gDutyCycle_g=1 -gmatA_N_g=2 -gmatA_M_g=3 -gmatB_N_g=3 -gmatB_M_g=1"
 add_tb_run
 
+create_tb_run "psi_fix_ss_solver_tb"
+tb_run_add_pre_script "python3" "io_gen.py" "../testbench/psi_fix_ss_solver_tb/scripts"
+set dataDir [file normalize "../testbench/psi_fix_ss_solver_tb/data"]
+tb_run_add_arguments    "-gFileFolder_g=$dataDir -gDutyCycle_g=6"
+add_tb_run
 
 
 

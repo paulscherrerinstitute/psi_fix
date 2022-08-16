@@ -31,14 +31,15 @@ library work;
 entity psi_fix_matrix_mult is
     generic( RstPol_g   : std_logic     := '1';         -- Reset polarity
 
-             InFmt_g    : PsiFixFmt_t   := (1, 0, 15);  -- Input data format
+             InAFmt_g   : PsiFixFmt_t   := (1, 0, 15);  -- Input data format
+             InBFmt_g   : PsiFixFmt_t   := (1, 0, 15);  -- Input data format for matrix B
              OutFmt_g   : PsiFixFmt_t   := (1, 0, 16);  -- Output data format
              IntFmt_g   : PsiFixFmt_t   := (1, 1, 30);  -- Internal data format
 
-             matA_N_g   : positive      := 2;           -- Number of rows on matrix A 
-             matA_M_g   : positive      := 2;           -- Number of columns on matrix A
+             matA_N_g   : positive      := 3;           -- Number of rows on matrix A 
+             matA_M_g   : positive      := 3;           -- Number of columns on matrix A
 
-             matB_N_g   : positive      := 2;           -- Number of rows on matrix B
+             matB_N_g   : positive      := 3;           -- Number of rows on matrix B
              matB_M_g   : positive      := 2            -- Number of columns on matrix B
     );
 
@@ -46,8 +47,8 @@ entity psi_fix_matrix_mult is
           clk_i     : in    std_logic;                                                                  -- Input clock
           strb_i    : in    std_logic;                                                                  -- Input strobe
 
-          data_A_i  : in    std_logic_vector( (matA_N_g*matA_M_g*PsiFixSize(InFmt_g)) - 1 downto 0 );   -- Input data matrix A 
-          data_B_i  : in    std_logic_vector( (matB_N_g*matB_M_g*PsiFixSize(InFmt_g)) - 1 downto 0 );   -- Input data matrix B
+          data_A_i  : in    std_logic_vector( (matA_N_g*matA_M_g*PsiFixSize(InAFmt_g)) - 1 downto 0 );  -- Input data matrix A 
+          data_B_i  : in    std_logic_vector( (matB_N_g*matB_M_g*PsiFixSize(InBFmt_g)) - 1 downto 0 );  -- Input data matrix B
 
           strb_o    : out   std_logic;                                                                  -- Output strobe
           data_o    : out   std_logic_vector( (matA_N_g*matB_M_g*PsiFixSize(OutFmt_g)) - 1 downto 0 )   -- Output data [A * B] matrix
@@ -71,12 +72,12 @@ architecture behavioral of psi_fix_matrix_mult is
         -- Registers always present
         strb     :   std_logic_vector(4 downto 0);
 
-        matA_s   :   data_matrix_t(0 to (matA_N_g-1), 0 to (matA_M_g-1)) (PsiFixSize(InFmt_g) - 1 downto 0);
-        matB_s   :   data_matrix_t(0 to (matB_N_g-1), 0 to (matB_M_g-1)) (PsiFixSize(InFmt_g) - 1 downto 0);
+        matA_s   :   data_matrix_t(0 to (matA_N_g-1), 0 to (matA_M_g-1)) (PsiFixSize(InAFmt_g) - 1 downto 0);
+        matB_s   :   data_matrix_t(0 to (matB_N_g-1), 0 to (matB_M_g-1)) (PsiFixSize(InBFmt_g) - 1 downto 0);
 
         mult_s   :   arry_matrix_t(0 to (matB_M_g-1))(0 to (matA_N_g-1), 0 to (matA_M_g-1)) (PsiFixSize(IntFmt_g) - 1 downto 0);
 
-        add_s    :   data_matrix_t(0 to (matB_N_g-1), 0 to (matB_M_g-1)) (PsiFixSize(IntFmt_g) - 1 downto 0);
+        add_s    :   data_matrix_t(0 to (matA_N_g-1), 0 to (matB_M_g-1)) (PsiFixSize(IntFmt_g) - 1 downto 0);
 
         data_s   :   std_logic_vector( (matA_N_g*matB_M_g*PsiFixSize(OutFmt_g)) - 1 downto 0 );
 
@@ -106,13 +107,13 @@ begin
         ------------------------------------------------------------
         for i in 0 to (matA_N_g - 1) loop
             for j in 0 to (matA_M_g - 1) loop
-                r_next.matA_s(i, j) <= data_A_i( (((i*matA_M_g)+j+1)*PsiFixSize(InFmt_g))-1 downto (((i*matA_M_g)+j)*PsiFixSize(InFmt_g)) );
+                r_next.matA_s(i, j) <= data_A_i( (((i*matA_M_g)+j+1)*PsiFixSize(InAFmt_g))-1 downto (((i*matA_M_g)+j)*PsiFixSize(InAFmt_g)) );
             end loop;
         end loop;
 
         for i in 0 to (matB_N_g - 1) loop
             for j in 0 to (matB_M_g - 1) loop
-                r_next.matB_s(i, j) <= data_B_i( (((i*matB_M_g)+j+1)*PsiFixSize(InFmt_g))-1 downto (((i*matB_M_g)+j)*PsiFixSize(InFmt_g)) );
+                r_next.matB_s(i, j) <= data_B_i( (((i*matB_M_g)+j+1)*PsiFixSize(InBFmt_g))-1 downto (((i*matB_M_g)+j)*PsiFixSize(InBFmt_g)) );
             end loop;
         end loop;
 
@@ -122,7 +123,7 @@ begin
         for i in 0 to (matB_M_g - 1) loop
             for j in 0 to (matA_N_g - 1) loop
                 for k in 0 to (matA_M_g - 1) loop
-                        r_next.mult_s(i)(j, k) <= PsiFixMult(r.matA_s(j, k), InFmt_g, r.matB_s(k, i), InFmt_g, IntFmt_g, PsiFixTrunc, PsiFixWrap);
+                        r_next.mult_s(i)(j, k) <= PsiFixMult(r.matA_s(j, k), InAFmt_g, r.matB_s(k, i), InBFmt_g, IntFmt_g, PsiFixTrunc, PsiFixWrap);
                 end loop;    
             end loop;
         end loop;
