@@ -87,17 +87,17 @@ begin
 		port map
 		(
 			-- Control Signals
-			Clk				=> Clk,
-			Rst				=> Rst,
+			clk_i				=> Clk,
+			rst_i				=> Rst,
 			-- Configuration
-			CfgRatio		=> Ratio_c,
-			CfgShift		=> Shift_c,
-			CfgGainCorr		=> GainCorrCoef_c,
+			cfg_ratio_i		=> Ratio_c,
+			cfg_shift_i		=> Shift_c,
+			cfg_gain_corr_i		=> GainCorrCoef_c,
 			-- Data Ports
-			InData			=> InData,
-			InVld			=> InVld,
-			OutData			=> OutData,
-			OutVld			=> OutVld
+			dat_i			=> InData,
+			vld_i			=> InVld,
+			dat_o			=> OutData,
+			vld_o			=> OutVld
 		);
 	
 	-------------------------------------------------------------------------
