@@ -16,33 +16,31 @@ use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
 use work.psi_common_logic_pkg.all;
-
-------------------------------------------------------------------------------
--- Entity
-------------------------------------------------------------------------------
+-- @formatter:off
 -- $$ tbpkg=psi_lib.psi_tb_textfile_pkg,psi_lib.psi_tb_txt_util $$
 -- $$ processes=stimuli,response $$
 entity psi_fix_complex_abs is
   generic(
-    InFmt_g       : PsiFixFmt_t := (1, 0, 15);
-    OutFmt_g      : PsiFixFmt_t := (0, 1, 15);
-    Round_g       : PsiFixRnd_t := PsiFixTrunc; --
-    Sat_g         : PsiFixSat_t := PsiFixWrap; --
-    RamBehavior_g : string      := "RBW" -- RBW = Read before write, WBR = write before read
+    InFmt_g       : PsiFixFmt_t := (1, 0, 15);                            -- FP format in
+    OutFmt_g      : PsiFixFmt_t := (0, 1, 15);                            -- FP format out
+    Round_g       : PsiFixRnd_t := PsiFixTrunc;                           -- trunc or round
+    Sat_g         : PsiFixSat_t := PsiFixWrap;                            -- Wrap or sat
+    rst_pol_g     : std_logic   := '1';
+    RamBehavior_g : string      := "RBW"                                  -- RBW = Read before write, WBR = write before read
   );
   port(
     -- Control Signals
-    Clk    : in  std_logic;              -- $$ type=Clk; freq=127e6 $$
-    Rst    : in  std_logic;             -- $$ type=Rst; Clk=Clk $$	
+    clk_i     : in  std_logic;                                            -- $$ type=Clk; freq=127e6 $$
+    rst_i     : in  std_logic;                                            -- $$ type=Rst; Clk=clk_i $$	
     -- Input
-    InVld  : in  std_logic;
-    InI    : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-    InQ    : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-    OutAbs : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-    OutVld : out std_logic
+    vld_i     : in  std_logic;                                            --vld signal in
+    dat_inp_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);   -- data inphase I
+    dat_qua_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);   -- data quadrature Q
+    dat_o     : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);  -- results output DQRT(I^2+Q^2)
+    vld_o     : out std_logic                                             -- vld signal out
   );
 end entity;
-
+-- @formatter:on
 ------------------------------------------------------------------------------
 -- Architecture section
 ------------------------------------------------------------------------------
@@ -97,7 +95,7 @@ begin
   --------------------------------------------------------------------------
   -- Combinatorial Process
   --------------------------------------------------------------------------	
-  proc_comb : process(r, InVld, InI, InQ, SftCntOut_s, SqrtVld_s, SqrtData_s, IsZeroOut_s)
+  proc_comb : process(r, vld_i, dat_inp_i, dat_qua_i, SftCntOut_s, SqrtVld_s, SqrtData_s, IsZeroOut_s)
     variable v              : two_process_r;
     variable SftBeforeIn_v  : std_logic_vector(PsiFixSize(LimFmt_c) - 1 downto 0);
     variable SftBefore_v    : integer;
@@ -114,9 +112,9 @@ begin
 
     -- *** Stage 0 ***
     -- Input Registers
-    v.InVld(0) := InVld;
-    v.I_0      := InI;
-    v.Q_0      := InQ;
+    v.InVld(0) := vld_i;
+    v.I_0      := dat_inp_i;
+    v.Q_0      := dat_qua_i;
 
     -- *** Stage 1 ***
     -- Normalization is implicit by reinterpreting the number format (number of bits is not changed)
@@ -186,18 +184,18 @@ begin
 
   --------------------------------------------------------------------------
   -- Output Assignment
-  --------------------------------------------------------------------------	
-  OutAbs <= r.OutRes;
-  OutVld <= r.OutVld(r.OutVld'high);
+  --------------------------------------------------------------------------
+  dat_o <= r.OutRes;
+  vld_o <= r.OutVld(r.OutVld'high);
 
   --------------------------------------------------------------------------
   -- Sequential Process
-  --------------------------------------------------------------------------	
-  proc_seq : process(Clk)
+  --------------------------------------------------------------------------
+  proc_seq : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       r <= r_next;
-      if Rst = '1' then
+      if rst_i = rst_pol_g then
         r.InVld  <= (others => '0');
         r.OutVld <= (others => '0');
       end if;
@@ -211,8 +209,8 @@ begin
   IsZeroIn_s <= '1' when unsigned(SqrtIn_s) = 0 else '0';
   inst_sqrt : entity work.psi_fix_lin_approx_sqrt18b
     port map(
-      Clk     => Clk,
-      Rst     => Rst,
+      clk_i     => clk_i,
+      rst_i     => rst_i,
       InVld   => r.InVld(r.InVld'high),
       InData  => SqrtIn_s,
       OutVld  => SqrtVld_s,
@@ -231,8 +229,8 @@ begin
         RamBehavior_g => RamBehavior_g
       )
       port map(
-        Clk     => Clk,
-        Rst     => Rst,
+        Clk     => clk_i,
+        Rst     => rst_i,
         InData  => FifoIn,
         InVld   => r.InVld(r.InVld'high),
         OutData => FifoOut,

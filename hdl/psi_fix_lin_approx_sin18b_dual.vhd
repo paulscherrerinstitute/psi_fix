@@ -10,34 +10,28 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library work;
 use work.psi_fix_pkg.all;
 use work.psi_common_math_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 entity psi_fix_lin_approx_sin18b_dual is
+  generic(rst_pol_g : std_logic:='1');
   port(
     -- Control Signals
-    Clk      : in  std_logic;
-    Rst      : in  std_logic;
+    clk_i    : in  std_logic;
+    rst_i    : in  std_logic;
     -- Input
-    InVldA   : in  std_logic;
-    InDataA  : in  std_logic_vector(20 - 1 downto 0); -- Format (0, 0, 20)
-    InVldB   : in  std_logic;
-    InDataB  : in  std_logic_vector(20 - 1 downto 0); -- Format (0, 0, 20)
+    vld_a_i  : in  std_logic;
+    dat_a_i  : in  std_logic_vector(20 - 1 downto 0); -- fixed Format (0, 0, 20)
+    vld_b_i  : in  std_logic;
+    dat_b_i  : in  std_logic_vector(20 - 1 downto 0); -- fixed Format (0, 0, 20)
     -- Output
-    OutVldA  : out std_logic;
-    OutDataA : out std_logic_vector(18 - 1 downto 0); -- Format (1, 0, 17)
-    OutVldB  : out std_logic;
-    OutDataB : out std_logic_vector(18 - 1 downto 0) -- Format (1, 0, 17)		
+    vld_a_o  : out std_logic;
+    dat_a_o  : out std_logic_vector(18 - 1 downto 0); -- fixed Format (1, 0, 17)
+    vld_b_o  : out std_logic;
+    dat_b_o  : out std_logic_vector(18 - 1 downto 0)  -- fixed Format (1, 0, 17)		
   );
 end entity;
 
-------------------------------------------------------------------------------
--- Architecture Declaration
-------------------------------------------------------------------------------
 architecture rtl of psi_fix_lin_approx_sin18b_dual is
 
   -- Constants
@@ -2120,20 +2114,21 @@ begin
     )
     port map(
       -- Control Signals
-      Clk     => Clk,
-      Rst     => Rst,
+      clk_i     => clk_i,
+      rst_i     => rst_i,
       -- Input
-      InVld   => InVldA,
-      InData  => InDataA,
+      vld_i   => vld_a_i,
+      dat_i  => dat_a_i,
       -- Output
-      OutVld  => OutVldA,
-      OutData => OutDataA,
+      vld_o  => vld_a_o,
+      dat_o => dat_a_o,
       -- Table Interface
-      TblAddr => TableAddrA,
-      TblData => TableDataA
+      addr_table_o => TableAddrA,
+      data_table_i => TableDataA
     );
   i_calc_b : entity work.psi_fix_lin_approx_calc
     generic map(
+      rst_pol_g => rst_pol_g,
       InFmt_g     => InFmt_c,
       OutFmt_g    => OutFmt_c,
       OffsFmt_g   => OffsFmt_c,
@@ -2142,22 +2137,22 @@ begin
     )
     port map(
       -- Control Signals
-      Clk     => Clk,
-      Rst     => Rst,
+      clk_i     => clk_i,
+      rst_i     => rst_i,
       -- Input
-      InVld   => InVldB,
-      InData  => InDataB,
+      vld_i   => vld_b_i,
+      dat_i  => dat_b_i,
       -- Output
-      OutVld  => OutVldB,
-      OutData => OutDataB,
+      vld_o  => vld_b_o,
+      dat_o => dat_b_o,
       -- Table Interface
-      TblAddr => TableAddrB,
-      TblData => TableDataB
+      addr_table_o => TableAddrB,
+      data_table_i => TableDataB
     );
   -- *** Table ***
-  p_table : process(Clk)
+  p_table : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       TableDataA <= Table_c(to_integer(unsigned(TableAddrA)));
       TableDataB <= Table_c(to_integer(unsigned(TableAddrB)));
     end if;

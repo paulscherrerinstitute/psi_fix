@@ -10,47 +10,38 @@
 -- This component calculateas a linear approximation. It should only be used
 -- together with tables generated from python (there is a code generator).
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library work;
 use work.psi_fix_pkg.all;
 use work.psi_common_math_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 entity psi_fix_lin_approx_calc is
   generic(
     InFmt_g     : PsiFixFmt_t := (1, 0, 17);
     OutFmt_g    : PsiFixFmt_t := (1, 0, 17);
     OffsFmt_g   : PsiFixFmt_t := (1, 0, 17);
     GradFmt_g   : PsiFixFmt_t := (1, 0, 17);
-    TableSize_g : natural     := 1024
+    TableSize_g : natural     := 1024;
+    rst_pol_g   : std_logic   := '1'
   );
   port(
     -- Control Signals
-    Clk     : in  std_logic;
-    Rst     : in  std_logic;
+    clk_i        : in  std_logic;
+    rst_i        : in  std_logic;
     -- Input
-    InVld   : in  std_logic;
-    InData  : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
+    vld_i        : in  std_logic;
+    dat_i        : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
     -- Output
-    OutVld  : out std_logic;
-    OutData : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+    vld_o        : out std_logic;
+    dat_o        : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
     -- Table Interface
-    TblAddr : out std_logic_vector(log2ceil(TableSize_g) - 1 downto 0);
-    TblData : in  std_logic_vector(PsiFixSize(OffsFmt_g) + PsiFixSize(GradFmt_g) - 1 downto 0)
+    addr_table_o : out std_logic_vector(log2ceil(TableSize_g) - 1 downto 0);
+    data_table_i : in  std_logic_vector(PsiFixSize(OffsFmt_g) + PsiFixSize(GradFmt_g) - 1 downto 0)
   );
 end entity;
 
-------------------------------------------------------------------------------
--- Architecture Declaration
-------------------------------------------------------------------------------
 architecture rtl of psi_fix_lin_approx_calc is
 
   -- Constants
@@ -87,7 +78,7 @@ begin
   --------------------------------------------
   -- Combinatorial Process
   --------------------------------------------
-  p_comb : process(r, InVld, InData, TblData)
+  p_comb : process(r, vld_i, dat_i, data_table_i)
     variable v : two_process_r;
   begin
     -- *** Hold variables stable ***
@@ -100,8 +91,8 @@ begin
 
     -- *** Stage 0 ***
     -- Input Registers
-    v.Vld(0) := InVld;
-    v.In_0   := InData;
+    v.Vld(0) := vld_i;
+    v.In_0   := dat_i;
 
     -- *** Stage 1 ***
     -- Index Calculation
@@ -115,8 +106,8 @@ begin
 
     -- *** Stage 3 ***
     -- Registering of Table outputs
-    v.Offs(3) := TblData(OffsRng_c);
-    v.Grad_3  := TblData(GradRng_c);
+    v.Offs(3) := data_table_i(OffsRng_c);
+    v.Grad_3  := data_table_i(GradRng_c);
 
     -- *** Stage 4 ***
     -- Multiplication
@@ -136,9 +127,9 @@ begin
                             OutFmt_g, PsiFixRound, PsiFixSat);
 
     -- *** Outputs ***
-    TblAddr <= r.TblIdx_1;
-    OutVld  <= r.Vld(6);
-    OutData <= r.Out_6;
+    addr_table_o <= r.TblIdx_1;
+    vld_o        <= r.Vld(6);
+    dat_o        <= r.Out_6;
 
     -- *** Assign to signal ***
     r_next <= v;
@@ -147,14 +138,15 @@ begin
   --------------------------------------------
   -- Sequential Process
   --------------------------------------------
-  p_seq : process(Clk)
+  p_seq : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       r <= r_next;
-      if Rst = '1' then
+      if rst_i = rst_pol_g then
         r.Vld <= (others => '0');
       end if;
     end if;
   end process;
+
 end architecture;
 

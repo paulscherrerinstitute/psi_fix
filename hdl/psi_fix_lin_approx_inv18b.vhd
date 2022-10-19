@@ -3,20 +3,13 @@
 --  All rights reserved.
 ------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library work;
 use work.psi_fix_pkg.all;
 use work.psi_common_math_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 entity psi_fix_lin_approx_inv18b is
   port(
     -- Control Signals
@@ -31,9 +24,6 @@ entity psi_fix_lin_approx_inv18b is
   );
 end entity;
 
-------------------------------------------------------------------------------
--- Architecture Declaration
-------------------------------------------------------------------------------
 architecture rtl of psi_fix_lin_approx_inv18b is
 
   -- Constants
@@ -1091,17 +1081,17 @@ begin
     )
     port map(
       -- Control Signals
-      Clk     => Clk,
-      Rst     => Rst,
+      clk_i     => Clk,
+      rst_i     => Rst,
       -- Input
-      InVld   => InVld,
-      InData  => InData,
+      vld_i   => InVld,
+      dat_i  => InData,
       -- Output
-      OutVld  => OutVld,
-      OutData => OutData,
+      vld_o  => OutVld,
+      dat_o => OutData,
       -- Table Interface
-      TblAddr => TableAddr,
-      TblData => TableData
+      addr_table_o => TableAddr,
+      data_table_i => TableData
     );
 
   -- *** Table ***

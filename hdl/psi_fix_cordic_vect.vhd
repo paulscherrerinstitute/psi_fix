@@ -20,45 +20,44 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 
-library work;
 use work.psi_fix_pkg.all;
 use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
-
+-- @formatter:off
 ------------------------------------------------------------------------------
 -- Entity Declaration
 ------------------------------------------------------------------------------
 -- $$ processes=stim, resp $$
 entity psi_fix_cordic_vect is
   generic(
-    InFmt_g        : PsiFixFmt_t          := (1, 0, 15); -- Must be signed		$$ constant=(1,0,15) $$
-    OutFmt_g       : PsiFixFmt_t          := (0, 2, 16); -- Must be unsigned		$$ constant=(0,2,16) $$
-    InternalFmt_g  : PsiFixFmt_t          := (1, 2, 22); -- Must be signed		$$ constant=(1,2,22) $$
-    AngleFmt_g     : PsiFixFmt_t          := (0, 0, 15); -- Must be unsigned		$$ constant=(0,0,15) $$
-    AngleIntFmt_g  : PsiFixFmt_t          := (1, 0, 18); -- Must be signed		$$ constant=(1,0,18) $$
-    Iterations_g   : natural              := 13; --						$$ constant=13 $$
-    GainComp_g     : boolean              := False; --						$$ export=true $$
+    InFmt_g        : PsiFixFmt_t          := (1, 0, 15);  -- Must be signed		$$ constant=(1,0,15) $$
+    OutFmt_g       : PsiFixFmt_t          := (0, 2, 16);  -- Must be unsigned		$$ constant=(0,2,16) $$
+    InternalFmt_g  : PsiFixFmt_t          := (1, 2, 22);  -- Must be signed		$$ constant=(1,2,22) $$
+    AngleFmt_g     : PsiFixFmt_t          := (0, 0, 15);  -- Must be unsigned		$$ constant=(0,0,15) $$
+    AngleIntFmt_g  : PsiFixFmt_t          := (1, 0, 18);  -- Must be signed		$$ constant=(1,0,18) $$
+    Iterations_g   : natural              := 13;          --						$$ constant=13 $$
+    GainComp_g     : boolean              := False;       --						$$ export=true $$
     Round_g        : PsiFixRnd_t          := PsiFixTrunc; --						$$ export=true $$
-    Sat_g          : PsiFixSat_t          := PsiFixWrap; --						$$ export=true $$
-    Mode_g         : string               := "SERIAL"; -- PIPELINED or SERIAL	$$ export=true $$
-    PlStgPerIter_g : integer range 1 to 2 := 1 -- Number of pipeline stages per iteration (does only affect pipelined implementation)
+    Sat_g          : PsiFixSat_t          := PsiFixWrap;  --						$$ export=true $$
+    Mode_g         : string               := "SERIAL";    -- PIPELINED or SERIAL	$$ export=true $$
+    PlStgPerIter_g : integer range 1 to 2 := 1            -- Number of pipeline stages per iteration (does only affect pipelined implementation)
   );
   port(
     -- Control Signals
-    Clk    : in  std_logic;             -- $$ type=clk; freq=100e6 $$
-    Rst    : in  std_logic;             -- $$ type=rst; clk=Clk $$
+    clk_i     : in  std_logic;                                            -- $$ type=clk; freq=100e6 $$
+    rst_i     : in  std_logic;                                            -- $$ type=rst; clk=Clk $$
     -- Input
-    InVld  : in  std_logic;
-    InRdy  : out std_logic;             -- $$ lowactive=true $$
-    InI    : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-    InQ    : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
+    vld_i     : in  std_logic;                                            -- valid signal in
+    rdy_i     : out std_logic;                                            -- $$ lowactive=true $$
+    dat_inp_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);   -- data input input
+    dat_qua_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);   -- dat quadrature input
     -- Output
-    OutVld : out std_logic;
-    OutAbs : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-    OutAng : out std_logic_vector(PsiFixSize(AngleFmt_g) - 1 downto 0)
+    vld_o     : out std_logic;                                            -- valid output
+    dat_abs_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);  -- data amplitude output
+    dat_ang_o : out std_logic_vector(PsiFixSize(AngleFmt_g) - 1 downto 0) -- dat angle output
   );
 end entity;
-
+-- @formatter:on
 ------------------------------------------------------------------------------
 -- Architecture Declaration
 ------------------------------------------------------------------------------
@@ -190,22 +189,22 @@ begin
     signal Quad       : t_aslv2(0 to Iterations_g * PlStgPerIter_g);
   begin
     -- Pipelined implementation can take a sample every clock cycle
-    InRdy <= '1';
+    rdy_i <= '1';
 
     -- Implementation
-    p_cordic_pipelined : process(Clk)
+    p_cordic_pipelined : process(clk_i)
     begin
-      if rising_edge(Clk) then
-        if Rst = '1' then
+      if rising_edge(clk_i) then
+        if rst_i = '1' then
           Vld    <= (others => '0');
           VldAbs <= '0';
-          OutVld <= '0';
+          vld_o  <= '0';
         else
           -- Input registers
-          VldAbs  <= InVld;
-          XAbs    <= PsiFixAbs(InI, InFmt_g, AbsFmt_c, PsiFixTrunc, PsiFixWrap); -- truncation is okay since internal format is usually bigger than input
-          YAbs    <= PsiFixAbs(InQ, InFmt_g, AbsFmt_c, PsiFixTrunc, PsiFixWrap); -- truncation is okay since internal format is usually bigger than input
-          QuadAbs <= InI(InI'left) & InQ(InQ'left);
+          VldAbs  <= vld_i;
+          XAbs    <= PsiFixAbs(dat_inp_i, InFmt_g, AbsFmt_c, PsiFixTrunc, PsiFixWrap); -- truncation is okay since internal format is usually bigger than input
+          YAbs    <= PsiFixAbs(dat_qua_i, InFmt_g, AbsFmt_c, PsiFixTrunc, PsiFixWrap); -- truncation is okay since internal format is usually bigger than input
+          QuadAbs <= dat_inp_i(dat_inp_i'left) & dat_qua_i(dat_qua_i'left);
 
           -- Saturation
           X(0)    <= PsiFixResize(XAbs, AbsFmt_c, InternalFmt_g, PsiFixTrunc, Sat_g);
@@ -230,17 +229,17 @@ begin
           end loop;
 
           -- Output 
-          OutVld <= Vld(Iterations_g * PlStgPerIter_g);
+          vld_o <= Vld(Iterations_g * PlStgPerIter_g);
           if GainComp_g then
-            OutAbs <= PsiFixMult(X(Iterations_g * PlStgPerIter_g), InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
+            dat_abs_o <= PsiFixMult(X(Iterations_g * PlStgPerIter_g), InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
           else
-            OutAbs <= PsiFixResize(X(Iterations_g * PlStgPerIter_g), InternalFmt_g, OutFmt_g, Round_g, Sat_g);
+            dat_abs_o <= PsiFixResize(X(Iterations_g * PlStgPerIter_g), InternalFmt_g, OutFmt_g, Round_g, Sat_g);
           end if;
           case Quad(Iterations_g * PlStgPerIter_g) is
-            when "00"   => OutAng <= PsiFixResize(Z(Iterations_g * PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-            when "10"   => OutAng <= PsiFixSub(AngInt_0_5_c, AngleIntExtFmt, Z(Iterations_g * PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-            when "11"   => OutAng <= PsiFixAdd(AngInt_0_5_c, AngleIntExtFmt, Z(Iterations_g * PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-            when "01"   => OutAng <= PsiFixSub(AngInt_1_0_c, AngleIntExtFmt, Z(Iterations_g * PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
+            when "00"   => dat_ang_o <= PsiFixResize(Z(Iterations_g * PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
+            when "10"   => dat_ang_o <= PsiFixSub(AngInt_0_5_c, AngleIntExtFmt, Z(Iterations_g * PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
+            when "11"   => dat_ang_o <= PsiFixAdd(AngInt_0_5_c, AngleIntExtFmt, Z(Iterations_g * PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
+            when "01"   => dat_ang_o <= PsiFixSub(AngInt_1_0_c, AngleIntExtFmt, Z(Iterations_g * PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
             when others => null;
           end case;
         end if;
@@ -262,23 +261,23 @@ begin
     signal Quad     : std_logic_vector(1 downto 0);
     constant Z0_c   : std_logic_vector(PsiFixSize(AngleIntFmt_g) - 1 downto 0) := (others => '0');
   begin
-    InRdy <= not XinVld;
+    rdy_i <= not XinVld;
 
-    p_cordic_serial : process(Clk)
+    p_cordic_serial : process(clk_i)
     begin
-      if rising_edge(Clk) then
-        if Rst = '1' then
+      if rising_edge(clk_i) then
+        if rst_i = '1' then
           XinVld  <= '0';
           IterCnt <= 0;
-          OutVld  <= '0';
+          vld_o   <= '0';
           CordVld <= '0';
         else
           -- Input latching
-          if XinVld = '0' and InVld = '1' then
+          if XinVld = '0' and vld_i = '1' then
             XinVld <= '1';
-            Xin    <= PsiFixAbs(InI, InFmt_g, InternalFmt_g, Round_g, Sat_g);
-            Yin    <= PsiFixAbs(InQ, InFmt_g, InternalFmt_g, Round_g, Sat_g);
-            Quadin <= InI(InI'left) & InQ(InQ'left);
+            Xin    <= PsiFixAbs(dat_inp_i, InFmt_g, InternalFmt_g, Round_g, Sat_g);
+            Yin    <= PsiFixAbs(dat_qua_i, InFmt_g, InternalFmt_g, Round_g, Sat_g);
+            Quadin <= dat_inp_i(dat_inp_i'left) & dat_qua_i(dat_qua_i'left);
           end if;
 
           -- CORDIC loop
@@ -308,18 +307,18 @@ begin
           end if;
 
           -- Output stage
-          OutVld <= CordVld;
+          vld_o <= CordVld;
           if CordVld = '1' then
             if GainComp_g then
-              OutAbs <= PsiFixMult(X, InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
+              dat_abs_o <= PsiFixMult(X, InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
             else
-              OutAbs <= PsiFixResize(X, InternalFmt_g, OutFmt_g, Round_g, Sat_g);
+              dat_abs_o <= PsiFixResize(X, InternalFmt_g, OutFmt_g, Round_g, Sat_g);
             end if;
             case Quad is
-              when "00"   => OutAng <= PsiFixResize(Z, AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-              when "10"   => OutAng <= PsiFixSub(AngInt_0_5_c, AngleIntExtFmt, Z, AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-              when "11"   => OutAng <= PsiFixAdd(AngInt_0_5_c, AngleIntExtFmt, Z, AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-              when "01"   => OutAng <= PsiFixSub(AngInt_1_0_c, AngleIntExtFmt, Z, AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
+              when "00"   => dat_ang_o <= PsiFixResize(Z, AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
+              when "10"   => dat_ang_o <= PsiFixSub(AngInt_0_5_c, AngleIntExtFmt, Z, AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
+              when "11"   => dat_ang_o <= PsiFixAdd(AngInt_0_5_c, AngleIntExtFmt, Z, AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
+              when "01"   => dat_ang_o <= PsiFixSub(AngInt_1_0_c, AngleIntExtFmt, Z, AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
               when others => null;
             end case;
           end if;
@@ -327,6 +326,6 @@ begin
       end if;
     end process;
   end generate;
-  
+
 end architecture;
 

@@ -13,44 +13,35 @@
 -- and perform the following computation RF = I.sin(w)+Q.cos(w)
 ------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 
-library work;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
-
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
+--@formatter:off
 -- $$ processes=stim,check $$
 entity psi_fix_mod_cplx2real is
-  generic(RstPol_g   : std_logic            := '1'; -- $$ constant = '1' $$
+  generic(RstPol_g   : std_logic            := '1';         -- $$ constant = '1' $$
           PlStages_g : integer range 5 to 6 := 5;
-          InpFmt_g   : PsiFixFmt_t          := (1, 1, 15); -- $$ constant=(1,1,15) $$
-          CoefFmt_g  : PsiFixFmt_t          := (1, 1, 15); -- $$ constant=(1,1,15) $$
-          IntFmt_g   : PsiFixFmt_t          := (1, 1, 15); -- $$ constant=(1,1,15) $$
-          OutFmt_g   : PsiFixFmt_t          := (1, 1, 15); -- $$ constant=(1,1,15) $$
-          Ratio_g    : natural              := 5 -- $$ constant=5 $$
+          InpFmt_g   : PsiFixFmt_t          := (1, 1, 15);  -- $$ constant=(1,1,15) $$
+          CoefFmt_g  : PsiFixFmt_t          := (1, 1, 15);  -- $$ constant=(1,1,15) $$
+          IntFmt_g   : PsiFixFmt_t          := (1, 1, 15);  -- $$ constant=(1,1,15) $$
+          OutFmt_g   : PsiFixFmt_t          := (1, 1, 15);  -- $$ constant=(1,1,15) $$
+          Ratio_g    : natural              := 5            -- $$ constant=5 $$
          );
   port(
-    InClk    : in  std_logic;           -- $$ type=clk; freq=100e6 $$
-    InRst    : in  std_logic;           -- $$ type=rst; clk=clk_i $$
-    InVld    : in  std_logic;           -- valid
-    --in
-    InInpDat : in  std_logic_vector(PsiFixSize(InpFmt_g) - 1 downto 0); -- in-phase 	 data
-    InQuaDat : in  std_logic_vector(PsiFixSize(InpFmt_g) - 1 downto 0); -- quadrature data
-    --out
-    OutDat   : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-    OutVld   : out std_logic
+    clk_i     : in  std_logic;                                           -- $$ type=clk; freq=100e6 $$
+    rst_i     : in  std_logic;                                           -- $$ type=rst; clk=clk_i $$
+    vld_i     : in  std_logic;                                           -- valid
+    dat_inp_i : in  std_logic_vector(PsiFixSize(InpFmt_g)-1 downto 0); -- in-phase 	 data
+    dat_qua_i : in  std_logic_vector(PsiFixSize(InpFmt_g)-1 downto 0); -- quadrature data
+    dat_o     : out std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);
+    vld_o     : out std_logic
   );
 end entity;
-
+--@formatter:on
 architecture rtl of psi_fix_mod_cplx2real is
 
   type coef_array_t is array (0 to Ratio_g - 1) of std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);
@@ -124,14 +115,14 @@ begin
   -------------------------------------------------------------------------------
   -- simple ROM pointer for both array
   -------------------------------------------------------------------------------
-  proc_add_coef : process(InClk)
+  proc_add_coef : process(clk_i)
     variable cpt_v : integer range 0 to Ratio_g := 0;
   begin
-    if rising_edge(InClk) then
-      if InRst = RstPol_g then
+    if rising_edge(clk_i) then
+      if rst_i = RstPol_g then
         cpt_v := 0;
       else
-        if InVld = '1' then
+        if vld_i = '1' then
           if cpt_v < Ratio_g - 1 then
             cpt_v := cpt_v + 1;
           else
@@ -147,12 +138,12 @@ begin
   -------------------------------------------------------------------------------
   -- Multiplier and Adder process
   -------------------------------------------------------------------------------
-  proc_dsp : process(InClk)
+  proc_dsp : process(clk_i)
   begin
-    if rising_edge(InClk) then
+    if rising_edge(clk_i) then
 
-      if InRst = RstPol_g then
-        OutVld <= '0';
+      if rst_i = RstPol_g then
+        vld_o <= '0';
         str1_s <= '0';
         str2_s <= '0';
         str3_s <= '0';
@@ -160,9 +151,9 @@ begin
         str5_s <= '0';
       else
         -- *** stage 1 ***
-        str1_s   <= InVld;
-        datInp_s <= InInpDat;
-        datQua_s <= InQuaDat;
+        str1_s   <= vld_i;
+        datInp_s <= dat_inp_i;
+        datQua_s <= dat_qua_i;
 
         -- *** stage 2 (optional) ***
         sin1_s    <= sin_s;
@@ -201,8 +192,8 @@ begin
                             mult_q_dff_s, IntFmt_g,
                             AddFmt_c, PsiFixTrunc, PsiFixWrap);
         -- *** stage 6 ***
-        OutDat <= PsiFixResize(sum_s, AddFmt_c, OutFmt_g, PsiFixRound, PsiFixSat);
-        OutVld <= str5_s;
+        dat_o <= PsiFixResize(sum_s, AddFmt_c, OutFmt_g, PsiFixRound, PsiFixSat);
+        vld_o <= str5_s;
       end if;
     end if;
   end process;

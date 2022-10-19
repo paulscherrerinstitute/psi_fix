@@ -1,46 +1,32 @@
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 
--- library work
 use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
 use work.psi_common_logic_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity
-------------------------------------------------------------------------------
 -- $$ tbpkg=psi_lib.psi_tb_textfile_pkg,psi_lib.psi_tb_txt_util $$
 -- $$ processes=stimuli,response $$
 entity psi_fix_phase_unwrap is
   generic(
-    InFmt_g  : PsiFixFmt_t := (1, 0, 15);
-    OutFmt_g : PsiFixFmt_t := (0, 1, 15);
-    Round_g  : PsiFixRnd_t := PsiFixTrunc
+    InFmt_g   : PsiFixFmt_t := (1, 0, 15);
+    OutFmt_g  : PsiFixFmt_t := (0, 1, 15);
+    Round_g   : PsiFixRnd_t := PsiFixTrunc;
+    rst_pol_g : std_logic   := '1'
   );
   port(
-    -- Control Signals
-    Clk     : in  std_logic;            -- $$ type=Clk; freq=127e6 $$
-    Rst     : in  std_logic;            -- $$ type=Rst; Clk=Clk $$
-
-    -- Input
-    InVld   : in  std_logic;
-    InData  : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-    OutVld  : out std_logic;
-    OutData : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-    OutWrap : out std_logic
+    clk_i  : in  std_logic;             -- $$ type=Clk; freq=127e6 $$
+    rst_i  : in  std_logic;             -- $$ type=Rst; Clk=Clk $$
+    vld_i  : in  std_logic;
+    dat_i  : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
+    vld_o  : out std_logic;
+    dat_o  : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+    wrap_o : out std_logic
   );
 end entity;
-
-------------------------------------------------------------------------------
--- Architecture section
-------------------------------------------------------------------------------
 
 architecture rtl of psi_fix_phase_unwrap is
 
@@ -51,9 +37,9 @@ architecture rtl of psi_fix_phase_unwrap is
   -- Two Process Method
   type two_process_r is record
     Vld       : std_logic_vector(0 to 3);
-    InData_0  : std_logic_vector(InData'range);
-    InData_1  : std_logic_vector(InData'range);
-    InLast_0  : std_logic_vector(InData'range);
+    InData_0  : std_logic_vector(dat_i'range);
+    InData_1  : std_logic_vector(dat_i'range);
+    InLast_0  : std_logic_vector(dat_i'range);
     Diff_1    : std_logic_vector(PsiFixSize(DiffFmt_c) - 1 downto 0);
     Sum_2     : std_logic_vector(PsiFixSize(SumFmt_c) - 1 downto 0);
     Wrap_2    : std_logic;
@@ -72,7 +58,7 @@ begin
   --------------------------------------------------------------------------
   -- Combinatorial Process
   --------------------------------------------------------------------------
-  proc_comb : process(r, InVld, InData)
+  proc_comb : process(r, vld_i, dat_i)
     variable Sum_v  : std_logic_vector(PsiFixSize(SumFmt_c) - 1 downto 0);
     variable Wrap_v : std_logic;
     variable v      : two_process_r;
@@ -84,8 +70,8 @@ begin
     v.Vld(v.Vld'low + 1 to v.Vld'high) := r.Vld(r.Vld'low to r.Vld'high - 1);
 
     -- *** Stage 0 (Input Stage) ***
-    v.Vld(0)   := InVld;
-    v.InData_0 := InData;
+    v.Vld(0)   := vld_i;
+    v.InData_0 := dat_i;
     -- Delay input data by one sample
     if r.Vld(0) = '1' then
       v.InLast_0 := r.InData_0;
@@ -123,18 +109,18 @@ begin
   --------------------------------------------------------------------------
   -- Output Assignment
   --------------------------------------------------------------------------
-  OutVld  <= r.Vld(3);
-  OutData <= r.OutData_3;
-  OutWrap <= r.OutWrap_3;
+  vld_o  <= r.Vld(3);
+  dat_o  <= r.OutData_3;
+  wrap_o <= r.OutWrap_3;
 
   --------------------------------------------------------------------------
   -- Sequential Process
   --------------------------------------------------------------------------
-  proc_seq : process(Clk)
+  proc_seq : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       r <= r_next;
-      if Rst = '1' then
+      if rst_i = rst_pol_g then
         r.InLast_0 <= (others => '0');
         r.Vld      <= (others => '0');
         r.Sum_2    <= (others => '0');

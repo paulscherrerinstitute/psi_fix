@@ -9,9 +9,6 @@
 ------------------------------------------------------------------------------
 -- This is a pure VHDL and vendor indpendent true dual port RAM.
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -21,9 +18,6 @@ use work.psi_common_math_pkg.all;
 use work.psi_common_array_pkg.all;
 use work.psi_fix_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 entity psi_fix_param_ram is
   generic(
     Depth_g    : positive    := 1024;
@@ -47,9 +41,6 @@ entity psi_fix_param_ram is
   );
 end entity;
 
-------------------------------------------------------------------------------
--- Architecture Declaration
-------------------------------------------------------------------------------
 architecture rtl of psi_fix_param_ram is
 
   -- memory array

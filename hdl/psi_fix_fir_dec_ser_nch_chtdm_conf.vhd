@@ -15,9 +15,6 @@
 --
 -- Required Memory depth per channel = MaxTaps_g + MaxRatio_g
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -26,9 +23,6 @@ use work.psi_fix_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_common_array_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 entity psi_fix_fir_dec_ser_nch_chtdm_conf is
   generic(
     InFmt_g       : PsiFixFmt_t := (1, 0, 17);
@@ -41,35 +35,30 @@ entity psi_fix_fir_dec_ser_nch_chtdm_conf is
     Sat_g         : PsiFixSat_t := PsiFixSat;
     UseFixCoefs_g : boolean     := false;
     Coefs_g       : t_areal     := (0.0, 0.0);
-    RamBehavior_g : string      := "RBW" -- RBW = Read before write, WBR = Write before read		
+    RamBehavior_g : string      := "RBW"; -- RBW = Read before write, WBR = Write before read	
+    rst_pol_g     : std_logic   := '1'
   );
   port(
-    -- Control Signals
-    Clk         : in  std_logic;
-    Rst         : in  std_logic;
-    -- Input
-    InVld       : in  std_logic;
-    InData      : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-    -- Output
-    OutVld      : out std_logic;
-    OutData     : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+    clk_i            : in  std_logic;
+    rst_i            : in  std_logic;
+    vld_i            : in  std_logic;
+    dat_i            : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
+    vld_o            : out std_logic;
+    dat_o            : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
     -- Parallel Configuration Interface
-    Ratio       : in  std_logic_vector(log2ceil(MaxRatio_g) - 1 downto 0)  := std_logic_vector(to_unsigned(MaxRatio_g - 1, log2ceil(MaxRatio_g))); -- Ratio - 1 (0 => Ratio 1, 4 => Ratio 5)
-    Taps        : in  std_logic_vector(log2ceil(MaxTaps_g) - 1 downto 0)   := std_logic_vector(to_unsigned(MaxTaps_g - 1, log2ceil(MaxTaps_g))); -- Number of taps - 1
+    cfg_ratio_i      : in  std_logic_vector(log2ceil(MaxRatio_g) - 1 downto 0)  := std_logic_vector(to_unsigned(MaxRatio_g - 1, log2ceil(MaxRatio_g))); -- Ratio - 1 (0 => Ratio 1, 4 => Ratio 5)
+    cfg_taps_i       : in  std_logic_vector(log2ceil(MaxTaps_g) - 1 downto 0)   := std_logic_vector(to_unsigned(MaxTaps_g - 1, log2ceil(MaxTaps_g))); -- Number of taps - 1
     -- Coefficient interface
-    CoefClk     : in  std_logic                                            := '0';
-    CoefWr      : in  std_logic                                            := '0';
-    CoefAddr    : in  std_logic_vector(log2ceil(MaxTaps_g) - 1 downto 0)   := (others => '0');
-    CoefWrData  : in  std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0');
-    CoefRdData  : out std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);
+    coef_if_clk_i    : in  std_logic                                            := '0';
+    coef_if_wr_i     : in  std_logic                                            := '0';
+    coef_if_addr_i   : in  std_logic_vector(log2ceil(MaxTaps_g) - 1 downto 0)   := (others => '0');
+    coef_if_wr_dat_i : in  std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0');
+    coef_if_rd_dat_o : out std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);
     -- Status Output
-    CalcOngoing : out std_logic
+    busy_o           : out std_logic
   );
 end entity;
 
-------------------------------------------------------------------------------
--- Architecture Declaration
-------------------------------------------------------------------------------
 architecture rtl of psi_fix_fir_dec_ser_nch_chtdm_conf is
 
   -- Data Memory needs twice the depth since a almost a full set of data can arrive until the last channel is fully processed
@@ -142,7 +131,7 @@ begin
   --------------------------------------------
   -- Combinatorial Process
   --------------------------------------------
-  p_comb : process(r, InVld, InData, Ratio, Taps, DataRamDout_3, CoefRamDout_3)
+  p_comb : process(r, vld_i, dat_i, cfg_ratio_i, cfg_taps_i, DataRamDout_3, CoefRamDout_3)
     variable v        : two_process_r;
     variable AccuIn_v : std_logic_vector(PsiFixSize(AccuFmt_c) - 1 downto 0);
   begin
@@ -159,11 +148,11 @@ begin
 
     -- *** Stage 0 ***
     -- Input Registers
-    v.Vld(0)   := InVld;
-    v.InSig(0) := InData;
+    v.Vld(0)   := vld_i;
+    v.InSig(0) := dat_i;
 
     -- Calculate channel number
-    if InVld = '1' then
+    if vld_i = '1' then
       if unsigned(r.ChannelNr(0)) = Channels_g - 1 or r.FirstAfterRst = '1' then
         v.ChannelNr(0)  := (others => '0');
         v.FirstAfterRst := '0';
@@ -186,7 +175,7 @@ begin
     -- normal update
     v.TapCnt_1 := std_logic_vector(unsigned(r.TapCnt_1) - 1);
     -- last tap of a channel
-    if unsigned(r.TapCnt_1) = 1 or unsigned(Taps) = 0 then
+    if unsigned(r.TapCnt_1) = 1 or unsigned(cfg_taps_i) = 0 then
       v.Last(1) := '1';
     end if;
     -- goto next channel or finish calculation
@@ -198,7 +187,7 @@ begin
       else
         v.First(1)   := '1';
         v.CalcChnl_1 := std_logic_vector(unsigned(r.CalcChnl_1) + 1);
-        v.TapCnt_1   := Taps;
+        v.TapCnt_1   := cfg_taps_i;
       end if;
     end if;
 
@@ -208,11 +197,11 @@ begin
       if unsigned(r.ChannelNr(0)) = Channels_g - 1 then
         if (unsigned(r.DecCnt_1) = 0) or (MaxRatio_g = 0) then
           v.Tap0Addr_1 := r.TapWrAddr_1;
-          v.TapCnt_1   := Taps;
+          v.TapCnt_1   := cfg_taps_i;
           v.CalcOn(1)  := '1';
           v.First(1)   := '1';
           v.CalcChnl_1 := (others => '0');
-          v.DecCnt_1   := Ratio;
+          v.DecCnt_1   := cfg_ratio_i;
         else
           v.DecCnt_1 := std_logic_vector(unsigned(r.DecCnt_1) - 1);
         end if;
@@ -234,7 +223,7 @@ begin
     -- *** Stage 4 ***
     -- Multiplier input registering
     -- Replace taps that are not yet written with zeros for bittrueness
-    if r.ReplaceZero_4 = '0' or unsigned(r.TapRdAddr_3) <= unsigned(Ratio) then
+    if r.ReplaceZero_4 = '0' or unsigned(r.TapRdAddr_3) <= unsigned(cfg_ratio_i) then
       v.MultInTap_4 := DataRamDout_3;
     else
       v.MultInTap_4 := (others => '0');
@@ -243,7 +232,7 @@ begin
     if r.FirstTapLoop_3 = '0' then
       v.ReplaceZero_4 := '0';
     elsif r.CalcOn(3) = '1' then
-      if r.First(3) = '1' and unsigned(r.TapRdAddr_3) <= unsigned(Ratio) then
+      if r.First(3) = '1' and unsigned(r.TapRdAddr_3) <= unsigned(cfg_ratio_i) then
         v.ReplaceZero_4 := '0';
         if unsigned(r.ChannelNr(3)) = Channels_g - 1 then
           v.FirstTapLoop_3 := '0';
@@ -294,9 +283,9 @@ begin
     end if;
 
     -- *** Outputs ***
-    OutVld      <= r.OutVld_8;
-    OutData     <= r.Output_8;
-    CalcOngoing <= r.CalcOngoing or r.Vld(0);
+    vld_o  <= r.OutVld_8;
+    dat_o  <= r.Output_8;
+    busy_o <= r.CalcOngoing or r.Vld(0);
 
     -- *** Assign to signal ***
     r_next <= v;
@@ -305,11 +294,11 @@ begin
   --------------------------------------------
   -- Sequential Process
   --------------------------------------------
-  p_seq : process(Clk)
+  p_seq : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       r <= r_next;
-      if Rst = '1' then
+      if rst_i = rst_pol_g then
         r.Vld            <= (others => '0');
         r.ChannelNr(0)   <= (others => '0');
         r.CalcChnl_1     <= (others => '0');
@@ -340,12 +329,12 @@ begin
         Init_g     => Coefs_g
       )
       port map(
-        ClkA  => CoefClk,
-        AddrA => CoefAddr,
-        WrA   => CoefWr,
-        DinA  => CoefWrData,
-        DoutA => CoefRdData,
-        ClkB  => Clk,
+        ClkA  => coef_if_clk_i,
+        AddrA => coef_if_addr_i,
+        WrA   => coef_if_wr_i,
+        DinA  => coef_if_wr_dat_i,
+        DoutA => coef_if_rd_dat_o,
+        ClkB  => clk_i,
         AddrB => r.CoefRdAddr_2,
         WrB   => '0',
         DinB  => (others => '0'),
@@ -361,11 +350,11 @@ begin
     end generate;
 
     -- Assign unused outputs
-    CoefRdData <= (others => '0');
+    coef_if_rd_dat_o <= (others => '0');
     -- Coefficient ROM
-    p_coef_rom : process(Clk)
+    p_coef_rom : process(clk_i)
     begin
-      if rising_edge(Clk) then
+      if rising_edge(clk_i) then
         CoefRamDout_3 <= CoefRom(to_integer(unsigned(r.CoefRdAddr_2)));
       end if;
     end process;
@@ -382,12 +371,12 @@ begin
       Behavior_g => RamBehavior_g
     )
     port map(
-      ClkA  => Clk,
+      ClkA  => clk_i,
       AddrA => DataRamWrAddr_1,
       WrA   => r.Vld(1),
       DinA  => r.InSig(1),
       DoutA => open,
-      ClkB  => Clk,
+      ClkB  => clk_i,
       AddrB => DataRamRdAddr_2,
       WrB   => '0',
       DinB  => (others => '0'),

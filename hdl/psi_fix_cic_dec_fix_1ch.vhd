@@ -4,10 +4,6 @@
 --  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -17,9 +13,6 @@ use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity
-------------------------------------------------------------------------------
 entity psi_fix_cic_dec_fix_1ch is
   generic(
     Order_g        : integer              := 4;
@@ -43,10 +36,6 @@ entity psi_fix_cic_dec_fix_1ch is
     busy_o : out std_logic
   );
 end entity;
-
-------------------------------------------------------------------------------
--- Architecture section
-------------------------------------------------------------------------------
 
 architecture rtl of psi_fix_cic_dec_fix_1ch is
   -- Constants

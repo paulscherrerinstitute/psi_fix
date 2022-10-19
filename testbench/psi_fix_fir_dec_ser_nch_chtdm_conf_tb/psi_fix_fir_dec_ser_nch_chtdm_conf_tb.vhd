@@ -76,23 +76,23 @@ begin
 		)
 		port map (
 			-- Control Signals
-			Clk			=> Clk,
-			Rst			=> Rst,
+			clk_i			=> Clk,
+			rst_i			=> Rst,
 			-- Input
-			InVld		=> SigIn.Vld,
-			InData		=> SigIn.Data,
+			vld_i		=> SigIn.Vld,
+			dat_i		=> SigIn.Data,
 			-- Output
-			OutVld		=> SigOut.Vld,
-			OutData		=> SigOut.Data,
+			vld_o		=> SigOut.Vld,
+			dat_o		=> SigOut.Data,
 			-- Parallel Configuration Interface
-			Ratio		=> Config.Ratio,
-			Taps		=> Config.Taps,
+			cfg_ratio_i		=> Config.Ratio,
+			cfg_taps_i		=> Config.Taps,
 			-- Coefficient interface
-			CoefClk		=> Clk,
-			CoefWr		=> CoefIn.Wr,
-			CoefAddr	=> CoefIn.Addr,
-			CoefWrData	=> CoefIn.Data,
-			CoefRdData	=> CoefOut
+			coef_if_clk_i		=> Clk,
+			coef_if_wr_i		=> CoefIn.Wr,
+			coef_if_addr_i	=> CoefIn.Addr,
+			coef_if_wr_dat_i	=> CoefIn.Data,
+			coef_if_rd_dat_o	=> CoefOut
 		);
 	
 	-------------------------------------------------------------------------

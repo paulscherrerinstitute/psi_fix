@@ -15,38 +15,30 @@ use ieee.numeric_std.all;
 use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
-
-------------------------------------------------------------------------------
--- Entity
-------------------------------------------------------------------------------	
+-- @formatter:off
 -- $$ processes=stim, resp $$
 entity psi_fix_pol2cart_approx is
   generic(
-    InAbsFmt_g   : PsiFixFmt_t := (0, 0, 15); -- Must be unsigned		$$ constant=(0,0,16) $$
-    InAngleFmt_g : PsiFixFmt_t := (0, 0, 15); -- Must be unsigned		$$ constant=(0,0,15) $$
-    OutFmt_g     : PsiFixFmt_t := (1, 0, 16); -- Usually signed		$$ constant=(1,0,16) $$	
-    Round_g      : PsiFixRnd_t := PsiFixRound; --					
-    Sat_g        : PsiFixSat_t := PsiFixSat --					
+    InAbsFmt_g   : PsiFixFmt_t := (0, 0, 15);   -- Must be unsigned		$$ constant=(0,0,16) $$
+    InAngleFmt_g : PsiFixFmt_t := (0, 0, 15);   -- Must be unsigned		$$ constant=(0,0,15) $$
+    OutFmt_g     : PsiFixFmt_t := (1, 0, 16);   -- Usually signed		$$ constant=(1,0,16) $$	
+    Round_g      : PsiFixRnd_t := PsiFixRound;  --					
+    Sat_g        : PsiFixSat_t := PsiFixSat;    --					
+    rst_pol_g    : std_logic   :='1'
   );
   port(
     -- Control Signals
-    Clk    : in  std_logic;             -- $$ type=clk; freq=100e6 $$
-    Rst    : in  std_logic;             -- $$ type=rst; clk=Clk $$
-    -- Input
-    InVld  : in  std_logic;
-    InAbs  : in  std_logic_vector(PsiFixSize(InAbsFmt_g) - 1 downto 0);
-    InAng  : in  std_logic_vector(PsiFixSize(InAngleFmt_g) - 1 downto 0);
-    -- Output
-    OutVld : out std_logic;
-    OutI   : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-    OutQ   : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)
+    clk_i     : in  std_logic;          -- $$ type=clk; freq=100e6 $$
+    rst_i     : in  std_logic;          -- $$ type=rst; clk=clk_i $$
+    vld_i     : in  std_logic;
+    dat_abs_i : in  std_logic_vector(PsiFixSize(InAbsFmt_g) - 1 downto 0);
+    dat_ang_i : in  std_logic_vector(PsiFixSize(InAngleFmt_g) - 1 downto 0);
+    vld_o     : out std_logic;
+    dat_inp_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+    dat_qua_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)
   );
 end entity;
-
-------------------------------------------------------------------------------
--- Architecture section
-------------------------------------------------------------------------------
-
+-- @formatter:on
 architecture rtl of psi_fix_pol2cart_approx is
   -- Constants
   constant SinOutFmt_c : PsiFixFmt_t                                           := (1, 0, 17);
@@ -55,7 +47,7 @@ architecture rtl of psi_fix_pol2cart_approx is
   constant CosOffs_c   : std_logic_vector(PsiFixSize(SinInFmt_c) - 1 downto 0) := PsiFixFromReal(0.25, SinInFmt_c);
 
   -- Types
-  type Abs_t is array (natural range <>) of std_logic_vector(InAbs'range);
+  type Abs_t is array (natural range <>) of std_logic_vector(dat_abs_i'range);
 
   -- Two Process Method
   type two_process_r is record
@@ -66,8 +58,8 @@ architecture rtl of psi_fix_pol2cart_approx is
     PhaseCos_1 : std_logic_vector(PsiFixSize(SinInFmt_c) - 1 downto 0);
     MultI_9    : std_logic_vector(PsiFixSize(MultFmt_c) - 1 downto 0);
     MultQ_9    : std_logic_vector(PsiFixSize(MultFmt_c) - 1 downto 0);
-    OutI_10    : std_logic_vector(OutI'range);
-    OutQ_10    : std_logic_vector(OutQ'range);
+    OutI_10    : std_logic_vector(dat_inp_o'range);
+    OutQ_10    : std_logic_vector(dat_qua_o'range);
   end record;
   signal r, r_next : two_process_r;
 
@@ -83,10 +75,10 @@ begin
   assert InAbsFmt_g.S = 0 report "psi_fix_pol2cart_approx: InAngleFmt_g must be unsigned" severity error;
   assert InAngleFmt_g.I <= 0 report "psi_fix_pol2cart_approx: InAngleFmt_g must be (1,0,x)" severity error;
 
-  p_assert : process(Clk)
+  p_assert : process(clk_i)
   begin
-    if rising_edge(Clk) then
-      if Rst = '0' then
+    if rising_edge(clk_i) then
+      if rst_i = '0' then
         assert SinVld_8 = CosVld_8 report "###ERROR###: psi_fix_pol2cart_approx: SinVld / CosVld mismatch" severity error;
         assert SinVld_8 = r.VldIn(8) report "###ERROR###: psi_fix_pol2cart_approx: SinVld / Pipeline Vld mismatch" severity error;
       end if;
@@ -96,7 +88,7 @@ begin
   --------------------------------------------------------------------------
   -- Combinatorial Process
   --------------------------------------------------------------------------
-  p_comb : process(r, InVld, InAbs, InAng, SinVld_8, CosVld_8, SinData_8, CosData_8)
+  p_comb : process(r, vld_i, dat_abs_i, dat_ang_i, SinVld_8, CosVld_8, SinData_8, CosData_8)
     variable v : two_process_r;
   begin
     -- hold variables stable
@@ -108,9 +100,9 @@ begin
 
     -- *** Stage 0 ***
     -- Input Registers
-    v.VldIn(0)   := InVld;
-    v.AbsPipe(0) := InAbs;
-    v.PhaseIn_0  := InAng;
+    v.VldIn(0)   := vld_i;
+    v.AbsPipe(0) := dat_abs_i;
+    v.PhaseIn_0  := dat_ang_i;
 
     -- *** Stage 1 ***
     -- Sine and cosine phase
@@ -133,9 +125,9 @@ begin
     v.OutQ_10 := PsiFixResize(r.MultQ_9, MultFmt_c, OutFmt_g, Round_g, Sat_g);
 
     -- *** Outputs ***
-    OutVld <= r.VldIn(10);
-    OutQ   <= r.OutQ_10;
-    OutI   <= r.OutI_10;
+    vld_o     <= r.VldIn(10);
+    dat_qua_o <= r.OutQ_10;
+    dat_inp_o <= r.OutI_10;
 
     -- Apply to record
     r_next <= v;
@@ -145,11 +137,11 @@ begin
   --------------------------------------------------------------------------
   -- Sequential Process
   --------------------------------------------------------------------------	
-  p_seq : process(Clk)
+  p_seq : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       r <= r_next;
-      if Rst = '1' then
+      if rst_i = rst_pol_g then
         r.VldIn <= (others => '0');
       end if;
     end if;
@@ -159,20 +151,21 @@ begin
   -- Component Instantiation
   --------------------------------------------------------------------------	
   i_sincos : entity work.psi_fix_lin_approx_sin18b_dual
+    generic map(rst_pol_g => rst_pol_g)
     port map(
       -- Control Signals
-      Clk      => Clk,
-      Rst      => Rst,
+      clk_i      => clk_i,
+      rst_i      => rst_i,
       -- Input
-      InVldA   => r.VldIn(1),
-      InDataA  => r.PhaseSin_1,
-      InVldB   => r.VldIn(1),
-      InDataB  => r.PhaseCos_1,
+      vld_a_i   => r.VldIn(1),
+      dat_a_i  => r.PhaseSin_1,
+      vld_b_i   => r.VldIn(1),
+      dat_b_i  => r.PhaseCos_1,
       -- Output
-      OutVldA  => SinVld_8,
-      OutDataA => SinData_8,
-      OutVldB  => CosVld_8,
-      OutDataB => CosData_8
+      vld_a_o  => SinVld_8,
+      dat_a_o => SinData_8,
+      vld_b_o  => CosVld_8,
+      dat_b_o => CosData_8
     );
 
-end rtl;
+end architecture;

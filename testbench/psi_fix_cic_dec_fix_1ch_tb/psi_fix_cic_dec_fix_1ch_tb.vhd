@@ -3,16 +3,11 @@
 --  All rights reserved.
 --  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
-
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 
-library work;
 use work.psi_tb_txt_util.all;
 use work.psi_tb_compare_pkg.all;
 use work.psi_fix_pkg.all;

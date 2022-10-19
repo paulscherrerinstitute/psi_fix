@@ -3,25 +3,18 @@
 --  All rights reserved.
 ------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library work;
 use work.psi_fix_pkg.all;
 use work.psi_common_math_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 entity psi_fix_lin_approx_sqrt18b is
   port(
     -- Control Signals
-    Clk     : in  std_logic;
-    Rst     : in  std_logic;
+    clk_i     : in  std_logic;
+    rst_i     : in  std_logic;
     -- Input
     InVld   : in  std_logic;
     InData  : in  std_logic_vector(20 - 1 downto 0); -- Format (0, 0, 20)
@@ -579,23 +572,23 @@ begin
     )
     port map(
       -- Control Signals
-      Clk     => Clk,
-      Rst     => Rst,
+      clk_i     => clk_i,
+      rst_i     => rst_i,
       -- Input
-      InVld   => InVld,
-      InData  => InData,
+      vld_i   => InVld,
+      dat_i  => InData,
       -- Output
-      OutVld  => OutVld,
-      OutData => OutData,
+      vld_o  => OutVld,
+      dat_o => OutData,
       -- Table Interface
-      TblAddr => TableAddr,
-      TblData => TableData
+      addr_table_o => TableAddr,
+      data_table_i => TableData
     );
 
   -- *** Table ***
-  p_table : process(Clk)
+  p_table : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       TableData <= Table_c(to_integer(unsigned(TableAddr)));
     end if;
   end process;

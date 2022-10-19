@@ -3,10 +3,6 @@
 --  All rights reserved.
 --  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
-
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -77,13 +73,13 @@ begin
     )
     port map(
       -- Control Signals
-      clk_i     => Clk,
-      rst_i     => Rst,
+      clk_i => Clk,
+      rst_i => Rst,
       -- Data Ports
-      dat_i  => InData,
-      vld_i   => InVld,
+      dat_i => InData,
+      vld_i => InVld,
       dat_o => OutData,
-      vld_o  => OutVld
+      vld_o => OutVld
     );
 
   -------------------------------------------------------------------------

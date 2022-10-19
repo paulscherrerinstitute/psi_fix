@@ -12,11 +12,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library work;
 use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
-
+-- @formatter:off
 ------------------------------------------------------------------------------
 -- Entity
 ------------------------------------------------------------------------------	
@@ -24,25 +23,26 @@ entity psi_fix_dds_18b is
   generic(
     PhaseFmt_g    : PsiFixFmt_t := (0, 0, 31);
     TdmChannels_g : positive    := 1;
-    RamBehavior_g : string      := "RBW"
+    RamBehavior_g : string      := "RBW";
+    rst_pol_g     : std_logic   :='1'
   );
   port(
     -- Control Signals
-    Clk       : in  std_logic;
-    Rst       : in  std_logic;
+    clk_i        : in  std_logic;
+    rst_i        : in  std_logic;
     -- Control Signals
-    Restart   : in  std_logic := '0';
-    PhaseStep : in  std_logic_vector(PsiFixSize(PhaseFmt_g) - 1 downto 0);
-    PhaseOffs : in  std_logic_vector(PsiFixSize(PhaseFmt_g) - 1 downto 0);
+    restart_i    : in  std_logic := '0';
+    phi_step_i   : in  std_logic_vector(PsiFixSize(PhaseFmt_g) - 1 downto 0);
+    phi_offset_i : in  std_logic_vector(PsiFixSize(PhaseFmt_g) - 1 downto 0);
     -- Input
-    InVld     : in  std_logic := '1';
+    vld_i        : in  std_logic := '1';
     -- Output
-    OutVld    : out std_logic;
-    OutSin    : out std_logic_vector(17 downto 0);
-    OutCos    : out std_logic_vector(17 downto 0)
+    vld_o        : out std_logic;
+    dat_sin_o    : out std_logic_vector(17 downto 0);
+    dat_cos_o    : out std_logic_vector(17 downto 0)
   );
 end entity;
-
+-- @formatter:on
 ------------------------------------------------------------------------------
 -- Architecture section
 ------------------------------------------------------------------------------
@@ -75,10 +75,10 @@ begin
   --------------------------------------------------------------------------
   -- Assertions
   --------------------------------------------------------------------------
-  p_assert : process(Clk)
+  p_assert : process(clk_i)
   begin
-    if rising_edge(Clk) then
-      if Rst = '0' then
+    if rising_edge(clk_i) then
+      if rst_i = '0' then
         assert SinVld = CosVld report "###ERROR###: psi_fix_dds_18b: SinVld / CosVld mismatch" severity error;
         assert SinVld = r.VldIn(9) report "###ERROR###: psi_fix_dds_18b: SinVld / Pipeline Vld mismatch" severity error;
       end if;
@@ -88,7 +88,7 @@ begin
   --------------------------------------------------------------------------
   -- Combinatorial Process
   --------------------------------------------------------------------------
-  p_comb : process(r, InVld, PhaseStep, PhaseOffs, Restart, SinData, CosData, PhaseAccu)
+  p_comb : process(r, vld_i, phi_step_i, phi_offset_i, restart_i, SinData, CosData, PhaseAccu)
     variable v : two_process_r;
   begin
     -- hold variables stable
@@ -99,17 +99,17 @@ begin
 
     -- *** Stage 0 ***
     -- Input Registers
-    v.VldIn(0)    := InVld;
-    v.PhaseOffs_0 := PhaseOffs;
+    v.VldIn(0)    := vld_i;
+    v.PhaseOffs_0 := phi_offset_i;
 
     -- Phase accu (count after sample to start at zero)
-    if InVld = '1' then
+    if vld_i = '1' then
       -- Phase zero must be output for the first sample after reset, this is achieved by r.FirstSplCnt_0
-      if Restart = '1' or r.FirstSplCnt_0 /= 0 then
+      if restart_i = '1' or r.FirstSplCnt_0 /= 0 then
         v.PhaseAccu_0 := (others => '0');
       else
         v.PhaseAccu_0 := PsiFixAdd(PhaseAccu, PhaseFmt_g,
-                                   PhaseStep, PhaseFmt_g,
+                                   phi_step_i, PhaseFmt_g,
                                    PhaseFmt_g);
       end if;
       if r.FirstSplCnt_0 /= 0 then
@@ -135,9 +135,9 @@ begin
     -- Reserved for Linear approximation		
 
     -- *** Outputs ***
-    OutVld <= r.VldIn(9);
-    OutSin <= SinData;
-    OutCos <= CosData;
+    vld_o     <= r.VldIn(9);
+    dat_sin_o <= SinData;
+    dat_cos_o <= CosData;
 
     -- Apply to record
     r_next <= v;
@@ -147,11 +147,11 @@ begin
   --------------------------------------------------------------------------
   -- Sequential Process
   --------------------------------------------------------------------------	
-  p_seq : process(Clk)
+  p_seq : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       r <= r_next;
-      if Rst = '1' then
+      if rst_i = rst_pol_g then
         r.PhaseAccu_0   <= (others => '0');
         r.VldIn         <= (others => '0');
         r.FirstSplCnt_0 <= TdmChannels_g;
@@ -165,18 +165,18 @@ begin
   i_sincos : entity work.psi_fix_lin_approx_sin18b_dual
     port map(
       -- Control Signals
-      Clk      => Clk,
-      Rst      => Rst,
+      clk_i      => clk_i,
+      rst_i      => rst_i,
       -- Input
-      InVldA   => r.VldIn(2),
-      InDataA  => r.PhaseSin_2,
-      InVldB   => r.VldIn(2),
-      InDataB  => r.PhaseCos_2,
+      vld_a_i   => r.VldIn(2),
+      dat_a_i  => r.PhaseSin_2,
+      vld_b_i   => r.VldIn(2),
+      dat_b_i  => r.PhaseCos_2,
       -- Output
-      OutVldA  => SinVld,
-      OutDataA => SinData,
-      OutVldB  => CosVld,
-      OutDataB => CosData
+      vld_a_o  => SinVld,
+      dat_a_o => SinData,
+      vld_b_o  => CosVld,
+      dat_b_o => CosData
     );
 
   i_accu : entity work.psi_common_delay
@@ -188,10 +188,10 @@ begin
       RamBehavior_g => RamBehavior_g
     )
     port map(
-      Clk     => Clk,
-      Rst     => Rst,
+      Clk     => clk_i,
+      Rst     => rst_i,
       InData  => PhaseAccu_Next,
-      InVld   => InVld,
+      InVld   => vld_i,
       OutData => PhaseAccu
     );
 

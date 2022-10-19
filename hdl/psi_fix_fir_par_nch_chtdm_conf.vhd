@@ -13,9 +13,6 @@
 -- - All channels are processed time-division-multiplexed
 -- - Coefficients are configurable but the same for each channel
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -24,9 +21,6 @@ use work.psi_fix_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_common_array_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 -- $$ processes=stim, resp $$
 entity psi_fix_fir_par_nch_chtdm_conf is
   generic(
@@ -41,25 +35,19 @@ entity psi_fix_fir_par_nch_chtdm_conf is
     Coefs_g       : t_areal     := (0.0, 0.0)
   );
   port(
-    -- Control Signals
-    Clk        : in  std_logic;         -- $$ type=clk; freq=100e6 $$
-    Rst        : in  std_logic;         -- $$ type=rst; clk=Clk $$
-    -- Input
-    InVld      : in  std_logic;
-    InData     : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-    -- Output
-    OutVld     : out std_logic;
-    OutData    : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+    clk_i             : in  std_logic;  -- $$ type=clk; freq=100e6 $$
+    rst_i             : in  std_logic;  -- $$ type=rst; clk=Clk $$
+    vld_i             : in  std_logic;
+    dat_i             : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
+    vld_o             : out std_logic;
+    dat_o             : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
     -- Coefficient interface										:= '0';
-    CoefWr     : in  std_logic                                            := '0';
-    CoefAddr   : in  std_logic_vector(log2ceil(Taps_g) - 1 downto 0)      := (others => '0');
-    CoefWrData : in  std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0')
+    coef_if_wr_i      : in  std_logic                                            := '0';
+    coef_if_wr_addr_i : in  std_logic_vector(log2ceil(Taps_g) - 1 downto 0)      := (others => '0');
+    coef_if_wr_dat_i  : in  std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0')
   );
 end entity;
 
-------------------------------------------------------------------------------
--- Architecture Declaration
-------------------------------------------------------------------------------
 architecture rtl of psi_fix_fir_par_nch_chtdm_conf is
 
   -- DSP Slice Chain
@@ -83,21 +71,21 @@ begin
   --------------------------------------------------------------------------
   -- General Control Logic
   --------------------------------------------------------------------------
-  p_logic : process(Clk)
+  p_logic : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       -- Valid chain
-      DspVldChain(1 to DspVldChain'high) <= InVld & DspVldChain(1 to DspVldChain'high - 1);
+      DspVldChain(1 to DspVldChain'high) <= vld_i & DspVldChain(1 to DspVldChain'high - 1);
       -- Coefficient handling (writable or fixed)
       CoefWe                             <= (others => '0');
       if not UseFixCoefs_g then
-        CoefReg <= (others => CoefWrData);
-        if CoefWr = '1' and unsigned(CoefAddr) < Taps_g then
-          CoefWe(to_integer(unsigned(CoefAddr))) <= '1';
+        CoefReg <= (others => coef_if_wr_dat_i);
+        if coef_if_wr_i = '1' and unsigned(coef_if_wr_addr_i) < Taps_g then
+          CoefWe(to_integer(unsigned(coef_if_wr_addr_i))) <= '1';
         end if;
       end if;
       -- Reset
-      if Rst = '1' then
+      if rst_i = '1' then
         -- Make sure coefficients are initialized
         if CoefRstDone = '0' then
           CoefWe <= (others => '1');
@@ -126,16 +114,16 @@ begin
       InBIsCoef_g => true
     )
     port map(
-      Clk            => Clk,
-      Rst            => Rst,
-      InAVld         => InVld,
-      InA            => InData,
-      InADel2        => DspDataChainI(0),
-      InBVld         => CoefWe(0),
-      InB            => CoefReg(0),
-      AddChainIn     => (others => '0'),
-      AddChainOut    => DspAccuChain(0),
-      AddChainOutVld => OutVldChain(0)
+      clk_i            => clk_i,
+      rst_i            => rst_i,
+      vld_a_i         => vld_i,
+      dat_a_i            => dat_i,
+      del2_a_o        => DspDataChainI(0),
+      vld_b_i         => CoefWe(0),
+      dat_b_i            => CoefReg(0),
+      chain_add_i     => (others => '0'),
+      chain_add_o    => DspAccuChain(0),
+      chain_add_vld_o => OutVldChain(0)
     );
 
   -- Delays (the same for all taps)
@@ -153,8 +141,8 @@ begin
           Delay_g => Channels_g - 1
         )
         port map(
-          Clk     => Clk,
-          Rst     => Rst,
+          Clk     => clk_i,
+          Rst     => rst_i,
           InData  => DspDataChainI(i),
           InVld   => DspVldChain(i + 1),
           OutData => DspDataChainO(i)
@@ -172,16 +160,16 @@ begin
         InBIsCoef_g => true
       )
       port map(
-        Clk            => Clk,
-        Rst            => Rst,
-        InAVld         => DspVldChain(i),
-        InA            => DspDataChainO(i - 1),
-        InADel2        => DspDataChainI(i),
-        InB            => CoefReg(i),
-        InBVld         => CoefWe(i),
-        AddChainIn     => DspAccuChain(i - 1),
-        AddChainOut    => DspAccuChain(i),
-        AddChainOutVld => OutVldChain(i)
+        clk_i            => clk_i,
+        rst_i            => rst_i,
+        vld_a_i         => DspVldChain(i),
+        dat_a_i            => DspDataChainO(i - 1),
+        del2_a_o        => DspDataChainI(i),
+        dat_b_i            => CoefReg(i),
+        vld_b_i         => CoefWe(i),
+        chain_add_i     => DspAccuChain(i - 1),
+        chain_add_o    => DspAccuChain(i),
+        chain_add_vld_o => OutVldChain(i)
       );
 
   end generate;
@@ -189,21 +177,21 @@ begin
   --------------------------------------------------------------------------
   -- Output Rounding and Saturation
   --------------------------------------------------------------------------
-  p_output : process(Clk)
+  p_output : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       -- Round
       OutRoundVld <= OutVldChain(Taps_g - 1);
       OutRound    <= PsiFixResize(DspAccuChain(Taps_g - 1), AccuFmt_c, RoundFmt_c, Rnd_g, PsiFixWrap);
 
       -- Saturate
-      OutVld  <= OutRoundVld;
-      OutData <= PsiFixResize(OutRound, RoundFmt_c, OutFmt_g, PsiFixTrunc, Sat_g);
+      vld_o <= OutRoundVld;
+      dat_o <= PsiFixResize(OutRound, RoundFmt_c, OutFmt_g, PsiFixTrunc, Sat_g);
 
       -- Reset
-      if Rst = '1' then
+      if rst_i = '1' then
         OutRoundVld <= '0';
-        OutVld      <= '0';
+        vld_o       <= '0';
       end if;
     end if;
   end process;

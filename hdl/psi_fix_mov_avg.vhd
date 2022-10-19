@@ -10,21 +10,14 @@
 -- This entity implements a moving average with different options for the 
 -- gain correction (none, rough by shifting, exact by shifting and multiplication).
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 
-library work;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 -- $$ processes=stim,check $$
 entity psi_fix_mov_avg is
   generic(
@@ -38,21 +31,15 @@ entity psi_fix_mov_avg is
   );
   port(
     -- Control Signals
-    Clk     : in  std_logic;            -- $$ type=clk; freq=100e6 $$
-    Rst     : in  std_logic;            -- $$ type=rst; clk=Clk $$
-
-    -- Input data
-    InVld   : in  std_logic;
-    InData  : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-    -- Output data
-    OutVld  : out std_logic;
-    OutData : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)
+    clk_i : in  std_logic;              -- $$ type=clk; freq=100e6 $$
+    rst_i : in  std_logic;              -- $$ type=rst; clk=clk_i $$
+    vld_i : in  std_logic;
+    dat_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
+    vld_o : out std_logic;
+    dat_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)
   );
 end entity;
 
-------------------------------------------------------------------------------
--- Architecture Declaration
-------------------------------------------------------------------------------
 architecture rtl of psi_fix_mov_avg is
 
   -- Constants
@@ -83,7 +70,7 @@ architecture rtl of psi_fix_mov_avg is
   signal r, r_next : two_process_r;
 
   -- Component instantiation signals
-  signal DataDel : std_logic_vector(InData'range);
+  signal DataDel : std_logic_vector(dat_i'range);
 
 begin
 
@@ -92,7 +79,7 @@ begin
   --------------------------------------------------------------------------
   -- Combinatorial Process
   --------------------------------------------------------------------------
-  p_comb : process(r, InVld, InData, DataDel)
+  p_comb : process(r, vld_i, dat_i, DataDel)
     variable v         : two_process_r;
     variable CalcOut_v : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
     variable CalcVld_v : std_logic;
@@ -110,8 +97,8 @@ begin
     v.OutRegs(v.OutRegs'low + 1 to v.OutRegs'high)          := r.OutRegs(r.OutRegs'low to r.OutRegs'high - 1);
 
     -- *** Stage 0 ***
-    v.Diff_0 := PsiFixSub(InData, InFmt_g, DataDel, InFmt_g, DiffFmt_c, PsiFixTrunc, PsiFixWrap);
-    v.Vld(0) := InVld;
+    v.Diff_0 := PsiFixSub(dat_i, InFmt_g, DataDel, InFmt_g, DiffFmt_c, PsiFixTrunc, PsiFixWrap);
+    v.Vld(0) := vld_i;
 
     -- *** Stage 1 ***
     if r.Vld(0) = '1' then
@@ -137,13 +124,13 @@ begin
 
     -- *** Output Registers ***
     if OutRegs_g = 0 then
-      OutVld  <= CalcVld_v;
-      OutData <= CalcOut_v;
+      vld_o <= CalcVld_v;
+      dat_o <= CalcOut_v;
     else
       v.OutRegs(0)    := CalcOut_v;
       v.VldOutRegs(0) := CalcVld_v;
-      OutData         <= r.OutRegs(r.OutRegs'high);
-      OutVld          <= r.VldOutRegs(r.VldOutRegs'high);
+      dat_o           <= r.OutRegs(r.OutRegs'high);
+      vld_o           <= r.VldOutRegs(r.VldOutRegs'high);
     end if;
 
     -- Apply to record
@@ -154,11 +141,11 @@ begin
   --------------------------------------------------------------------------
   -- Sequential Process
   --------------------------------------------------------------------------	
-  p_seq : process(Clk)
+  p_seq : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       r <= r_next;
-      if Rst = '1' then
+      if rst_i = '1' then
         r.Vld        <= (others => '0');
         r.VldOutRegs <= (others => '0');
         r.Sum_1      <= (others => '0');
@@ -177,10 +164,10 @@ begin
       RstState_g => True
     )
     port map(
-      Clk     => Clk,
-      Rst     => Rst,
-      InData  => InData,
-      InVld   => InVld,
+      Clk     => clk_i,
+      Rst     => rst_i,
+      InData  => dat_i,
+      InVld   => vld_i,
       OutData => DataDel
     );
 

@@ -4,16 +4,12 @@
 --  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 
-library work;
 use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
@@ -26,9 +22,6 @@ use work.psi_fix_pkg.all;
 -- SHIFT = CIC_GROWTH					--> Apply this to CfgShift
 -- GAINCORR = 2^CIC_GROWTH/CIC_GAIN		--> Apply this to CfgGainCorr
 
-------------------------------------------------------------------------------
--- Entity
-------------------------------------------------------------------------------
 entity psi_fix_cic_dec_cfg_1ch is
   generic(
     Order_g        : integer              := 4;
@@ -40,7 +33,6 @@ entity psi_fix_cic_dec_cfg_1ch is
     AutoGainCorr_g : boolean              := True         -- Use CfgGainCorr for fine-grained gain correction (beyond pure shifting)
   );
   port(
-    -- Control Signals
     clk_i           : in  std_logic;
     rst_i           : in  std_logic;
     -- Configuration (only change when in reset!)
@@ -48,18 +40,14 @@ entity psi_fix_cic_dec_cfg_1ch is
     cfg_shift_i     : in  std_logic_vector(7 downto 0); -- Shifting by more than 255 bits is not supported, this would lead to timing issues anyways
     cfg_gain_corr_i : in  std_logic_vector(16 downto 0); -- Gain correction factor in format [0,1,16]
     -- Data Ports
-    dat_i          : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
+    dat_i           : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
     vld_i           : in  std_logic;
-    dat_o         : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-    vld_o          : out std_logic;
-    -- Status Output
-    busy_o     : out std_logic
+    dat_o           : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+    vld_o           : out std_logic;
+    busy_o          : out std_logic
   );
 end entity;
 
-------------------------------------------------------------------------------
--- Architecture section
-------------------------------------------------------------------------------
 
 architecture rtl of psi_fix_cic_dec_cfg_1ch is
   -- Constants

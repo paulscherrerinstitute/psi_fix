@@ -12,38 +12,38 @@
 -- Libraries
 ------------------------------------------------------------
 library ieee;
-	use ieee.std_logic_1164.all;
-	use ieee.numeric_std.all;
-	use ieee.math_real.all;
-	
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+use ieee.math_real.all;
+
 library std;
-	use std.textio.all;
+use std.textio.all;
 
 library work;
-	use work.psi_fix_pkg.all;
-	use work.psi_common_math_pkg.all;
-	use work.psi_common_array_pkg.all;
-	use work.psi_tb_txt_util.all;
-	use work.psi_tb_textfile_pkg.all;
-	use work.psi_fix_fir_dec_semi_nch_chtdm_conf_tb_coefs_pkg.all;
+use work.psi_fix_pkg.all;
+use work.psi_common_math_pkg.all;
+use work.psi_common_array_pkg.all;
+use work.psi_tb_txt_util.all;
+use work.psi_tb_textfile_pkg.all;
+use work.psi_fix_fir_dec_semi_nch_chtdm_conf_tb_coefs_pkg.all;
 
 ------------------------------------------------------------
 -- Entity Declaration
 ------------------------------------------------------------
 entity psi_fix_fir_dec_semi_nch_chtdm_conf_tb is
-	generic (
-		Channels_g : natural := 3;
-		Taps_g : natural := 48;
-		ClkPerSpl_g : positive := 10;
-		UseFixCoefs_g : boolean := true;
-		InitCoefs_g : boolean := false;
-		FullInpRateSupport_g : boolean := false;
-		Multipliers_g : positive := 8;
-		Ratio_g	: positive := 3;
-		RamBehavior_g : string := "RBW";	
-		FileFolder_g : string := "../testbench/psi_fix_fir_dec_semi_nch_chtdm_conf_tb/Data";
-		ImplFlushIf_g : boolean	:= true
-	);
+  generic(
+    Channels_g           : natural  := 3;
+    Taps_g               : natural  := 48;
+    ClkPerSpl_g          : positive := 10;
+    UseFixCoefs_g        : boolean  := true;
+    InitCoefs_g          : boolean  := false;
+    FullInpRateSupport_g : boolean  := false;
+    Multipliers_g        : positive := 8;
+    Ratio_g              : positive := 3;
+    RamBehavior_g        : string   := "RBW";
+    FileFolder_g         : string   := "../testbench/psi_fix_fir_dec_semi_nch_chtdm_conf_tb/Data";
+    ImplFlushIf_g        : boolean  := true
+  );
 end entity;
 
 ------------------------------------------------------------
@@ -51,237 +51,233 @@ end entity;
 ------------------------------------------------------------
 architecture sim of psi_fix_fir_dec_semi_nch_chtdm_conf_tb is
 
-	-- *** File Selection ***
-	constant InFile_c 		: string := "Input_" & to_string(Channels_g) & "Ch.txt";
-	constant OutFile_c 		: string := "Output_" & to_string(Channels_g) & "Ch_R" & to_string(Ratio_g) & "_" & to_string(Taps_g) & "Taps.txt";
-	constant CoefsFile_c 	: string := "Coefs_" & "R" & to_string(Ratio_g) & "_" & to_string(Taps_g) & "Taps.txt";
+  -- *** File Selection ***
+  constant InFile_c    : string := "Input_" & to_string(Channels_g) & "Ch.txt";
+  constant OutFile_c   : string := "Output_" & to_string(Channels_g) & "Ch_R" & to_string(Ratio_g) & "_" & to_string(Taps_g) & "Taps.txt";
+  constant CoefsFile_c : string := "Coefs_" & "R" & to_string(Ratio_g) & "_" & to_string(Taps_g) & "Taps.txt";
 
-	-- *** Fixed Generics ***
-	constant InFmt_g : PsiFixFmt_t := (1,0,15);
-	constant OutFmt_g : PsiFixFmt_t := (1,0,13);
-	constant CoefFmt_g : PsiFixFmt_t := (1,0,17);
-	
-	-- *** Not Assigned Generics (default values) ***
-	constant Rnd_g : PsiFixRnd_t := PsiFixRound ;
-	constant Sat_g : PsiFixSat_t := PsiFixSat ;
-	constant FixCoefs_g : t_areal := (0.0, 0.0);
-	
-	-- *** TB Control ***
-	signal TbRunning : boolean := True;
-	signal NextCase : integer := -1;
-	signal ProcessDone : std_logic_vector(0 to 1) := (others => '0');
-	constant AllProcessesDone_c : std_logic_vector(0 to 1) := (others => '1');
-	constant TbProcNr_stim_c : integer := 0;
-	constant TbProcNr_resp_c : integer := 1;
-	
-	-- *** DUT Signals ***
-	signal Clk : std_logic := '1';
-	signal Rst : std_logic := '1';
-	signal InVld : std_logic := '0';
-	signal InData : std_logic_vector(PsiFixSize(InFmt_g)-1 downto 0) := (others => '0');
-	signal OutVld : std_logic := '0';
-	signal OutData : std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0) := (others => '0');
-	signal CoefWr : std_logic := '0';
-	signal CoefAddr : std_logic_vector(log2ceil(Taps_g)-1 downto 0) := (others => '0');
-	signal CoefWrData : std_logic_vector(PsiFixSize(CoefFmt_g)-1 downto 0) := (others => '0');
-	signal FlushMem : std_logic := '0';
-	signal FlushDone : std_logic := '0';
-	
-	signal SigIn					: TextfileData_t(0 to 0)	:= (others => 0);
-	signal SigOut					: TextfileData_t(0 to 0)	:= (others => 0);	
-	
-	function GetFixCoefs return t_areal is
-		constant ZeroCoefs : t_areal(0 to Taps_g-1) := (others => 0.0);
-	begin
-		if UseFixCoefs_g or InitCoefs_g then
-			if Ratio_g = 3 and Taps_g = 48 then
-				return Coefs_R3_48Taps; -- from package
-			elsif Ratio_g = 1 and Taps_g = 48 then
-				return Coefs_R1_48Taps; -- from package
-			elsif Ratio_g = 12 and Taps_g = 160 then
-				return Coefs_R12_160Taps; -- from package
-			else
-				report "###ERROR###: psi_fix_fir_dec_semi_nch_chtdm_conf_tb: no fixed coef configuration for this Ratio/Taps setting" severity error;
-				return ZeroCoefs;
-			end if;
-		else
-			return ZeroCoefs;
-		end if;
-	end function;
-	
+  -- *** Fixed Generics ***
+  constant InFmt_g   : PsiFixFmt_t := (1, 0, 15);
+  constant OutFmt_g  : PsiFixFmt_t := (1, 0, 13);
+  constant CoefFmt_g : PsiFixFmt_t := (1, 0, 17);
+
+  -- *** Not Assigned Generics (default values) ***
+  constant Rnd_g      : PsiFixRnd_t := PsiFixRound;
+  constant Sat_g      : PsiFixSat_t := PsiFixSat;
+  constant FixCoefs_g : t_areal     := (0.0, 0.0);
+
+  -- *** TB Control ***
+  signal TbRunning            : boolean                  := True;
+  signal NextCase             : integer                  := -1;
+  signal ProcessDone          : std_logic_vector(0 to 1) := (others => '0');
+  constant AllProcessesDone_c : std_logic_vector(0 to 1) := (others => '1');
+  constant TbProcNr_stim_c    : integer                  := 0;
+  constant TbProcNr_resp_c    : integer                  := 1;
+
+  -- *** DUT Signals ***
+  signal Clk        : std_logic                                            := '1';
+  signal Rst        : std_logic                                            := '1';
+  signal InVld      : std_logic                                            := '0';
+  signal InData     : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0)   := (others => '0');
+  signal OutVld     : std_logic                                            := '0';
+  signal OutData    : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)  := (others => '0');
+  signal CoefWr     : std_logic                                            := '0';
+  signal CoefAddr   : std_logic_vector(log2ceil(Taps_g) - 1 downto 0)      := (others => '0');
+  signal CoefWrData : std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0');
+  signal FlushMem   : std_logic                                            := '0';
+  signal FlushDone  : std_logic                                            := '0';
+
+  signal SigIn  : TextfileData_t(0 to 0) := (others => 0);
+  signal SigOut : TextfileData_t(0 to 0) := (others => 0);
+
+  function GetFixCoefs return t_areal is
+    constant ZeroCoefs : t_areal(0 to Taps_g - 1) := (others => 0.0);
+  begin
+    if UseFixCoefs_g or InitCoefs_g then
+      if Ratio_g = 3 and Taps_g = 48 then
+        return Coefs_R3_48Taps;         -- from package
+      elsif Ratio_g = 1 and Taps_g = 48 then
+        return Coefs_R1_48Taps;         -- from package
+      elsif Ratio_g = 12 and Taps_g = 160 then
+        return Coefs_R12_160Taps;       -- from package
+      else
+        report "###ERROR###: psi_fix_fir_dec_semi_nch_chtdm_conf_tb: no fixed coef configuration for this Ratio/Taps setting" severity error;
+        return ZeroCoefs;
+      end if;
+    else
+      return ZeroCoefs;
+    end if;
+  end function;
+
 begin
-	------------------------------------------------------------
-	-- DUT Instantiation
-	------------------------------------------------------------
-	i_dut : entity work.psi_fix_fir_dec_semi_nch_chtdm_conf
-		generic map (
-			Channels_g => Channels_g,
-			Multipliers_g => Multipliers_g,
-			Ratio_g => Ratio_g,
-			Taps_g => Taps_g,
-			InFmt_g => InFmt_g,
-			OutFmt_g => OutFmt_g,
-			CoefFmt_g => CoefFmt_g,
-			UseFixCoefs_g => UseFixCoefs_g,
-			Coefs_g => GetFixCoefs,
-			FullInpRateSupport_g => FullInpRateSupport_g,
-			RamBehavior_g => RamBehavior_g,
-			Rnd_g => Rnd_g,
-			Sat_g => Sat_g,
-			ImplFlushIf_g => ImplFlushIf_g
-		)
-		port map (
-			Clk => Clk,
-			Rst => Rst,
-			InVld => InVld,
-			InData => InData,
-			OutVld => OutVld,
-			OutData => OutData,
-			CoefWr => CoefWr,
-			CoefAddr => CoefAddr,
-			CoefWrData => CoefWrData,
-			FlushMem => FlushMem,
-			FlushDone => FlushDone
-		);
-	
-	------------------------------------------------------------
-	-- Testbench Control !DO NOT EDIT!
-	------------------------------------------------------------
-	p_tb_control : process
-	begin
-		wait until Rst = '0';
-		wait until ProcessDone = AllProcessesDone_c;
-		TbRunning <= false;
-		wait;
-	end process;
-	
-	------------------------------------------------------------
-	-- Clocks !DO NOT EDIT!
-	------------------------------------------------------------
-	p_clock_Clk : process
-		constant Frequency_c : real := real(100e6);
-	begin
-		while TbRunning loop
-			wait for 0.5*(1 sec)/Frequency_c;
-			Clk <= not Clk;
-		end loop;
-		wait;
-	end process;
-	
-	
-	------------------------------------------------------------
-	-- Processes
-	------------------------------------------------------------
-	-- *** stim ***
-	InData <= std_logic_vector(to_signed(SigIn(0), InData'length));
-	p_stim : process
-		file fp         : text;
-		variable ln     : line;
-		variable Coef   : integer;
-	begin
-		-- start of process !DO NOT EDIT
-		wait for 1 us;
-		-- Wait for two clk edges to ensure reset is active for at least one edge
-		wait until rising_edge(Clk);
-		wait until rising_edge(Clk);
-		Rst <= '0';
-		wait until rising_edge(Clk);
-		
-		if not UseFixCoefs_g and not InitCoefs_g then		
-			-- Write Coefficients
-			if not UseFixCoefs_g then
-				file_open(fp, FileFolder_g & "/" & CoefsFile_c, read_mode);
-				readline(fp, ln); -- ignore title line
-				for i in 0 to Taps_g-1 loop
-					readline(fp, ln);
-					read(ln, Coef);
-					wait until rising_edge(Clk);
-					CoefAddr <= std_logic_vector(to_unsigned(i, CoefAddr'length));
-					CoefWr <= '1';
-					CoefWrData <= std_logic_vector(to_signed(Coef, CoefWrData'length));
-					wait until rising_edge(Clk);
-					CoefWr <= '0';
-				end loop;
-			end if;
-		end if;
-		wait until rising_edge(Clk);
-		wait until rising_edge(Clk);
-	
-	
-		-- Apply Stimuli	
-		ApplyTextfileContent(	Clk 			=> Clk, 
-								Rdy 			=> PsiTextfile_SigOne,
-								Vld 			=> InVld, 
-								Data			=> SigIn, 
-								Filepath		=> FileFolder_g & "/" & InFile_c,
-								ClkPerSpl		=> ClkPerSpl_g,							
-								IgnoreLines		=> 1,
-								DataOnlyOnVld	=> true);	
-								
-		-- In case flush-interface is implemented, try out if not leftovers are present after flushing
-		if ImplFlushIf_g then
-			-- Wait until first stimuli run faded out
-			wait for 10 us;
-			
-			-- Reset filter	
-			wait until rising_edge(Clk);
-			Rst <= '1';
-			wait until rising_edge(Clk);
-			Rst <= '0';					
-			
-			-- Flush Memory
-			wait until rising_edge(Clk);
-			FlushMem <= '1';
-			wait until rising_edge(Clk);
-			FlushMem <= '0';
-			wait until rising_edge(Clk) and FlushDone = '1';
-					
-			
-			-- Second stimuli run
-			ApplyTextfileContent(	Clk 			=> Clk, 
-									Rdy 			=> PsiTextfile_SigOne,
-									Vld 			=> InVld, 
-									Data			=> SigIn, 
-									Filepath		=> FileFolder_g & "/" & InFile_c,
-									ClkPerSpl		=> ClkPerSpl_g,							
-									IgnoreLines		=> 1,
-									DataOnlyOnVld	=> true);				
-		end if;
-		
-		-- end of process !DO NOT EDIT!
-		ProcessDone(TbProcNr_stim_c) <= '1';
-		wait;
-	end process;
-	
-	-- *** resp ***
-	SigOut(0) <= to_integer(signed(OutData));
-	p_resp : process
-	begin
-		-- start of process !DO NOT EDIT
-		wait until Rst = '0';
-		
-		-- User Code
-		CheckTextfileContent(	Clk			=> Clk,
-								Rdy			=> PsiTextfile_SigUnused,
-								Vld			=> OutVld,
-								Data		=> SigOut,
-								Filepath	=> FileFolder_g & "/" & OutFile_c,
-								IgnoreLines => 1);
-								
-		-- In case flush-interface is implemented, try out if not leftovers are present after flushing
-		if ImplFlushIf_g then
-			CheckTextfileContent(	Clk			=> Clk,
-									Rdy			=> PsiTextfile_SigUnused,
-									Vld			=> OutVld,
-									Data		=> SigOut,
-									Filepath	=> FileFolder_g & "/" & OutFile_c,
-									IgnoreLines => 1);
-		end if;
-		
-		-- end of process !DO NOT EDIT!
-		ProcessDone(TbProcNr_resp_c) <= '1';
-		wait;
-	end process;
-	
-	
+  ------------------------------------------------------------
+  -- DUT Instantiation
+  ------------------------------------------------------------
+  i_dut : entity work.psi_fix_fir_dec_semi_nch_chtdm_conf
+    generic map(
+      Channels_g           => Channels_g,
+      Multipliers_g        => Multipliers_g,
+      Ratio_g              => Ratio_g,
+      Taps_g               => Taps_g,
+      InFmt_g              => InFmt_g,
+      OutFmt_g             => OutFmt_g,
+      CoefFmt_g            => CoefFmt_g,
+      UseFixCoefs_g        => UseFixCoefs_g,
+      Coefs_g              => GetFixCoefs,
+      FullInpRateSupport_g => FullInpRateSupport_g,
+      RamBehavior_g        => RamBehavior_g,
+      Rnd_g                => Rnd_g,
+      Sat_g                => Sat_g,
+      ImplFlushIf_g        => ImplFlushIf_g
+    )
+    port map(
+      clk_i         => Clk,
+      rst_i         => Rst,
+      vld_i         => InVld,
+      dat_i         => InData,
+      vld_o         => OutVld,
+      dat_o         => OutData,
+      coef_wr_i     => CoefWr,
+      coef_addr_i   => CoefAddr,
+      coef_wr_dat_i => CoefWrData,
+      flush_mem_i   => FlushMem,
+      flush_done_o  => FlushDone
+    );
+
+  ------------------------------------------------------------
+  -- Testbench Control !DO NOT EDIT!
+  ------------------------------------------------------------
+  p_tb_control : process
+  begin
+    wait until Rst = '0';
+    wait until ProcessDone = AllProcessesDone_c;
+    TbRunning <= false;
+    wait;
+  end process;
+
+  ------------------------------------------------------------
+  -- Clocks !DO NOT EDIT!
+  ------------------------------------------------------------
+  p_clock_Clk : process
+    constant Frequency_c : real := real(100e6);
+  begin
+    while TbRunning loop
+      wait for 0.5 * (1 sec) / Frequency_c;
+      Clk <= not Clk;
+    end loop;
+    wait;
+  end process;
+
+  ------------------------------------------------------------
+  -- Processes
+  ------------------------------------------------------------
+  -- *** stim ***
+  InData <= std_logic_vector(to_signed(SigIn(0), InData'length));
+  p_stim : process
+    file fp       : text;
+    variable ln   : line;
+    variable Coef : integer;
+  begin
+    -- start of process !DO NOT EDIT
+    wait for 1 us;
+    -- Wait for two clk edges to ensure reset is active for at least one edge
+    wait until rising_edge(Clk);
+    wait until rising_edge(Clk);
+    Rst <= '0';
+    wait until rising_edge(Clk);
+
+    if not UseFixCoefs_g and not InitCoefs_g then
+      -- Write Coefficients
+      if not UseFixCoefs_g then
+        file_open(fp, FileFolder_g & "/" & CoefsFile_c, read_mode);
+        readline(fp, ln);               -- ignore title line
+        for i in 0 to Taps_g - 1 loop
+          readline(fp, ln);
+          read(ln, Coef);
+          wait until rising_edge(Clk);
+          CoefAddr   <= std_logic_vector(to_unsigned(i, CoefAddr'length));
+          CoefWr     <= '1';
+          CoefWrData <= std_logic_vector(to_signed(Coef, CoefWrData'length));
+          wait until rising_edge(Clk);
+          CoefWr     <= '0';
+        end loop;
+      end if;
+    end if;
+    wait until rising_edge(Clk);
+    wait until rising_edge(Clk);
+
+    -- Apply Stimuli	
+    ApplyTextfileContent(Clk           => Clk,
+                         Rdy           => PsiTextfile_SigOne,
+                         Vld           => InVld,
+                         Data          => SigIn,
+                         Filepath      => FileFolder_g & "/" & InFile_c,
+                         ClkPerSpl     => ClkPerSpl_g,
+                         IgnoreLines   => 1,
+                         DataOnlyOnVld => true);
+
+    -- In case flush-interface is implemented, try out if not leftovers are present after flushing
+    if ImplFlushIf_g then
+      -- Wait until first stimuli run faded out
+      wait for 10 us;
+
+      -- Reset filter	
+      wait until rising_edge(Clk);
+      Rst <= '1';
+      wait until rising_edge(Clk);
+      Rst <= '0';
+
+      -- Flush Memory
+      wait until rising_edge(Clk);
+      FlushMem <= '1';
+      wait until rising_edge(Clk);
+      FlushMem <= '0';
+      wait until rising_edge(Clk) and FlushDone = '1';
+
+      -- Second stimuli run
+      ApplyTextfileContent(Clk           => Clk,
+                           Rdy           => PsiTextfile_SigOne,
+                           Vld           => InVld,
+                           Data          => SigIn,
+                           Filepath      => FileFolder_g & "/" & InFile_c,
+                           ClkPerSpl     => ClkPerSpl_g,
+                           IgnoreLines   => 1,
+                           DataOnlyOnVld => true);
+    end if;
+
+    -- end of process !DO NOT EDIT!
+    ProcessDone(TbProcNr_stim_c) <= '1';
+    wait;
+  end process;
+
+  -- *** resp ***
+  SigOut(0) <= to_integer(signed(OutData));
+  p_resp : process
+  begin
+    -- start of process !DO NOT EDIT
+    wait until Rst = '0';
+
+    -- User Code
+    CheckTextfileContent(Clk         => Clk,
+                         Rdy         => PsiTextfile_SigUnused,
+                         Vld         => OutVld,
+                         Data        => SigOut,
+                         Filepath    => FileFolder_g & "/" & OutFile_c,
+                         IgnoreLines => 1);
+
+    -- In case flush-interface is implemented, try out if not leftovers are present after flushing
+    if ImplFlushIf_g then
+      CheckTextfileContent(Clk         => Clk,
+                           Rdy         => PsiTextfile_SigUnused,
+                           Vld         => OutVld,
+                           Data        => SigOut,
+                           Filepath    => FileFolder_g & "/" & OutFile_c,
+                           IgnoreLines => 1);
+    end if;
+
+    -- end of process !DO NOT EDIT!
+    ProcessDone(TbProcNr_resp_c) <= '1';
+    wait;
+  end process;
+
 end;

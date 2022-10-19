@@ -4,15 +4,11 @@
 --  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 
-library work;
 use work.psi_tb_txt_util.all;
 use work.psi_tb_compare_pkg.all;
 use work.psi_fix_pkg.all;
@@ -77,15 +73,15 @@ begin
     )
     port map(
       -- Control Signals
-      clk_i     => Clk,
-      rst_i     => Rst,
+      clk_i => Clk,
+      rst_i => Rst,
       -- Data Ports
-      dat_i  => InData,
-      rdy_o   => InRdy,
-      vld_i   => InVld,
+      dat_i => InData,
+      rdy_o => InRdy,
+      vld_i => InVld,
       dat_o => OutData,
-      vld_o  => OutVld,
-      rdy_o  => OutRdy
+      vld_o => OutVld,
+      rdy_i => OutRdy
     );
 
   -------------------------------------------------------------------------

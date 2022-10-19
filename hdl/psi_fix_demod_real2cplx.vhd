@@ -15,9 +15,6 @@
 -- out of band noise. The signal frequency must be an integer multiple of the 
 -- sample frequency.
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -26,9 +23,6 @@ use ieee.math_real.all;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 -- $$ processes=stim,check $$
 entity psi_fix_demod_real2cplx is
   generic(
@@ -43,8 +37,8 @@ entity psi_fix_demod_real2cplx is
     clk_i        : in  std_logic;       -- $$ type=clk; freq=100e6 $$
     rst_i        : in  std_logic;       -- $$ type=rst; clk=clk_i $$
     str_i        : in  std_logic;
-    data_i       : in  std_logic_vector(PsiFixSize(InFmt_g) * Channels_g - 1 downto 0);
-    phi_offset_i : in  std_logic_vector(log2ceil(Ratio_g) - 1 downto 0);
+    data_i       : in  std_logic_vector(PsiFixSize(InFmt_g)*Channels_g - 1 downto 0);
+    phi_offset_i : in  std_logic_vector(log2ceil(Ratio_g)-1 downto 0);
     --
     data_I_o     : out std_logic_vector(PsiFixSize(OutFmt_g) * Channels_g - 1 downto 0);
     data_Q_o     : out std_logic_vector(PsiFixSize(OutFmt_g) * Channels_g - 1 downto 0);
@@ -52,15 +46,12 @@ entity psi_fix_demod_real2cplx is
   );
 end entity;
 
-------------------------------------------------------------------------------
--- Architecture Declaration
-------------------------------------------------------------------------------
 architecture RTL of psi_fix_demod_real2cplx is
 
   constant coefUnusedBits_c : integer     := log2(Ratio_g);
-  constant CoefFmt_c        : PsiFixFmt_t := (1, 0 - coefUnusedBits_c, CoefBits_g + coefUnusedBits_c - 1);
-  constant MultFmt_c        : PsiFixFmt_t := (1, InFmt_g.I + CoefFmt_c.I, OutFmt_g.F + log2ceil(Ratio_g) + 2); -- truncation error does only lead to 1/4 LSB error on output
-  constant coef_scale_c     : real        := (1.0 - 2.0**(-real(CoefFmt_c.F))) / real(Ratio_g); -- prevent +/- 1.0 and pre-compensate for gain of moving average
+  constant CoefFmt_c        : PsiFixFmt_t := (1, 0-coefUnusedBits_c, CoefBits_g + coefUnusedBits_c-1);
+  constant MultFmt_c        : PsiFixFmt_t := (1, InFmt_g.I + CoefFmt_c.I, OutFmt_g.F+log2ceil(Ratio_g)+2); -- truncation error does only lead to 1/4 LSB error on output
+  constant coef_scale_c     : real        := (1.0-2.0**(-real(CoefFmt_c.F)))/real(Ratio_g); -- prevent +/- 1.0 and pre-compensate for gain of moving average
 
   type coef_array_t is array (0 to Ratio_g - 1) of std_logic_vector(PsiFixSize(CoefFmt_c) - 1 downto 0);
 
@@ -220,12 +211,12 @@ begin
         OutRegs_g  => 2
       )
       port map(
-        Clk     => clk_i,
-        Rst     => RstPos,
-        InVld   => strIn(4),
-        InData  => mult_i_dff2_s(i),
-        OutVld  => out_str_s(i),
-        OutData => out_i_s(i)
+        clk_i     => clk_i,
+        rst_i     => RstPos,
+        vld_i   => strIn(4),
+        dat_i  => mult_i_dff2_s(i),
+        vld_o  => out_str_s(i),
+        dat_o => out_i_s(i)
       );
 
     data_I_o((i + 1) * PsiFixSize(OutFmt_g) - 1 downto i * PsiFixSize(OutFmt_g)) <= out_i_s(i);
@@ -271,12 +262,12 @@ begin
         OutRegs_g  => 2
       )
       port map(
-        Clk     => clk_i,
-        Rst     => RstPos,
-        InVld   => strIn(4),
-        InData  => mult_q_dff2_s(i),
-        OutVld  => open,
-        OutData => out_q_s(i)
+        clk_i     => clk_i,
+        rst_i     => RstPos,
+        vld_i   => strIn(4),
+        dat_i  => mult_q_dff2_s(i),
+        vld_o  => open,
+        dat_o => out_q_s(i)
       );
 
     data_Q_o((i + 1) * PsiFixSize(OutFmt_g) - 1 downto i * PsiFixSize(OutFmt_g)) <= out_q_s(i);

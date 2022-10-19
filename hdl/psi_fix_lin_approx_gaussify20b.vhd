@@ -2,38 +2,26 @@
 --  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 --  All rights reserved.
 ------------------------------------------------------------------------------
-
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library work;
 use work.psi_fix_pkg.all;
 use work.psi_common_math_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 entity psi_fix_lin_approx_gaussify20b is
+  generic(rst_pol_g : std_logic := '1');
   port(
     -- Control Signals
-    Clk     : in  std_logic;
-    Rst     : in  std_logic;
-    -- Input
-    InVld   : in  std_logic;
-    InData  : in  std_logic_vector(20 - 1 downto 0); -- Format (1, 0, 19)
-    -- Output
-    OutVld  : out std_logic;
-    OutData : out std_logic_vector(20 - 1 downto 0) -- Format (1, 0, 19)
+    clk_i : in  std_logic;
+    rst_i : in  std_logic;
+    vld_i : in  std_logic;
+    dat_i : in  std_logic_vector(20 - 1 downto 0); -- Format (1, 0, 19)
+    vld_o : out std_logic;
+    dat_o : out std_logic_vector(20 - 1 downto 0)  -- Format (1, 0, 19)
   );
 end entity;
 
-------------------------------------------------------------------------------
--- Architecture Declaration
-------------------------------------------------------------------------------
 architecture rtl of psi_fix_lin_approx_gaussify20b is
 
   -- Constants
@@ -1083,6 +1071,7 @@ begin
   -- *** Calculation Unit ***
   i_calc : entity work.psi_fix_lin_approx_calc
     generic map(
+      rst_pol_g   => rst_pol_g,
       InFmt_g     => InFmt_c,
       OutFmt_g    => OutFmt_c,
       OffsFmt_g   => OffsFmt_c,
@@ -1091,23 +1080,23 @@ begin
     )
     port map(
       -- Control Signals
-      Clk     => Clk,
-      Rst     => Rst,
+      clk_i        => clk_i,
+      rst_i        => rst_i,
       -- Input
-      InVld   => InVld,
-      InData  => InData,
+      vld_i        => vld_i,
+      dat_i        => dat_i,
       -- Output
-      OutVld  => OutVld,
-      OutData => OutData,
+      vld_o        => vld_o,
+      dat_o        => dat_o,
       -- Table Interface
-      TblAddr => TableAddr,
-      TblData => TableData
+      addr_table_o => TableAddr,
+      data_table_i => TableData
     );
 
   -- *** Table ***
-  p_table : process(Clk)
+  p_table : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       TableData <= Table_c(to_integer(unsigned(TableAddr)));
     end if;
   end process;

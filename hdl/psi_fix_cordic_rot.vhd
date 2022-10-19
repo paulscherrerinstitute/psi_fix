@@ -20,44 +20,43 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 
-library work;
 use work.psi_fix_pkg.all;
 use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
-
+-- @formatter:off
 ------------------------------------------------------------------------------
 -- Entity Declaration
 ------------------------------------------------------------------------------
 -- $$ processes=stim, resp $$
 entity psi_fix_cordic_rot is
   generic(
-    InAbsFmt_g    : PsiFixFmt_t := (0, 0, 15); -- Must be unsigned		$$ constant=(0,0,16) $$
-    InAngleFmt_g  : PsiFixFmt_t := (0, 0, 15); -- Must be unsigned		$$ constant=(0,0,15) $$
-    OutFmt_g      : PsiFixFmt_t := (1, 2, 16); -- Usually signed		$$ constant=(1,2,16) $$
-    InternalFmt_g : PsiFixFmt_t := (1, 2, 22); -- Must be signed		$$ constant=(1,2,22) $$
-    AngleIntFmt_g : PsiFixFmt_t := (1, -2, 18); -- Must be (1, -2, x)	$$ constant=(1,-2,23) $$
-    Iterations_g  : natural     := 13;  --						$$ constant=21 $$
-    GainComp_g    : boolean     := False; --						$$ export=true $$
-    Round_g       : PsiFixRnd_t := PsiFixTrunc; --						$$ export=true $$
-    Sat_g         : PsiFixSat_t := PsiFixWrap; --						$$ export=true $$
-    Mode_g        : string      := "SERIAL" -- PIPELINED or SERIAL	$$ export=true $$
+    InAbsFmt_g    : PsiFixFmt_t := (0, 0, 15);    -- Must be unsigned		$$ constant=(0,0,16) $$
+    InAngleFmt_g  : PsiFixFmt_t := (0, 0, 15);    -- Must be unsigned		$$ constant=(0,0,15) $$
+    OutFmt_g      : PsiFixFmt_t := (1, 2, 16);    -- Usually signed		$$ constant=(1,2,16) $$
+    InternalFmt_g : PsiFixFmt_t := (1, 2, 22);    -- Must be signed		$$ constant=(1,2,22) $$
+    AngleIntFmt_g : PsiFixFmt_t := (1, -2, 18);   -- Must be (1, -2, x)	$$ constant=(1,-2,23) $$
+    Iterations_g  : natural     := 13;            --						$$ constant=21 $$
+    GainComp_g    : boolean     := False;         --						$$ export=true $$
+    Round_g       : PsiFixRnd_t := PsiFixTrunc;   --						$$ export=true $$
+    Sat_g         : PsiFixSat_t := PsiFixWrap;    --						$$ export=true $$
+    Mode_g        : string      := "SERIAL"       -- PIPELINED or SERIAL	$$ export=true $$
   );
   port(
     -- Control Signals
-    Clk    : in  std_logic;             -- $$ type=clk; freq=100e6 $$
-    Rst    : in  std_logic;             -- $$ type=rst; clk=Clk $$
+    clk_i      : in  std_logic;                                               -- $$ type=clk; freq=100e6 $$
+    rst_i      : in  std_logic;                                               -- $$ type=rst; clk=Clk $$
     -- Input
-    InVld  : in  std_logic;
-    InRdy  : out std_logic;             -- $$ lowactive=true $$
-    InAbs  : in  std_logic_vector(PsiFixSize(InAbsFmt_g) - 1 downto 0);
-    InAng  : in  std_logic_vector(PsiFixSize(InAngleFmt_g) - 1 downto 0);
+    vld_i      : in  std_logic;
+    rdy_i      : out std_logic;                                               -- $$ lowactive=true $$
+    dat_abs_i  : in  std_logic_vector(PsiFixSize(InAbsFmt_g) - 1 downto 0);   -- amplitude signal input
+    dat_ang_i  : in  std_logic_vector(PsiFixSize(InAngleFmt_g) - 1 downto 0); -- phase signal input
     -- Output
-    OutVld : out std_logic;
-    OutI   : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-    OutQ   : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)
+    vld_o       : out std_logic;                                              -- valid output
+    dat_inp_o   : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);    -- dat inphase out
+    dat_qua_o   : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)     -- dat quadrature out
   );
 end entity;
-
+-- @formatter:on
 ------------------------------------------------------------------------------
 -- Architecture Declaration
 ------------------------------------------------------------------------------
@@ -183,23 +182,23 @@ begin
     signal QcVld    : std_logic;
   begin
     -- Pipelined implementation can take a sample every clock cycle
-    InRdy <= '1';
+    rdy_i <= '1';
 
     -- Implementation
-    p_cordic_pipelined : process(Clk)
+    p_cordic_pipelined : process(clk_i)
     begin
-      if rising_edge(Clk) then
-        if Rst = '1' then
+      if rising_edge(clk_i) then
+        if rst_i = '1' then
           Vld    <= (others => '0');
-          OutVld <= '0';
+          vld_o <= '0';
           QcVld  <= '0';
         else
           -- Initialization
-          X(0)    <= PsiFixResize(InAbs, InAbsFmt_g, InternalFmt_g, Round_g, Sat_g);
+          X(0)    <= PsiFixResize(dat_abs_i, InAbsFmt_g, InternalFmt_g, Round_g, Sat_g);
           Y(0)    <= (others => '0');
-          Z(0)    <= PsiFixResize(InAng, InAngleFmt_g, AngleIntFmt_g, Round_g, PsiFixWrap);
-          Quad(0) <= PsiFixResize(InAng, InAngleFmt_g, QuadFmt_c, PsiFixTrunc, PsiFixWrap);
-          Vld(0)  <= InVld;
+          Z(0)    <= PsiFixResize(dat_ang_i, InAngleFmt_g, AngleIntFmt_g, Round_g, PsiFixWrap);
+          Quad(0) <= PsiFixResize(dat_ang_i, InAngleFmt_g, QuadFmt_c, PsiFixTrunc, PsiFixWrap);
+          Vld(0)  <= vld_i;
 
           -- Cordic Iterations_g
           Vld(1 to Vld'high)   <= Vld(0 to Vld'high - 1);
@@ -221,13 +220,13 @@ begin
           end if;
 
           -- Output 
-          OutVld <= QcVld;
+          vld_o <= QcVld;
           if GainComp_g then
-            OutI <= PsiFixMult(xQc, InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
-            OutQ <= PsiFixMult(yQc, InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
+            dat_inp_o <= PsiFixMult(xQc, InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
+            dat_qua_o <= PsiFixMult(yQc, InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
           else
-            OutI <= PsiFixResize(xQc, InternalFmt_g, OutFmt_g, Round_g, Sat_g);
-            OutQ <= PsiFixResize(yQc, InternalFmt_g, OutFmt_g, Round_g, Sat_g);
+            dat_inp_o <= PsiFixResize(xQc, InternalFmt_g, OutFmt_g, Round_g, Sat_g);
+            dat_qua_o <= PsiFixResize(yQc, InternalFmt_g, OutFmt_g, Round_g, Sat_g);
           end if;
         end if;
       end if;
@@ -250,24 +249,24 @@ begin
     signal yQc, xQc : std_logic_vector(PsiFixsize(InternalFmt_g) - 1 downto 0);
     signal QcVld    : std_logic;
   begin
-    InRdy <= not XinVld;
+    rdy_i <= not XinVld;
 
-    p_cordic_serial : process(Clk)
+    p_cordic_serial : process(clk_i)
     begin
-      if rising_edge(Clk) then
-        if Rst = '1' then
+      if rising_edge(clk_i) then
+        if rst_i = '1' then
           XinVld  <= '0';
           IterCnt <= 0;
-          OutVld  <= '0';
+          vld_o  <= '0';
           CordVld <= '0';
         else
           -- Input latching
-          if XinVld = '0' and InVld = '1' then
+          if XinVld = '0' and vld_i = '1' then
             XinVld <= '1';
-            Xin    <= PsiFixResize(InAbs, InAbsFmt_g, InternalFmt_g, Round_g, Sat_g);
+            Xin    <= PsiFixResize(dat_abs_i, InAbsFmt_g, InternalFmt_g, Round_g, Sat_g);
             Yin    <= (others => '0');
-            Zin    <= PsiFixResize(InAng, InAngleFmt_g, AngleIntFmt_g, Round_g, PsiFixWrap);
-            Quadin <= PsiFixResize(InAng, InAngleFmt_g, QuadFmt_c, PsiFixTrunc, PsiFixWrap);
+            Zin    <= PsiFixResize(dat_ang_i, InAngleFmt_g, AngleIntFmt_g, Round_g, PsiFixWrap);
+            Quadin <= PsiFixResize(dat_ang_i, InAngleFmt_g, QuadFmt_c, PsiFixTrunc, PsiFixWrap);
           end if;
 
           -- CORDIC loop
@@ -307,13 +306,13 @@ begin
           end if;
 
           -- Output 
-          OutVld <= QcVld;
+          vld_o <= QcVld;
           if GainComp_g then
-            OutI <= PsiFixMult(xQc, InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
-            OutQ <= PsiFixMult(yQc, InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
+            dat_inp_o <= PsiFixMult(xQc, InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
+            dat_qua_o <= PsiFixMult(yQc, InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
           else
-            OutI <= PsiFixResize(xQc, InternalFmt_g, OutFmt_g, Round_g, Sat_g);
-            OutQ <= PsiFixResize(yQc, InternalFmt_g, OutFmt_g, Round_g, Sat_g);
+            dat_inp_o <= PsiFixResize(xQc, InternalFmt_g, OutFmt_g, Round_g, Sat_g);
+            dat_qua_o <= PsiFixResize(yQc, InternalFmt_g, OutFmt_g, Round_g, Sat_g);
           end if;
 
         end if;

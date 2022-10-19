@@ -19,18 +19,12 @@ use work.psi_common_logic_pkg.all;
 use work.psi_tb_textfile_pkg.all;
 use work.psi_tb_txt_util.all;
 
-------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------
 entity psi_fix_complex_abs_tb is
   generic(
     FileFolder_g : string := "../testbench/psi_fix_complex_abs_tb/Data"
   );
 end entity;
 
-------------------------------------------------------------
--- Architecture
-------------------------------------------------------------
 architecture sim of psi_fix_complex_abs_tb is
   -- *** Fixed Generics ***
   constant InFmt_g  : PsiFixFmt_t := (1, 2, 14);
@@ -72,13 +66,13 @@ begin
       Sat_g    => Sat_g
     )
     port map(
-      Clk    => Clk,
-      Rst    => Rst,
-      InVld  => InVld,
-      InI    => InI,
-      InQ    => InQ,
-      OutAbs => OutAbs,
-      OutVld => OutVld
+      clk_i     => Clk,
+      rst_i     => Rst,
+      vld_i     => InVld,
+      dat_inp_i => InI,
+      dat_qua_i => InQ,
+      dat_o     => OutAbs,
+      vld_o     => OutVld
     );
 
   ------------------------------------------------------------

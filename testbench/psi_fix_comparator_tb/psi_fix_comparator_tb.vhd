@@ -10,9 +10,6 @@
 --This basic block allows set min and max threshold in fixed point format fashion
 --prior to deliver flag indications output - TESTBENCH
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;

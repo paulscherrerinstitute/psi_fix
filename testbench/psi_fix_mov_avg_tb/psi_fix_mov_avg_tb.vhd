@@ -79,12 +79,12 @@ begin
 			OutRegs_g => OutRegs_g
 		)
 		port map (
-			Clk => Clk,
-			Rst => Rst,
-			InVld => InVld,
-			InData => InData,
-			OutVld => OutVld,
-			OutData => OutData
+			clk_i => Clk,
+			rst_i => Rst,
+			vld_i => InVld,
+			dat_i => InData,
+			vld_o => OutVld,
+			dat_o => OutData
 		);
 	
 	------------------------------------------------------------

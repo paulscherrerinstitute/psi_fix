@@ -3,11 +3,6 @@
 --  All rights reserved.
 --  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
-
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -24,10 +19,7 @@ use work.psi_fix_pkg.all;
 -- CIC_GROWTH = ceil(log2(CIC_GAIN))
 -- SHIFT = CIC_GROWTH					--> Apply this to CfgShift
 -- GAINCORR = 2^CIC_GROWTH/CIC_GAIN		--> Apply this to CfgGainCorr
-
-------------------------------------------------------------------------------
--- Entity
-------------------------------------------------------------------------------
+-- @fromatter:off
 entity psi_fix_cic_dec_cfg_nch_tdm_tdm is
   generic(
     Channels_g     : integer              := 3;          -- Min. 2
@@ -45,8 +37,8 @@ entity psi_fix_cic_dec_cfg_nch_tdm_tdm is
     rst_i           : in  std_logic;
     -- Configuration (only change when in reset!)
     cfg_ratio_i     : in  std_logic_vector(log2ceil(MaxRatio_g) - 1 downto 0); -- Ratio-1 (0 --> no decimation, 3 --> decimation by 4)
-    cfg_shift_i     : in  std_logic_vector(7 downto 0); -- Shifting by more than 255 bits is not supported, this would lead to timing issues anyways
-    cfg_gain_corr_i : in  std_logic_vector(16 downto 0); -- Gain correction factor in format [0,1,16]
+    cfg_shift_i     : in  std_logic_vector(7 downto 0);                        -- Shifting by more than 255 bits is not supported, this would lead to timing issues anyways
+    cfg_gain_corr_i : in  std_logic_vector(16 downto 0);                       -- Gain correction factor in format [0,1,16]
     -- Data Ports
     dat_i           : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
     vld_i           : in  std_logic;
@@ -56,11 +48,7 @@ entity psi_fix_cic_dec_cfg_nch_tdm_tdm is
     busy_o          : out std_logic
   );
 end entity;
-
-------------------------------------------------------------------------------
--- Architecture section
-------------------------------------------------------------------------------
-
+-- @fromatter:on
 architecture rtl of psi_fix_cic_dec_cfg_nch_tdm_tdm is
   -- Constants
   constant MaxCicGain_c    : real        := (real(MaxRatio_g) * real(DiffDelay_g))**real(Order_g);

@@ -8,12 +8,10 @@
 ------------------------------------------------------------------------------
 -- Libraries
 ------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library work;
 use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_common_logic_pkg.all;
@@ -23,20 +21,15 @@ use work.psi_fix_pkg.all;
 -- Entity
 ------------------------------------------------------------------------------
 entity psi_fix_white_noise is
-  generic(
-    OutFmt_g : PsiFixFmt_t           := (0, 0, 31);
-    Seed_g   : unsigned(31 downto 0) := X"A38E3C1D"
-  );
-  port(
-    -- Control Signals
-    Clk     : in  std_logic;
-    Rst     : in  std_logic;
-    -- Input
-    InVld   : in  std_logic := '1';
-    -- Output
-    OutVld  : out std_logic;
-    OutData : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)
-  );
+  generic( OutFmt_g : PsiFixFmt_t           := (0, 0, 31);
+           Seed_g   : unsigned(31 downto 0) := X"A38E3C1D";
+           rst_pol_g: std_logic             :='1');
+  port(    -- Control Signals
+          clk_i     : in  std_logic;
+          rst_i     : in  std_logic;
+          vld_i     : in  std_logic := '1';
+          vld_o     : out std_logic;
+          dat_o     : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0));
 end entity;
 
 ------------------------------------------------------------------------------
@@ -59,10 +52,10 @@ begin
   --------------------------------------------------------------------------
   -- Assertions
   --------------------------------------------------------------------------
-  p_assert : process(Clk)
+  p_assert : process(clk_i)
   begin
-    if rising_edge(Clk) then
-      if Rst = '0' then
+    if rising_edge(clk_i) then
+      if rst_i = not rst_pol_g then
         assert PsiFixSize(OutFmt_g) <= 32 report "###ERROR###: psi_fix_white_noise: Output width cannot be larger than 32 bits" severity error;
       end if;
     end if;
@@ -71,20 +64,20 @@ begin
   --------------------------------------------------------------------------
   -- Combinatorial Process
   --------------------------------------------------------------------------
-  p_comb : process(r, InVld)
+  p_comb : process(r, vld_i)
     variable v : two_process_r;
   begin
     -- hold variables stable
     v := r;
 
     -- *** Generate Output ***
-    v.OutVld := InVld;
+    v.OutVld := vld_i;
     for i in 0 to OutBits_c - 1 loop
       v.OutData(i) := r.Lfsr(i)(0);
     end loop;
 
     -- *** Update LFSRs ***
-    if InVld = '1' then
+    if vld_i = '1' then
       for i in 0 to OutBits_c - 1 loop
         v.Lfsr(i)    := ShiftLeft(r.Lfsr(i), 1);
         v.Lfsr(i)(0) := r.Lfsr(i)(31) xor r.Lfsr(i)(20) xor r.Lfsr(i)(26) xor r.Lfsr(i)(25);
@@ -96,17 +89,17 @@ begin
 
   end process;
 
-  OutData <= r.OutData;
-  OutVld  <= r.OutVld;
+  dat_o <= r.OutData;
+  vld_o  <= r.OutVld;
 
   --------------------------------------------------------------------------
   -- Sequential Process
   --------------------------------------------------------------------------	
-  p_seq : process(Clk)
+  p_seq : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       r <= r_next;
-      if Rst = '1' then
+      if rst_i = rst_pol_g then
         for i in 0 to OutBits_c - 1 loop
           r.Lfsr(i) <= std_logic_vector(Seed_g + shift_left(to_unsigned(1, 32), i));
         end loop;
@@ -115,4 +108,4 @@ begin
     end if;
   end process;
 
-end rtl;
+end architecture;

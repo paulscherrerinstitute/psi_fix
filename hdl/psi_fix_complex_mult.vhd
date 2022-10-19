@@ -18,40 +18,39 @@ use ieee.numeric_std.all;
 
 use work.psi_fix_pkg.all;
 use work.psi_common_math_pkg.all;
-
+-- @formatter:off
 ------------------------------------------------------------------------------
 -- Entity Declaration
 ------------------------------------------------------------------------------
 -- $$ processes=stim, resp $$
 entity psi_fix_complex_mult is
   generic(
-    RstPol_g      : std_logic   := '1'; -- set reset polarity														$$ constant='1' $$
-    Pipeline_g    : boolean     := false; -- when false 3 pipes stages, when false 6 pipes (increase Fmax)			$$ export=true $$
-    InAFmt_g      : PsiFixFmt_t := (1, 0, 15); -- Input A Fixed Point format 										$$ constant=(1,0,15) $$
-    InBFmt_g      : PsiFixFmt_t := (1, 0, 24); -- Input B Fixed Point format 										$$ constant=(1,0,24) $$
-    InternalFmt_g : PsiFixFmt_t := (1, 1, 24); -- Internal Calc. Fixed Point format									$$ constant=(1,1,24) $$
-    OutFmt_g      : PsiFixFmt_t := (1, 0, 20); -- Output Fixed Point format											$$ constant=(1,0,20) $$
-    Round_g       : PsiFixRnd_t := PsiFixRound; --																	$$ constant=PsiFixRound $$
-    Sat_g         : PsiFixSat_t := PsiFixSat; --																	$$ constant=PsiFixSat $$
-    InAIsCplx_g   : boolean     := true;
-    InBIsCplx_g   : boolean     := true
+    RstPol_g      : std_logic   := '1';         -- set reset polarity                             $$ constant='1' $$
+    Pipeline_g    : boolean     := false;       -- when false 3 pipes stages, when false 6 pipes (increase Fmax)			$$ export=true $$
+    InAFmt_g      : PsiFixFmt_t := (1, 0, 15);  -- Input A Fixed Point format                     $$ constant=(1,0,15) $$
+    InBFmt_g      : PsiFixFmt_t := (1, 0, 24);  -- Input B Fixed Point format                     $$ constant=(1,0,24) $$
+    InternalFmt_g : PsiFixFmt_t := (1, 1, 24);  -- Internal Calc. Fixed Point format              $$ constant=(1,1,24) $$
+    OutFmt_g      : PsiFixFmt_t := (1, 0, 20);  -- Output Fixed Point format                      $$ constant=(1,0,20) $$
+    Round_g       : PsiFixRnd_t := PsiFixRound; -- Trunc or Round                                 $$ constant=PsiFixRound $$
+    Sat_g         : PsiFixSat_t := PsiFixSat;   -- Sat or wrap                                    $$ constant=PsiFixSat $$
+    InAIsCplx_g   : boolean     := true;        -- Complex number?
+    InBIsCplx_g   : boolean     := true         -- Complex number?
   );
   port(
-    InClk   : in  std_logic;            -- clk 																			$$ type=clk; freq=100e6 $$
-    InRst   : in  std_logic;            -- sync. rst																	$$ type=rst; clk=clk_i $$
+    clk_i         : in  std_logic;                                           -- clk        $$ type=clk; freq=100e6 $$
+    rst_i         : in  std_logic;                                           -- sync. rst  $$ type=rst; clk=clk_i $$
+    dat_inA_inp_i : in  std_logic_vector(PsiFixSize(InAFmt_g) - 1 downto 0); -- Inphase input of signal A
+    dat_inA_qua_i : in  std_logic_vector(PsiFixSize(InAFmt_g) - 1 downto 0); -- Quadrature input of signal A
+    dat_inB_inp_i : in  std_logic_vector(PsiFixSize(InBFmt_g) - 1 downto 0); -- Inphase input of signal B
+    dat_inB_qua_i : in  std_logic_vector(PsiFixSize(InBFmt_g) - 1 downto 0); -- Quadrature input of signal B
+    vld_i         : in  std_logic;                                           -- strobe input
 
-    InIADat : in  std_logic_vector(PsiFixSize(InAFmt_g) - 1 downto 0); -- Inphase input of signal A
-    InQADat : in  std_logic_vector(PsiFixSize(InAFmt_g) - 1 downto 0); -- Quadrature input of signal A
-    InIBDat : in  std_logic_vector(PsiFixSize(InBFmt_g) - 1 downto 0); -- Inphase input of signal B
-    InQBDat : in  std_logic_vector(PsiFixSize(InBFmt_g) - 1 downto 0); -- Quadrature input of signal B
-    InVld   : in  std_logic;            -- strobe input
-
-    OutIDat : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0); -- data output I
-    OutQDat : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0); -- data output Q
-    OutVld  : out std_logic             -- strobe output
+    dat_inp_o     : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0); -- data output I
+    dat_qua_o     : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0); -- data output Q
+    vld_o         : out std_logic                                            -- strobe output
   );
 end entity;
-
+-- @formatter:on
 ------------------------------------------------------------------------------
 -- Architecture Declaration
 ------------------------------------------------------------------------------
@@ -90,44 +89,44 @@ begin
   --------------------------------------------
   -- Combinatorial Process
   --------------------------------------------
-  p_comb : process(r, InIADat, InQADat, InIBDat, InQBDat, InVld)
+  p_comb : process(r, dat_inA_inp_i, dat_inA_qua_i, dat_inB_inp_i, dat_inB_qua_i, vld_i)
     variable v : two_process_r;
   begin
     -- *** Hold variables stable ***
     v := r;
 
     -- *** Vld Handling ***
-    v.Vld(0)      := InVld;
+    v.Vld(0)      := vld_i;
     v.Vld(1 to 5) := r.Vld(0 to 4);
 
     -- *** Multiplications ***
     if Pipeline_g then
-      v.AiIn := InIADat;
-      v.AqIn := InQADat;
-      v.BiIn := InIBDat;
-      v.BqIn := InQBDat;
+      v.AiIn := dat_inA_inp_i;
+      v.AqIn := dat_inA_qua_i;
+      v.BiIn := dat_inB_inp_i;
+      v.BqIn := dat_inB_qua_i;
       v.MrIQ := r.MultIQ;
       v.MrQI := r.MultQI;
       v.MrII := r.MultII;
       v.MrQQ := r.MultQQ;
     end if;
-    v.MultII := PsiFixMult(choose(Pipeline_g, r.AiIn, InIADat), InAFmt_g,
-                           choose(Pipeline_g, r.BiIn, InIBDat), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
+    v.MultII := PsiFixMult(choose(Pipeline_g, r.AiIn, dat_inA_inp_i), InAFmt_g,
+                           choose(Pipeline_g, r.BiIn, dat_inB_inp_i), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
     if InBIsCplx_g then
-      v.MultIQ := PsiFixMult(choose(Pipeline_g, r.AiIn, InIADat), InAFmt_g,
-                             choose(Pipeline_g, r.BqIn, InQBDat), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
+      v.MultIQ := PsiFixMult(choose(Pipeline_g, r.AiIn, dat_inA_inp_i), InAFmt_g,
+                             choose(Pipeline_g, r.BqIn, dat_inB_qua_i), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
     else
       v.MultIQ := (others => '0');
     end if;
     if InAIsCplx_g then
-      v.MultQI := PsiFixMult(choose(Pipeline_g, r.AqIn, InQADat), InAFmt_g,
-                             choose(Pipeline_g, r.BiIn, InIBDat), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
+      v.MultQI := PsiFixMult(choose(Pipeline_g, r.AqIn, dat_inA_qua_i), InAFmt_g,
+                             choose(Pipeline_g, r.BiIn, dat_inB_inp_i), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
     else
       v.MultQI := (others => '0');
     end if;
     if InAIsCplx_g and InBIsCplx_g then
-      v.MultQQ := PsiFixMult(choose(Pipeline_g, r.AqIn, InQADat), InAFmt_g,
-                             choose(Pipeline_g, r.BqIn, InQBDat), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
+      v.MultQQ := PsiFixMult(choose(Pipeline_g, r.AqIn, dat_inA_qua_i), InAFmt_g,
+                             choose(Pipeline_g, r.BqIn, dat_inB_qua_i), InBFmt_g, InternalFmt_g, PsiFixTrunc, PsiFixWrap);
     else
       v.MultQQ := (others => '0');
     end if;
@@ -156,22 +155,22 @@ begin
 
   -- *** Outputs ***
   g_pl : if Pipeline_g generate
-    OutVld <= r.Vld(5);
+    vld_o <= r.Vld(5);
   end generate;
   g_npl : if not Pipeline_g generate
-    OutVld <= r.Vld(2);
+    vld_o <= r.Vld(2);
   end generate;
-  OutIDat <= r.OutI;
-  OutQDat <= r.OutQ;
+  dat_inp_o <= r.OutI;
+  dat_qua_o <= r.OutQ;
 
   --------------------------------------------
   -- Sequential Process
   --------------------------------------------
-  p_seq : process(InClk)
+  p_seq : process(clk_i)
   begin
-    if rising_edge(InClk) then
+    if rising_edge(clk_i) then
       r <= r_next;
-      if InRst = RstPol_g then
+      if rst_i = RstPol_g then
         r.Vld <= (others => '0');
       end if;
     end if;

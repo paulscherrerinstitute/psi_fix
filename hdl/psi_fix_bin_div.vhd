@@ -16,14 +16,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library work;
 use work.psi_fix_pkg.all;
 use work.psi_common_logic_pkg.all;
 use work.psi_common_math_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 entity psi_fix_bin_div is
   generic(
     NumFmt_g   : PsiFixFmt_t := (1, 0, 17);   -- numerator format 
@@ -48,9 +44,6 @@ entity psi_fix_bin_div is
   );
 end entity;
 
-------------------------------------------------------------------------------
--- Architecture Declaration
-------------------------------------------------------------------------------
 architecture rtl of psi_fix_bin_div is
 
   -- constants
@@ -181,9 +174,6 @@ begin
   result_o <= r.OutQuot;
   rdy_i    <= r.InRdy;
 
-  --------------------------------------------
-  -- Sequential Process
-  --------------------------------------------
   p_seq : process(clk_i)
   begin
     if rising_edge(clk_i) then

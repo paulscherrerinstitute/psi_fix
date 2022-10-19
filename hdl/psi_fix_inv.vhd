@@ -1,47 +1,33 @@
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 
--- library work
 use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
 use work.psi_common_logic_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity
-------------------------------------------------------------------------------
 -- $$ tbpkg=psi_lib.psi_tb_textfile_pkg,psi_lib.psi_tb_txt_util $$
 -- $$ processes=stimuli,response $$
 entity psi_fix_inv is
   generic(
-    InFmt_g       : PsiFixFmt_t := (0, 0, 15); -- Must be unsigned, wuare root not defined for negative numbers
+    InFmt_g       : PsiFixFmt_t := (0, 0, 15);  -- Must be unsigned, wuare root not defined for negative numbers
     OutFmt_g      : PsiFixFmt_t := (0, 1, 15);
     Round_g       : PsiFixRnd_t := PsiFixTrunc; --
-    Sat_g         : PsiFixSat_t := PsiFixWrap; --
-    RamBehavior_g : string      := "RBW" -- RBW = Read before write, WBR = write before read
+    Sat_g         : PsiFixSat_t := PsiFixWrap;  --
+    RamBehavior_g : string      := "RBW"        -- RBW = Read before write, WBR = write before read
   );
   port(
     -- Control Signals
-    Clk     : in  std_logic;            -- $$ type=Clk; freq=127e6 $$
-    Rst     : in  std_logic;            -- $$ type=Rst; Clk=Clk $$
-
+    clk_i : in  std_logic;              -- $$ type=Clk; freq=127e6 $$
+    rst_i : in  std_logic;              -- $$ type=Rst; Clk=Clk $$
     -- Input
-    InVld   : in  std_logic;
-    InData  : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-    OutData : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-    OutVld  : out std_logic
-  );
+    vld_i : in  std_logic;
+    dat_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
+    vld_o : out std_logic;
+    dat_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0));
 end entity;
-
-------------------------------------------------------------------------------
--- Architecture section
-------------------------------------------------------------------------------
 
 architecture rtl of psi_fix_inv is
 
@@ -97,7 +83,7 @@ begin
   --------------------------------------------------------------------------
   -- Combinatorial Process
   --------------------------------------------------------------------------
-  proc_comb : process(r, InVld, InData, SftCntOut_s, InvVld_s, InvData_s, SignOut_s)
+  proc_comb : process(r, vld_i, dat_i, SftCntOut_s, InvVld_s, InvData_s, SignOut_s)
     variable v              : two_process_r;
     variable SftBeforeIn_v  : std_logic_vector(PsiFixSize(InFmtNorm_c) - 1 downto 0);
     variable SftBefore_v    : integer;
@@ -116,13 +102,13 @@ begin
 
     -- *** Stage 0 ***
     -- Input Registers
-    v.InVld(0)  := InVld;
+    v.InVld(0)  := vld_i;
     if InFmt_g.S = 0 then
       v.InSign(0) := '0';
     else
-      v.InSign(0) := InData(InData'high);
+      v.InSign(0) := dat_i(dat_i'high);
     end if;
-    v.AbsFull_0 := PsiFixAbs(InData, InFmt_g, AbsFullFmt_c, PsiFixTrunc, PsiFixWrap);
+    v.AbsFull_0 := PsiFixAbs(dat_i, InFmt_g, AbsFullFmt_c, PsiFixTrunc, PsiFixWrap);
 
     -- *** Stage 1 ***
     v.Abs_1 := PsiFixResize(r.AbsFull_0, AbsFullFmt_c, AbsFmt_c, PsiFixTrunc, PsiFixSat);
@@ -197,17 +183,17 @@ begin
   --------------------------------------------------------------------------
   -- Output Assignment
   --------------------------------------------------------------------------
-  OutData <= r.OutRes;
-  OutVld  <= r.OutVld(r.OutVld'high);
+  dat_o <= r.OutRes;
+  vld_o <= r.OutVld(r.OutVld'high);
 
   --------------------------------------------------------------------------
   -- Sequential Process
   --------------------------------------------------------------------------
-  proc_seq : process(Clk)
+  proc_seq : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       r <= r_next;
-      if Rst = '1' then
+      if rst_i = '1' then
         r.InVld  <= (others => '0');
         r.OutVld <= (others => '0');
       end if;
@@ -221,8 +207,8 @@ begin
   SignIn_s <= r.InSign(r.InSign'high);
   inst_sqrt : entity work.psi_fix_lin_approx_inv18b
     port map(
-      Clk     => Clk,
-      Rst     => Rst,
+      Clk     => clk_i,
+      Rst     => rst_i,
       InVld   => r.InVld(r.InVld'high),
       InData  => InvIn_s,
       OutVld  => InvVld_s,
@@ -243,8 +229,8 @@ begin
         RamBehavior_g => RamBehavior_g
       )
       port map(
-        Clk     => Clk,
-        Rst     => Rst,
+        Clk     => clk_i,
+        Rst     => rst_i,
         InData  => FifoIn,
         InVld   => r.InVld(r.InVld'high),
         OutData => FifoOut,

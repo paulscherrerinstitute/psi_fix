@@ -10,22 +10,15 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library work;
 use work.psi_fix_pkg.all;
 use work.psi_tb_textfile_pkg.all;
 -- @foramter:off
-------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------
 entity psi_fix_complex_addsub_tb is
   generic(Pipeline_g   : boolean := true;
           FileFolder_g : string  := "../testbench/psi_fix_complex_addsub_tb/Data";
           ClkPerSpl_g  : integer := 1);
 end entity;
 
-------------------------------------------------------------
--- Architecture
-------------------------------------------------------------
 architecture sim of psi_fix_complex_addsub_tb is
   -- *** Fixed Generics ***
   constant RstPol_g : std_logic   := '1';
@@ -75,16 +68,16 @@ begin
       Sat_g      => Sat_g,
       AddSub_g   => "ADD")
     port map(
-      InClk   => InClk,
-      InRst   => InRst,
-      InIADat => InInpADat,
-      InQADat => InQuaADat,
-      InIBDat => InInpBDat,
-      InQBDat => InQuaBDat,
-      InVld   => InVld,
-      OutIDat => AddOutInpDat,
-      OutQDat => AddOutQuaDat,
-      OutVld  => OutVld);
+      clk_i         => InClk,
+      rst_i         => InRst,
+      dat_inA_inp_i => InInpADat,
+      dat_inA_qua_i => InQuaADat,
+      dat_inB_inp_i => InInpBDat,
+      dat_inB_qua_i => InQuaBDat,
+      vld_i         => InVld,
+      dat_out_inp_o => AddOutInpDat,
+      dat_out_qua_o => AddOutQuaDat,
+      vld_o         => OutVld);
 
   ------------------------------------------------------------
   -- DUT Instantiation Sub
@@ -100,16 +93,16 @@ begin
       Sat_g      => Sat_g,
       AddSub_g   => "SUB")
     port map(
-      InClk   => InClk,
-      InRst   => InRst,
-      InIADat => InInpADat,
-      InQADat => InQuaADat,
-      InIBDat => InInpBDat,
-      InQBDat => InQuaBDat,
-      InVld   => InVld,
-      OutIDat => SubOutInpDat,
-      OutQDat => SubOutQuaDat,
-      OutVld  => open);
+      clk_i         => InClk,
+      rst_i         => InRst,
+      dat_inA_inp_i => InInpADat,
+      dat_inA_qua_i => InQuaADat,
+      dat_inB_inp_i => InInpBDat,
+      dat_inB_qua_i => InQuaBDat,
+      vld_i         => InVld,
+      dat_out_inp_o => SubOutInpDat,
+      dat_out_qua_o => SubOutQuaDat,
+      vld_o         => open);
 
   ------------------------------------------------------------
   -- Testbench Control !DO NOT EDIT!

@@ -4,10 +4,6 @@
 --  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -16,20 +12,17 @@ use ieee.math_real.all;
 use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
-
-------------------------------------------------------------------------------
--- Entity
-------------------------------------------------------------------------------
+-- @formatter:off
 entity psi_fix_cic_dec_fix_nch_tdm_tdm is
   generic(
-    Channels_g     : integer              := 3; -- Min. 2
-    Order_g        : integer              := 4; -- CIC filter order
-    Ratio_g        : integer              := 10; -- decimation ratio
-    DiffDelay_g    : natural range 1 to 2 := 1; -- differential delay
-    InFmt_g        : PsiFixFmt_t          := (1, 0, 15); -- input format FP
-    OutFmt_g       : PsiFixFmt_t          := (1, 0, 15); -- output format FP
+    Channels_g     : integer              := 3;           -- Min. 2
+    Order_g        : integer              := 4;           -- CIC filter order
+    Ratio_g        : integer              := 10;          -- decimation ratio
+    DiffDelay_g    : natural range 1 to 2 := 1;           -- differential delay
+    InFmt_g        : PsiFixFmt_t          := (1, 0, 15);  -- input format FP
+    OutFmt_g       : PsiFixFmt_t          := (1, 0, 15);  -- output format FP
     rst_pol_g      : std_logic            := '1';
-    AutoGainCorr_g : boolean              := True -- Uses up to 25 bits of the datapath and 17 bit correction parameter
+    AutoGainCorr_g : boolean              := True         -- Uses up to 25 bits of the datapath and 17 bit correction parameter
   );
   port(
     -- Control Signals
@@ -44,11 +37,7 @@ entity psi_fix_cic_dec_fix_nch_tdm_tdm is
     busy_o : out std_logic              -- busy/ready signal
   );
 end entity;
-
-------------------------------------------------------------------------------
--- Architecture section
-------------------------------------------------------------------------------
-
+-- @formatter:on
 architecture rtl of psi_fix_cic_dec_fix_nch_tdm_tdm is
   -- Constants
   constant CicGain_c    : real                                                   := (real(Ratio_g) * real(DiffDelay_g))**real(Order_g);
@@ -280,4 +269,4 @@ begin
       );
   end generate;
 
-end rtl;
+end architecture;

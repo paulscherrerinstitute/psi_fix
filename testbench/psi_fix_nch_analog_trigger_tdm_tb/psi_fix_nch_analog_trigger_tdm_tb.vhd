@@ -72,13 +72,13 @@ architecture tb of psi_fix_nch_analog_trigger_tdm_tb is
   end function;
   ------------------------------------------------------------------------------------------------------------
   signal trig_dff         : std_logic;
-  signal ext_sti          : std_logic_vector(trig_ext_nb_g - 1 downto 0)         := (others => '0');
+  signal ext_sti          : std_logic_vector(trig_ext_nb_g - 1 downto 0)                   := (others => '0');
   signal mask_min_sti     : std_logic_vector(trig_nb_g * ch_nb_g - 1 downto 0)             := (others => '0');
   signal mask_max_sti     : std_logic_vector(trig_nb_g * ch_nb_g - 1 downto 0)             := (others => '0');
-  signal mask_ext_sti     : std_logic_vector(trig_nb_g*trig_ext_nb_g - 1 downto 0)         := (others => '0');
+  signal mask_ext_sti     : std_logic_vector(trig_nb_g * trig_ext_nb_g - 1 downto 0)       := (others => '0');
   signal thld_min_sti     : std_logic_vector(ch_nb_g * PsiFixSize(fix_fmt_g) - 1 downto 0) := (others => '0');
   signal thld_max_sti     : std_logic_vector(ch_nb_g * PsiFixSize(fix_fmt_g) - 1 downto 0) := (others => '0');
-  signal trig_clr_ext_sti : std_logic_vector(trig_nb_g*trig_ext_nb_g - 1 downto 0)         := (others => '0');
+  signal trig_clr_ext_sti : std_logic_vector(trig_nb_g * trig_ext_nb_g - 1 downto 0)       := (others => '0');
   signal trig_mode_sti    : std_logic_vector(trig_nb_g - 1 downto 0)                       := (others => '0');
   signal trig_arm_sti     : std_logic_vector(trig_nb_g - 1 downto 0)                       := (others => '0');
   signal trig_obs         : std_logic_vector(trig_nb_g - 1 downto 0)                       := (others => '0');
@@ -215,36 +215,36 @@ begin
     ------------------------------------------------------------
     wait for period_c;
     trig_mode_sti(0) <= '1';
-    trig_arm_sti(0)     <= '1';
+    trig_arm_sti(0)  <= '1';
     --*** init arrays ***
     for i in 0 to ch_nb_g - 1 loop
-      thld_min_sti(i*bit_c+bit_c - 1 downto i*bit_c)         <= to_uslv(100, bit_c);
-      thld_max_sti(i*bit_c+bit_c - 1 downto i*bit_c) <= to_uslv(5000, bit_c);
+      thld_min_sti(i * bit_c + bit_c - 1 downto i * bit_c) <= to_uslv(100, bit_c);
+      thld_max_sti(i * bit_c + bit_c - 1 downto i * bit_c) <= to_uslv(5000, bit_c);
     end loop;
     wait for 100 * period_c;
-    mask_min_sti(0) <= '1';             --only activ min for ch   
+    mask_min_sti(0)  <= '1';            --only activ min for ch   
     wait until trig_dff = '1';
     print("[INFO]: Check channel 0 trigger Min");
     assert check_array_s(0) < to_uslv(100, bit_c) report "***ERROR***: Ch 0 has min Thld 100 trig occurs but data is above thld min" severity error;
     wait for 100 * period_c;
     print("[INFO]: Check if trigger is dearmed");
     assert is_arm_obs(0) = '0' report "***ERROR***: trigger is not dearmed but raised" severity error;
-    trig_arm_sti(0)     <= '0';
-    mask_min_sti(0) <= '0';             --dactiv min for ch
+    trig_arm_sti(0)  <= '0';
+    mask_min_sti(0)  <= '0';            --dactiv min for ch
     wait for 10 * period_c;
-    trig_arm_sti(0)     <= '1';        --rearm
+    trig_arm_sti(0)  <= '1';            --rearm
     wait for 100 * period_c;
-    mask_max_sti(0) <= '1';             --activ max for ch 0
+    mask_max_sti(0)  <= '1';            --activ max for ch 0
     wait until trig_dff = '1';
     print("[INFO]: Check channel 0 trigger Max");
     assert check_array_s(0) > to_uslv(5000, bit_c) report "***ERROR***: Ch 0 has max Thld 5000 trig occurs but data is under thld min" severity error;
     wait for 100 * period_c;
-    mask_min_sti(0) <= '0';             --deactiv min for ch 
-    mask_max_sti(0) <= '0';             --deactiv max for ch 0
+    mask_min_sti(0)  <= '0';            --deactiv min for ch 
+    mask_max_sti(0)  <= '0';            --deactiv max for ch 0
     wait for 100 * period_c;
-    trig_arm_sti(0)     <= '0';
+    trig_arm_sti(0)  <= '0';
     wait for 10 * period_c;
-    trig_arm_sti(0)     <= '1';         --rearm trigger
+    trig_arm_sti(0)  <= '1';            --rearm trigger
     mask_min_sti(0)  <= '1';            --active min ch3
     wait until trig_dff = '1';
     print("[INFO]: Check channel 3 trigger Min");
@@ -252,14 +252,14 @@ begin
     wait for 100 * period_c;
     ------------------------------------------------------------
     print("[INFO]: Test external signal align");
-    mask_min_sti    <= (others => '0'); --deactiv min for ch 
-    mask_max_sti    <= (others => '0'); --deactiv max for ch 0
-    mask_ext_sti    <= (others => '0'); --deactiv max for ch 0
-    mask_ext_sti(0) <= '1';             --
-    trig_arm_sti(0) <= '0';             --disarm trigger
+    mask_min_sti     <= (others => '0'); --deactiv min for ch 
+    mask_max_sti     <= (others => '0'); --deactiv max for ch 0
+    mask_ext_sti     <= (others => '0'); --deactiv max for ch 0
+    mask_ext_sti(0)  <= '1';            --
+    trig_arm_sti(0)  <= '0';            --disarm trigger
     wait for 10 * period_c;
 
-    trig_arm_sti(0)  <= '1';            --rearm trigger
+    trig_arm_sti(0)     <= '1';         --rearm trigger
     wait until str_sti = '0';
     wait until rising_edge(str_sti);
     wait until rising_edge(str_sti);
@@ -270,40 +270,40 @@ begin
     trig_clr_ext_sti(0) <= '1';         -- clear external
     trig_arm_sti(0)     <= '0';         -- dearm
     wait for 20 * period_c;
-    trig_arm_sti(0) <= '1';
-    mask_min_sti    <= (others => '0'); --deactiv min for ch 
-    mask_max_sti    <= (others => '0'); --deactiv max for ch 0
-    mask_ext_sti    <= (others => '0'); --deactiv max for ch 0
+    trig_arm_sti(0)     <= '1';
+    mask_min_sti        <= (others => '0'); --deactiv min for ch 
+    mask_max_sti        <= (others => '0'); --deactiv max for ch 0
+    mask_ext_sti        <= (others => '0'); --deactiv max for ch 0
     wait for 20 * period_c;
     ------------------------------------------------------------
     if trig_ext_nb_g > 1 then
-    print("[INFO]: Test external signal 2 align");
-      mask_ext_sti(1) <= '1';
+      print("[INFO]: Test external signal 2 align");
+      mask_ext_sti(1)     <= '1';
       wait until rising_edge(str_sti);
       wait until rising_edge(str_sti);
       PulseSig(ext_sti(1), clk_sti);
       wait until trig_obs(0) = '1';
       wait for 50 * period_c;
-      trig_clr_ext_sti(0) <= '1';         -- clear external
-      trig_arm_sti(0)     <= '0';         -- dearm
+      trig_clr_ext_sti(0) <= '1';       -- clear external
+      trig_arm_sti(0)     <= '0';       -- dearm
       wait for 20 * period_c;
-      trig_arm_sti(0) <= '1';
-      mask_min_sti    <= (others => '0'); --deactiv min for ch 
-      mask_max_sti    <= (others => '0'); --deactiv max for ch 0
-      mask_ext_sti    <= (others => '0'); --deactiv max for ch 0
+      trig_arm_sti(0)     <= '1';
+      mask_min_sti        <= (others => '0'); --deactiv min for ch 
+      mask_max_sti        <= (others => '0'); --deactiv max for ch 0
+      mask_ext_sti        <= (others => '0'); --deactiv max for ch 0
       wait for 20 * period_c;
     end if;
-    
+
     ------------------------------------------------------------
     if trig_nb_g > 1 then
       print("[INFO]: Test trigger 2");
-      trig_clr_ext_sti(0)     <= '0';         -- clear external
-      mask_ext_sti(trig_nb_g*trig_ext_nb_g-1) <= '1';         -- set trigger 2 mask external
-      trig_arm_sti(1)         <= '1';         -- arm  
+      trig_clr_ext_sti(0)                         <= '0'; -- clear external
+      mask_ext_sti(trig_nb_g * trig_ext_nb_g - 1) <= '1'; -- set trigger 2 mask external
+      trig_arm_sti(1)                             <= '1'; -- arm  
       wait until rising_edge(str_sti);
       wait until rising_edge(str_sti);
-      PulseSig(ext_sti(trig_ext_nb_g-1), clk_sti);  --generate external trigger   
-      wait until trig_obs(trig_nb_g-1) = '1';
+      PulseSig(ext_sti(trig_ext_nb_g - 1), clk_sti); --generate external trigger   
+      wait until trig_obs(trig_nb_g - 1) = '1';
       wait for 50 * period_c;
     end if;
     tb_run_s <= false;

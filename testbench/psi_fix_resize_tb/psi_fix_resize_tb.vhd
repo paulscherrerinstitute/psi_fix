@@ -67,14 +67,14 @@ begin
 			Sat_g => Sat_g
 		)
 		port map (
-			Clk => Clk,
-			Rst => Rst,
-			InVld => InVld,
-			InRdy => InRdy,
-			InData => InData,
-			OutVld => OutVld,
-			OutRdy => OutRdy,
-			OutData => OutData
+			clk_i => Clk,
+			rst_i => Rst,
+			vld_i => InVld,
+			rdy_o => InRdy,
+			dat_i => InData,
+			vld_o => OutVld,
+			rdy_i => OutRdy,
+			dat_o => OutData
 		);
 	
 	------------------------------------------------------------

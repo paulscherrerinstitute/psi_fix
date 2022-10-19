@@ -4,10 +4,6 @@
 --  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -17,9 +13,6 @@ use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity
-------------------------------------------------------------------------------
 entity psi_fix_cic_dec_fix_nch_par_tdm is
   generic(
     Channels_g     : integer              := 3; -- Min. 2
@@ -44,10 +37,6 @@ entity psi_fix_cic_dec_fix_nch_par_tdm is
     busy_o : out std_logic
   );
 end entity;
-
-------------------------------------------------------------------------------
--- Architecture section
-------------------------------------------------------------------------------
 
 architecture rtl of psi_fix_cic_dec_fix_nch_par_tdm is
   -- Constants
@@ -237,7 +226,6 @@ begin
   --------------------------------------------------------------------------
   -- Component Instantiations
   --------------------------------------------------------------------------
-
   -- *** Parallel to TDM conversion before diff-stages ***
   g_partdmin : for ch in 0 to Channels_g - 1 generate
     ParTdmIn(PsiFixSize(DiffFmt_c) * (ch + 1) - 1 downto PsiFixSize(DiffFmt_c) * ch) <= PsiFixShiftRight(r.Accu(Order_g)(ch), AccuFmt_c, Shift_c, Shift_c, DiffFmt_c, PsiFixTrunc, PsiFixWrap);

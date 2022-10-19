@@ -34,18 +34,19 @@ entity psi_fix_fir_3tap_hbw_dec2 is
     Channels_g : natural     := 2;      -- $$ EXPORT=true $$
     Separate_g : boolean     := true;   -- $$ EXPORT=true $$
     Rnd_g      : PsiFixRnd_t := PsiFixRound;
-    Sat_g      : PsiFixSat_t := PsiFixSat
+    Sat_g      : PsiFixSat_t := PsiFixSat;
+    rst_pol_g  : std_logic   := '1'
   );
   port(
     -- Control Signals
-    Clk     : in  std_logic;            -- $$ TYPE=CLK; FREQ=100e6; Proc=Input $$
-    Rst     : in  std_logic;            -- $$ TYPE=RST; CLK=Clk $$
+    clk_i : in  std_logic;                                                            -- $$ TYPE=CLK; FREQ=100e6; Proc=Input $$
+    rst_i : in  std_logic;                                                            -- $$ TYPE=RST; CLK=Clk $$
     -- Input
-    InVld   : in  std_logic;            -- $$ PROC=Input $$
-    InData  : in  std_logic_vector(PsiFixSize(InFmt_g) * 2 * Channels_g - 1 downto 0); -- $$ PROC=Input $$
+    vld_i : in  std_logic;                                                            -- $$ PROC=Input $$
+    dat_i : in  std_logic_vector(PsiFixSize(InFmt_g) * 2 * Channels_g - 1 downto 0);  -- $$ PROC=Input $$
     -- Output
-    OutVld  : out std_logic;            -- $$ PROC=Output $$
-    OutData : out std_logic_vector(PsiFixSize(OutFmt_g) * Channels_g - 1 downto 0) -- $$ PROC=Output $$
+    vld_o : out std_logic;                                                            -- $$ PROC=Output $$
+    dat_o : out std_logic_vector(PsiFixSize(OutFmt_g) * Channels_g - 1 downto 0)      -- $$ PROC=Output $$
   );
 end entity;
 
@@ -80,21 +81,20 @@ architecture rtl of psi_fix_fir_3tap_hbw_dec2 is
   signal InDataS : InData_t;
 
 begin
-
   --------------------------------------------
   -- Input Transformation
   --------------------------------------------
-  process(InData) is
+  process(dat_i) is
   begin
     for i in 0 to 2 * Channels_g - 1 loop
-      InDataS(i) <= InData(PsiFixSize(InFmt_g) * (i + 1) - 1 downto PsiFixSize(InFmt_g) * i);
+      InDataS(i) <= dat_i(PsiFixSize(InFmt_g) * (i + 1) - 1 downto PsiFixSize(InFmt_g) * i);
     end loop;
   end process;
 
   --------------------------------------------
   -- Combinatorial Process
   --------------------------------------------
-  p_comb : process(r, InVld, InDataS)
+  p_comb : process(r, vld_i, InDataS)
     variable v : two_process_r;
   begin
     -- *** Hold variables stable ***
@@ -105,9 +105,9 @@ begin
 
     -- *** Stage 0 ***
     -- Input Registers
-    v.Vld(0) := InVld;
+    v.Vld(0) := vld_i;
 
-    if InVld = '1' then
+    if vld_i = '1' then
       v.InData := InDataS;
       if Separate_g then
         for v_i in 0 to inDataS'high / 2 loop
@@ -153,10 +153,10 @@ begin
 
     -- *** Output Assignment ***
     for i in 0 to Channels_g - 1 loop
-      OutData(PsiFixSize(OutFmt_g) * (i + 1) - 1 downto PsiFixSize(OutFmt_g) * i) <= r.OutSig(i);
+      dat_o(PsiFixSize(OutFmt_g) * (i + 1) - 1 downto PsiFixSize(OutFmt_g) * i) <= r.OutSig(i);
     end loop;
 
-    OutVld <= r.Vld(r.Vld'high);
+    vld_o <= r.Vld(r.Vld'high);
 
     -- *** Assign to signal ***
     r_next <= v;
@@ -165,15 +165,14 @@ begin
   --------------------------------------------
   -- Sequential Process
   --------------------------------------------
-  p_seq : process(Clk)
+  p_seq : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       r <= r_next;
-      if Rst = '1' then
+      if rst_i = rst_pol_g then
         r.Vld <= (others => '0');
       end if;
     end if;
   end process;
 
 end architecture;
-
