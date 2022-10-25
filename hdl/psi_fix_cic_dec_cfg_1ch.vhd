@@ -3,6 +3,7 @@
 --  All rights reserved.
 --  Authors: Oliver Bruendler
 --  https://github.com/paulscherrerinstitute/psi_fix/blob/refactor/hdl/psi_fix_cic_dec_cfg_1ch.vhd
+--  Configuration (only change when in reset!)
 ---------------------------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -35,16 +36,13 @@ entity psi_fix_cic_dec_cfg_1ch is
   port(
     clk_i           : in  std_logic;                                            -- clk system
     rst_i           : in  std_logic;                                            -- rst system
-    -- Configuration (only change when in reset!)
     cfg_ratio_i     : in  std_logic_vector(log2ceil(MaxRatio_g) - 1 downto 0);  -- Ratio-1 (0 --> no decimation, 3 --> decimation by 4)
     cfg_shift_i     : in  std_logic_vector(7 downto 0);                         -- Shifting by more than 255 bits is not supported, this would lead to timing issues anyways
     cfg_gain_corr_i : in  std_logic_vector(16 downto 0);                        -- Gain correction factor in format [0,1,16]
-    -- Data Ports
     dat_i           : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);   -- data input
     vld_i           : in  std_logic;                                            -- valid input
     dat_o           : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);  -- data output
     vld_o           : out std_logic;                                            -- valid otuput
-    -- Status output
     busy_o          : out std_logic                                             -- busy signal output active high
   );
 end entity;

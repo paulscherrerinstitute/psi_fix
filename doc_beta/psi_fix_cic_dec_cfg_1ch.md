@@ -4,7 +4,7 @@
 [**components list**](index.md)
 # psi_fix_cic_dec_cfg_1ch
  - VHDL source: [psi_fix_cic_dec_cfg_1ch](../hdl/psi_fix_cic_dec_cfg_1ch.vhd)
- - Testbench source: [psi_fix_cic_dec_cfg_1ch_tb.vhd](../testbench/psi_fix_cic_dec_cfg_1ch/psi_fix_cic_dec_cfg_1ch_tb.vhd)
+ - Testbench source: [psi_fix_cic_dec_cfg_1ch_tb.vhd](../testbench/psi_fix_cic_dec_cfg_1ch_tb/psi_fix_cic_dec_cfg_1ch_tb.vhd)
 
 ### Description
 

@@ -10,9 +10,10 @@ use work.psi_fix_pkg.all;
 use work.psi_common_math_pkg.all;
 
 entity psi_fix_lin_approx_gaussify20b is
-  generic(rst_pol_g : std_logic := '1');
+  generic(
+    rst_pol_g : std_logic := '1'
+  );
   port(
-    -- Control Signals
     clk_i : in  std_logic;
     rst_i : in  std_logic;    
     dat_i : in  std_logic_vector(20 - 1 downto 0);  -- Format (1, 0, 19)
