@@ -22,11 +22,11 @@ end entity;
 architecture sim of psi_fix_complex_addsub_tb is
   -- *** Fixed Generics ***
   constant RstPol_g : std_logic   := '1';
-  constant InAFmt_g : PsiFixFmt_t := (1, 0, 15);
-  constant InBFmt_g : PsiFixFmt_t := (1, 0, 15);
-  constant OutFmt_g : PsiFixFmt_t := (1, 0, 15);
-  constant Round_g  : PsiFixRnd_t := PsiFixRound;
-  constant Sat_g    : PsiFixSat_t := PsiFixSat;
+  constant InAFmt_g : psi_fix_fmt_t := (1, 0, 15);
+  constant InBFmt_g : psi_fix_fmt_t := (1, 0, 15);
+  constant OutFmt_g : psi_fix_fmt_t := (1, 0, 15);
+  constant Round_g  : psi_fix_rnd_t := PsiFixRound;
+  constant Sat_g    : psi_fix_sat_t := PsiFixSat;
 
   -- *** TB Control ***
   signal TbRunning            : boolean                  := True;

@@ -37,9 +37,9 @@ end entity;
 ------------------------------------------------------------
 architecture sim of psi_fix_pol2cart_approx_tb is
   -- *** Fixed Generics ***
-  constant InAbsFmt_g   : PsiFixFmt_t := (0, 0, 16);
-  constant InAngleFmt_g : PsiFixFmt_t := (0, 0, 15);
-  constant OutFmt_g     : PsiFixFmt_t := (1, 0, 16);
+  constant InAbsFmt_g   : psi_fix_fmt_t := (0, 0, 16);
+  constant InAngleFmt_g : psi_fix_fmt_t := (0, 0, 15);
+  constant OutFmt_g     : psi_fix_fmt_t := (1, 0, 16);
 
   -- *** Not Assigned Generics (default values) ***
 

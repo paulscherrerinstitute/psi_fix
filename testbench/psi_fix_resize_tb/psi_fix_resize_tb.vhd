@@ -30,10 +30,10 @@ end entity;
 ------------------------------------------------------------
 architecture sim of psi_fix_resize_tb is
 	-- *** Fixed Generics ***
-	constant InFmt_g : PsiFixFmt_t := (1,1,14);
-	constant OutFmt_g : PsiFixFmt_t := (0,0,3);
-	constant Round_g : PsiFixRnd_t := PsiFixRound;
-	constant Sat_g : PsiFixSat_t := PsiFixSat;
+	constant InFmt_g : psi_fix_fmt_t := (1,1,14);
+	constant OutFmt_g : psi_fix_fmt_t := (0,0,3);
+	constant Round_g : psi_fix_rnd_t := PsiFixRound;
+	constant Sat_g : psi_fix_sat_t := PsiFixSat;
 	
 	-- *** Not Assigned Generics (default values) ***
 	

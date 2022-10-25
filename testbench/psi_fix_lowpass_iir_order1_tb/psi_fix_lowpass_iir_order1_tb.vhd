@@ -38,14 +38,14 @@ architecture sim of psi_fix_lowpass_iir_order1_tb is
   -- *** Fixed Generics ***
   constant FSampleHz_g : real        := 100.0e6;
   constant FCutoffHz_g : real        := 1.0e6;
-  constant InFmt_g     : PsiFixFmt_t := (1, 0, 15);
-  constant OutFmt_g    : PsiFixFmt_t := (1, 0, 14);
+  constant InFmt_g     : psi_fix_fmt_t := (1, 0, 15);
+  constant OutFmt_g    : psi_fix_fmt_t := (1, 0, 14);
 
   -- *** Not Assigned Generics (default values) ***
-  constant IntFmt_g        : PsiFixFmt_t := (1, 0, 24);
-  constant CoefFmt_g       : PsiFixFmt_t := (1, 0, 17);
-  constant Round_g         : PsiFixRnd_t := PsiFixRound;
-  constant Sat_g           : PsiFixSat_t := PsiFixSat;
+  constant IntFmt_g        : psi_fix_fmt_t := (1, 0, 24);
+  constant CoefFmt_g       : psi_fix_fmt_t := (1, 0, 17);
+  constant Round_g         : psi_fix_rnd_t := PsiFixRound;
+  constant Sat_g           : psi_fix_sat_t := PsiFixSat;
   constant ResetPolarity_g : std_logic   := '1';
 
   -- *** TB Control ***

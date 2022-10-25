@@ -30,9 +30,9 @@ architecture sim of psi_fix_bin_div_tb is
   -------------------------------------------------------------------------
   -- Constants
   -------------------------------------------------------------------------
-  constant NumFmt_c   : PsiFixFmt_t := (1, 2, 5);
-  constant DenomFmt_c : PsiFixFmt_t := (1, 2, 8);
-  constant OutFmt_c   : PsiFixFmt_t := (1, 4, 10);
+  constant NumFmt_c   : psi_fix_fmt_t := (1, 2, 5);
+  constant DenomFmt_c : psi_fix_fmt_t := (1, 2, 8);
+  constant OutFmt_c   : psi_fix_fmt_t := (1, 4, 10);
 
   -------------------------------------------------------------------------
   -- TB Defnitions

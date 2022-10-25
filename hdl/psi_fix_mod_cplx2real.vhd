@@ -23,22 +23,22 @@ use work.psi_fix_pkg.all;
 --@formatter:off
 -- $$ processes=stim,check $$
 entity psi_fix_mod_cplx2real is
-  generic(RstPol_g   : std_logic            := '1';         -- $$ constant = '1' $$
-          PlStages_g : integer range 5 to 6 := 5;
-          InpFmt_g   : PsiFixFmt_t          := (1, 1, 15);  -- $$ constant=(1,1,15) $$
-          CoefFmt_g  : PsiFixFmt_t          := (1, 1, 15);  -- $$ constant=(1,1,15) $$
-          IntFmt_g   : PsiFixFmt_t          := (1, 1, 15);  -- $$ constant=(1,1,15) $$
-          OutFmt_g   : PsiFixFmt_t          := (1, 1, 15);  -- $$ constant=(1,1,15) $$
-          Ratio_g    : natural              := 5            -- $$ constant=5 $$
+  generic(RstPol_g   : std_logic            := '1';           -- reset polarity $$ constant = '1' $$
+          PlStages_g : integer range 5 to 6 := 5;             -- select the pipelines stages required
+          InpFmt_g   : psi_fix_fmt_t        := (1, 1, 15);    -- input format FP $$ constant=(1,1,15) $$
+          CoefFmt_g  : psi_fix_fmt_t        := (1, 1, 15);    -- coef format $$ constant=(1,1,15) $$
+          IntFmt_g   : psi_fix_fmt_t        := (1, 1, 15);    -- internal format computation $$ constant=(1,1,15) $$
+          OutFmt_g   : psi_fix_fmt_t        := (1, 1, 15);    -- output format FP $$ constant=(1,1,15) $$
+          Ratio_g    : natural              := 5              -- ratio for deciamtion $$ constant=5 $$
          );
   port(
-    clk_i     : in  std_logic;                                           -- $$ type=clk; freq=100e6 $$
-    rst_i     : in  std_logic;                                           -- $$ type=rst; clk=clk_i $$
-    vld_i     : in  std_logic;                                           -- valid
+    clk_i     : in  std_logic;                                         -- $$ type=clk; freq=100e6 $$
+    rst_i     : in  std_logic;                                         -- $$ type=rst; clk=clk_i $$
     dat_inp_i : in  std_logic_vector(PsiFixSize(InpFmt_g)-1 downto 0); -- in-phase 	 data
     dat_qua_i : in  std_logic_vector(PsiFixSize(InpFmt_g)-1 downto 0); -- quadrature data
-    dat_o     : out std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0);
-    vld_o     : out std_logic
+    vld_i     : in  std_logic;                                         -- valid input frequency sampling
+    dat_o     : out std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0); -- data output IF/RF
+    vld_o     : out std_logic                                          -- valid output frequency sampling
   );
 end entity;
 --@formatter:on
@@ -72,8 +72,8 @@ architecture rtl of psi_fix_mod_cplx2real is
   end function;
 
   -------------------------------------------------------------------------------
-  constant MultFmt_c                            : PsiFixFmt_t  := (1, InpFmt_g.I + CoefFmt_g.I + 1, CoefFmt_g.F + InpFmt_g.F);
-  constant AddFmt_c                             : PsiFixFmt_t  := (1, IntFmt_g.I + 1, IntFmt_g.F);
+  constant MultFmt_c                            : psi_fix_fmt_t  := (1, InpFmt_g.I + CoefFmt_g.I + 1, CoefFmt_g.F + InpFmt_g.F);
+  constant AddFmt_c                             : psi_fix_fmt_t  := (1, IntFmt_g.I + 1, IntFmt_g.F);
   --Definitin within the above package
   constant table_sin                            : coef_array_t := coef_sin_array_func;
   constant table_cos                            : coef_array_t := coef_cos_array_func;

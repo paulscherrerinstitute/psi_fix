@@ -25,9 +25,9 @@ package psi_fix_fir_dec_ser_nch_chtdm_conf_tb_pkg is
   -- Constants
   -------------------------------------------------------------------------
   constant Channels_c : integer     := 2;
-  constant InFmt_c    : PsiFixFmt_t := (1, 0, 16);
-  constant CoefFmt_c  : PsiFixFmt_t := (1, 0, 15);
-  constant OutFmt_c   : PsiFixFmt_t := (1, 0, 17);
+  constant InFmt_c    : psi_fix_fmt_t := (1, 0, 16);
+  constant CoefFmt_c  : psi_fix_fmt_t := (1, 0, 15);
+  constant OutFmt_c   : psi_fix_fmt_t := (1, 0, 17);
   constant MaxRatio_c : integer     := 8;
   constant MaxTaps_c  : integer     := 16;
 

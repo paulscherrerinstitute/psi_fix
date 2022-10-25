@@ -4,10 +4,6 @@
 --  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -16,41 +12,34 @@ use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
 -- @formatter:off
-------------------------------------------------------------------------------
--- Entity
-------------------------------------------------------------------------------	
 entity psi_fix_dds_18b is
   generic(
-    PhaseFmt_g    : PsiFixFmt_t := (0, 0, 31);
-    TdmChannels_g : positive    := 1;
-    RamBehavior_g : string      := "RBW";
-    rst_pol_g     : std_logic   :='1'
+    PhaseFmt_g    : psi_fix_fmt_t := (0, 0, 31);                              -- phase format width => generally counter length
+    TdmChannels_g : positive    := 1;                                         -- time division multiplexed number of channels
+    RamBehavior_g : string      := "RBW";                                     -- RAM beahvior read before write
+    rst_pol_g     : std_logic   :='1';                                        -- reset polarity active high = '1'
+    rst_sync_g    : boolean     := true                                       -- reset sync or async
   );
   port(
     -- Control Signals
-    clk_i        : in  std_logic;
-    rst_i        : in  std_logic;
+    clk_i        : in  std_logic;                                             -- clk system
+    rst_i        : in  std_logic;                                             -- rst system
     -- Control Signals
-    restart_i    : in  std_logic := '0';
-    phi_step_i   : in  std_logic_vector(PsiFixSize(PhaseFmt_g) - 1 downto 0);
-    phi_offset_i : in  std_logic_vector(PsiFixSize(PhaseFmt_g) - 1 downto 0);
-    -- Input
-    vld_i        : in  std_logic := '1';
-    -- Output
-    vld_o        : out std_logic;
-    dat_sin_o    : out std_logic_vector(17 downto 0);
-    dat_cos_o    : out std_logic_vector(17 downto 0)
+    restart_i    : in  std_logic := '0';                                      -- restart counter (init phase)
+    phi_step_i   : in  std_logic_vector(PsiFixSize(PhaseFmt_g) - 1 downto 0); -- phase step (rasterized make sens for phase noise)
+    phi_offset_i : in  std_logic_vector(PsiFixSize(PhaseFmt_g) - 1 downto 0); -- phase offset
+    vld_i        : in  std_logic := '1';                                      -- frequency sampling input valid
+    dat_sin_o    : out std_logic_vector(17 downto 0);                         -- sinus output
+    dat_cos_o    : out std_logic_vector(17 downto 0);                         -- cosine output 90° phase shifted 
+    vld_o        : out std_logic                                              -- freqeuncy sampling output valid
   );
 end entity;
 -- @formatter:on
-------------------------------------------------------------------------------
--- Architecture section
-------------------------------------------------------------------------------
 
 architecture rtl of psi_fix_dds_18b is
   -- Constants
-  constant SinOutFmt_c : PsiFixFmt_t                                           := (1, 0, 17);
-  constant SinInFmt_c  : PsiFixFmt_t                                           := (0, 0, 20);
+  constant SinOutFmt_c : psi_fix_fmt_t                                         := (1, 0, 17);
+  constant SinInFmt_c  : psi_fix_fmt_t                                         := (0, 0, 20);
   constant CosOffs_c   : std_logic_vector(PsiFixSize(PhaseFmt_g) - 1 downto 0) := PsiFixFromReal(0.25, PhaseFmt_g);
 
   -- Two Process Method
@@ -147,35 +136,51 @@ begin
   --------------------------------------------------------------------------
   -- Sequential Process
   --------------------------------------------------------------------------	
-  p_seq : process(clk_i)
+  sync_rst_gene : if rst_sync_g generate
   begin
-    if rising_edge(clk_i) then
-      r <= r_next;
+    p_seq : process(clk_i)
+    begin
+      if rising_edge(clk_i) then
+        r <= r_next;
+        if rst_i = rst_pol_g then
+          r.PhaseAccu_0   <= (others => '0');
+          r.VldIn         <= (others => '0');
+          r.FirstSplCnt_0 <= TdmChannels_g;
+        end if;
+      end if;
+    end process;
+  end generate;
+
+  async_rst_gene : if not rst_sync_g generate
+  begin
+    process(clk_i, rst_i)
+    begin
       if rst_i = rst_pol_g then
         r.PhaseAccu_0   <= (others => '0');
         r.VldIn         <= (others => '0');
         r.FirstSplCnt_0 <= TdmChannels_g;
+      elsif rising_edge(clk_i) then
+        r <= r_next;
       end if;
-    end if;
-  end process;
-
+    end process;
+  end generate;
   --------------------------------------------------------------------------
   -- Component Instantiation
   --------------------------------------------------------------------------	
   i_sincos : entity work.psi_fix_lin_approx_sin18b_dual
     port map(
       -- Control Signals
-      clk_i      => clk_i,
-      rst_i      => rst_i,
+      clk_i   => clk_i,
+      rst_i   => rst_i,                 -- TODO ensure psi fix is consistent with reset snc or async
       -- Input
-      vld_a_i   => r.VldIn(2),
-      dat_a_i  => r.PhaseSin_2,
-      vld_b_i   => r.VldIn(2),
-      dat_b_i  => r.PhaseCos_2,
+      vld_a_i => r.VldIn(2),
+      dat_a_i => r.PhaseSin_2,
+      vld_b_i => r.VldIn(2),
+      dat_b_i => r.PhaseCos_2,
       -- Output
-      vld_a_o  => SinVld,
+      vld_a_o => SinVld,
       dat_a_o => SinData,
-      vld_b_o  => CosVld,
+      vld_b_o => CosVld,
       dat_b_o => CosData
     );
 
@@ -189,7 +194,7 @@ begin
     )
     port map(
       Clk     => clk_i,
-      Rst     => rst_i,
+      Rst     => rst_i,                   -- TODO ensure psi fix is consistent with reset snc or async
       InData  => PhaseAccu_Next,
       InVld   => vld_i,
       OutData => PhaseAccu

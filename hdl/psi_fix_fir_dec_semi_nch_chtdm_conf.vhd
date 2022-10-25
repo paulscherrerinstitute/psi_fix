@@ -12,10 +12,8 @@
 -- - The number of channels is configurable
 -- - All channels are processed time-division-multiplexed
 -- - Coefficients are configurable but the same for each channel
--- - After the reset, the delay lines are not flushed. So tranisents may occur for the first few samples after resetting the filter.
-
-------------------------------------------------------------------------------
--- Libraries
+-- - After the reset, the delay lines are not flushed. So tranisents may occur
+-- - for the first few samples after resetting the filter.
 ------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -26,46 +24,43 @@ use work.psi_fix_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_common_array_pkg.all;
 
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 -- $$ processes=stim, resp $$
 entity psi_fix_fir_dec_semi_nch_chtdm_conf is
   generic(
-    InFmt_g              : PsiFixFmt_t := (1, 0, 17); -- $$ constant=(1,0,15) $$
-    OutFmt_g             : PsiFixFmt_t := (1, 0, 17); -- $$ constant=(1,2,13) $$
-    CoefFmt_g            : PsiFixFmt_t := (1, 0, 17); -- $$ constant=(1,0,17) $$
-    Channels_g           : natural     := 4; -- $$ export=true $$
-    Multipliers_g        : natural     := 4;
-    Ratio_g              : natural     := 8;
-    Taps_g               : natural     := 32;
-    Rnd_g                : PsiFixRnd_t := PsiFixRound;
-    Sat_g                : PsiFixSat_t := PsiFixSat;
-    UseFixCoefs_g        : boolean     := false;
-    FullInpRateSupport_g : boolean     := false;
-    RamBehavior_g        : string      := "RBW"; -- "RBW" = read-before-write, "WBR" = write-before-read
-    Coefs_g              : t_areal     := (0.1, 0.2);
-    ImplFlushIf_g        : boolean     := false
+    InFmt_g              : psi_fix_fmt_t := (1, 0, 17);                                         -- input format FP $$ constant=(1,0,15) $$
+    OutFmt_g             : psi_fix_fmt_t := (1, 0, 17);                                         -- output format FP $$ constant=(1,2,13) $$
+    CoefFmt_g            : psi_fix_fmt_t := (1, 0, 17);                                         -- coef format FP $$ constant=(1,0,17) $$
+    Channels_g           : natural     := 4;                                                    -- number of parallel channels $$ export=true $$
+    Multipliers_g        : natural     := 4;                                                    -- number of multipliers to use in parallel
+    Ratio_g              : natural     := 8;                                                    -- decimation ratio
+    Taps_g               : natural     := 32;                                                   -- number of taps implemented
+    Rnd_g                : psi_fix_rnd_t := PsiFixRound;                                        -- round or trunc
+    Sat_g                : psi_fix_sat_t := PsiFixSat;                                          -- sat or wrap
+    UseFixCoefs_g        : boolean     := false;                                                -- if true fixed coefficient instead of configurable
+    FullInpRateSupport_g : boolean     := false;                                                -- True = valid signa can be High all the time
+    RamBehavior_g        : string      := "RBW";                                                -- "RBW" = read-before-write, "WBR" = write-before-read
+    Coefs_g              : t_areal     := (0.1, 0.2);                                           -- inital value for coefficients
+    ImplFlushIf_g        : boolean     := false                                                 -- implement memory flushing interface
   );
   port(
     -- Control Signals
-    clk_i         : in  std_logic;      -- $$ type=clk; freq=100e6 $$
-    rst_i         : in  std_logic;      -- $$ type=rst; clk=Clk $$
+    clk_i         : in  std_logic;                                                              -- clk system $$ type=clk; freq=100e6 $$
+    rst_i         : in  std_logic;                                                              -- rst system $$ type=rst; clk=Clk $$
     -- Input
-    vld_i         : in  std_logic;
-    dat_i         : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
+    dat_i         : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);                     -- data input
+    vld_i         : in  std_logic;                                                              -- valid input - AXI-S handshaking 
     -- Output
-    vld_o         : out std_logic;
-    dat_o         : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+    dat_o         : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);                    -- Output data, one channel is passed after the other
+    vld_o         : out std_logic;                                                              -- valid output signal - AXI-S handshaking 
     -- Coefficient interface		
-    coef_wr_i     : in  std_logic                                            := '0';
-    coef_addr_i   : in  std_logic_vector(log2ceil(Taps_g) - 1 downto 0)      := (others => '0');
-    coef_wr_dat_i : in  std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0');
+    coef_wr_i     : in  std_logic                                            := '0';            -- Coefficient write enable signal
+    coef_addr_i   : in  std_logic_vector(log2ceil(Taps_g) - 1 downto 0)      := (others => '0');-- Address of the coefficient to access
+    coef_wr_dat_i : in  std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0');-- Coefficient value for write access (CoefWr = 1)
     -- Delay-line flushing interface
-    flush_mem_i   : in  std_logic                                            := '0';
-    flush_done_o  : out std_logic;
+    flush_mem_i   : in  std_logic                                            := '0';            -- Inject a pulse to flush all data memories (usually done after reset).                                                                                            
+    flush_done_o  : out std_logic;                                                              -- A pulse on this port indicates that a flush started by FlushMem = ‘1’ was completed.                                                                                            
     -- Status Output
-    busy_o        : out std_logic
+    busy_o        : out std_logic                                                               -- busy signal output status
   );
 end entity;
 
@@ -83,8 +78,8 @@ architecture rtl of psi_fix_fir_dec_semi_nch_chtdm_conf is
   constant ChSelBits_c        : natural := log2ceil(Channels_g);
 
   -- Constants
-  constant AccuFmt_c       : PsiFixFmt_t := (1, InFmt_g.I + CoefFmt_g.I + log2ceil(Multipliers_g), InFmt_g.F + CoefFmt_g.F);
-  constant RoundFmt_c      : PsiFixFmt_t := (1, AccuFmt_c.I + 1, OutFmt_g.F);
+  constant AccuFmt_c       : psi_fix_fmt_t := (1, InFmt_g.I + CoefFmt_g.I + log2ceil(Multipliers_g), InFmt_g.F + CoefFmt_g.F);
+  constant RoundFmt_c      : psi_fix_fmt_t := (1, AccuFmt_c.I + 1, OutFmt_g.F);
   constant CyclesPerCalc_c : integer     := integer(ceil(real(Taps_g) / real(Multipliers_g)));
 
   -- types

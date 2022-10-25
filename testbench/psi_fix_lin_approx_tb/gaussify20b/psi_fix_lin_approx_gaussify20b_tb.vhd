@@ -33,8 +33,8 @@ end entity;
 architecture sim of psi_fix_lin_approx_gaussify20b_tb is
 
   -- constants
-  constant InFmt_c     : PsiFixFmt_t := (1, 0, 19);
-  constant OutFmt_c    : PsiFixFmt_t := (1, 0, 19);
+  constant InFmt_c     : psi_fix_fmt_t := (1, 0, 19);
+  constant OutFmt_c    : psi_fix_fmt_t := (1, 0, 19);
   constant ClkPeriod_c : time        := 10 ns;
 
   -- Signals

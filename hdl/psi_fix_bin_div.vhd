@@ -8,10 +8,9 @@
 -- Description
 ------------------------------------------------------------------------------
 -- This component calculates a binary division of two fixed point values.
+-- link:
+------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -20,39 +19,39 @@ use work.psi_fix_pkg.all;
 use work.psi_common_logic_pkg.all;
 use work.psi_common_math_pkg.all;
 
+-- @formatter:off
 entity psi_fix_bin_div is
   generic(
-    NumFmt_g   : PsiFixFmt_t := (1, 0, 17);   -- numerator format 
-    DenomFmt_g : PsiFixFmt_t := (0, 0, 17);   -- denominator format 
-    OutFmt_g   : PsiFixFmt_t := (1, 0, 25);   -- ouput format
-    Round_g    : PsiFixRnd_t := PsiFixTrunc;  -- rounding or trunc
-    Sat_g      : PsiFixSat_t := PsiFixSat;    -- saturation or wrap
-    rst_pol_g  : std_logic   := '1'           -- polarity reset
-  );
+       NumFmt_g      : psi_fix_fmt_t := (1, 0, 17);                              -- numerator format 
+       DenomFmt_g    : psi_fix_fmt_t := (0, 0, 17);                              -- denominator format 
+       OutFmt_g      : psi_fix_fmt_t := (1, 0, 25);                              -- ouput format
+       Round_g       : psi_fix_rnd_t := PsiFixTrunc;                             -- rounding or trunc
+       Sat_g         : psi_fix_sat_t := PsiFixSat;                               -- saturation or wrap
+       rst_pol_g     : std_logic   := '1';                                       -- polarity reset
+       rst_sync_g    : boolean     := true                                       -- sync reset ?
+        );
   port(
-    -- Control Signals
-    clk_i         : in  std_logic;
-    rst_i         : in  std_logic;
-    -- Input
-    vld_i         : in  std_logic;
-    rdy_i         : out std_logic;
-    numerator_i   : in  std_logic_vector(PsiFixSize(NumFmt_g) - 1 downto 0);
-    denominator_i : in  std_logic_vector(PsiFixSize(DenomFmt_g) - 1 downto 0);
-    -- Output
-    vld_o         : out std_logic;
-    result_o      : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)
-  );
+       clk_i         : in  std_logic;                                            -- clk system
+       rst_i         : in  std_logic;                                            -- rst system depends on polarity
+       vld_i         : in  std_logic;                                            -- valid signal input
+       rdy_i         : out std_logic;                                            -- ready signal output
+       numerator_i   : in  std_logic_vector(PsiFixSize(NumFmt_g) - 1 downto 0);  -- numerator to divide
+       denominator_i : in  std_logic_vector(PsiFixSize(DenomFmt_g) - 1 downto 0);-- denominator divider
+       vld_o         : out std_logic;                                            -- valid output signal
+       result_o      : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)   -- result output = Num/Den
+        );
 end entity;
+-- @formatter:on
 
 architecture rtl of psi_fix_bin_div is
 
   -- constants
   constant FirstShift_c   : integer     := OutFmt_g.I;
-  constant NumAbsFmt_c    : PsiFixFmt_t := (0, NumFmt_g.I + NumFmt_g.S, NumFmt_g.F);
-  constant DenomAbsFmt_c  : PsiFixFmt_t := (0, DenomFmt_g.I + DenomFmt_g.S, DenomFmt_g.F);
-  constant ResultIntFmt_c : PsiFixFmt_t := (1, OutFmt_g.I + 1, OutFmt_g.F + 1);
-  constant DenomCompFmt_c : PsiFixFmt_t := (0, DenomAbsFmt_c.I + FirstShift_c, DenomAbsFmt_c.F - FirstShift_c);
-  constant NumCompFmt_c   : PsiFixFmt_t := (0, max(DenomCompFmt_c.I, NumAbsFmt_c.I), max(DenomCompFmt_c.F, NumAbsFmt_c.F));
+  constant NumAbsFmt_c    : psi_fix_fmt_t := (0, NumFmt_g.I + NumFmt_g.S, NumFmt_g.F);
+  constant DenomAbsFmt_c  : psi_fix_fmt_t := (0, DenomFmt_g.I + DenomFmt_g.S, DenomFmt_g.F);
+  constant ResultIntFmt_c : psi_fix_fmt_t := (1, OutFmt_g.I + 1, OutFmt_g.F + 1);
+  constant DenomCompFmt_c : psi_fix_fmt_t := (0, DenomAbsFmt_c.I + FirstShift_c, DenomAbsFmt_c.F - FirstShift_c);
+  constant NumCompFmt_c   : psi_fix_fmt_t := (0, max(DenomCompFmt_c.I, NumAbsFmt_c.I), max(DenomCompFmt_c.F, NumAbsFmt_c.F));
   constant Iterations_c   : integer     := OutFmt_g.I + OutFmt_g.F + 2;
 
   -- types
@@ -174,17 +173,34 @@ begin
   result_o <= r.OutQuot;
   rdy_i    <= r.InRdy;
 
-  p_seq : process(clk_i)
+  sync_rst_gene : if rst_sync_g generate
   begin
-    if rising_edge(clk_i) then
-      r <= r_next;
-      if rst_i = rst_pol_g then
-        r.State  <= Idle_s;
-        r.OutVld <= '0';
-        r.InRdy  <= '0';
+    p_seq : process(clk_i)
+    begin
+      if rising_edge(clk_i) then
+        r <= r_next;
+        if rst_i = rst_pol_g then
+          r.State  <= Idle_s;
+          r.OutVld <= '0';
+          r.InRdy  <= '0';
+        end if;
       end if;
-    end if;
-  end process;
+    end process;
+  end generate;
+
+  async_rst_gene : if not rst_sync_g generate
+  begin
+    p_seq : process(clk_i,rst_i)
+    begin
+       if rst_i = rst_pol_g then
+          r.State  <= Idle_s;
+          r.OutVld <= '0';
+          r.InRdy  <= '0';
+      elsif rising_edge(clk_i) then
+        r <= r_next;     
+      end if;
+    end process;
+  end generate;
   
 end architecture;
 

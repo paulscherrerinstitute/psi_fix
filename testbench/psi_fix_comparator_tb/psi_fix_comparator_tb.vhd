@@ -20,7 +20,7 @@ use work.psi_tb_txt_util.all;
 use work.psi_fix_pkg.all;
 
 entity psi_fix_comparator_tb is
-  generic(fmt_g : PsiFixFmt_t := (1, 0, 15));
+  generic(fmt_g : psi_fix_fmt_t := (1, 0, 15));
 end entity;
 
 architecture tb of psi_fix_comparator_tb is
@@ -76,8 +76,8 @@ begin
              set_min_i => set_min_sti,
              set_max_i => set_max_sti,
              data_i    => data_sti,
-             str_i     => str_sti,
-             str_o     => str_obs,
+             vld_i     => str_sti,
+             vld_o     => str_obs,
              min_o     => min_obs,
              max_o     => max_obs
             );

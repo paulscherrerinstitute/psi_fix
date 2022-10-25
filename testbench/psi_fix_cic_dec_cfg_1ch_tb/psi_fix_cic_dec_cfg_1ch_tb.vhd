@@ -34,8 +34,8 @@ architecture sim of psi_fix_cic_dec_cfg_1ch_tb is
   -------------------------------------------------------------------------
   -- Constants
   -------------------------------------------------------------------------
-  constant InFmt_c        : PsiFixFmt_t                                         := (1, 0, 16);
-  constant OutFmt_c       : PsiFixFmt_t                                         := (1, 0, 17);
+  constant InFmt_c        : psi_fix_fmt_t                                         := (1, 0, 16);
+  constant OutFmt_c       : psi_fix_fmt_t                                         := (1, 0, 17);
   constant MaxRatio_c     : integer                                             := 10000;
   constant Ratio_c        : std_logic_vector(log2ceil(MaxRatio_c) - 1 downto 0) := to_uslv(Ratio_g - 1, log2ceil(MaxRatio_c));
   constant CicGain_c      : real                                                := (real(Ratio_g) * real(DiffDelay_g))**real(Order_g);

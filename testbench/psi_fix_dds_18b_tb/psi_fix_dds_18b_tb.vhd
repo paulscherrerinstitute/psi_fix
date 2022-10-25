@@ -48,8 +48,8 @@ architecture sim of psi_fix_dds_18b_tb is
   -------------------------------------------------------------------------
   -- Interface Signals
   -------------------------------------------------------------------------
-  constant OutFmt_c    : PsiFixFmt_t                                           := (1, 0, 17);
-  constant PhaseFmt_c  : PsiFixFmt_t                                           := (0, 0, 31);
+  constant OutFmt_c    : psi_fix_fmt_t                                           := (1, 0, 17);
+  constant PhaseFmt_c  : psi_fix_fmt_t                                           := (0, 0, 31);
   signal Clk           : std_logic                                             := '0';
   signal Rst           : std_logic                                             := '1';
   signal InVld         : std_logic                                             := '0';

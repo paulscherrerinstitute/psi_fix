@@ -3,7 +3,6 @@
 --  All rights reserved.
 --  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -12,42 +11,42 @@ use ieee.math_real.all;
 use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
-
+-- @formatter : off
 entity psi_fix_cic_dec_fix_nch_par_tdm is
   generic(
-    Channels_g     : integer              := 3; -- Min. 2
-    Order_g        : integer              := 4;
-    Ratio_g        : integer              := 10;
-    DiffDelay_g    : natural range 1 to 2 := 1;
-    InFmt_g        : PsiFixFmt_t          := (1, 0, 15);
-    OutFmt_g       : PsiFixFmt_t          := (1, 0, 15);
-    rst_pol_g      : std_logic;
-    AutoGainCorr_g : boolean              := True -- Uses up to 25 bits of the datapath and 17 bit correction parameter
+    Channels_g     : integer              := 3;                                   -- Min. 2
+    Order_g        : integer              := 4;                                   -- CIC Filter Order
+    Ratio_g        : integer              := 10;                                  -- Decimation ratio watch out the number of channels
+    DiffDelay_g    : natural range 1 to 2 := 1;                                   -- diffrential delay
+    InFmt_g        : psi_fix_fmt_t        := (1, 0, 15);                          -- input format FP
+    OutFmt_g       : psi_fix_fmt_t        := (1, 0, 15);                          -- output fromat FP
+    rst_pol_g      : std_logic;                                                   -- reset polarity active high = '1'
+    AutoGainCorr_g : boolean              := True                                 -- Uses up to 25 bits of the datapath and 17 bit correction parameter
   );
   port(
     -- Control Signals
-    clk_i  : in  std_logic;
-    rst_i  : in  std_logic;
-    -- Data Ports
-    dat_i  : in  std_logic_vector(PsiFixSize(InFmt_g) * Channels_g - 1 downto 0);
-    vld_i  : in  std_logic;
-    dat_o  : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-    vld_o  : out std_logic;
+    clk_i  : in  std_logic;                                                       --clk system
+    rst_i  : in  std_logic;                                                       --rst system
+    -- Data Ports 
+    dat_i  : in  std_logic_vector(PsiFixSize(InFmt_g) * Channels_g - 1 downto 0); -- data input
+    vld_i  : in  std_logic;                                                       -- valid input frequency sampling
+    dat_o  : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);             -- data output
+    vld_o  : out std_logic;                                                       -- valid output new frequency sampling Fs/Ratio
     -- Status Output
-    busy_o : out std_logic
+    busy_o : out std_logic                                                        -- active high
   );
 end entity;
-
+-- @formatter : on
 architecture rtl of psi_fix_cic_dec_fix_nch_par_tdm is
   -- Constants
   constant CicGain_c    : real                                                   := (real(Ratio_g) * real(DiffDelay_g))**real(Order_g);
   constant CicAddBits_c : integer                                                := log2ceil(CicGain_c - 0.1); -- WORKAROUND: Vivado does real calculations imprecisely. With the -0.1, wrong results are avoided.
   constant Shift_c      : integer                                                := CicAddBits_c;
-  constant AccuFmt_c    : PsiFixFmt_t                                            := (InFmt_g.S, InFmt_g.I + CicAddBits_c, InFmt_g.F);
-  constant DiffFmt_c    : PsiFixFmt_t                                            := (OutFmt_g.S, InFmt_g.I, OutFmt_g.F + Order_g + 1);
-  constant GcInFmt_c    : PsiFixFmt_t                                            := (1, OutFmt_g.I, work.psi_common_math_pkg.min(24 - OutFmt_g.I, DiffFmt_c.F));
-  constant GcCoefFmt_c  : PsiFixFmt_t                                            := (0, 1, 16);
-  constant GcMultFmt_c  : PsiFixFmt_t                                            := (1, GcInFmt_c.I + GcCoefFmt_c.I, GcInFmt_c.F + GcCoefFmt_c.F);
+  constant AccuFmt_c    : psi_fix_fmt_t                                            := (InFmt_g.S, InFmt_g.I + CicAddBits_c, InFmt_g.F);
+  constant DiffFmt_c    : psi_fix_fmt_t                                            := (OutFmt_g.S, InFmt_g.I, OutFmt_g.F + Order_g + 1);
+  constant GcInFmt_c    : psi_fix_fmt_t                                            := (1, OutFmt_g.I, work.psi_common_math_pkg.min(24 - OutFmt_g.I, DiffFmt_c.F));
+  constant GcCoefFmt_c  : psi_fix_fmt_t                                            := (0, 1, 16);
+  constant GcMultFmt_c  : psi_fix_fmt_t                                            := (1, GcInFmt_c.I + GcCoefFmt_c.I, GcInFmt_c.F + GcCoefFmt_c.F);
   constant Gc_c         : std_logic_vector(PsiFixSize(GcCoefFmt_c) - 1 downto 0) := PsiFixFromReal(2.0**real(CicAddBits_c) / CicGain_c, GcCoefFmt_c);
 
   -- Types

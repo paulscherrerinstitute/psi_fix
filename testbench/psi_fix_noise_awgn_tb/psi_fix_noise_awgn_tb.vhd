@@ -34,7 +34,7 @@ end entity;
 architecture sim of psi_fix_noise_awgn_tb is
 
   -- *** Constants ***
-  constant OutFmt_c : PsiFixFmt_t := (1, 0, 15);
+  constant OutFmt_c : psi_fix_fmt_t := (1, 0, 15);
 
   -- *** TB Control ***
   signal TbRunning             : boolean                  := True;

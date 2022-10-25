@@ -9,6 +9,7 @@
 ------------------------------------------------------------------------------
 -- This component calculateas a linear approximation. It should only be used
 -- together with tables generated from python (there is a code generator).
+------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -19,26 +20,23 @@ use work.psi_common_math_pkg.all;
 
 entity psi_fix_lin_approx_calc is
   generic(
-    InFmt_g     : PsiFixFmt_t := (1, 0, 17);
-    OutFmt_g    : PsiFixFmt_t := (1, 0, 17);
-    OffsFmt_g   : PsiFixFmt_t := (1, 0, 17);
-    GradFmt_g   : PsiFixFmt_t := (1, 0, 17);
-    TableSize_g : natural     := 1024;
-    rst_pol_g   : std_logic   := '1'
+    InFmt_g     : psi_fix_fmt_t := (1, 0, 17); -- depending ont table so do not touch
+    OutFmt_g    : psi_fix_fmt_t := (1, 0, 17); -- depending ont table so do not touch
+    OffsFmt_g   : psi_fix_fmt_t := (1, 0, 17); -- depending ont table so do not touch
+    GradFmt_g   : psi_fix_fmt_t := (1, 0, 17); -- depending ont table so do not touch
+    TableSize_g : natural     := 1024;         -- depending ont table so do not touch
+    rst_pol_g   : std_logic   := '1'           -- reset polarity 
   );
   port(
-    -- Control Signals
-    clk_i        : in  std_logic;
-    rst_i        : in  std_logic;
-    -- Input
-    vld_i        : in  std_logic;
-    dat_i        : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-    -- Output
-    vld_o        : out std_logic;
-    dat_o        : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+    clk_i        : in  std_logic;                                             -- system clock
+    rst_i        : in  std_logic;                                             -- system reset
+    dat_i        : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);    -- data input 
+    vld_i        : in  std_logic;                                             -- valid input freqeuncy sampling
+    dat_o        : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);   -- data output
+    vld_o        : out std_logic;                                             -- valid output frequency sampling
     -- Table Interface
-    addr_table_o : out std_logic_vector(log2ceil(TableSize_g) - 1 downto 0);
-    data_table_i : in  std_logic_vector(PsiFixSize(OffsFmt_g) + PsiFixSize(GradFmt_g) - 1 downto 0)
+    addr_table_o : out std_logic_vector(log2ceil(TableSize_g) - 1 downto 0);                        --
+    data_table_i : in  std_logic_vector(PsiFixSize(OffsFmt_g) + PsiFixSize(GradFmt_g) - 1 downto 0) --
   );
 end entity;
 
@@ -47,11 +45,11 @@ architecture rtl of psi_fix_lin_approx_calc is
   -- Constants
   constant IndexBits_c    : integer     := log2ceil(TableSize_g);
   constant OffsetBits_c   : integer     := PsiFixSize(InFmt_g) - IndexBits_c;
-  constant RemFmt_c       : PsiFixFmt_t := (0, OffsetBits_c - InFmt_g.F, InFmt_g.F);
-  constant RemFmtSigned_c : PsiFixFmt_t := (1, RemFmt_c.I - 1, RemFmt_c.F);
-  constant IdxFmt_c       : PsiFixFmt_t := (0, InFmt_g.S + InFmt_g.I, InFmt_g.F - RemFmt_c.F - RemFmt_c.I);
-  constant IntFmt_c       : PsiFixFmt_t := (1, RemFmt_c.I + GradFmt_g.I + 1, RemFmt_c.F + GradFmt_g.F);
-  constant AddFmt_c       : PsiFixFmt_t := (max(IntFmt_c.S, OffsFmt_g.S), max(IntFmt_c.I, OffsFmt_g.I) + 1, max(IntFmt_c.F, OffsFmt_g.F));
+  constant RemFmt_c       : psi_fix_fmt_t := (0, OffsetBits_c - InFmt_g.F, InFmt_g.F);
+  constant RemFmtSigned_c : psi_fix_fmt_t := (1, RemFmt_c.I - 1, RemFmt_c.F);
+  constant IdxFmt_c       : psi_fix_fmt_t := (0, InFmt_g.S + InFmt_g.I, InFmt_g.F - RemFmt_c.F - RemFmt_c.I);
+  constant IntFmt_c       : psi_fix_fmt_t := (1, RemFmt_c.I + GradFmt_g.I + 1, RemFmt_c.F + GradFmt_g.F);
+  constant AddFmt_c       : psi_fix_fmt_t := (max(IntFmt_c.S, OffsFmt_g.S), max(IntFmt_c.I, OffsFmt_g.I) + 1, max(IntFmt_c.F, OffsFmt_g.F));
 
   subtype OffsRng_c is natural range PsiFixSize(OffsFmt_g) - 1 downto 0;
   subtype GradRng_c is natural range PsiFixSize(GradFmt_g) + OffsRng_c'high downto OffsRng_c'high + 1;

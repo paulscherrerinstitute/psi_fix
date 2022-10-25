@@ -8,6 +8,7 @@
 -- Description
 ------------------------------------------------------------------------------
 -- This is a pure VHDL and vendor indpendent true dual port RAM.
+------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -20,24 +21,24 @@ use work.psi_fix_pkg.all;
 
 entity psi_fix_param_ram is
   generic(
-    Depth_g    : positive    := 1024;
-    Fmt_g      : PsiFixFmt_t := (1, 0, 15);
-    Behavior_g : string      := "RBW";  -- "RBW" = read-before-write, "WBR" = write-before-read
-    Init_g     : t_areal     := (0.0, 0.0) -- First N parameters are initialized, others are zero
+    Depth_g    : positive    := 1024;         -- memory depth
+    Fmt_g      : psi_fix_fmt_t := (1, 0, 15); -- fixed format
+    Behavior_g : string      := "RBW";        -- "RBW" = read-before-write, "WBR" = write-before-read
+    Init_g     : t_areal     := (0.0, 0.0)    -- First N parameters are initialized, others are zero
   );
   port(
     -- Port A
-    ClkA  : in  std_logic                                        := '0';
-    AddrA : in  std_logic_vector(log2ceil(Depth_g) - 1 downto 0) := (others => '0');
-    WrA   : in  std_logic                                        := '0';
-    DinA  : in  std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0) := (others => '0');
-    DoutA : out std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0);
+    ClkA  : in  std_logic                                        := '0';            -- clock port A
+    AddrA : in  std_logic_vector(log2ceil(Depth_g) - 1 downto 0) := (others => '0');-- address port A
+    WrA   : in  std_logic                                        := '0';            -- write enable A
+    DinA  : in  std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0) := (others => '0');-- data input A
+    DoutA : out std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0);                   -- data output A
     -- Port B
-    ClkB  : in  std_logic                                        := '0';
-    AddrB : in  std_logic_vector(log2ceil(Depth_g) - 1 downto 0) := (others => '0');
-    WrB   : in  std_logic                                        := '0';
-    DinB  : in  std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0) := (others => '0');
-    DoutB : out std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0)
+    ClkB  : in  std_logic                                        := '0';            -- clock port B
+    AddrB : in  std_logic_vector(log2ceil(Depth_g) - 1 downto 0) := (others => '0');-- address port B
+    WrB   : in  std_logic                                        := '0';            -- write enable B 
+    DinB  : in  std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0) := (others => '0');-- data input B
+    DoutB : out std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0)                    -- data output B
   );
 end entity;
 

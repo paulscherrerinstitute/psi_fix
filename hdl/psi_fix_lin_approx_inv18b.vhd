@@ -12,27 +12,24 @@ use work.psi_common_math_pkg.all;
 
 entity psi_fix_lin_approx_inv18b is
   port(
-    -- Control Signals
-    Clk     : in  std_logic;
-    Rst     : in  std_logic;
-    -- Input
-    InVld   : in  std_logic;
-    InData  : in  std_logic_vector(19 - 1 downto 0); -- Format (0, 1, 18)
-    -- Output
-    OutVld  : out std_logic;
-    OutData : out std_logic_vector(18 - 1 downto 0) -- Format (0, 0, 18)
+    clk_i : in  std_logic;                         -- system clock
+    rst_i : in  std_logic;                         -- system reset
+    dat_i : in  std_logic_vector(19 - 1 downto 0); -- Format (0, 1, 18)
+    vld_i : in  std_logic;                         -- valid input
+    dat_o : out std_logic_vector(18 - 1 downto 0); -- Format (0, 0, 18)
+    vld_o : out std_logic                          -- valid output
   );
 end entity;
 
 architecture rtl of psi_fix_lin_approx_inv18b is
 
   -- Constants
-  constant InFmt_c      : PsiFixFmt_t := (0, 1, 18);
-  constant OutFmt_c     : PsiFixFmt_t := (0, 0, 18);
-  constant OffsFmt_c    : PsiFixFmt_t := (1, 0, 21);
-  constant GradFmt_c    : PsiFixFmt_t := (1, 0, 14);
-  constant TableSize_c  : integer     := 1024;
-  constant TableWidth_c : integer     := 37;
+  constant InFmt_c      : psi_fix_fmt_t := (0, 1, 18);
+  constant OutFmt_c     : psi_fix_fmt_t := (0, 0, 18);
+  constant OffsFmt_c    : psi_fix_fmt_t := (1, 0, 21);
+  constant GradFmt_c    : psi_fix_fmt_t := (1, 0, 14);
+  constant TableSize_c  : integer       := 1024;
+  constant TableWidth_c : integer       := 37;
 
   -- Table
 
@@ -1081,23 +1078,23 @@ begin
     )
     port map(
       -- Control Signals
-      clk_i     => Clk,
-      rst_i     => Rst,
+      clk_i        => clk_i,
+      rst_i        => rst_i,
       -- Input
-      vld_i   => InVld,
-      dat_i  => InData,
+      vld_i        => vld_i,
+      dat_i        => dat_i,
       -- Output
-      vld_o  => OutVld,
-      dat_o => OutData,
+      vld_o        => vld_o,
+      dat_o        => dat_o,
       -- Table Interface
       addr_table_o => TableAddr,
       data_table_i => TableData
     );
 
   -- *** Table ***
-  p_table : process(Clk)
+  p_table : process(clk_i)
   begin
-    if rising_edge(Clk) then
+    if rising_edge(clk_i) then
       TableData <= Table_c(to_integer(unsigned(TableAddr)));
     end if;
   end process;

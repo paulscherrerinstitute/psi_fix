@@ -20,7 +20,7 @@ architecture tb of psi_fix_lut_gen_tb is
   constant clk_freq_c : real := 100.0E6;
   constant period_c   : time := (1 sec) / clk_freq_c;
 
-  constant data_fmt_c   : PsiFixFmt_t            := (1, 0, 15);
+  constant data_fmt_c   : psi_fix_fmt_t            := (1, 0, 15);
   signal tb_run         : boolean                := true;
   signal clk_sti        : std_logic              := '0';
   signal rst_sti        : std_logic;

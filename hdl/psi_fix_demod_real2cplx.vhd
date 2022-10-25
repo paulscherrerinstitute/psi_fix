@@ -14,6 +14,7 @@
 -- The demodulator only works well for very narrowband signals with very little
 -- out of band noise. The signal frequency must be an integer multiple of the 
 -- sample frequency.
+------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -24,33 +25,33 @@ use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
 
 -- $$ processes=stim,check $$
+-- @formatter:off
 entity psi_fix_demod_real2cplx is
   generic(
-    RstPol_g   : std_logic := '1';      -- $$ constant = '1' $$
-    InFmt_g    : PsiFixFmt_t;           -- $$ constant=(1,0,15) $$
-    OutFmt_g   : PsiFixFmt_t;           -- $$ constant=(1,0,16) $$
-    CoefBits_g : positive  := 18;       -- $$ constant=25 $$
-    Channels_g : natural   := 1;        -- $$ constant=2 $$
-    Ratio_g    : natural   := 5         -- $$ constant=5 $$
+    RstPol_g   : std_logic := '1';                                                  -- reset polarity active high ='1'    $$ constant = '1' $$
+    InFmt_g    : psi_fix_fmt_t;                                                     -- input format FP                    $$ constant=(1,0,15) $$
+    OutFmt_g   : psi_fix_fmt_t;                                                     -- output format FP                   $$ constant=(1,0,16) $$
+    CoefBits_g : positive  := 18;                                                   -- internal coefficent number of bits $$ constant=25 $$
+    Channels_g : natural   := 1;                                                    -- number of channels TDM             $$ constant=2 $$
+    Ratio_g    : natural   := 5                                                     -- ratio betwenn clock and IF/RF      $$ constant=5 $$
   );
   port(
-    clk_i        : in  std_logic;       -- $$ type=clk; freq=100e6 $$
-    rst_i        : in  std_logic;       -- $$ type=rst; clk=clk_i $$
-    str_i        : in  std_logic;
-    data_i       : in  std_logic_vector(PsiFixSize(InFmt_g)*Channels_g - 1 downto 0);
-    phi_offset_i : in  std_logic_vector(log2ceil(Ratio_g)-1 downto 0);
-    --
-    data_I_o     : out std_logic_vector(PsiFixSize(OutFmt_g) * Channels_g - 1 downto 0);
-    data_Q_o     : out std_logic_vector(PsiFixSize(OutFmt_g) * Channels_g - 1 downto 0);
-    str_o        : out std_logic
+    clk_i        : in  std_logic;                                                    -- clk system $$ type=clk; freq=100e6 $$
+    rst_i        : in  std_logic;                                                    -- rst system $$ type=rst; clk=clk_i $$
+    dat_i        : in  std_logic_vector(PsiFixSize(InFmt_g)*Channels_g - 1 downto 0);-- data input IF/RF 
+    vld_i        : in  std_logic;                                                    -- valid input freqeuncy sampling 
+    phi_offset_i : in  std_logic_vector(log2ceil(Ratio_g)-1 downto 0);               -- phase offset for demod LUT
+    dat_inp_o    : out std_logic_vector(PsiFixSize(OutFmt_g)*Channels_g- 1 downto 0);-- inphase data output
+    dat_qua_o    : out std_logic_vector(PsiFixSize(OutFmt_g)*Channels_g- 1 downto 0);-- quadrature data output
+    vld_o        : out std_logic                                                     -- valid output
   );
 end entity;
-
+-- @formatter:on
 architecture RTL of psi_fix_demod_real2cplx is
 
   constant coefUnusedBits_c : integer     := log2(Ratio_g);
-  constant CoefFmt_c        : PsiFixFmt_t := (1, 0-coefUnusedBits_c, CoefBits_g + coefUnusedBits_c-1);
-  constant MultFmt_c        : PsiFixFmt_t := (1, InFmt_g.I + CoefFmt_c.I, OutFmt_g.F+log2ceil(Ratio_g)+2); -- truncation error does only lead to 1/4 LSB error on output
+  constant CoefFmt_c        : psi_fix_fmt_t := (1, 0-coefUnusedBits_c, CoefBits_g + coefUnusedBits_c-1);
+  constant MultFmt_c        : psi_fix_fmt_t := (1, InFmt_g.I + CoefFmt_c.I, OutFmt_g.F+log2ceil(Ratio_g)+2); -- truncation error does only lead to 1/4 LSB error on output
   constant coef_scale_c     : real        := (1.0-2.0**(-real(CoefFmt_c.F)))/real(Ratio_g); -- prevent +/- 1.0 and pre-compensate for gain of moving average
 
   type coef_array_t is array (0 to Ratio_g - 1) of std_logic_vector(PsiFixSize(CoefFmt_c) - 1 downto 0);
@@ -121,11 +122,11 @@ begin
         data_dff_s <= (others => (others => '0'));
         strIn      <= (others => '0');
       else
-        strIn(0)               <= str_i;
+        strIn(0)               <= vld_i;
         strIn(1 to strIn'high) <= strIn(0 to strIn'high - 1);
         -- Channel Splitting
         for i in 0 to Channels_g - 1 loop
-          data_s(i) <= data_i((i + 1) * PsiFixSize(InFmt_g) - 1 downto i * PsiFixSize(InFmt_g));
+          data_s(i) <= dat_i((i + 1) * PsiFixSize(InFmt_g) - 1 downto i * PsiFixSize(InFmt_g));
         end loop;
         -- Delay
         data_dff_s             <= data_s;
@@ -142,7 +143,7 @@ begin
       if rst_i = RstPol_g then
         cptInt <= 0;
       else
-        if str_i = '1' then
+        if vld_i = '1' then
           if cptInt = Ratio_g - 1 then
             cptInt <= 0;
           else
@@ -219,9 +220,9 @@ begin
         dat_o => out_i_s(i)
       );
 
-    data_I_o((i + 1) * PsiFixSize(OutFmt_g) - 1 downto i * PsiFixSize(OutFmt_g)) <= out_i_s(i);
+    dat_inp_o((i + 1) * PsiFixSize(OutFmt_g) - 1 downto i * PsiFixSize(OutFmt_g)) <= out_i_s(i);
   end generate;
-  str_o <= out_str_s(0);
+  vld_o <= out_str_s(0);
 
   --===========================================================================
   -- Q PATH
@@ -270,7 +271,7 @@ begin
         dat_o => out_q_s(i)
       );
 
-    data_Q_o((i + 1) * PsiFixSize(OutFmt_g) - 1 downto i * PsiFixSize(OutFmt_g)) <= out_q_s(i);
+    dat_qua_o((i + 1) * PsiFixSize(OutFmt_g) - 1 downto i * PsiFixSize(OutFmt_g)) <= out_q_s(i);
   end generate;
 
 end architecture;

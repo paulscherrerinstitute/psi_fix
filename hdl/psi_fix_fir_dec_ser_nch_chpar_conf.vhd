@@ -12,6 +12,7 @@
 -- - The number of channels is configurable
 -- - All channels are processed in parallel and their data must be synchronized
 -- - Coefficients are configurable but the same for each channel
+------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -23,38 +24,36 @@ use work.psi_common_array_pkg.all;
 
 -- @ formatter:off
 entity psi_fix_fir_dec_ser_nch_chpar_conf is
-  generic(InFmt_g       : PsiFixFmt_t := (1, 0, 17);    -- internal format
-          OutFmt_g      : PsiFixFmt_t := (1, 0, 17);    -- output format
-          CoefFmt_g     : PsiFixFmt_t := (1, 0, 17);    -- coefficient format
-          Channels_g    : natural     := 2;             -- channels
-          MaxRatio_g    : natural     := 8;             -- max decimation ratio
-          MaxTaps_g     : natural     := 1024;          -- max number of taps
-          Rnd_g         : PsiFixRnd_t := PsiFixRound;   -- rounding truncation
-          Sat_g         : PsiFixSat_t := PsiFixSat;     -- saturate or wrap
-          UseFixCoefs_g : boolean     := false;         -- use fix coefficients or update them
-          Coefs_g       : t_areal     := (0.0, 0.0);    -- see doc
-          RamBehavior_g : string      := "RBW";         -- RBW = Read before write, WBR = Write before read  
-          rst_pol_g     : std_logic   := '1'
+  generic(InFmt_g       : psi_fix_fmt_t := (1, 0, 17);    -- internal format
+          OutFmt_g      : psi_fix_fmt_t := (1, 0, 17);    -- output format
+          CoefFmt_g     : psi_fix_fmt_t := (1, 0, 17);    -- coefficient format
+          Channels_g    : natural     := 2;               -- channels
+          MaxRatio_g    : natural     := 8;               -- max decimation ratio
+          MaxTaps_g     : natural     := 1024;            -- max number of taps
+          Rnd_g         : psi_fix_rnd_t := PsiFixRound;   -- rounding truncation
+          Sat_g         : psi_fix_sat_t := PsiFixSat;     -- saturate or wrap
+          UseFixCoefs_g : boolean     := false;           -- use fix coefficients or update them
+          Coefs_g       : t_areal     := (0.0, 0.0);      -- see doc
+          RamBehavior_g : string      := "RBW";           -- RBW = Read before write, WBR = Write before read  
+          rst_pol_g     : std_logic   := '1'              -- reset polarity active high ='1' 
           );
-  port(clk_i            : in  std_logic;
-       rst_i            : in  std_logic;
-       -- Input
-       vld_i            : in  std_logic;
-       dat_i            : in  std_logic_vector(PsiFixSize(InFmt_g) * Channels_g - 1 downto 0);
-       -- Output
-       vld_o            : out std_logic;
-       dat_o            : out std_logic_vector(PsiFixSize(OutFmt_g) * Channels_g - 1 downto 0);
+  port(clk_i            : in  std_logic;                                                                -- system clock
+       rst_i            : in  std_logic;                                                                -- system reset
+       dat_i            : in  std_logic_vector(PsiFixSize(InFmt_g) * Channels_g - 1 downto 0);          -- data input
+       vld_i            : in  std_logic;                                                                -- valid input Frequency sampling
+       dat_o            : out std_logic_vector(PsiFixSize(OutFmt_g) * Channels_g - 1 downto 0);         -- data output
+       vld_o            : out std_logic;                                                                -- valid output new frequency sampling
        -- Parallel Configuration Interface
        cfg_ratio_i      : in  std_logic_vector(log2ceil(MaxRatio_g) - 1 downto 0)  := std_logic_vector(to_unsigned(MaxRatio_g - 1, log2ceil(MaxRatio_g))); -- Ratio - 1 (0 => Ratio 1, 4 => Ratio 5)
-       cfg_taps_i       : in  std_logic_vector(log2ceil(MaxTaps_g) - 1 downto 0)   := std_logic_vector(to_unsigned(MaxTaps_g - 1, log2ceil(MaxTaps_g))); -- Number of taps - 1
+       cfg_taps_i       : in  std_logic_vector(log2ceil(MaxTaps_g) - 1 downto 0)   := std_logic_vector(to_unsigned(MaxTaps_g - 1, log2ceil(MaxTaps_g)));   -- Number of taps - 1
        -- Coefficient interface
-       coef_if_clk_i    : in  std_logic                                            := '0';
-       coef_if_wr_i     : in  std_logic                                            := '0';
-       coef_if_addr_i   : in  std_logic_vector(log2ceil(MaxTaps_g) - 1 downto 0)   := (others => '0');
-       coef_if_wr_dat_i : in  std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0');
-       coef_if_rd_dat_o : out std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);
+       coef_if_clk_i    : in  std_logic                                            := '0';             -- clock for coef intereface
+       coef_if_wr_i     : in  std_logic                                            := '0';             -- write enable
+       coef_if_addr_i   : in  std_logic_vector(log2ceil(MaxTaps_g) - 1 downto 0)   := (others => '0'); -- address of coef access
+       coef_if_wr_dat_i : in  std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0'); -- coef to write
+       coef_if_rd_dat_o : out std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);                    -- coef read
        -- Status Output
-       busy_o           : out std_logic);
+       busy_o           : out std_logic);                                                              -- calculation on going active high
 end entity;
 -- @ formatter:on
 
@@ -64,9 +63,9 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chpar_conf is
   constant CoefMemDepthApplied_c : natural := 2**log2ceil(MaxTaps_g);
 
   -- Constants
-  constant MultFmt_c : PsiFixFmt_t := (max(InFmt_g.S, CoefFmt_g.S), InFmt_g.I + CoefFmt_g.I, InFmt_g.F + CoefFmt_g.F);
-  constant AccuFmt_c : PsiFixFmt_t := (1, OutFmt_g.I + 1, InFmt_g.F + CoefFmt_g.F);
-  constant RndFmt_c  : PsiFixFmt_t := (1, OutFmt_g.I + 1, OutFmt_g.F);
+  constant MultFmt_c : psi_fix_fmt_t := (max(InFmt_g.S, CoefFmt_g.S), InFmt_g.I + CoefFmt_g.I, InFmt_g.F + CoefFmt_g.F);
+  constant AccuFmt_c : psi_fix_fmt_t := (1, OutFmt_g.I + 1, InFmt_g.F + CoefFmt_g.F);
+  constant RndFmt_c  : psi_fix_fmt_t := (1, OutFmt_g.I + 1, OutFmt_g.F);
 
   -- types
   type InData_t is array (0 to Channels_g - 1) of std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);

@@ -29,7 +29,7 @@ use work.psi_fix_pkg.all;
 entity psi_fix_nch_analog_trigger_tdm_tb is
   generic(ch_nb_g       : natural     := 8; --number of input/output channel
           trig_ext_nb_g : natural     := 3; --number of input external trigger
-          fix_fmt_g     : PsiFixFmt_t := (1, 0, 15); --FP format
+          fix_fmt_g     : psi_fix_fmt_t := (1, 0, 15); --FP format
           trig_nb_g     : natural     := 2); --number of output trigger
 end entity;
 
@@ -121,7 +121,7 @@ begin
     port map(clk_i          => clk_sti,
              rst_i          => rst_sti,
              dat_i          => dat_sti,
-             str_i          => str_sti,
+             vld_i          => str_sti,
              ext_i          => ext_sti,
              mask_min_i     => mask_min_sti,
              mask_max_i     => mask_max_sti,

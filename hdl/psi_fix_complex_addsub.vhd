@@ -26,11 +26,11 @@ use work.psi_common_math_pkg.all;
 entity psi_fix_complex_addsub is
   generic(RstPol_g   : std_logic   := '1';                                      -- set reset polarity                $$ constant='1' $$
           Pipeline_g : boolean     := false;                                    -- when false 3 pipes stages, when false 6 pipes (increase Fmax)			$$ export=true $$
-          InAFmt_g   : PsiFixFmt_t := (1, 0, 15);                               -- Input A Fixed Point format   $$ constant=(1,0,15) $$
-          InBFmt_g   : PsiFixFmt_t := (1, 0, 24);                               -- Input B Fixed Point format   $$ constant=(1,0,24) $$
-          OutFmt_g   : PsiFixFmt_t := (1, 0, 20);                               -- Output Fixed Point format    $$ constant=(1,0,20) $$
-          Round_g    : PsiFixRnd_t := PsiFixRound;                              --   $$ constant=PsiFixRound $$
-          Sat_g      : PsiFixSat_t := PsiFixSat;                                --   $$ constant=PsiFixSat $$
+          InAFmt_g   : psi_fix_fmt_t := (1, 0, 15);                             -- Input A Fixed Point format   $$ constant=(1,0,15) $$
+          InBFmt_g   : psi_fix_fmt_t := (1, 0, 24);                             -- Input B Fixed Point format   $$ constant=(1,0,24) $$
+          OutFmt_g   : psi_fix_fmt_t := (1, 0, 20);                             -- Output Fixed Point format    $$ constant=(1,0,20) $$
+          Round_g    : psi_fix_rnd_t := PsiFixRound;                            -- Round or trunc  $$ constant=PsiFixRound $$
+          Sat_g      : psi_fix_sat_t := PsiFixSat;                              -- Adder or Subtracter  $$ constant=PsiFixSat $$
           AddSub_g   : string      := "ADD");
   port(clk_i         : in  std_logic;                                           -- clk    $$ type=clk; freq=100e6 $$
        rst_i         : in  std_logic;                                           -- sync. rst    $$ type=rst; clk=clk_i $$
@@ -53,8 +53,8 @@ end entity;
 ------------------------------------------------------------------------------
 architecture rtl of psi_fix_complex_addsub is
 
-  constant SumFmt_c : PsiFixFmt_t := (max(InAFmt_g.S, InBFmt_g.S), max(InAFmt_g.I, InBFmt_g.I) + 1, max(InAFmt_g.F, InBFmt_g.F));
-  constant RndFmt_c : PsiFixFmt_t := (SumFmt_c.S, SumFmt_c.I + 1, OutFmt_g.F);
+  constant SumFmt_c : psi_fix_fmt_t := (max(InAFmt_g.S, InBFmt_g.S), max(InAFmt_g.I, InBFmt_g.I) + 1, max(InAFmt_g.F, InBFmt_g.F));
+  constant RndFmt_c : psi_fix_fmt_t := (SumFmt_c.S, SumFmt_c.I + 1, OutFmt_g.F);
 
   -- Two process method
   type two_process_r is record

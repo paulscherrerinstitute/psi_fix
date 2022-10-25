@@ -1,3 +1,14 @@
+------------------------------------------------------------------------------
+--  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
+--  All rights reserved.
+--  Authors: Oliver Bruendler
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+-- Description
+------------------------------------------------------------------------------
+-- unwrap phase signal for instance +/- 180 -> 360° and so on with indicator
+------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -12,27 +23,27 @@ use work.psi_common_logic_pkg.all;
 -- $$ processes=stimuli,response $$
 entity psi_fix_phase_unwrap is
   generic(
-    InFmt_g   : PsiFixFmt_t := (1, 0, 15);
-    OutFmt_g  : PsiFixFmt_t := (0, 1, 15);
-    Round_g   : PsiFixRnd_t := PsiFixTrunc;
-    rst_pol_g : std_logic   := '1'
+    InFmt_g   : psi_fix_fmt_t := (1, 0, 15);                          -- input format
+    OutFmt_g  : psi_fix_fmt_t := (0, 1, 15);                          -- output format
+    Round_g   : psi_fix_rnd_t := PsiFixTrunc;                         -- round or trunc
+    rst_pol_g : std_logic   := '1'                                    -- reset polarity
   );
   port(
-    clk_i  : in  std_logic;             -- $$ type=Clk; freq=127e6 $$
-    rst_i  : in  std_logic;             -- $$ type=Rst; Clk=Clk $$
-    vld_i  : in  std_logic;
-    dat_i  : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-    vld_o  : out std_logic;
-    dat_o  : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-    wrap_o : out std_logic
+    clk_i  : in  std_logic;                                           -- $$ type=Clk; freq=127e6 $$
+    rst_i  : in  std_logic;                                           -- $$ type=Rst; Clk=Clk $$
+    dat_i  : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);  -- data input
+    vld_i  : in  std_logic;                                           -- valid signal input
+    dat_o  : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0); -- data output
+    vld_o  : out std_logic;                                           -- valid signal output
+    wrap_o : out std_logic                                            -- wrap output
   );
 end entity;
 
 architecture rtl of psi_fix_phase_unwrap is
 
   -- Constants
-  constant SumFmt_c  : PsiFixFmt_t := (1, max(OutFmt_g.I + 1, 1), InFmt_g.F);
-  constant DiffFmt_c : PsiFixFmt_t := (1, 0, InFmt_g.F);
+  constant SumFmt_c  : psi_fix_fmt_t := (1, max(OutFmt_g.I + 1, 1), InFmt_g.F);
+  constant DiffFmt_c : psi_fix_fmt_t := (1, 0, InFmt_g.F);
 
   -- Two Process Method
   type two_process_r is record

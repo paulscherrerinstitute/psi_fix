@@ -3,7 +3,6 @@
 --  All rights reserved.
 --  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -20,33 +19,34 @@ use work.psi_fix_pkg.all;
 -- CIC_GROWTH = ceil(log2(CIC_GAIN))
 -- SHIFT = CIC_GROWTH					--> Apply this to CfgShift
 -- GAINCORR = 2^CIC_GROWTH/CIC_GAIN		--> Apply this to CfgGainCorr
+------------------------------------------------------------------------------
 
 entity psi_fix_cic_dec_cfg_nch_par_tdm is
   generic(
-    Channels_g     : integer              := 3; -- Min. 2
-    Order_g        : integer              := 4;
-    MaxRatio_g     : natural              := 12;
-    DiffDelay_g    : natural range 1 to 2 := 1;
-    InFmt_g        : PsiFixFmt_t          := (1, 0, 15);
-    OutFmt_g       : PsiFixFmt_t          := (1, 0, 15);
-    rst_pol_g      : std_logic            := '1';
-    AutoGainCorr_g : boolean              := True -- Use CfgGainCorr for fine-grained gain correction (beyond pure shifting)
+    Channels_g     : integer              := 3;         -- Min. 2
+    Order_g        : integer              := 4;         -- filter order
+    MaxRatio_g     : natural              := 12;        -- maximaum decimation ratio
+    DiffDelay_g    : natural range 1 to 2 := 1;         -- differential delay
+    InFmt_g        : psi_fix_fmt_t        := (1, 0, 15);-- input fomrat FP
+    OutFmt_g       : psi_fix_fmt_t        := (1, 0, 15);-- output fromat FP
+    rst_pol_g      : std_logic            := '1';       -- reset polarity active high ='1'
+    AutoGainCorr_g : boolean              := True       -- Use CfgGainCorr for fine-grained gain correction (beyond pure shifting)
   );
   port(
     -- Control Signals
-    clk_i           : in  std_logic;
-    rst_i           : in  std_logic;
+    clk_i           : in  std_logic;                                                      -- clk system
+    rst_i           : in  std_logic;                                                      -- rst system
     -- Configuration (only change when in reset!)
-    cfg_ratio_i     : in  std_logic_vector(log2ceil(MaxRatio_g) - 1 downto 0); -- Ratio-1 (0 --> no decimation, 3 --> decimation by 4)
-    cfg_shift_i     : in  std_logic_vector(7 downto 0);                 -- Shifting by more than 255 bits is not supported, this would lead to timing issues anyways
-    cfg_gain_corr_i : in  std_logic_vector(16 downto 0); -- Gain correction factor in format [0,1,16]
+    cfg_ratio_i     : in  std_logic_vector(log2ceil(MaxRatio_g) - 1 downto 0);             -- Ratio-1 (0 --> no decimation, 3 --> decimation by 4)
+    cfg_shift_i     : in  std_logic_vector(7 downto 0);                                    -- Shifting by more than 255 bits is not supported, this would lead to timing issues anyways
+    cfg_gain_corr_i : in  std_logic_vector(16 downto 0);                                   -- Gain correction factor in format [0,1,16]
     -- Data Ports
-    dat_i           : in  std_logic_vector(PsiFixSize(InFmt_g) * Channels_g - 1 downto 0);
-    vld_i           : in  std_logic;
-    dat_o           : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-    vld_o           : out std_logic;
-    -- Status Output
-    busy_o          : out std_logic
+    dat_i           : in  std_logic_vector(PsiFixSize(InFmt_g) * Channels_g - 1 downto 0); -- data input
+    vld_i           : in  std_logic;                                                       -- valid input
+    dat_o           : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);             -- data output
+    vld_o           : out std_logic;                                                       -- valid otuput
+    -- Status output
+    busy_o          : out std_logic                                                        --  busy signal output active high
   );
 end entity;
 
@@ -55,12 +55,12 @@ architecture rtl of psi_fix_cic_dec_cfg_nch_par_tdm is
   constant MaxCicGain_c    : real        := (real(MaxRatio_g) * real(DiffDelay_g))**real(Order_g);
   constant MaxCicAddBits_c : integer     := log2ceil(MaxCicGain_c - 0.1); -- WORKAROUND: Vivado does real calculations imprecisely. With the -0.1, wrong results are avoided.
   constant MaxShift_c      : integer     := MaxCicAddBits_c;
-  constant AccuFmt_c       : PsiFixFmt_t := (InFmt_g.S, InFmt_g.I + MaxCicAddBits_c, InFmt_g.F);
-  constant DiffFmt_c       : PsiFixFmt_t := (OutFmt_g.S, InFmt_g.I, OutFmt_g.F + Order_g + 1);
-  constant GcInFmt_c       : PsiFixFmt_t := (1, OutFmt_g.I, work.psi_common_math_pkg.min(24 - OutFmt_g.I, DiffFmt_c.F));
-  constant GcCoefFmt_c     : PsiFixFmt_t := (0, 1, 16);
-  constant GcMultFmt_c     : PsiFixFmt_t := (1, GcInFmt_c.I + GcCoefFmt_c.I, GcInFmt_c.F + GcCoefFmt_c.F);
-  constant SftFmt_c        : PsiFixFmt_t := (AccuFmt_c.S, AccuFmt_c.I, max(AccuFmt_c.F, DiffFmt_c.F));
+  constant AccuFmt_c       : psi_fix_fmt_t := (InFmt_g.S, InFmt_g.I + MaxCicAddBits_c, InFmt_g.F);
+  constant DiffFmt_c       : psi_fix_fmt_t := (OutFmt_g.S, InFmt_g.I, OutFmt_g.F + Order_g + 1);
+  constant GcInFmt_c       : psi_fix_fmt_t := (1, OutFmt_g.I, work.psi_common_math_pkg.min(24 - OutFmt_g.I, DiffFmt_c.F));
+  constant GcCoefFmt_c     : psi_fix_fmt_t := (0, 1, 16);
+  constant GcMultFmt_c     : psi_fix_fmt_t := (1, GcInFmt_c.I + GcCoefFmt_c.I, GcInFmt_c.F + GcCoefFmt_c.F);
+  constant SftFmt_c        : psi_fix_fmt_t := (AccuFmt_c.S, AccuFmt_c.I, max(AccuFmt_c.F, DiffFmt_c.F));
 
   -- Types
   type AccuStage_t is array (natural range <>) of std_logic_vector(PsiFixSize(AccuFmt_c) - 1 downto 0);

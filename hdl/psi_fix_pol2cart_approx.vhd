@@ -4,10 +4,6 @@
 --  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -19,31 +15,31 @@ use work.psi_fix_pkg.all;
 -- $$ processes=stim, resp $$
 entity psi_fix_pol2cart_approx is
   generic(
-    InAbsFmt_g   : PsiFixFmt_t := (0, 0, 15);   -- Must be unsigned		$$ constant=(0,0,16) $$
-    InAngleFmt_g : PsiFixFmt_t := (0, 0, 15);   -- Must be unsigned		$$ constant=(0,0,15) $$
-    OutFmt_g     : PsiFixFmt_t := (1, 0, 16);   -- Usually signed		$$ constant=(1,0,16) $$	
-    Round_g      : PsiFixRnd_t := PsiFixRound;  --					
-    Sat_g        : PsiFixSat_t := PsiFixSat;    --					
-    rst_pol_g    : std_logic   :='1'
+    InAbsFmt_g   : psi_fix_fmt_t := (0, 0, 15);   -- Must be unsigned		$$ constant=(0,0,16) $$
+    InAngleFmt_g : psi_fix_fmt_t := (0, 0, 15);   -- Must be unsigned		$$ constant=(0,0,15) $$
+    OutFmt_g     : psi_fix_fmt_t := (1, 0, 16);   -- Usually signed		  $$ constant=(1,0,16) $$	
+    Round_g      : psi_fix_rnd_t := PsiFixRound;  -- round or trunc					
+    Sat_g        : psi_fix_sat_t := PsiFixSat;    -- sat or wrap					
+    rst_pol_g    : std_logic     :='1'            -- reset polarity
   );
   port(
     -- Control Signals
-    clk_i     : in  std_logic;          -- $$ type=clk; freq=100e6 $$
-    rst_i     : in  std_logic;          -- $$ type=rst; clk=clk_i $$
-    vld_i     : in  std_logic;
-    dat_abs_i : in  std_logic_vector(PsiFixSize(InAbsFmt_g) - 1 downto 0);
-    dat_ang_i : in  std_logic_vector(PsiFixSize(InAngleFmt_g) - 1 downto 0);
-    vld_o     : out std_logic;
-    dat_inp_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-    dat_qua_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)
+    clk_i     : in  std_logic;                                              -- clk system $$ type=clk; freq=100e6 $$
+    rst_i     : in  std_logic;                                              -- rst system $$ type=rst; clk=clk_i $$
+    dat_abs_i : in  std_logic_vector(PsiFixSize(InAbsFmt_g) - 1 downto 0);  -- data amplitude 
+    dat_ang_i : in  std_logic_vector(PsiFixSize(InAngleFmt_g) - 1 downto 0);-- data phase
+    vld_i     : in  std_logic;                                              -- valid input signal freqeucy sampling
+    dat_inp_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);    -- data inphase
+    dat_qua_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);    -- data quadrature
+    vld_o     : out std_logic                                               -- valid output
   );
 end entity;
 -- @formatter:on
 architecture rtl of psi_fix_pol2cart_approx is
   -- Constants
-  constant SinOutFmt_c : PsiFixFmt_t                                           := (1, 0, 17);
-  constant SinInFmt_c  : PsiFixFmt_t                                           := (0, 0, 20);
-  constant MultFmt_c   : PsiFixFmt_t                                           := (1, InAbsFmt_g.I + SinOutFmt_c.I, InAbsFmt_g.F + SinOutFmt_c.F);
+  constant SinOutFmt_c : psi_fix_fmt_t                                           := (1, 0, 17);
+  constant SinInFmt_c  : psi_fix_fmt_t                                           := (0, 0, 20);
+  constant MultFmt_c   : psi_fix_fmt_t                                           := (1, InAbsFmt_g.I + SinOutFmt_c.I, InAbsFmt_g.F + SinOutFmt_c.F);
   constant CosOffs_c   : std_logic_vector(PsiFixSize(SinInFmt_c) - 1 downto 0) := PsiFixFromReal(0.25, SinInFmt_c);
 
   -- Types

@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 -- Libraries
 ------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -13,17 +12,14 @@ use work.psi_fix_pkg.all;
 use work.psi_common_logic_pkg.all;
 
 -- @formatter:off
-------------------------------------------------------------------------------
--- Entity
-------------------------------------------------------------------------------	
 -- $$ tbpkg=psi_lib.psi_tb_textfile_pkg,psi_lib.psi_tb_txt_util $$
 -- $$ processes=stimuli,response $$
 entity psi_fix_sqrt is
   generic(
-    InFmt_g       : PsiFixFmt_t := (0, 0, 15);                      -- Must be unsigned, wuare root not defined for negative numbers
-    OutFmt_g      : PsiFixFmt_t := (0, 1, 15);                      -- output format FP
-    Round_g       : PsiFixRnd_t := PsiFixTrunc;                     -- round or trunc
-    Sat_g         : PsiFixSat_t := PsiFixWrap;                      -- sat or wrap
+    InFmt_g       : psi_fix_fmt_t := (0, 0, 15);                    -- Must be unsigned, wuare root not defined for negative numbers
+    OutFmt_g      : psi_fix_fmt_t := (0, 1, 15);                    -- output format FP
+    Round_g       : psi_fix_rnd_t := PsiFixTrunc;                   -- round or trunc
+    Sat_g         : psi_fix_sat_t := PsiFixWrap;                    -- sat or wrap
     RamBehavior_g : string      := "RBW";                           -- RBW = Read before write, WBR = write before read
     rst_pol_g     : std_logic   := '1'
   );
@@ -32,28 +28,25 @@ entity psi_fix_sqrt is
     clk_i : in  std_logic;                                          -- $$ type=Clk; freq=127e6 $$
     rst_i : in  std_logic;                                          -- $$ type=Rst; Clk=Clk $
     -- Input
-    vld_i : in  std_logic;                                          -- valid signal (strobe input)
     dat_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0); -- data input
-    vld_o : out std_logic;                                          -- output signal
-    dat_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0) -- data output
+    vld_i : in  std_logic;                                          -- valid signal (strobe input)
+    dat_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);-- data output
+    vld_o : out std_logic                                           -- output signal
   );
 end entity;
 -- @formatter:on
-------------------------------------------------------------------------------
--- Architecture section
-------------------------------------------------------------------------------
 
 architecture rtl of psi_fix_sqrt is
 
   -- Constants
-  constant InFmtNorm_c          : PsiFixFmt_t := (0, 0, InFmt_g.I + InFmt_g.F);
-  constant OutFmtNorm_c         : PsiFixFmt_t := (OutFmt_g.S, 0, OutFmt_g.I + OutFmt_g.F + 1); -- rounding bit is kept
-  constant SqrtInFmt_c          : PsiFixFmt_t := (0, 0, 20);
-  constant SqrtOutFmt_c         : PsiFixFmt_t := (0, 0, 17);
+  constant InFmtNorm_c          : psi_fix_fmt_t := (0, 0, InFmt_g.I + InFmt_g.F);
+  constant OutFmtNorm_c         : psi_fix_fmt_t := (OutFmt_g.S, 0, OutFmt_g.I + OutFmt_g.F + 1); -- rounding bit is kept
+  constant SqrtInFmt_c          : psi_fix_fmt_t := (0, 0, 20);
+  constant SqrtOutFmt_c         : psi_fix_fmt_t := (0, 0, 17);
   constant MaxSft_c             : natural     := (InFmtNorm_c.F / 2 * 2);
   constant SftStgBeforeApprox_c : natural     := log2(MaxSft_c);
   constant SftStgAfterApprox_c  : natural     := SftStgBeforeApprox_c / 2;
-  constant OutSftFmt_c          : PsiFixFmt_t := (OutFmt_g.S, 0, OutFmtNorm_c.F);
+  constant OutSftFmt_c          : psi_fix_fmt_t := (OutFmt_g.S, 0, OutFmtNorm_c.F);
   constant NormSft_c            : integer     := (InFmt_g.I + 1) / 2 * 2;
 
   -- types
@@ -191,10 +184,10 @@ begin
     port map(
       clk_i     => clk_i,
       rst_i     => rst_i,
-      InVld   => r.InVld(r.InVld'high),
-      InData  => SqrtIn_s,
-      OutVld  => SqrtVld_s,
-      OutData => SqrtData_s
+      vld_i   => r.InVld(r.InVld'high),
+      dat_i  => SqrtIn_s,
+      vld_o  => SqrtVld_s,
+      dat_o => SqrtData_s
     );
 
   -- Count delayed with FIFO to stay working of delay of the approximation should hcange in future

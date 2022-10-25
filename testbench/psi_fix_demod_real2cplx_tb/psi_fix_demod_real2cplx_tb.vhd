@@ -38,8 +38,8 @@ end entity;
 architecture sim of psi_fix_demod_real2cplx_tb is
   -- *** Fixed Generics ***
   constant RstPol_g   : std_logic   := '1';
-  constant InFmt_g    : PsiFixFmt_t := (1, 0, 15);
-  constant OutFmt_g   : PsiFixFmt_t := (1, 0, 16);
+  constant InFmt_g    : psi_fix_fmt_t := (1, 0, 15);
+  constant OutFmt_g   : psi_fix_fmt_t := (1, 0, 16);
   constant CoefBits_g : integer     := 25;
 
   -- *** Not Assigned Generics (default values) ***
@@ -83,12 +83,12 @@ begin
     port map(
       clk_i        => clk_i,
       rst_i        => rst_i,
-      str_i        => str_i,
-      data_i       => data_i,
+      vld_i        => str_i,
+      dat_i       => data_i,
       phi_offset_i => phi_offset_16(2 downto 0),
-      data_I_o     => data_I_o,
-      data_Q_o     => data_Q_o,
-      str_o        => str_o
+      dat_inp_o     => data_I_o,
+      dat_qua_o     => data_Q_o,
+      vld_o        => str_o
     );
 
   ------------------------------------------------------------

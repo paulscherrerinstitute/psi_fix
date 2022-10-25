@@ -41,11 +41,11 @@ end entity;
 ------------------------------------------------------------
 architecture sim of psi_fix_cordic_rot_tb is
   -- *** Fixed Generics ***
-  constant InAbsFmt_g    : PsiFixFmt_t := (0, 0, 16);
-  constant InAngleFmt_g  : PsiFixFmt_t := (0, 0, 15);
-  constant OutFmt_g      : PsiFixFmt_t := (1, 2, 16);
-  constant InternalFmt_g : PsiFixFmt_t := (1, 2, 22);
-  constant AngleIntFmt_g : PsiFixFmt_t := (1, -2, 23);
+  constant InAbsFmt_g    : psi_fix_fmt_t := (0, 0, 16);
+  constant InAngleFmt_g  : psi_fix_fmt_t := (0, 0, 15);
+  constant OutFmt_g      : psi_fix_fmt_t := (1, 2, 16);
+  constant InternalFmt_g : psi_fix_fmt_t := (1, 2, 22);
+  constant AngleIntFmt_g : psi_fix_fmt_t := (1, -2, 23);
   constant Iterations_g  : natural     := 21;
 
   -- *** Not Assigned Generics (default values) ***

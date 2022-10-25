@@ -27,24 +27,22 @@ use work.psi_common_array_pkg.all;
 
 entity psi_fix_mult_add_stage is
   generic(
-    InAFmt_g    : PsiFixFmt_t := (1, 0, 17);
-    InBFmt_g    : PsiFixFmt_t := (1, 0, 17);
-    AddFmt_g    : PsiFixFmt_t := (1, 0, 17);
-    InBIsCoef_g : boolean     := false;
-    rst_pol_g   : std_logic   := '1'
+    InAFmt_g    : psi_fix_fmt_t := (1, 0, 17);                                -- data A input format FP
+    InBFmt_g    : psi_fix_fmt_t := (1, 0, 17);                                -- data B input format FP
+    AddFmt_g    : psi_fix_fmt_t := (1, 0, 17);                                -- output format FP
+    InBIsCoef_g : boolean       := false;                                     -- If True, InBVld is only used to write a cst coef to the input reg of the DSP slice
+                                                                              -- If False, InBVld leads to a multiply-add operation and is propagated to AddChainOutVld
+    rst_pol_g   : std_logic     := '1'                                        -- reset polarity
   );
   port(
-    -- Control Signals
-    clk_i          : in  std_logic;     -- $$ type=clk; freq=100e6 $$
-    rst_i          : in  std_logic;     -- $$ type=rst; clk=clk_i $$
-    -- Input	
-    vld_a_i        : in  std_logic;                                           -- vld a
-    dat_a_i        : in  std_logic_vector(PsiFixSize(InAFmt_g) - 1 downto 0); -- data in put a
-    del2_a_o       : out std_logic_vector(PsiFixSize(InAFmt_g) - 1 downto 0); -- registred data a
-    vld_b_i        : in  std_logic;                                           -- vld b
-    dat_b_i        : in  std_logic_vector(PsiFixSize(InBFmt_g) - 1 downto 0); -- data input b
-    del2_b_o       : out std_logic_vector(PsiFixSize(InBFmt_g) - 1 downto 0); -- registered data b
-    -- Output	
+    clk_i           : in  std_logic;                                           -- system clock $$ type=clk; freq=100e6 $$
+    rst_i           : in  std_logic;                                           -- system reset $$ type=rst; clk=clk_i $$
+    dat_a_i         : in  std_logic_vector(PsiFixSize(InAFmt_g) - 1 downto 0); -- data in put a
+    vld_a_i         : in  std_logic;                                           -- vld a
+    del2_a_o        : out std_logic_vector(PsiFixSize(InAFmt_g) - 1 downto 0); -- registred data a by 2 clock cycles (efficient pipeline for FIR implementation)
+    dat_b_i         : in  std_logic_vector(PsiFixSize(InBFmt_g) - 1 downto 0); -- data input b
+    vld_b_i         : in  std_logic;                                           -- vld b
+    del2_b_o        : out std_logic_vector(PsiFixSize(InBFmt_g) - 1 downto 0); -- registered data b by 2 clock cycles (efficient pipeline for FIR implementation)
     chain_add_i     : in  std_logic_vector(PsiFixSize(AddFmt_g) - 1 downto 0); -- adder chain input data
     chain_add_o     : out std_logic_vector(PsiFixSize(AddFmt_g) - 1 downto 0); -- adder chain output data
     chain_add_vld_o : out std_logic                                            -- adder chain output valid
@@ -53,7 +51,7 @@ end entity;
 
 architecture rtl of psi_fix_mult_add_stage is
 
-  constant MultFmt_c : PsiFixFmt_t := (max(InAFmt_g.S, InBFmt_g.S), InAFmt_g.I + InBFmt_g.I + 1, InAFmt_g.F + InBFmt_g.F);
+  constant MultFmt_c : psi_fix_fmt_t := (max(InAFmt_g.S, InBFmt_g.S), InAFmt_g.I + InBFmt_g.I + 1, InAFmt_g.F + InBFmt_g.F);
   signal InAReg0     : std_logic_vector(dat_a_i'range);
   signal InAReg1     : std_logic_vector(dat_a_i'range);
   signal InBReg0     : std_logic_vector(dat_b_i'range);
@@ -113,9 +111,9 @@ begin
   end process;
 
   -- Outputs
-  chain_add_o    <= AddReg;
-  del2_a_o       <= InAReg1;
-  del2_b_o       <= InBReg1;
+  chain_add_o     <= AddReg;
+  del2_a_o        <= InAReg1;
+  del2_b_o        <= InBReg1;
   chain_add_vld_o <= Vld3;
 
 end architecture;

@@ -42,11 +42,11 @@ architecture sim of psi_fix_fir_3tap_hbw_dec2_tb is
   -- *** Fixed Generics ***
 
   -- *** Not Assigned Generics (default values) ***
-  constant InFmt_g  : PsiFixFmt_t := (1, 0, 17);
-  constant OutFmt_g : PsiFixFmt_t := (1, 0, 17);
-  constant IntFmt_g : PsiFixFmt_t := (1, 0, 17);
-  constant Rnd_g    : PsiFixRnd_t := PsiFixRound;
-  constant Sat_g    : PsiFixSat_t := PsiFixSat;
+  constant InFmt_g  : psi_fix_fmt_t := (1, 0, 17);
+  constant OutFmt_g : psi_fix_fmt_t := (1, 0, 17);
+  constant IntFmt_g : psi_fix_fmt_t := (1, 0, 17);
+  constant Rnd_g    : psi_fix_rnd_t := PsiFixRound;
+  constant Sat_g    : psi_fix_sat_t := PsiFixSat;
   constant Shifts_g : t_ainteger  := (2, 1, 2);
 
   -- *** TB Control ***

@@ -34,8 +34,8 @@ end entity;
 architecture sim of psi_fix_lin_approx_sin18b_dual_tb is
 
   -- constants
-  constant InFmt_c     : PsiFixFmt_t := (0, 0, 20);
-  constant OutFmt_c    : PsiFixFmt_t := (1, 0, 17);
+  constant InFmt_c     : psi_fix_fmt_t := (0, 0, 20);
+  constant OutFmt_c    : psi_fix_fmt_t := (1, 0, 17);
   constant ClkPeriod_c : time        := 10 ns;
 
   -- Signals

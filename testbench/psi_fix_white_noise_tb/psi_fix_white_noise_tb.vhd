@@ -35,9 +35,9 @@ end entity;
 architecture sim of psi_fix_white_noise_tb is
 
   -- *** Constants ***
-  constant OutFmtS_c : PsiFixFmt_t := (1, 2, 15);
-  constant OutFmtU_c : PsiFixFmt_t := (0, 2, 13);
-  constant OutFmt_c  : PsiFixFmt_t := PsiFixChooseFmt(StimuliSet_g = "S", OutFmtS_c, OutFmtU_c);
+  constant OutFmtS_c : psi_fix_fmt_t := (1, 2, 15);
+  constant OutFmtU_c : psi_fix_fmt_t := (0, 2, 13);
+  constant OutFmt_c  : psi_fix_fmt_t := PsiFixChooseFmt(StimuliSet_g = "S", OutFmtS_c, OutFmtU_c);
 
   -- *** TB Control ***
   signal TbRunning             : boolean                  := True;

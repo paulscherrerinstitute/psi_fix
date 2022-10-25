@@ -14,33 +14,30 @@ use work.psi_fix_pkg.all;
 use work.psi_common_math_pkg.all;
 
 entity psi_fix_lin_approx_sin18b_dual is
-  generic(rst_pol_g : std_logic:='1');
+  generic(rst_pol_g : std_logic := '1');
   port(
-    -- Control Signals
-    clk_i    : in  std_logic;
-    rst_i    : in  std_logic;
-    -- Input
-    vld_a_i  : in  std_logic;
-    dat_a_i  : in  std_logic_vector(20 - 1 downto 0); -- fixed Format (0, 0, 20)
-    vld_b_i  : in  std_logic;
-    dat_b_i  : in  std_logic_vector(20 - 1 downto 0); -- fixed Format (0, 0, 20)
-    -- Output
-    vld_a_o  : out std_logic;
-    dat_a_o  : out std_logic_vector(18 - 1 downto 0); -- fixed Format (1, 0, 17)
-    vld_b_o  : out std_logic;
-    dat_b_o  : out std_logic_vector(18 - 1 downto 0)  -- fixed Format (1, 0, 17)		
+    clk_i   : in  std_logic;                         -- system clock
+    rst_i   : in  std_logic;                         -- system reset
+    dat_a_i : in  std_logic_vector(20 - 1 downto 0); -- data A input A fixed Format (0, 0, 20)
+    vld_a_i : in  std_logic;                         -- valid input data A 
+    dat_b_i : in  std_logic_vector(20 - 1 downto 0); -- data B input fixed Format (0, 0, 20)
+    vld_b_i : in  std_logic;                         -- data B valid input data B
+    dat_a_o : out std_logic_vector(18 - 1 downto 0); -- data A out fixed Format (1, 0, 17)    
+    vld_a_o : out std_logic;                         -- valid output data A
+    dat_b_o : out std_logic_vector(18 - 1 downto 0); -- data B out fixed Format (1, 0, 17)		
+    vld_b_o : out std_logic                          -- valid output data B
   );
 end entity;
 
 architecture rtl of psi_fix_lin_approx_sin18b_dual is
 
   -- Constants
-  constant InFmt_c      : PsiFixFmt_t := (0, 0, 20);
-  constant OutFmt_c     : PsiFixFmt_t := (1, 0, 17);
-  constant OffsFmt_c    : PsiFixFmt_t := (1, 0, 19);
-  constant GradFmt_c    : PsiFixFmt_t := (1, 3, 8);
-  constant TableSize_c  : integer     := 2048;
-  constant TableWidth_c : integer     := 32;
+  constant InFmt_c      : psi_fix_fmt_t := (0, 0, 20);
+  constant OutFmt_c     : psi_fix_fmt_t := (1, 0, 17);
+  constant OffsFmt_c    : psi_fix_fmt_t := (1, 0, 19);
+  constant GradFmt_c    : psi_fix_fmt_t := (1, 3, 8);
+  constant TableSize_c  : integer       := 2048;
+  constant TableWidth_c : integer       := 32;
 
   -- Table	
   type Table_t is array (0 to TableSize_c - 1) of std_logic_vector(TableWidth_c - 1 downto 0);
@@ -2114,21 +2111,21 @@ begin
     )
     port map(
       -- Control Signals
-      clk_i     => clk_i,
-      rst_i     => rst_i,
+      clk_i        => clk_i,
+      rst_i        => rst_i,
       -- Input
-      vld_i   => vld_a_i,
-      dat_i  => dat_a_i,
+      vld_i        => vld_a_i,
+      dat_i        => dat_a_i,
       -- Output
-      vld_o  => vld_a_o,
-      dat_o => dat_a_o,
+      vld_o        => vld_a_o,
+      dat_o        => dat_a_o,
       -- Table Interface
       addr_table_o => TableAddrA,
       data_table_i => TableDataA
     );
   i_calc_b : entity work.psi_fix_lin_approx_calc
     generic map(
-      rst_pol_g => rst_pol_g,
+      rst_pol_g   => rst_pol_g,
       InFmt_g     => InFmt_c,
       OutFmt_g    => OutFmt_c,
       OffsFmt_g   => OffsFmt_c,
@@ -2137,14 +2134,14 @@ begin
     )
     port map(
       -- Control Signals
-      clk_i     => clk_i,
-      rst_i     => rst_i,
+      clk_i        => clk_i,
+      rst_i        => rst_i,
       -- Input
-      vld_i   => vld_b_i,
-      dat_i  => dat_b_i,
+      vld_i        => vld_b_i,
+      dat_i        => dat_b_i,
       -- Output
-      vld_o  => vld_b_o,
-      dat_o => dat_b_o,
+      vld_o        => vld_b_o,
+      dat_o        => dat_b_o,
       -- Table Interface
       addr_table_o => TableAddrB,
       data_table_i => TableDataB

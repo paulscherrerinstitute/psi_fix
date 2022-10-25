@@ -12,36 +12,35 @@ use work.psi_common_logic_pkg.all;
 -- $$ processes=stimuli,response $$
 entity psi_fix_inv is
   generic(
-    InFmt_g       : PsiFixFmt_t := (0, 0, 15);  -- Must be unsigned, wuare root not defined for negative numbers
-    OutFmt_g      : PsiFixFmt_t := (0, 1, 15);
-    Round_g       : PsiFixRnd_t := PsiFixTrunc; --
-    Sat_g         : PsiFixSat_t := PsiFixWrap;  --
-    RamBehavior_g : string      := "RBW"        -- RBW = Read before write, WBR = write before read
+    InFmt_g       : psi_fix_fmt_t := (0, 0, 15);  -- Must be unsigned, wuare root not defined for negative numbers
+    OutFmt_g      : psi_fix_fmt_t := (0, 1, 15);  -- output fomrat FP
+    Round_g       : psi_fix_rnd_t := PsiFixTrunc; -- round or trunc
+    Sat_g         : psi_fix_sat_t := PsiFixWrap;  -- sat or wrap
+    RamBehavior_g : string      := "RBW"          -- RBW = Read before write, WBR = write before read
   );
   port(
-    -- Control Signals
-    clk_i : in  std_logic;              -- $$ type=Clk; freq=127e6 $$
-    rst_i : in  std_logic;              -- $$ type=Rst; Clk=Clk $$
-    -- Input
-    vld_i : in  std_logic;
-    dat_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-    vld_o : out std_logic;
-    dat_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0));
+    clk_i : in  std_logic;                                           -- system clock $$ type=Clk; freq=127e6 $$
+    rst_i : in  std_logic;                                           -- system reset $$ type=Rst; Clk=Clk $$   
+    dat_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);  -- data input
+    vld_i : in  std_logic;                                           -- valid signal input frequency sampling
+    dat_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0); -- data output 
+    vld_o : out std_logic                                            -- valid output frequency samlping
+    );
 end entity;
 
 architecture rtl of psi_fix_inv is
 
   -- Constants
-  constant InFmtNorm_c          : PsiFixFmt_t := (0, 1, InFmt_g.I + InFmt_g.F);
-  constant OutFmtNorm_c         : PsiFixFmt_t := (0, 1 + InFmt_g.F, OutFmt_g.I + OutFmt_g.F);
-  constant InvInFmt_c           : PsiFixFmt_t := (0, 1, 18);
-  constant InvOutFmt_c          : PsiFixFmt_t := (0, 0, 18);
+  constant InFmtNorm_c          : psi_fix_fmt_t := (0, 1, InFmt_g.I + InFmt_g.F);
+  constant OutFmtNorm_c         : psi_fix_fmt_t := (0, 1 + InFmt_g.F, OutFmt_g.I + OutFmt_g.F);
+  constant InvInFmt_c           : psi_fix_fmt_t := (0, 1, 18);
+  constant InvOutFmt_c          : psi_fix_fmt_t := (0, 0, 18);
   constant MaxSft_c             : natural     := InFmtNorm_c.F;
   constant SftStgBeforeApprox_c : natural     := log2ceil(MaxSft_c);
   constant SftStgAfterApprox_c  : natural     := SftStgBeforeApprox_c;
   constant NormSft_c            : integer     := InFmt_g.I - 1;
-  constant AbsFmt_c             : PsiFixFmt_t := (0, InFmt_g.I, InFmt_g.F);
-  constant AbsFullFmt_c         : PsiFixFmt_t := (0, AbsFmt_c.I + 1, AbsFmt_c.F);
+  constant AbsFmt_c             : psi_fix_fmt_t := (0, InFmt_g.I, InFmt_g.F);
+  constant AbsFullFmt_c         : psi_fix_fmt_t := (0, AbsFmt_c.I + 1, AbsFmt_c.F);
 
   -- types
   type CntArray_t is array (natural range <>) of unsigned(SftStgBeforeApprox_c - 1 downto 0);
@@ -207,12 +206,12 @@ begin
   SignIn_s <= r.InSign(r.InSign'high);
   inst_sqrt : entity work.psi_fix_lin_approx_inv18b
     port map(
-      Clk     => clk_i,
-      Rst     => rst_i,
-      InVld   => r.InVld(r.InVld'high),
-      InData  => InvIn_s,
-      OutVld  => InvVld_s,
-      OutData => InvData_s
+      clk_i     => clk_i,
+      rst_i     => rst_i,
+      vld_i   => r.InVld(r.InVld'high),
+      dat_i  => InvIn_s,
+      vld_o  => InvVld_s,
+      dat_o => InvData_s
     );
 
   -- Count delayed with FIFO to stay working of delay of the approximation should hcange in future

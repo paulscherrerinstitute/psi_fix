@@ -9,10 +9,8 @@
 ------------------------------------------------------------------------------
 -- This block allows generating triggers out of several "analog" input signals 
 -- with fixed point format and several external triggers
--- The number of trigger generated is also extendable
-
-------------------------------------------------------------------------------
--- RTL HDL file
+-- The number of trigger generated is also extendable - quite specific though
+-- intetntion to be used with multi stream DAQ
 ------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -26,13 +24,13 @@ use work.psi_common_array_pkg.all;
 entity psi_fix_nch_analog_trigger_tdm is
   generic(ch_nb_g       : natural      := 8;                                              --number of input/output channel
           trig_ext_nb_g : natural      := 1;                                              --number of input external trigger
-          fix_fmt_g     : PsiFixFmt_t  := (1,0,15);                                       --FP format
+          fix_fmt_g     : psi_fix_fmt_t  := (1,0,15);                                     --FP format
           trig_nb_g     : natural      := 1);                                             --number of output trigger
   port(   clk_i         : in  std_logic;                                                  --processing clock
           rst_i         : in  std_logic;                                                  --Reset  processing '1' <=> active high 
           --*** signals ***
           dat_i         : in  std_logic_vector(PsiFixSize(fix_fmt_g)- 1 downto 0);        --// Data Input
-          str_i         : in  std_logic;                                                  --TDM Strobe Input
+          vld_i         : in  std_logic;                                                  --TDM Strobe Input
           ext_i         : in  std_logic_vector(trig_ext_nb_g-1 downto 0);                 --external trigger input
           --*** parameters ***
           mask_min_i    : in std_logic_vector(trig_nb_g*ch_nb_g-1 downto 0);              --mask min results
@@ -117,8 +115,8 @@ begin
        param_slv2partdm_dat_s((i+1)*2*len_c -1 downto i*2*len_c) <= thld_max_array_s(i) & thld_min_array_s(i);
       end loop;
       --*** edge detect ***
-      str_dff_s <= str_i;
-      if str_i = '1' and str_dff_s = '0' then
+      str_dff_s <= vld_i;
+      if vld_i = '1' and str_dff_s = '0' then
         param_slv2partdm_vld_s <= '1';
       else
         param_slv2partdm_vld_s <= '0';
@@ -151,8 +149,8 @@ begin
              set_min_i => param_tdm_thld_s(len_c - 1 downto 0),
              set_max_i => param_tdm_thld_s(2 * len_c - 1 downto len_c),
              data_i    => data_dff1_s,
-             str_i     => param_tdm_vld_s,
-             str_o     => str_s,
+             vld_i     => param_tdm_vld_s,
+             vld_o     => str_s,
              min_o     => min_s,
              max_o     => max_s);
 
@@ -190,7 +188,7 @@ begin
     port map(-- @suppress 
              Clk     => clk_i,
              Rst     => rst_i,
-             InVld   => str_i,
+             InVld   => vld_i,
              InData  => dat_i,
              OutVld  => str_pipe_o,
              OutRdy  => '1',

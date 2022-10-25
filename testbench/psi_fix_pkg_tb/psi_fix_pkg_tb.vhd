@@ -63,7 +63,7 @@ begin
   -- TB Control
   -------------------------------------------------------------------------
   p_control : process
-    variable Fmt_v      : PsiFixFmt_t;
+    variable Fmt_v      : psi_fix_fmt_t;
     variable FmtArray_v : PsiFixFmtArray_t(0 to 1);
   begin
     -- *** PsiFixSize ***

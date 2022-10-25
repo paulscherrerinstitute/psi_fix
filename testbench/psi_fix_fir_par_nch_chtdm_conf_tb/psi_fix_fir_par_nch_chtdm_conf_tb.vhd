@@ -49,13 +49,13 @@ architecture sim of psi_fix_fir_par_nch_chtdm_conf_tb is
   constant OutFile_c : string := "Output_" & to_string(Channels_g) & "Ch.txt";
 
   -- *** Fixed Generics ***
-  constant InFmt_g   : PsiFixFmt_t := (1, 0, 15);
-  constant OutFmt_g  : PsiFixFmt_t := (1, 0, 13);
-  constant CoefFmt_g : PsiFixFmt_t := (1, 0, 17);
+  constant InFmt_g   : psi_fix_fmt_t := (1, 0, 15);
+  constant OutFmt_g  : psi_fix_fmt_t := (1, 0, 13);
+  constant CoefFmt_g : psi_fix_fmt_t := (1, 0, 17);
 
   -- *** Not Assigned Generics (default values) ***
-  constant Rnd_g      : PsiFixRnd_t := PsiFixRound;
-  constant Sat_g      : PsiFixSat_t := PsiFixSat;
+  constant Rnd_g      : psi_fix_rnd_t := PsiFixRound;
+  constant Sat_g      : psi_fix_sat_t := PsiFixSat;
   constant FixCoefs_g : t_areal     := (0.0, 0.0);
 
   -- *** TB Control ***

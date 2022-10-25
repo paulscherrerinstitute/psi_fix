@@ -34,8 +34,8 @@ architecture sim of psi_fix_cic_dec_fix_nch_par_tdm_tb is
   -------------------------------------------------------------------------
   -- Constants
   -------------------------------------------------------------------------
-  constant InFmt_c     : PsiFixFmt_t := (1, 0, 16);
-  constant OutFmt_c    : PsiFixFmt_t := (1, 0, 17);
+  constant InFmt_c     : psi_fix_fmt_t := (1, 0, 16);
+  constant OutFmt_c    : psi_fix_fmt_t := (1, 0, 17);
   constant Channels_c  : integer     := 3;
   constant InChWidth_c : integer     := PsiFixSize(InFmt_c);
 

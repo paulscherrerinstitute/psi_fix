@@ -11,10 +11,8 @@
 -- a vectoring CORDIC kernel. In pipelined mode it requires more logic but
 -- can take one input sample every clock cycle. In serial mode it requires
 -- N clock cycles but requires less logic.
+------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -24,43 +22,38 @@ use work.psi_fix_pkg.all;
 use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
 -- @formatter:off
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 -- $$ processes=stim, resp $$
 entity psi_fix_cordic_vect is
   generic(
-    InFmt_g        : PsiFixFmt_t          := (1, 0, 15);  -- Must be signed		$$ constant=(1,0,15) $$
-    OutFmt_g       : PsiFixFmt_t          := (0, 2, 16);  -- Must be unsigned		$$ constant=(0,2,16) $$
-    InternalFmt_g  : PsiFixFmt_t          := (1, 2, 22);  -- Must be signed		$$ constant=(1,2,22) $$
-    AngleFmt_g     : PsiFixFmt_t          := (0, 0, 15);  -- Must be unsigned		$$ constant=(0,0,15) $$
-    AngleIntFmt_g  : PsiFixFmt_t          := (1, 0, 18);  -- Must be signed		$$ constant=(1,0,18) $$
-    Iterations_g   : natural              := 13;          --						$$ constant=13 $$
-    GainComp_g     : boolean              := False;       --						$$ export=true $$
-    Round_g        : PsiFixRnd_t          := PsiFixTrunc; --						$$ export=true $$
-    Sat_g          : PsiFixSat_t          := PsiFixWrap;  --						$$ export=true $$
-    Mode_g         : string               := "SERIAL";    -- PIPELINED or SERIAL	$$ export=true $$
-    PlStgPerIter_g : integer range 1 to 2 := 1            -- Number of pipeline stages per iteration (does only affect pipelined implementation)
+    InFmt_g        : psi_fix_fmt_t          := (1, 0, 15);                -- Must be signed		                         $$ constant=(1,0,15) $$
+    OutFmt_g       : psi_fix_fmt_t          := (0, 2, 16);                -- Must be unsigned		                       $$ constant=(0,2,16) $$
+    InternalFmt_g  : psi_fix_fmt_t          := (1, 2, 22);                -- Must be signed		                         $$ constant=(1,2,22) $$
+    AngleFmt_g     : psi_fix_fmt_t          := (0, 0, 15);                -- Must be unsigned		                       $$ constant=(0,0,15) $$
+    AngleIntFmt_g  : psi_fix_fmt_t          := (1, 0, 18);                -- Must be signed		                         $$ constant=(1,0,18) $$
+    Iterations_g   : natural                := 13;                        -- number of iteration prior to get results	 $$ constant=13 $$
+    GainComp_g     : boolean               := False;                      -- gain compensation                         $$ export=true $$
+    Round_g        : psi_fix_rnd_t          := PsiFixTrunc;               -- round or trunc                            $$ export=true $$
+    Sat_g          : psi_fix_sat_t          := PsiFixWrap;                -- saturation or wrap                        $$ export=true $$
+    Mode_g         : string               := "SERIAL";                    -- PIPELINED or SERIAL                       $$ export=true $$
+    PlStgPerIter_g : integer range 1 to 2 := 1                            -- Number of pipeline stages per iteration (does only affect pipelined implementation)
   );
   port(
     -- Control Signals
-    clk_i     : in  std_logic;                                            -- $$ type=clk; freq=100e6 $$
-    rst_i     : in  std_logic;                                            -- $$ type=rst; clk=Clk $$
+    clk_i     : in  std_logic;                                            -- clk system $$ type=clk; freq=100e6 $$
+    rst_i     : in  std_logic;                                            -- rst system $$ type=rst; clk=Clk $$
     -- Input
-    vld_i     : in  std_logic;                                            -- valid signal in
-    rdy_i     : out std_logic;                                            -- $$ lowactive=true $$
     dat_inp_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);   -- data input input
     dat_qua_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);   -- dat quadrature input
+    vld_i     : in  std_logic;                                            -- valid signal in
+    rdy_i     : out std_logic;                                            -- ready signal output $$ lowactive=true $$
     -- Output
-    vld_o     : out std_logic;                                            -- valid output
     dat_abs_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);  -- data amplitude output
-    dat_ang_o : out std_logic_vector(PsiFixSize(AngleFmt_g) - 1 downto 0) -- dat angle output
+    dat_ang_o : out std_logic_vector(PsiFixSize(AngleFmt_g) - 1 downto 0);-- dat angle output    
+    vld_o     : out std_logic                                             -- valid output
   );
 end entity;
 -- @formatter:on
-------------------------------------------------------------------------------
--- Architecture Declaration
-------------------------------------------------------------------------------
+
 architecture rtl of psi_fix_cordic_vect is
 
   -- *** Constants ***
@@ -94,9 +87,9 @@ architecture rtl of psi_fix_cordic_vect is
     return g;
   end function;
 
-  constant GcFmt_c        : PsiFixFmt_t                                               := (0, 0, 17);
-  constant AngleIntExtFmt : PsiFixFmt_t                                               := (AngleIntFmt_g.S, max(AngleIntFmt_g.I, 1), AngleIntFmt_g.F);
-  constant AbsFmt_c       : PsiFixFmt_t                                               := (InFmt_g.S, InFmt_g.I + 1, InFmt_g.F);
+  constant GcFmt_c        : psi_fix_fmt_t                                               := (0, 0, 17);
+  constant AngleIntExtFmt : psi_fix_fmt_t                                               := (AngleIntFmt_g.S, max(AngleIntFmt_g.I, 1), AngleIntFmt_g.F);
+  constant AbsFmt_c       : psi_fix_fmt_t                                               := (InFmt_g.S, InFmt_g.I + 1, InFmt_g.F);
   constant GcCoef_c       : std_logic_vector(PsiFixSize(GcFmt_c) - 1 downto 0)        := PsiFixFromReal(1.0 / CordicGain(Iterations_g), GcFmt_c);
   constant AngInt_0_5_c   : std_logic_vector(PsiFixSize(AngleIntExtFmt) - 1 downto 0) := PsiFixFromReal(0.5, AngleIntExtFmt);
   constant AngInt_1_0_c   : std_logic_vector(PsiFixSize(AngleIntExtFmt) - 1 downto 0) := PsiFixFromReal(1.0, AngleIntExtFmt);

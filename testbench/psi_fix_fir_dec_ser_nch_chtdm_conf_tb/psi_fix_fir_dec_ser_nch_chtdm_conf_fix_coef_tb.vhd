@@ -39,8 +39,8 @@ architecture sim of psi_fix_fir_dec_ser_nch_chtdm_conf_fix_coef_tb is
   signal TbRunning          : boolean := True;
   signal ResponseDone       : boolean := False;
 
-  constant CoefFmt_c : PsiFixFmt_t := (1, 0, 15);
-  constant DataFmt_c : PsiFixFmt_t := (1, 0, 15);
+  constant CoefFmt_c : psi_fix_fmt_t := (1, 0, 15);
+  constant DataFmt_c : psi_fix_fmt_t := (1, 0, 15);
 
   constant Coefs_c : t_areal(0 to 9) := (1.0 / 2.0**8.0, 2.0 / 2.0**8.0, 3.0 / 2.0**8.0, 4.0 / 2.0**8.0,
                                          5.0 / 2.0**8.0, 6.0 / 2.0**8.0, 7.0 / 2.0**8.0, 8.0 / 2.0**8.0,

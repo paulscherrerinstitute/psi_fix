@@ -7,11 +7,9 @@
 ------------------------------------------------------------------------------
 -- Description
 ------------------------------------------------------------------------------
--- Multiplciation of two complex numbers
+-- Multiplication of two complex numbers
+------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -19,22 +17,19 @@ use ieee.numeric_std.all;
 use work.psi_fix_pkg.all;
 use work.psi_common_math_pkg.all;
 -- @formatter:off
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 -- $$ processes=stim, resp $$
 entity psi_fix_complex_mult is
   generic(
-    RstPol_g      : std_logic   := '1';         -- set reset polarity                             $$ constant='1' $$
-    Pipeline_g    : boolean     := false;       -- when false 3 pipes stages, when false 6 pipes (increase Fmax)			$$ export=true $$
-    InAFmt_g      : PsiFixFmt_t := (1, 0, 15);  -- Input A Fixed Point format                     $$ constant=(1,0,15) $$
-    InBFmt_g      : PsiFixFmt_t := (1, 0, 24);  -- Input B Fixed Point format                     $$ constant=(1,0,24) $$
-    InternalFmt_g : PsiFixFmt_t := (1, 1, 24);  -- Internal Calc. Fixed Point format              $$ constant=(1,1,24) $$
-    OutFmt_g      : PsiFixFmt_t := (1, 0, 20);  -- Output Fixed Point format                      $$ constant=(1,0,20) $$
-    Round_g       : PsiFixRnd_t := PsiFixRound; -- Trunc or Round                                 $$ constant=PsiFixRound $$
-    Sat_g         : PsiFixSat_t := PsiFixSat;   -- Sat or wrap                                    $$ constant=PsiFixSat $$
-    InAIsCplx_g   : boolean     := true;        -- Complex number?
-    InBIsCplx_g   : boolean     := true         -- Complex number?
+    RstPol_g      : std_logic   := '1';                                      -- set reset polarity                             $$ constant='1' $$
+    Pipeline_g    : boolean     := false;                                    -- when false 3 pipes stages, when false 6 pipes (increase Fmax)			$$ export=true $$
+    InAFmt_g      : psi_fix_fmt_t := (1, 0, 15);                             -- Input A Fixed Point format                     $$ constant=(1,0,15) $$
+    InBFmt_g      : psi_fix_fmt_t := (1, 0, 24);                             -- Input B Fixed Point format                     $$ constant=(1,0,24) $$
+    InternalFmt_g : psi_fix_fmt_t := (1, 1, 24);                             -- Internal Calc. Fixed Point format              $$ constant=(1,1,24) $$
+    OutFmt_g      : psi_fix_fmt_t := (1, 0, 20);                             -- Output Fixed Point format                      $$ constant=(1,0,20) $$
+    Round_g       : psi_fix_rnd_t := PsiFixRound;                            -- Trunc or Round                                 $$ constant=PsiFixRound $$
+    Sat_g         : psi_fix_sat_t := PsiFixSat;                              -- Sat or wrap                                    $$ constant=PsiFixSat $$
+    InAIsCplx_g   : boolean     := true;                                     -- Complex number?
+    InBIsCplx_g   : boolean     := true                                      -- Complex number?
   );
   port(
     clk_i         : in  std_logic;                                           -- clk        $$ type=clk; freq=100e6 $$
@@ -56,8 +51,8 @@ end entity;
 ------------------------------------------------------------------------------
 architecture rtl of psi_fix_complex_mult is
 
-  constant SumFmt_c : PsiFixFmt_t := (InternalFmt_g.S, InternalFmt_g.I + 1, InternalFmt_g.F);
-  constant RndFmt_c : PsiFixFmt_t := (SumFmt_c.S, SumFmt_c.I + 1, OutFmt_g.F);
+  constant SumFmt_c : psi_fix_fmt_t := (InternalFmt_g.S, InternalFmt_g.I + 1, InternalFmt_g.F);
+  constant RndFmt_c : psi_fix_fmt_t := (SumFmt_c.S, SumFmt_c.I + 1, OutFmt_g.F);
 
   -- Two process method
   type two_process_r is record

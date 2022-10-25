@@ -33,10 +33,10 @@ end entity;
 
 architecture tb of psi_fix_mod_cplx2real_tb is
   -- Format definition
-  constant InFixFmt_c         : PsiFixFmt_t              := (1, 1, 15); --same as python model
-  constant CoefFixFmt_c       : PsiFixFmt_t              := (1, 1, 23); --same as python model
-  constant OutFixFmt_c        : PsiFixFmt_t              := (1, 1, 15); --same as python model
-  constant InternalFmt_c      : PsiFixFmt_t              := (1, 1, 23); --same as python model
+  constant InFixFmt_c         : psi_fix_fmt_t              := (1, 1, 15); --same as python model
+  constant CoefFixFmt_c       : psi_fix_fmt_t              := (1, 1, 23); --same as python model
+  constant OutFixFmt_c        : psi_fix_fmt_t              := (1, 1, 15); --same as python model
+  constant InternalFmt_c      : psi_fix_fmt_t              := (1, 1, 23); --same as python model
   --smthg
   constant TbProcNr_stim_c    : integer                  := 0;
   constant TbProcNr_check_c   : integer                  := 1;

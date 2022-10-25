@@ -14,6 +14,7 @@
 --	             |    |___|       |
 --               |_________ X ____|
 --
+------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -24,24 +25,24 @@ use work.psi_fix_pkg.all;
 -- $$ processes=stimuli,check $$
 entity psi_fix_lowpass_iir_order1 is
   generic(
-    FSampleHz_g     : real        := 10_000_000.0;  -- $$constant=100.0e6$$
-    FCutoffHz_g     : real        := 30_000.0;      -- $$constant=1.0e6$$
-    InFmt_g         : PsiFixFmt_t := (1, 0, 15);    -- $$constant='(1, 0, 15)'$$
-    OutFmt_g        : PsiFixFmt_t := (1, 0, 15);    -- $$constant='(1, 0, 14)'$$
-    IntFmt_g        : PsiFixFmt_t := (1, 0, 24);    -- Number format for calculations, for details see documentation
-    CoefFmt_g       : PsiFixFmt_t := (1, 0, 17);
-    Round_g         : PsiFixRnd_t := PsiFixRound;
-    Sat_g           : PsiFixSat_t := PsiFixSat;
-    Pipeline_g      : boolean     := True;          -- True = Optimize for clock speed, False = Optimize for latency	$$ export=true $$
-    ResetPolarity_g : std_logic   := '1'
+    FSampleHz_g     : real        := 10_000_000.0;                  -- $$constant=100.0e6$$
+    FCutoffHz_g     : real        := 30_000.0;                      -- $$constant=1.0e6$$
+    InFmt_g         : psi_fix_fmt_t := (1, 0, 15);                  -- $$constant='(1, 0, 15)'$$
+    OutFmt_g        : psi_fix_fmt_t := (1, 0, 15);                  -- $$constant='(1, 0, 14)'$$
+    IntFmt_g        : psi_fix_fmt_t := (1, 0, 24);                  -- Number format for calculations, for details see documentation
+    CoefFmt_g       : psi_fix_fmt_t := (1, 0, 17);                  -- coef format
+    Round_g         : psi_fix_rnd_t := PsiFixRound;                 -- round or trunc
+    Sat_g           : psi_fix_sat_t := PsiFixSat;                   -- sat or wrap
+    Pipeline_g      : boolean     := True;                          -- True = Optimize for clock speed, False = Optimize for latency	$$ export=true $$
+    ResetPolarity_g : std_logic   := '1'                            -- reset polarity active high = '1'
   );
   port(
     clk_i : in  std_logic;                                          -- clock input									$$ type=clk; freq=100e6 $$
     rst_i : in  std_logic;                                          -- sync. reset									$$ type=rst; clk=clk_i $$
-    vld_i : in  std_logic;                                          -- input strobe
     dat_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0); -- data in
-    vld_o : out std_logic;                                          -- output strobe
-    dat_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0) -- data out
+    vld_i : in  std_logic;                                          -- input valid signal
+    dat_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);-- data out
+    vld_o : out std_logic                                           -- output valid signal
   );
 end entity;
 -- @formatter:on

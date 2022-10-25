@@ -9,7 +9,7 @@
 ------------------------------------------------------------------------------
 -- This entity implements a moving average with different options for the 
 -- gain correction (none, rough by shifting, exact by shifting and multiplication).
-
+------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -21,22 +21,22 @@ use work.psi_fix_pkg.all;
 -- $$ processes=stim,check $$
 entity psi_fix_mov_avg is
   generic(
-    InFmt_g    : PsiFixFmt_t;           -- $$ constant=(1,0,10) $$
-    OutFmt_g   : PsiFixFmt_t;           -- $$ constant=(1,1,12) $$
-    Taps_g     : positive;              -- $$ constant=7 $$
-    GainCorr_g : string      := "ROUGH"; -- ROUGH, NONE or EXACT $$ export=true $$
-    Round_g    : PsiFixRnd_t := PsiFixRound;
-    Sat_g      : PsiFixSat_t := PsiFixSat;
-    OutRegs_g  : natural     := 1       -- $$ export=true $$
+    InFmt_g    : psi_fix_fmt_t;                                     -- input format   $$ constant=(1,0,10) $$
+    OutFmt_g   : psi_fix_fmt_t;                                     -- output format  $$ constant=(1,1,12) $$
+    Taps_g     : positive;                                          -- number of Taps $$ constant=7 $$
+    GainCorr_g : string      := "ROUGH";                            -- gain coorection either:= ROUGH, NONE or EXACT $$ export=true $$
+    Round_g    : psi_fix_rnd_t := PsiFixRound;                      -- round or trunc
+    Sat_g      : psi_fix_sat_t := PsiFixSat;                        -- saturate or wrap
+    OutRegs_g  : natural     := 1                                   -- add number of output register $$ export=true $$
   );
   port(
     -- Control Signals
-    clk_i : in  std_logic;              -- $$ type=clk; freq=100e6 $$
-    rst_i : in  std_logic;              -- $$ type=rst; clk=clk_i $$
-    vld_i : in  std_logic;
-    dat_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-    vld_o : out std_logic;
-    dat_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)
+    clk_i : in  std_logic;                                          -- system clock $$ type=clk; freq=100e6 $$
+    rst_i : in  std_logic;                                          -- system reset $$ type=rst; clk=clk_i $$
+    dat_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0); -- data input
+    vld_i : in  std_logic;                                          -- valid input sampling frequency 
+    dat_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);-- data output
+    vld_o : out std_logic                                           -- valid output sampling frequency
   );
 end entity;
 
@@ -47,10 +47,10 @@ architecture rtl of psi_fix_mov_avg is
   constant AdditionalBits_c : integer := log2ceil(Gain_c);
 
   -- Formats
-  constant DiffFmt_c   : PsiFixFmt_t := (1, InFmt_g.I + 1, InFmt_g.F);
-  constant SumFmt_c    : PsiFixFmt_t := (1, inFmt_g.I + AdditionalBits_c, InFmt_g.F);
-  constant GcInFmt_c   : PsiFixFmt_t := (1, InFmt_g.I, work.psi_common_math_pkg.min(24 - inFmt_g.I, SumFmt_c.F + AdditionalBits_c));
-  constant GcCoefFmt_c : PsiFixFmt_t := (0, 1, 16);
+  constant DiffFmt_c   : psi_fix_fmt_t := (1, InFmt_g.I + 1, InFmt_g.F);
+  constant SumFmt_c    : psi_fix_fmt_t := (1, InFmt_g.I + AdditionalBits_c, InFmt_g.F);
+  constant GcInFmt_c   : psi_fix_fmt_t := (1, InFmt_g.I, work.psi_common_math_pkg.min(24 - InFmt_g.I, SumFmt_c.F + AdditionalBits_c));
+  constant GcCoefFmt_c : psi_fix_fmt_t := (0, 1, 16);
 
   -- Gain correction coefficient calculation
   constant Gc_c : std_logic_vector(PsiFixSize(GcCoefFmt_c) - 1 downto 0) := PsiFixFromReal(2.0**real(AdditionalBits_c) / real(Gain_c), GcCoefFmt_c);

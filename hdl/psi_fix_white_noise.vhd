@@ -21,7 +21,7 @@ use work.psi_fix_pkg.all;
 -- Entity
 ------------------------------------------------------------------------------
 entity psi_fix_white_noise is
-  generic( OutFmt_g : PsiFixFmt_t           := (0, 0, 31);
+  generic( OutFmt_g : psi_fix_fmt_t           := (0, 0, 31);
            Seed_g   : unsigned(31 downto 0) := X"A38E3C1D";
            rst_pol_g: std_logic             :='1');
   port(    -- Control Signals

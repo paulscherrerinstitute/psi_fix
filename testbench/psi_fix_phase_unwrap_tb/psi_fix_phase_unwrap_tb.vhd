@@ -35,13 +35,13 @@ end entity;
 ------------------------------------------------------------
 architecture sim of psi_fix_phase_unwrap_tb is
   -- *** Fixed Generics ***
-  constant OutFmt_g : PsiFixFmt_t := (1, 3, 15);
-  constant Round_g  : PsiFixRnd_t := PsiFixTrunc;
+  constant OutFmt_g : psi_fix_fmt_t := (1, 3, 15);
+  constant Round_g  : psi_fix_rnd_t := PsiFixTrunc;
 
   -- *** Constants ***
-  constant InFmtS_c : PsiFixFmt_t := (1, 0, 15);
-  constant InFmtU_c : PsiFixFmt_t := (0, 1, 15);
-  constant InFmt_c  : PsiFixFmt_t := PsiFixChooseFmt(StimuliSet_g = "S", InFmtS_c, InFmtU_c);
+  constant InFmtS_c : psi_fix_fmt_t := (1, 0, 15);
+  constant InFmtU_c : psi_fix_fmt_t := (0, 1, 15);
+  constant InFmt_c  : psi_fix_fmt_t := PsiFixChooseFmt(StimuliSet_g = "S", InFmtS_c, InFmtU_c);
 
   -- *** TB Control ***
   signal TbRunning             : boolean                  := True;

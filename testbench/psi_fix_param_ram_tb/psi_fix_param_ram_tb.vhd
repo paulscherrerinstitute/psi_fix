@@ -36,7 +36,7 @@ architecture sim of psi_fix_param_ram_tb is
 
   -- *** Not Assigned Generics (default values) ***
   constant Depth_g    : positive    := 8;
-  constant Fmt_g      : PsiFixFmt_t := (1, 0, 15);
+  constant Fmt_g      : psi_fix_fmt_t := (1, 0, 15);
   constant Behavior_g : string      := "RBW";
   constant Init_g     : t_areal     := (0.1, 0.2, 0.3);
 

@@ -14,21 +14,21 @@ entity psi_fix_lin_approx_gaussify20b is
   port(
     -- Control Signals
     clk_i : in  std_logic;
-    rst_i : in  std_logic;
+    rst_i : in  std_logic;    
+    dat_i : in  std_logic_vector(20 - 1 downto 0);  -- Format (1, 0, 19)
     vld_i : in  std_logic;
-    dat_i : in  std_logic_vector(20 - 1 downto 0); -- Format (1, 0, 19)
-    vld_o : out std_logic;
-    dat_o : out std_logic_vector(20 - 1 downto 0)  -- Format (1, 0, 19)
+    dat_o : out std_logic_vector(20 - 1 downto 0);  -- Format (1, 0, 19)
+    vld_o : out std_logic
   );
 end entity;
 
 architecture rtl of psi_fix_lin_approx_gaussify20b is
 
   -- Constants
-  constant InFmt_c      : PsiFixFmt_t := (1, 0, 19);
-  constant OutFmt_c     : PsiFixFmt_t := (1, 0, 19);
-  constant OffsFmt_c    : PsiFixFmt_t := (1, 0, 21);
-  constant GradFmt_c    : PsiFixFmt_t := (0, 5, 9);
+  constant InFmt_c      : psi_fix_fmt_t := (1, 0, 19);
+  constant OutFmt_c     : psi_fix_fmt_t := (1, 0, 19);
+  constant OffsFmt_c    : psi_fix_fmt_t := (1, 0, 21);
+  constant GradFmt_c    : psi_fix_fmt_t := (0, 5, 9);
   constant TableSize_c  : integer     := 1024;
   constant TableWidth_c : integer     := 36;
 

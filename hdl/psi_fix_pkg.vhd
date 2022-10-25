@@ -24,49 +24,49 @@ package psi_fix_pkg is
   --------------------------------------------------------------------------
   -- Definitions
   --------------------------------------------------------------------------
-  type PsiFixFmt_t is record
+  type psi_fix_fmt_t is record
     S : natural range 0 to 1;           -- Sign bit
     I : integer;                        -- Integer bits
     F : integer;                        -- Fractional bits
   end record;
 
-  type PsiFixFmtArray_t is array (natural range <>) of PsiFixFmt_t;
+  type PsiFixFmtArray_t is array (natural range <>) of psi_fix_fmt_t;
 
-  type PsiFixRnd_t is (PsiFixRound, PsiFixTrunc);
+  type psi_fix_rnd_t is (PsiFixRound, PsiFixTrunc);
 
-  type PsiFixSat_t is (PsiFixWrap, PsiFixSat);
+  type psi_fix_sat_t is (PsiFixWrap, PsiFixSat);
 
   --------------------------------------------------------------------------
   -- Helpers
   --------------------------------------------------------------------------		
   function PsiFixChooseFmt(sel  : boolean;
-                           fmtA : PsiFixFmt_t;
-                           fmtB : PsiFixFmt_t)
-  return PsiFixFmt_t;                   -- fmtA if true, otherwise fmtB
+                           fmtA : psi_fix_fmt_t;
+                           fmtB : psi_fix_fmt_t)
+  return psi_fix_fmt_t;                   -- fmtA if true, otherwise fmtB
 
   --------------------------------------------------------------------------
   -- Conversions between PSI and Enclustra Definitions
   --------------------------------------------------------------------------	
-  function PsiFix2ClFix(rnd : PsiFixRnd_t)
+  function PsiFix2ClFix(rnd : psi_fix_rnd_t)
   return FixRound_t;
 
-  function PsiFix2ClFix(sat : PsiFixSat_t)
+  function PsiFix2ClFix(sat : psi_fix_sat_t)
   return FixSaturate_t;
 
-  function PsiFix2ClFix(fmt : PsiFixFmt_t)
+  function PsiFix2ClFix(fmt : psi_fix_fmt_t)
   return FixFormat_t;
 
   function PsiFix2ClFix(fmts : PsiFixFmtArray_t)
   return FixFormatArray_t;
 
   function ClFix2PsiFix(rnd : FixRound_t)
-  return PsiFixRnd_t;
+  return psi_fix_rnd_t;
 
   function ClFix2PsiFix(sat : FixSaturate_t)
-  return PsiFixSat_t;
+  return psi_fix_sat_t;
 
   function ClFix2PsiFix(fmt : FixFormat_t)
-  return PsiFixFmt_t;
+  return psi_fix_fmt_t;
 
   function ClFix2PsiFix(fmts : FixFormatArray_t)
   return PsiFixFmtArray_t;
@@ -74,130 +74,130 @@ package psi_fix_pkg is
   --------------------------------------------------------------------------
   -- Bittrue available in Python
   --------------------------------------------------------------------------	
-  function PsiFixSize(fmt : PsiFixFmt_t)
+  function PsiFixSize(fmt : psi_fix_fmt_t)
   return integer;
 
   function PsiFixFromReal(a    : real;
-                          rFmt : PsiFixFmt_t)
+                          rFmt : psi_fix_fmt_t)
   return std_logic_vector;
 
   function PsiFixFromBitsAsInt(a    : integer;
-                               aFmt : PsiFixFmt_t)
+                               aFmt : psi_fix_fmt_t)
   return std_logic_vector;
 
   function PsiFixGetBitsAsInt(a    : std_logic_vector;
-                              aFmt : PsiFixFmt_t)
+                              aFmt : psi_fix_fmt_t)
   return integer;
 
   function PsiFixResize(a    : std_logic_vector;
-                        aFmt : PsiFixFmt_t;
-                        rFmt : PsiFixFmt_t;
-                        rnd  : PsiFixRnd_t := PsiFixTrunc;
-                        sat  : PsiFixSat_t := PsiFixWrap)
+                        aFmt : psi_fix_fmt_t;
+                        rFmt : psi_fix_fmt_t;
+                        rnd  : psi_fix_rnd_t := PsiFixTrunc;
+                        sat  : psi_fix_sat_t := PsiFixWrap)
   return std_logic_vector;
 
   function PsiFixAdd(a    : std_logic_vector;
-                     aFmt : PsiFixFmt_t;
+                     aFmt : psi_fix_fmt_t;
                      b    : std_logic_vector;
-                     bFmt : PsiFixFmt_t;
-                     rFmt : PsiFixFmt_t;
-                     rnd  : PsiFixRnd_t := PsiFixTrunc;
-                     sat  : PsiFixSat_t := PsiFixWrap)
+                     bFmt : psi_fix_fmt_t;
+                     rFmt : psi_fix_fmt_t;
+                     rnd  : psi_fix_rnd_t := PsiFixTrunc;
+                     sat  : psi_fix_sat_t := PsiFixWrap)
   return std_logic_vector;
 
   function PsiFixSub(a    : std_logic_vector;
-                     aFmt : PsiFixFmt_t;
+                     aFmt : psi_fix_fmt_t;
                      b    : std_logic_vector;
-                     bFmt : PsiFixFmt_t;
-                     rFmt : PsiFixFmt_t;
-                     rnd  : PsiFixRnd_t := PsiFixTrunc;
-                     sat  : PsiFixSat_t := PsiFixWrap)
+                     bFmt : psi_fix_fmt_t;
+                     rFmt : psi_fix_fmt_t;
+                     rnd  : psi_fix_rnd_t := PsiFixTrunc;
+                     sat  : psi_fix_sat_t := PsiFixWrap)
   return std_logic_vector;
 
   function PsiFixMult(a    : std_logic_vector;
-                      aFmt : PsiFixFmt_t;
+                      aFmt : psi_fix_fmt_t;
                       b    : std_logic_vector;
-                      bFmt : PsiFixFmt_t;
-                      rFmt : PsiFixFmt_t;
-                      rnd  : PsiFixRnd_t := PsiFixTrunc;
-                      sat  : PsiFixSat_t := PsiFixWrap)
+                      bFmt : psi_fix_fmt_t;
+                      rFmt : psi_fix_fmt_t;
+                      rnd  : psi_fix_rnd_t := PsiFixTrunc;
+                      sat  : psi_fix_sat_t := PsiFixWrap)
   return std_logic_vector;
 
   function PsiFixAbs(a    : std_logic_vector;
-                     aFmt : PsiFixFmt_t;
-                     rFmt : PsiFixFmt_t;
-                     rnd  : PsiFixRnd_t := PsiFixTrunc;
-                     sat  : PsiFixSat_t := PsiFixWrap)
+                     aFmt : psi_fix_fmt_t;
+                     rFmt : psi_fix_fmt_t;
+                     rnd  : psi_fix_rnd_t := PsiFixTrunc;
+                     sat  : psi_fix_sat_t := PsiFixWrap)
   return std_logic_vector;
 
   function PsiFixNeg(a    : std_logic_vector;
-                     aFmt : PsiFixFmt_t;
-                     rFmt : PsiFixFmt_t;
-                     rnd  : PsiFixRnd_t := PsiFixTrunc;
-                     sat  : PsiFixSat_t := PsiFixWrap)
+                     aFmt : psi_fix_fmt_t;
+                     rFmt : psi_fix_fmt_t;
+                     rnd  : psi_fix_rnd_t := PsiFixTrunc;
+                     sat  : psi_fix_sat_t := PsiFixWrap)
   return std_logic_vector;
 
   function PsiFixShiftLeft(a        : std_logic_vector;
-                           aFmt     : PsiFixFmt_t;
+                           aFmt     : psi_fix_fmt_t;
                            shift    : integer;
                            maxShift : integer;
-                           rFmt     : PsiFixFmt_t;
-                           rnd      : PsiFixRnd_t := PsiFixTrunc;
-                           sat      : PsiFixSat_t := PsiFixWrap;
+                           rFmt     : psi_fix_fmt_t;
+                           rnd      : psi_fix_rnd_t := PsiFixTrunc;
+                           sat      : psi_fix_sat_t := PsiFixWrap;
                            dynamic  : boolean     := False)
   return std_logic_vector;
 
   function PsiFixShiftRight(a        : std_logic_vector;
-                            aFmt     : PsiFixFmt_t;
+                            aFmt     : psi_fix_fmt_t;
                             shift    : integer;
                             maxShift : integer;
-                            rFmt     : PsiFixFmt_t;
-                            rnd      : PsiFixRnd_t := PsiFixTrunc;
-                            sat      : PsiFixSat_t := PsiFixWrap;
+                            rFmt     : psi_fix_fmt_t;
+                            rnd      : psi_fix_rnd_t := PsiFixTrunc;
+                            sat      : psi_fix_sat_t := PsiFixWrap;
                             dynamic  : boolean     := False)
   return std_logic_vector;
 
-  function PsiFixUpperBoundStdlv(fmt : PsiFixFmt_t)
+  function PsiFixUpperBoundStdlv(fmt : psi_fix_fmt_t)
   return std_logic_vector;
 
-  function PsiFixLowerBoundStdlv(fmt : PsiFixFmt_t)
+  function PsiFixLowerBoundStdlv(fmt : psi_fix_fmt_t)
   return std_logic_vector;
 
-  function PsiFixUpperBoundReal(fmt : PsiFixFmt_t)
+  function PsiFixUpperBoundReal(fmt : psi_fix_fmt_t)
   return real;
 
-  function PsiFixLowerBoundReal(fmt : PsiFixFmt_t)
+  function PsiFixLowerBoundReal(fmt : psi_fix_fmt_t)
   return real;
 
   function PsiFixInRange(a    : std_logic_vector;
-                         aFmt : PsiFixFmt_t;
-                         rFmt : PsiFixFmt_t;
-                         rnd  : PsiFixRnd_t := PsiFixTrunc)
+                         aFmt : psi_fix_fmt_t;
+                         rFmt : psi_fix_fmt_t;
+                         rnd  : psi_fix_rnd_t := PsiFixTrunc)
   return boolean;
 
   -- Allowed comparisons: "a=b", "a<b", "a>b", "a<=b", "a>=b",  "a!=b"
   function PsiFixCompare(comparison : string;
                          a          : std_logic_vector;
-                         aFmt       : PsiFixFmt_t;
+                         aFmt       : psi_fix_fmt_t;
                          b          : std_logic_vector;
-                         bFmt       : PsiFixFmt_t) return boolean;
+                         bFmt       : psi_fix_fmt_t) return boolean;
 
   --------------------------------------------------------------------------
   -- VHDL Only
   --------------------------------------------------------------------------		
   function PsiFixToReal(a    : std_logic_vector;
-                        aFmt : PsiFixFmt_t)
+                        aFmt : psi_fix_fmt_t)
   return real;
 
   function PsiFixRoundFromString(s : string)
-  return PsiFixRnd_t;
+  return psi_fix_rnd_t;
 
   function PsiFixSatFromString(s : string)
-  return PsiFixSat_t;
+  return psi_fix_sat_t;
 
-  function PsiFixFmtFromString(str : string) return PsiFixFmt_t;
+  function PsiFixFmtFromString(str : string) return psi_fix_fmt_t;
 
-  function PsiFixFmtToString(aFmt : PsiFixFmt_t) return string;
+  function PsiFixFmtToString(aFmt : psi_fix_fmt_t) return string;
 
 end psi_fix_pkg;
 
@@ -210,9 +210,9 @@ package body psi_fix_pkg is
   -- Helpers
   --------------------------------------------------------------------------
   function PsiFixChooseFmt(sel  : boolean;
-                           fmtA : PsiFixFmt_t;
-                           fmtB : PsiFixFmt_t)
-  return PsiFixFmt_t is
+                           fmtA : psi_fix_fmt_t;
+                           fmtB : psi_fix_fmt_t)
+  return psi_fix_fmt_t is
   begin
     if sel then
       return fmtA;
@@ -254,7 +254,7 @@ package body psi_fix_pkg is
   --------------------------------------------------------------------------
   -- Conversions between PSI and Enclustra Definitions
   --------------------------------------------------------------------------
-  function PsiFix2ClFix(rnd : PsiFixRnd_t)
+  function PsiFix2ClFix(rnd : psi_fix_rnd_t)
   return FixRound_t is
   begin
     case rnd is
@@ -265,7 +265,7 @@ package body psi_fix_pkg is
     end case;
   end function;
 
-  function PsiFix2ClFix(sat : PsiFixSat_t)
+  function PsiFix2ClFix(sat : psi_fix_sat_t)
   return FixSaturate_t is
   begin
     case sat is
@@ -276,7 +276,7 @@ package body psi_fix_pkg is
     end case;
   end function;
 
-  function PsiFix2ClFix(fmt : PsiFixFmt_t)
+  function PsiFix2ClFix(fmt : psi_fix_fmt_t)
   return FixFormat_t is
   begin
     return ((fmt.S = 1), fmt.I, fmt.F);
@@ -293,7 +293,7 @@ package body psi_fix_pkg is
   end function;
 
   function ClFix2PsiFix(rnd : FixRound_t)
-  return PsiFixRnd_t is
+  return psi_fix_rnd_t is
   begin
     case rnd is
       when NonSymPos_s => return PsiFixRound;
@@ -304,7 +304,7 @@ package body psi_fix_pkg is
   end function;
 
   function ClFix2PsiFix(sat : FixSaturate_t)
-  return PsiFixSat_t is
+  return psi_fix_sat_t is
   begin
     case sat is
       when Sat_s  => return PsiFixSat;
@@ -315,7 +315,7 @@ package body psi_fix_pkg is
   end function;
 
   function ClFix2PsiFix(fmt : FixFormat_t)
-  return PsiFixFmt_t is
+  return psi_fix_fmt_t is
   begin
     return (choose(fmt.Signed, 1, 0), fmt.Intbits, fmt.FracBits);
   end function;
@@ -334,7 +334,7 @@ package body psi_fix_pkg is
   -- Psi Fix Functionality
   --------------------------------------------------------------------------
   -- *** PsiFixSize ***
-  function PsiFixSize(fmt : PsiFixFmt_t)
+  function PsiFixSize(fmt : psi_fix_fmt_t)
   return integer is
   begin
     return cl_fix_width(PsiFix2ClFix(fmt));
@@ -342,7 +342,7 @@ package body psi_fix_pkg is
 
   -- *** PsiFixFromReal ***
   function PsiFixFromReal(a    : real;
-                          rFmt : PsiFixFmt_t)
+                          rFmt : psi_fix_fmt_t)
   return std_logic_vector is
   begin
     -- assertions
@@ -353,7 +353,7 @@ package body psi_fix_pkg is
 
   -- *** PsiFixToReal ***
   function PsiFixToReal(a    : std_logic_vector;
-                        aFmt : PsiFixFmt_t)
+                        aFmt : psi_fix_fmt_t)
   return real is
 
   begin
@@ -362,7 +362,7 @@ package body psi_fix_pkg is
 
   -- *** PsiFixFromBitsAsInt ***
   function PsiFixFromBitsAsInt(a    : integer;
-                               aFmt : PsiFixFmt_t)
+                               aFmt : psi_fix_fmt_t)
   return std_logic_vector is
   begin
     return cl_fix_from_bits_as_int(a, PsiFix2ClFix(aFmt));
@@ -370,7 +370,7 @@ package body psi_fix_pkg is
 
   -- *** PsiFixGetBitsAsInt ***
   function PsiFixGetBitsAsInt(a    : std_logic_vector;
-                              aFmt : PsiFixFmt_t)
+                              aFmt : psi_fix_fmt_t)
   return integer is
   begin
     return cl_fix_get_bits_as_int(a, PsiFix2ClFix(aFmt));
@@ -378,10 +378,10 @@ package body psi_fix_pkg is
 
   -- *** PsiFixResize ***
   function PsiFixResize(a    : std_logic_vector;
-                        aFmt : PsiFixFmt_t;
-                        rFmt : PsiFixFmt_t;
-                        rnd  : PsiFixRnd_t := PsiFixTrunc;
-                        sat  : PsiFixSat_t := PsiFixWrap)
+                        aFmt : psi_fix_fmt_t;
+                        rFmt : psi_fix_fmt_t;
+                        rnd  : psi_fix_rnd_t := PsiFixTrunc;
+                        sat  : psi_fix_sat_t := PsiFixWrap)
   return std_logic_vector is
   begin
     return cl_fix_resize(a, PsiFix2ClFix(aFmt), PsiFix2ClFix(rFmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat));
@@ -389,12 +389,12 @@ package body psi_fix_pkg is
 
   -- *** PsiFixAdd ***
   function PsiFixAdd(a    : std_logic_vector;
-                     aFmt : PsiFixFmt_t;
+                     aFmt : psi_fix_fmt_t;
                      b    : std_logic_vector;
-                     bFmt : PsiFixFmt_t;
-                     rFmt : PsiFixFmt_t;
-                     rnd  : PsiFixRnd_t := PsiFixTrunc;
-                     sat  : PsiFixSat_t := PsiFixWrap)
+                     bFmt : psi_fix_fmt_t;
+                     rFmt : psi_fix_fmt_t;
+                     rnd  : psi_fix_rnd_t := PsiFixTrunc;
+                     sat  : psi_fix_sat_t := PsiFixWrap)
   return std_logic_vector is
   begin
     return cl_fix_add(a, PsiFix2ClFix(aFmt),
@@ -404,12 +404,12 @@ package body psi_fix_pkg is
 
   -- *** PsiFixSub ***
   function PsiFixSub(a    : std_logic_vector;
-                     aFmt : PsiFixFmt_t;
+                     aFmt : psi_fix_fmt_t;
                      b    : std_logic_vector;
-                     bFmt : PsiFixFmt_t;
-                     rFmt : PsiFixFmt_t;
-                     rnd  : PsiFixRnd_t := PsiFixTrunc;
-                     sat  : PsiFixSat_t := PsiFixWrap)
+                     bFmt : psi_fix_fmt_t;
+                     rFmt : psi_fix_fmt_t;
+                     rnd  : psi_fix_rnd_t := PsiFixTrunc;
+                     sat  : psi_fix_sat_t := PsiFixWrap)
   return std_logic_vector is
   begin
     return cl_fix_sub(a, PsiFix2ClFix(aFmt),
@@ -419,12 +419,12 @@ package body psi_fix_pkg is
 
   -- *** PsiFixMult ***
   function PsiFixMult(a    : std_logic_vector;
-                      aFmt : PsiFixFmt_t;
+                      aFmt : psi_fix_fmt_t;
                       b    : std_logic_vector;
-                      bFmt : PsiFixFmt_t;
-                      rFmt : PsiFixFmt_t;
-                      rnd  : PsiFixRnd_t := PsiFixTrunc;
-                      sat  : PsiFixSat_t := PsiFixWrap)
+                      bFmt : psi_fix_fmt_t;
+                      rFmt : psi_fix_fmt_t;
+                      rnd  : psi_fix_rnd_t := PsiFixTrunc;
+                      sat  : psi_fix_sat_t := PsiFixWrap)
   return std_logic_vector is
   begin
     return cl_fix_mult(a, PsiFix2ClFix(aFmt),
@@ -434,10 +434,10 @@ package body psi_fix_pkg is
 
   -- *** PsiFixAbs ***
   function PsiFixAbs(a    : std_logic_vector;
-                     aFmt : PsiFixFmt_t;
-                     rFmt : PsiFixFmt_t;
-                     rnd  : PsiFixRnd_t := PsiFixTrunc;
-                     sat  : PsiFixSat_t := PsiFixWrap)
+                     aFmt : psi_fix_fmt_t;
+                     rFmt : psi_fix_fmt_t;
+                     rnd  : psi_fix_rnd_t := PsiFixTrunc;
+                     sat  : psi_fix_sat_t := PsiFixWrap)
   return std_logic_vector is
   begin
     return cl_fix_abs(a, PsiFix2ClFix(aFmt), PsiFix2ClFix(rFmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat));
@@ -445,10 +445,10 @@ package body psi_fix_pkg is
 
   -- *** PsiFixNeg ***
   function PsiFixNeg(a    : std_logic_vector;
-                     aFmt : PsiFixFmt_t;
-                     rFmt : PsiFixFmt_t;
-                     rnd  : PsiFixRnd_t := PsiFixTrunc;
-                     sat  : PsiFixSat_t := PsiFixWrap)
+                     aFmt : psi_fix_fmt_t;
+                     rFmt : psi_fix_fmt_t;
+                     rnd  : psi_fix_rnd_t := PsiFixTrunc;
+                     sat  : psi_fix_sat_t := PsiFixWrap)
   return std_logic_vector is
   begin
     return cl_fix_neg(a, PsiFix2ClFix(aFmt), '1', PsiFix2ClFix(rFmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat));
@@ -457,15 +457,15 @@ package body psi_fix_pkg is
   -- *** PsiFixShiftLeft ***
   -- PsiFix specific implementation since cl_fix implementation is not synthesizable for dynamic shifts when using Xilinx Vivado tools
   function PsiFixShiftLeft(a        : std_logic_vector;
-                           aFmt     : PsiFixFmt_t;
+                           aFmt     : psi_fix_fmt_t;
                            shift    : integer;
                            maxShift : integer;
-                           rFmt     : PsiFixFmt_t;
-                           rnd      : PsiFixRnd_t := PsiFixTrunc;
-                           sat      : PsiFixSat_t := PsiFixWrap;
+                           rFmt     : psi_fix_fmt_t;
+                           rnd      : psi_fix_rnd_t := PsiFixTrunc;
+                           sat      : psi_fix_sat_t := PsiFixWrap;
                            dynamic  : boolean     := False)
   return std_logic_vector is
-    constant FullFmt_c : PsiFixFmt_t := (max(aFmt.S, rFmt.S), max(aFmt.I + maxShift, rFmt.I), max(aFmt.F, rFmt.F));
+    constant FullFmt_c : psi_fix_fmt_t := (max(aFmt.S, rFmt.S), max(aFmt.I + maxShift, rFmt.I), max(aFmt.F, rFmt.F));
     variable FullA_v   : std_logic_vector(PsiFixsize(FullFmt_c) - 1 downto 0);
     variable FullOut_v : std_logic_vector(FullA_v'range);
   begin
@@ -487,15 +487,15 @@ package body psi_fix_pkg is
   -- *** PsiFixShiftRight ***
   -- PsiFix specific implementation since cl_fix implementation is not synthesizable for dynamic shifts when using Xilinx Vivado tools
   function PsiFixShiftRight(a        : std_logic_vector;
-                            aFmt     : PsiFixFmt_t;
+                            aFmt     : psi_fix_fmt_t;
                             shift    : integer;
                             maxShift : integer;
-                            rFmt     : PsiFixFmt_t;
-                            rnd      : PsiFixRnd_t := PsiFixTrunc;
-                            sat      : PsiFixSat_t := PsiFixWrap;
+                            rFmt     : psi_fix_fmt_t;
+                            rnd      : psi_fix_rnd_t := PsiFixTrunc;
+                            sat      : psi_fix_sat_t := PsiFixWrap;
                             dynamic  : boolean     := False)
   return std_logic_vector is
-    constant FullFmt_c : PsiFixFmt_t := (max(aFmt.S, rFmt.S), max(aFmt.I, rFmt.I), max(aFmt.F + maxShift, rFmt.F + 1)); -- Additional bit for rounding
+    constant FullFmt_c : psi_fix_fmt_t := (max(aFmt.S, rFmt.S), max(aFmt.I, rFmt.I), max(aFmt.F + maxShift, rFmt.F + 1)); -- Additional bit for rounding
     variable FullA_v   : std_logic_vector(PsiFixsize(FullFmt_c) - 1 downto 0);
     variable FullOut_v : std_logic_vector(FullA_v'range);
   begin
@@ -523,28 +523,28 @@ package body psi_fix_pkg is
   end function;
 
   -- *** PsiFixUpperBoundStdlv ***
-  function PsiFixUpperBoundStdlv(fmt : PsiFixFmt_t)
+  function PsiFixUpperBoundStdlv(fmt : psi_fix_fmt_t)
   return std_logic_vector is
   begin
     return cl_fix_max_value(PsiFix2ClFix(fmt));
   end function;
 
   -- *** PsiFixLowerBoundStdlv ***	
-  function PsiFixLowerBoundStdlv(fmt : PsiFixFmt_t)
+  function PsiFixLowerBoundStdlv(fmt : psi_fix_fmt_t)
   return std_logic_vector is
   begin
     return cl_fix_min_value(PsiFix2ClFix(fmt));
   end function;
 
   -- *** PsiFixUpperBoundReal ***
-  function PsiFixUpperBoundReal(fmt : PsiFixFmt_t)
+  function PsiFixUpperBoundReal(fmt : psi_fix_fmt_t)
   return real is
   begin
     return cl_fix_max_real(PsiFix2ClFix(fmt));
   end function;
 
   -- *** PsiFixLowerBoundReal ***
-  function PsiFixLowerBoundReal(fmt : PsiFixFmt_t)
+  function PsiFixLowerBoundReal(fmt : psi_fix_fmt_t)
   return real is
   begin
     return cl_fix_min_real(PsiFix2ClFix(fmt));
@@ -552,9 +552,9 @@ package body psi_fix_pkg is
 
   -- *** PsiFixInRange ***
   function PsiFixInRange(a    : std_logic_vector;
-                         aFmt : PsiFixFmt_t;
-                         rFmt : PsiFixFmt_t;
-                         rnd  : PsiFixRnd_t := PsiFixTrunc)
+                         aFmt : psi_fix_fmt_t;
+                         rFmt : psi_fix_fmt_t;
+                         rnd  : psi_fix_rnd_t := PsiFixTrunc)
   return boolean is
   begin
     return cl_fix_in_range(a, PsiFix2ClFix(aFmt), PsiFix2ClFix(rFmt), PsiFix2ClFix(rnd));
@@ -562,7 +562,7 @@ package body psi_fix_pkg is
 
   -- *** PsiFixRoundFromString ***
   function PsiFixRoundFromString(s : string)
-  return PsiFixRnd_t is
+  return psi_fix_rnd_t is
   begin
     if s = "PsiFixRound" or s = "psifixround" then
       return PsiFixRound;
@@ -575,7 +575,7 @@ package body psi_fix_pkg is
 
   -- *** PsiFixSatFromString ***
   function PsiFixSatFromString(s : string)
-  return PsiFixSat_t is
+  return psi_fix_sat_t is
   begin
     if s = "PsiFixSat" or s = "psifixsat" then
       return PsiFixSat;
@@ -590,16 +590,16 @@ package body psi_fix_pkg is
   -- Allowed comparisons: "a=b", "a<b", "a>b", "a<=b", "a>=b", "a!=b"
   function PsiFixCompare(comparison : string;
                          a          : std_logic_vector;
-                         aFmt       : PsiFixFmt_t;
+                         aFmt       : psi_fix_fmt_t;
                          b          : std_logic_vector;
-                         bFmt       : PsiFixFmt_t) return boolean is
+                         bFmt       : psi_fix_fmt_t) return boolean is
   begin
     return cl_fix_compare(comparison, a, PsiFix2ClFix(aFmt), b, PsiFix2ClFix(bFmt));
   end function;
 
   -- *** PsiFixFmtFromString ***
-  function PsiFixFmtFromString(str : string) return PsiFixFmt_t is
-    variable Format_v         : PsiFixFmt_t;
+  function PsiFixFmtFromString(str : string) return psi_fix_fmt_t is
+    variable Format_v         : psi_fix_fmt_t;
     variable OpenBraceIdx_v   : integer := -1;
     variable FirstCommaIdx_v  : integer := -1;
     variable SecondCommaIdx_v : integer := -1;
@@ -629,7 +629,7 @@ package body psi_fix_pkg is
   end function;
 
   -- *** PsiFixFmtToString ***
-  function PsiFixFmtToString(aFmt : PsiFixFmt_t) return string is
+  function PsiFixFmtToString(aFmt : psi_fix_fmt_t) return string is
   begin
     return "(" & integer'image(aFmt.S) & ", " & integer'image(aFmt.I) & ", " & integer'image(aFmt.F) & ")";
   end function;

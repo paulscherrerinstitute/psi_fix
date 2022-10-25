@@ -12,6 +12,7 @@
 -- - The number of channels is configurable
 -- - All channels are processed time-division-multiplexed
 -- - Coefficients are configurable but the same for each channel
+------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -24,35 +25,35 @@ use work.psi_common_array_pkg.all;
 -- $$ processes=stim, resp $$
 entity psi_fix_fir_par_nch_chtdm_conf is
   generic(
-    InFmt_g       : PsiFixFmt_t := (1, 0, 17); -- $$ constant=(1,0,15) $$
-    OutFmt_g      : PsiFixFmt_t := (1, 0, 17); -- $$ constant=(1,2,13) $$
-    CoefFmt_g     : PsiFixFmt_t := (1, 0, 17); -- $$ constant=(1,0,17) $$
-    Channels_g    : natural     := 1;   -- $$ export=true $$
-    Taps_g        : natural     := 48;  -- $$ export=true $$
-    Rnd_g         : PsiFixRnd_t := PsiFixRound;
-    Sat_g         : PsiFixSat_t := PsiFixSat;
-    UseFixCoefs_g : boolean     := true;
-    Coefs_g       : t_areal     := (0.0, 0.0)
+    InFmt_g       : psi_fix_fmt_t := (1, 0, 17);  -- input format FP      $$ constant=(1,0,15) $$
+    OutFmt_g      : psi_fix_fmt_t := (1, 0, 17);  -- output format FP     $$ constant=(1,2,13) $$
+    CoefFmt_g     : psi_fix_fmt_t := (1, 0, 17);  -- coeffcient format FP $$ constant=(1,0,17) $$
+    Channels_g    : natural     := 1;             -- number of channel    $$ export=true $$
+    Taps_g        : natural     := 48;            -- Taps number          $$ export=true $$
+    Rnd_g         : psi_fix_rnd_t := PsiFixRound; -- round or trunc
+    Sat_g         : psi_fix_sat_t := PsiFixSat;   -- sat or wrap
+    UseFixCoefs_g : boolean     := true;          -- use fixed coef or updated from table
+    Coefs_g       : t_areal     := (0.0, 0.0)     -- see doc
   );
   port(
-    clk_i             : in  std_logic;  -- $$ type=clk; freq=100e6 $$
-    rst_i             : in  std_logic;  -- $$ type=rst; clk=Clk $$
-    vld_i             : in  std_logic;
-    dat_i             : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-    vld_o             : out std_logic;
-    dat_o             : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-    -- Coefficient interface										:= '0';
-    coef_if_wr_i      : in  std_logic                                            := '0';
-    coef_if_wr_addr_i : in  std_logic_vector(log2ceil(Taps_g) - 1 downto 0)      := (others => '0');
-    coef_if_wr_dat_i  : in  std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0')
+    clk_i             : in  std_logic;                                                                -- system clock $$ type=clk; freq=100e6 $$
+    rst_i             : in  std_logic;                                                                -- system reset $$ type=rst; clk=Clk $$
+    dat_i             : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);                       -- data input FP
+    vld_i             : in  std_logic;                                                                -- valid input frequency sampling 
+    dat_o             : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);                      -- data output 
+    vld_o             : out std_logic;                                                                -- valid output frequency sampling
+    -- Coefficient interface
+    coef_if_wr_i      : in  std_logic                                            := '0';              -- write enable
+    coef_if_wr_addr_i : in  std_logic_vector(log2ceil(Taps_g) - 1 downto 0)      := (others => '0');  -- write address
+    coef_if_wr_dat_i  : in  std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0')   -- coef to write
   );
 end entity;
 
 architecture rtl of psi_fix_fir_par_nch_chtdm_conf is
 
   -- DSP Slice Chain
-  constant AccuFmt_c   : PsiFixFmt_t                  := (1, OutFmt_g.I + 1, InFmt_g.F + CoefFmt_g.F);
-  constant RoundFmt_c  : PsiFixFmt_t                  := (1, AccuFmt_c.I + 1, OutFmt_g.F);
+  constant AccuFmt_c   : psi_fix_fmt_t                  := (1, OutFmt_g.I + 1, InFmt_g.F + CoefFmt_g.F);
+  constant RoundFmt_c  : psi_fix_fmt_t                  := (1, AccuFmt_c.I + 1, OutFmt_g.F);
   type AccuChain_a is array (natural range <>) of std_logic_vector(PsiFixSize(AccuFmt_c) - 1 downto 0);
   type InData_a is array (natural range <>) of std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
   signal DspDataChainI : InData_a(0 to Taps_g - 1);

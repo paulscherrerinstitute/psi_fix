@@ -10,10 +10,8 @@
 -- This component is half bandwidth decimation filter
 -- - The number of channels is configurable
 -- - All channels are processed in parallel and their data must be synchronized
+------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- Libraries
-------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -24,40 +22,32 @@ use work.psi_common_array_pkg.all;
 
 -- $$ PROCESSES=Input,Output $$
 
-------------------------------------------------------------------------------
--- Entity Declaration
-------------------------------------------------------------------------------
 entity psi_fix_fir_3tap_hbw_dec2 is
   generic(
-    InFmt_g    : PsiFixFmt_t := (1, 0, 17);
-    OutFmt_g   : PsiFixFmt_t := (1, 0, 17);
-    Channels_g : natural     := 2;      -- $$ EXPORT=true $$
-    Separate_g : boolean     := true;   -- $$ EXPORT=true $$
-    Rnd_g      : PsiFixRnd_t := PsiFixRound;
-    Sat_g      : PsiFixSat_t := PsiFixSat;
-    rst_pol_g  : std_logic   := '1'
+    InFmt_g    : psi_fix_fmt_t := (1, 0, 17);                                         -- input format FP
+    OutFmt_g   : psi_fix_fmt_t := (1, 0, 17);                                         -- output format FP
+    Channels_g : natural     := 2;                                                    -- number of channels TDM $$ EXPORT=true $$
+    Separate_g : boolean     := true;                                                 -- $$ EXPORT=true $$
+    Rnd_g      : psi_fix_rnd_t := PsiFixRound;                                        -- Round or trunc
+    Sat_g      : psi_fix_sat_t := PsiFixSat;                                          -- saturation or wrap
+    rst_pol_g  : std_logic   := '1';                                                  -- reset polarity active high ='1'
+    rst_sync_g : boolean     := true                                                  -- async reset or sync architecture
   );
   port(
-    -- Control Signals
-    clk_i : in  std_logic;                                                            -- $$ TYPE=CLK; FREQ=100e6; Proc=Input $$
-    rst_i : in  std_logic;                                                            -- $$ TYPE=RST; CLK=Clk $$
-    -- Input
-    vld_i : in  std_logic;                                                            -- $$ PROC=Input $$
-    dat_i : in  std_logic_vector(PsiFixSize(InFmt_g) * 2 * Channels_g - 1 downto 0);  -- $$ PROC=Input $$
-    -- Output
-    vld_o : out std_logic;                                                            -- $$ PROC=Output $$
-    dat_o : out std_logic_vector(PsiFixSize(OutFmt_g) * Channels_g - 1 downto 0)      -- $$ PROC=Output $$
+    clk_i : in  std_logic;                                                            -- clk system $$ TYPE=CLK; FREQ=100e6; Proc=Input $$
+    rst_i : in  std_logic;                                                            -- rst system $$ TYPE=RST; CLK=Clk $$   
+    dat_i : in  std_logic_vector(PsiFixSize(InFmt_g) * 2 * Channels_g - 1 downto 0);  -- data input                     $$ PROC=Input $$
+    vld_i : in  std_logic;                                                            -- valid input Frequency sampling $$ PROC=Input $$
+    dat_o : out std_logic_vector(PsiFixSize(OutFmt_g) * Channels_g - 1 downto 0);     -- data output  $$ PROC=Output $$    
+    vld_o : out std_logic                                                             -- valid otuput $$ PROC=Output $$
   );
 end entity;
 
-------------------------------------------------------------------------------
--- Architecture Declaration
-------------------------------------------------------------------------------
 architecture rtl of psi_fix_fir_3tap_hbw_dec2 is
 
   -- Constants
   constant Shifts_c : t_ainteger  := (2, 1, 2);
-  constant IntFmt_c : PsiFixFmt_t := (InFmt_g.S, InFmt_g.I, InFmt_g.F + 2);
+  constant IntFmt_c : psi_fix_fmt_t := (InFmt_g.S, InFmt_g.I, InFmt_g.F + 2);
 
   -- types
   type InData_t is array (0 to 2 * Channels_g - 1) of std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
@@ -165,14 +155,29 @@ begin
   --------------------------------------------
   -- Sequential Process
   --------------------------------------------
-  p_seq : process(clk_i)
-  begin
-    if rising_edge(clk_i) then
-      r <= r_next;
-      if rst_i = rst_pol_g then
-        r.Vld <= (others => '0');
-      end if;
-    end if;
-  end process;
+  sync_rst_gene : if rst_sync_g generate
+    begin
+      p_seq : process(clk_i)
+      begin
+        if rising_edge(clk_i) then
+          r <= r_next;
+          if rst_i = rst_pol_g then
+            r.Vld <= (others => '0');
+          end if;
+        end if;
+      end process;
+   end generate;
 
+  async_rst_gene : if not rst_sync_g generate
+    begin
+      p_seq : process(clk_i, rst_i)
+      begin
+         if rst_i = rst_pol_g then
+            r.Vld <= (others => '0'); 
+        elsif rising_edge(clk_i) then
+          r <= r_next;
+        end if;
+      end process;
+   end generate;
+   
 end architecture;

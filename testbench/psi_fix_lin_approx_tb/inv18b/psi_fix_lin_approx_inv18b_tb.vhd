@@ -33,8 +33,8 @@ end entity;
 architecture sim of psi_fix_lin_approx_inv18b_tb is
 
   -- constants
-  constant InFmt_c     : PsiFixFmt_t := (0, 1, 18);
-  constant OutFmt_c    : PsiFixFmt_t := (0, 0, 18);
+  constant InFmt_c     : psi_fix_fmt_t := (0, 1, 18);
+  constant OutFmt_c    : psi_fix_fmt_t := (0, 0, 18);
   constant ClkPeriod_c : time        := 10 ns;
 
   -- Signals
@@ -55,14 +55,14 @@ begin
   i_dut : entity work.psi_fix_lin_approx_inv18b
     port map(
       -- Control Signals
-      Clk     => Clk,
-      Rst     => Rst,
+      clk_i     => Clk,
+      rst_i     => Rst,
       -- Input
-      InVld   => InVld,
-      InData  => InData,
+      vld_i   => InVld,
+      dat_i  => InData,
       -- Output
-      OutVld  => OutVld,
-      OutData => OutData
+      vld_o  => OutVld,
+      dat_o => OutData
     );
 
   p_clk : process
