@@ -1,10 +1,10 @@
 <img align="right" src="../doc/psi_logo.png">
 
 ***
-[**components list**](../index.md)
+[**components list**](index.md)
 # psi_fix_cic_dec_cfg_1ch
  - VHDL source: [psi_fix_cic_dec_cfg_1ch](../hdl/psi_fix_cic_dec_cfg_1ch.vhd)
- - Testbench source: [psi_fix_cic_dec_cfg_1ch_tb.vhd](../testbench/psi_fix_cic_dec_cfg_1ch_tb.vhd)
+ - Testbench source: [psi_fix_cic_dec_cfg_1ch_tb.vhd](../testbench/psi_fix_cic_dec_cfg_1ch/psi_fix_cic_dec_cfg_1ch_tb.vhd)
 
 ### Description
 
@@ -20,7 +20,9 @@ Since the integrators are responsible for most of the CIC gain, the numbers are 
 Note that the number format for the differentiator sections has one additional fractional bit (compared to the output format) per section. This results from the fact that depending on the signal frequency, the differentiators can have a gain up to two. This way the least significant bit at the input of the differentiators that can change the output by one LSB is preserved.
 If the gain correction multiplier is used, signal path is chosen to be 25 bits wide and the gain correction coefficient is 17 bits (unsigned). For most implementations this design decisions are sufficient. If other requirements exist (e.g. very wide signal path), a project specific implementation of the CIC is required.
 
-<img align="center" src="psi_fix_cic_dec_cfg_1ch_a.png">
+<p align="center">
+<img src="psi_fix_cic_dec_cfg_1ch_a.png">
+</p>
 
 The symbols are defined as follows:
 - R	Decimation ratio
@@ -30,12 +32,13 @@ The symbols are defined as follows:
 - GC	Gain correction factor to compensate overall gain to 1.0
 Some of the most common formulas are given below.
 
-<img align="center" src="psi_fix_cic_dec_cfg_1ch_b.png" width="250">
-
+<p align="center">
+<img src="psi_fix_cic_dec_cfg_1ch_b.png" width="250" />
+</p>
 For the case that the gain correction amplifier is disabled, the overall gain of the CIC is:
-
+<p align="center">
 <img align="center" src="psi_fix_cic_dec_cfg_1ch_c.png" width="250">
-
+</p>
 
 ### Generics
 | Name           | type          | Description                                                             |
@@ -62,4 +65,4 @@ For the case that the gain correction amplifier is disabled, the overall gain of
 | vld_o           | o        | 1         | valid otuput                                                                              |
 | busy_o          | o        | 1         | busy signal output active high                                                            |
 
-[**components list**](../index.md)
+[**components list**](index.md)

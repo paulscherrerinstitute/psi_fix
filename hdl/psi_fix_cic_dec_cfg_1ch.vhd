@@ -1,8 +1,9 @@
-------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 --  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 --  All rights reserved.
 --  Authors: Oliver Bruendler
-------------------------------------------------------------------------------
+--  https://github.com/paulscherrerinstitute/psi_fix/blob/refactor/hdl/psi_fix_cic_dec_cfg_1ch.vhd
+---------------------------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;

@@ -1,11 +1,11 @@
 <img align="right" src="../doc/psi_logo.png">
 
 ***
-[**components list**](../index.md)
+[**components list**](index.md)
 
 # psi_fix_bin_div
  - VHDL source: [psi_fix_bin_div](../hdl/psi_fix_bin_div.vhd)
- - Testbench source: [psi_fix_bin_div_tb.vhd](../testbench/psi_fix_bin_div_tb.vhd)
+ - Testbench source: [psi_fix_bin_div_tb.vhd](../testbench/psi_fix_bin_div_tb/psi_fix_bin_div_tb.vhd)
 
 ### Description
 This component implements a fixed point binary divider.
@@ -41,4 +41,4 @@ The component converts numerator and denominator to unsigned numbers, so a stand
 | vld_o         | o        | 1           | valid output signal            |
 | result_o      | o        | outfmt_g    | result output = num/den        |
 
-[**components list**](../index.md)
+[**components list**](index.md)
