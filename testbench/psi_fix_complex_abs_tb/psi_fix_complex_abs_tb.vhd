@@ -21,16 +21,16 @@ use work.psi_tb_txt_util.all;
 
 entity psi_fix_complex_abs_tb is
   generic(
-    FileFolder_g : string := "../testbench/psi_fix_complex_abs_tb/Data"
+    file_folder_g : string := "../testbench/psi_fix_complex_abs_tb/Data"
   );
 end entity;
 
 architecture sim of psi_fix_complex_abs_tb is
   -- *** Fixed Generics ***
-  constant InFmt_g  : psi_fix_fmt_t := (1, 2, 14);
-  constant OutFmt_g : psi_fix_fmt_t := (0, 1, 15);
-  constant Round_g  : psi_fix_rnd_t := PsiFixRound;
-  constant Sat_g    : psi_fix_sat_t := PsiFixSat;
+  constant in_fmt_g  : psi_fix_fmt_t := (1, 2, 14);
+  constant out_fmt_g : psi_fix_fmt_t := (0, 1, 15);
+  constant round_g  : psi_fix_rnd_t := psi_fix_round;
+  constant sat_g    : psi_fix_sat_t := psi_fix_sat;
 
   -- *** Not Assigned Generics (default values) ***
 
@@ -46,9 +46,9 @@ architecture sim of psi_fix_complex_abs_tb is
   signal Clk    : std_logic                                           := '1';
   signal Rst    : std_logic                                           := '1';
   signal InVld  : std_logic                                           := '0';
-  signal InI    : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0)  := (others => '0');
-  signal InQ    : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0)  := (others => '0');
-  signal OutAbs : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
+  signal InI    : std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0)  := (others => '0');
+  signal InQ    : std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0)  := (others => '0');
+  signal OutAbs : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
   signal OutVld : std_logic                                           := '0';
 
   signal SigIn  : TextfileData_t(0 to 1) := (others => 0);
@@ -60,10 +60,10 @@ begin
   ------------------------------------------------------------
   i_dut : entity work.psi_fix_complex_abs
     generic map(
-      InFmt_g  => InFmt_g,
-      OutFmt_g => OutFmt_g,
-      Round_g  => Round_g,
-      Sat_g    => Sat_g
+      in_fmt_g  => in_fmt_g,
+      out_fmt_g => out_fmt_g,
+      round_g  => round_g,
+      sat_g    => sat_g
     )
     port map(
       clk_i     => Clk,
@@ -128,7 +128,7 @@ begin
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => InVld,
                          Data        => SigIn,
-                         Filepath    => FileFolder_g & "/input.txt",
+                         Filepath    => file_folder_g & "/input.txt",
                          ClkPerSpl   => 3,
                          IgnoreLines => 1);
 
@@ -149,7 +149,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => OutVld,
                          Data        => SigOut,
-                         Filepath    => FileFolder_g & "/output.txt",
+                         Filepath    => file_folder_g & "/output.txt",
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!

@@ -29,9 +29,9 @@ architecture tb of psi_fix_comparator_tb is
   signal clk_sti       : std_logic                                        := '0';
   signal rst_sti       : std_logic                                        := '1';
   signal tb_run        : boolean                                          := true;
-  signal set_min_sti   : std_logic_vector(PsiFixSize(fmt_g) - 1 downto 0) := (others => '0');
-  signal set_max_sti   : std_logic_vector(PsiFixSize(fmt_g) - 1 downto 0) := (others => '0');
-  signal data_sti      : std_logic_vector(PsiFixSize(fmt_g) - 1 downto 0) := (others => '0');
+  signal set_min_sti   : std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');
+  signal set_max_sti   : std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');
+  signal data_sti      : std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');
   signal str_sti       : std_logic                                        := '0';
   signal str_obs       : std_logic;
   signal min_obs       : std_logic;
@@ -88,16 +88,16 @@ begin
   begin
     if falling_edge(clk_sti) then
       if str_obs = '1' and max_obs = '1' then
-        assert max_obs = '1' and PsiFixCompare("a<b", set_max_sti, fmt_g, data_dly_s, fmt_g) report "###ERROR### max didn't not rise but thld < data" severity error;
+        assert max_obs = '1' and psi_fix_compare("a<b", set_max_sti, fmt_g, data_dly_s, fmt_g) report "###ERROR### max didn't not rise but thld < data" severity error;
       end if;
       if str_obs = '1' and max_obs = '0' then
-        assert max_obs = '0' and PsiFixCompare("a>b", set_max_sti, fmt_g, data_dly_s, fmt_g) report "###ERROR### max rose but thld < data" severity error;
+        assert max_obs = '0' and psi_fix_compare("a>b", set_max_sti, fmt_g, data_dly_s, fmt_g) report "###ERROR### max rose but thld < data" severity error;
       end if;
       if str_obs = '1' and min_obs = '1' then
-        assert min_obs = '1' and PsiFixCompare("a>b", set_min_sti, fmt_g, data_dly_s, fmt_g) report "###ERROR### min didn't not rise but thld > data" severity error;
+        assert min_obs = '1' and psi_fix_compare("a>b", set_min_sti, fmt_g, data_dly_s, fmt_g) report "###ERROR### min didn't not rise but thld > data" severity error;
       end if;
       if str_obs = '1' and min_obs = '0' then
-        assert min_obs = '0' and PsiFixCompare("a<b", set_min_sti, fmt_g, data_dly_s, fmt_g) report "###ERROR2### min rose but thld > data" severity error;
+        assert min_obs = '0' and psi_fix_compare("a<b", set_min_sti, fmt_g, data_dly_s, fmt_g) report "###ERROR2### min rose but thld > data" severity error;
       end if;
     end if;
   end process;
@@ -114,17 +114,17 @@ begin
     wait for period_c;
     data_sti    <= (others => '0');
     str_sti     <= '1';
-    set_min_sti <= PsiFixFromReal(-0.5, fmt_g);
-    set_max_sti <= PsiFixFromReal(0.5, fmt_g);
+    set_min_sti <= psi_fix_from_real(-0.5, fmt_g);
+    set_max_sti <= psi_fix_from_real(0.5, fmt_g);
     wait until rising_edge(clk_sti);
     for i in 0 to 99 loop
-      data_sti <= PsiFixAdd(data_sti, fmt_g, PsiFixFromReal(0.01, fmt_g), fmt_g, fmt_g, PsiFixTrunc, PsiFixSat);
+      data_sti <= psi_fix_add(data_sti, fmt_g, psi_fix_from_real(0.01, fmt_g), fmt_g, fmt_g, psi_fix_trunc, psi_fix_sat);
       wait until rising_edge(clk_sti);
     end loop;
 
     wait until rising_edge(clk_sti);
     for i in 0 to 9999 loop
-      data_sti <= PsiFixSub(data_sti, fmt_g, PsiFixFromReal(0.0002, fmt_g), fmt_g, fmt_g, PsiFixTrunc, PsiFixSat);
+      data_sti <= psi_fix_sub(data_sti, fmt_g, psi_fix_from_real(0.0002, fmt_g), fmt_g, fmt_g, psi_fix_trunc, psi_fix_sat);
       wait until rising_edge(clk_sti);
     end loop;
 

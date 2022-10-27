@@ -27,12 +27,12 @@ use work.psi_tb_textfile_pkg.all;
 ------------------------------------------------------------
 entity psi_fix_cordic_vect_tb is
   generic(
-    GainComp_g     : boolean              := False;
-    Round_g        : string               := "PsiFixTrunc"; -- Pass as string, required by modelsim on linux
-    Sat_g          : string               := "PsiFixWrap"; -- Pass as string, required by modelsim on linux
-    Mode_g         : string               := "PIPELINED";
-    FileFolder_g   : string               := "../tesbench/psi_fix_cordic_vect_tb/Data";
-    PlStgPerIter_g : integer range 1 to 2 := 1
+    gain_comp_g     : boolean              := False;
+    round_g        : string               := "psi_fix_trunc"; -- Pass as string, required by modelsim on linux
+    sat_g          : string               := "psi_fix_wrap"; -- Pass as string, required by modelsim on linux
+    mode_g         : string               := "PIPELINED";
+    file_folder_g   : string               := "../tesbench/psi_fix_cordic_vect_tb/Data";
+    pl_stg_per_iter_g : integer range 1 to 2 := 1
   );
 end entity;
 
@@ -41,12 +41,12 @@ end entity;
 ------------------------------------------------------------
 architecture sim of psi_fix_cordic_vect_tb is
   -- *** Fixed Generics ***
-  constant InFmt_g       : psi_fix_fmt_t := (1, 0, 15);
-  constant OutFmt_g      : psi_fix_fmt_t := (0, 2, 16);
-  constant InternalFmt_g : psi_fix_fmt_t := (1, 2, 22);
-  constant AngleFmt_g    : psi_fix_fmt_t := (0, 0, 15);
-  constant AngleIntFmt_g : psi_fix_fmt_t := (1, 0, 18);
-  constant Iterations_g  : natural     := 13;
+  constant in_fmt_g       : psi_fix_fmt_t := (1, 0, 15);
+  constant out_fmt_g      : psi_fix_fmt_t := (0, 2, 16);
+  constant internal_fmt_g : psi_fix_fmt_t := (1, 2, 22);
+  constant angle_fmt_g    : psi_fix_fmt_t := (0, 0, 15);
+  constant angle_int_fmt_g : psi_fix_fmt_t := (1, 0, 18);
+  constant iterations_g  : natural     := 13;
 
   -- *** Not Assigned Generics (default values) ***
 
@@ -63,14 +63,14 @@ architecture sim of psi_fix_cordic_vect_tb is
   signal Rst    : std_logic                                             := '1';
   signal InVld  : std_logic                                             := '0';
   signal InRdy  : std_logic                                             := '1';
-  signal InI    : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0)    := (others => '0');
-  signal InQ    : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0)    := (others => '0');
+  signal InI    : std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0)    := (others => '0');
+  signal InQ    : std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0)    := (others => '0');
   signal OutVld : std_logic                                             := '0';
-  signal OutAbs : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)   := (others => '0');
-  signal OutAng : std_logic_vector(PsiFixSize(AngleFmt_g) - 1 downto 0) := (others => '0');
+  signal OutAbs : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0)   := (others => '0');
+  signal OutAng : std_logic_vector(psi_fix_size(angle_fmt_g) - 1 downto 0) := (others => '0');
 
   -- *** User Definitions ***
-  constant RespFileName_c : string                 := choose(GainComp_g, "outputWithGc.txt", "outputWithNoGc.txt");
+  constant RespFileName_c : string                 := choose(gain_comp_g, "outputWithGc.txt", "outputWithNoGc.txt");
   signal SigIn            : TextfileData_t(0 to 1) := (others => 0);
   signal SigOut           : TextfileData_t(0 to 1) := (others => 0);
 
@@ -80,17 +80,17 @@ begin
   ------------------------------------------------------------
   i_dut : entity work.psi_fix_cordic_vect
     generic map(
-      GainComp_g     => GainComp_g,
-      Round_g        => PsiFixRoundFromString(Round_g),
-      Sat_g          => PsiFixSatFromString(Sat_g),
-      Mode_g         => Mode_g,
-      InFmt_g        => InFmt_g,
-      OutFmt_g       => OutFmt_g,
-      InternalFmt_g  => InternalFmt_g,
-      AngleFmt_g     => AngleFmt_g,
-      AngleIntFmt_g  => AngleIntFmt_g,
-      Iterations_g   => Iterations_g,
-      PlStgPerIter_g => PlStgPerIter_g
+      gain_comp_g     => gain_comp_g,
+      round_g        => psi_fix_round_from_string(round_g),
+      sat_g          => psi_fix_sat_from_string(sat_g),
+      mode_g         => mode_g,
+      in_fmt_g        => in_fmt_g,
+      out_fmt_g       => out_fmt_g,
+      internal_fmt_g  => internal_fmt_g,
+      angle_fmt_g     => angle_fmt_g,
+      angle_int_fmt_g  => angle_int_fmt_g,
+      iterations_g   => iterations_g,
+      pl_stg_per_iter_g => pl_stg_per_iter_g
     )
     port map(
       clk_i     => Clk,
@@ -157,7 +157,7 @@ begin
                          Rdy         => InRdy,
                          Vld         => InVld,
                          Data        => SigIn,
-                         Filepath    => FileFolder_g & "/input.txt",
+                         Filepath    => file_folder_g & "/input.txt",
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!
@@ -178,7 +178,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => OutVld,
                          Data        => SigOut,
-                         Filepath    => FileFolder_g & "/" & RespFileName_c,
+                         Filepath    => file_folder_g & "/" & RespFileName_c,
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!

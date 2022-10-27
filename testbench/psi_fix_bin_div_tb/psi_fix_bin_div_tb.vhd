@@ -21,7 +21,7 @@ use std.textio.all;
 
 entity psi_fix_bin_div_tb is
   generic(
-    DataDir_g : string := "../testbench/psi_fix_bin_div_tb/Data"
+    data_dir_g : string := "../testbench/psi_fix_bin_div_tb/Data"
   );
 end entity psi_fix_bin_div_tb;
 
@@ -48,10 +48,10 @@ architecture sim of psi_fix_bin_div_tb is
   signal Rst     : std_logic                                             := '1';
   signal InVld   : std_logic                                             := '0';
   signal InRdy   : std_logic                                             := '0';
-  signal InNum   : std_logic_vector(PsiFixSize(NumFmt_c) - 1 downto 0)   := (others => '0');
-  signal InDenom : std_logic_vector(PsiFixSize(DenomFmt_c) - 1 downto 0) := (others => '0');
+  signal InNum   : std_logic_vector(psi_fix_size(NumFmt_c) - 1 downto 0)   := (others => '0');
+  signal InDenom : std_logic_vector(psi_fix_size(DenomFmt_c) - 1 downto 0) := (others => '0');
   signal OutVld  : std_logic                                             := '0';
-  signal OutQuot : std_logic_vector(PsiFixSize(OutFmt_c) - 1 downto 0)   := (others => '0');
+  signal OutQuot : std_logic_vector(psi_fix_size(OutFmt_c) - 1 downto 0)   := (others => '0');
 
   -------------------------------------------------------------------------
   -- Procedure
@@ -73,11 +73,11 @@ begin
   -------------------------------------------------------------------------
   i_dut : entity work.psi_fix_bin_div
     generic map(
-      NumFmt_g   => NumFmt_c,
-      DenomFmt_g => DenomFmt_c,
-      OutFmt_g   => OutFmt_c,
-      Round_g    => PsiFixTrunc,
-      Sat_g      => PsiFixSat
+      num_fmt_g   => NumFmt_c,
+      denom_fmt_g => DenomFmt_c,
+      out_fmt_g   => OutFmt_c,
+      round_g    => psi_fix_trunc,
+      sat_g      => psi_fix_sat
     )
     port map(
       -- Control Signals
@@ -131,45 +131,45 @@ begin
 
     -- Check Simple Division
     wait until rising_edge(Clk);
-    InNum   <= PsiFixFromReal(3.0, NumFmt_c);
-    InDenom <= PsiFixFromReal(0.5, DenomFmt_c);
+    InNum   <= psi_fix_from_real(3.0, NumFmt_c);
+    InDenom <= psi_fix_from_real(0.5, DenomFmt_c);
     InVld   <= '1';
     wait until rising_edge(Clk) and InRdy = '1';
     InVld   <= '0';
     wait until rising_edge(Clk) and OutVld = '1';
-    CheckReal(6.0, PsiFixToReal(OutQuot, OutFmt_c), 0.01, "Simple Division");
+    CheckReal(6.0, psi_fix_to_real(OutQuot, OutFmt_c), 0.01, "Simple Division");
 
     -- Check Saturation
     wait until rising_edge(Clk);
-    InNum   <= PsiFixFromReal(1.0, NumFmt_c);
-    InDenom <= PsiFixFromReal(0.001, DenomFmt_c);
+    InNum   <= psi_fix_from_real(1.0, NumFmt_c);
+    InDenom <= psi_fix_from_real(0.001, DenomFmt_c);
     InVld   <= '1';
     wait until rising_edge(Clk) and InRdy = '1';
     InVld   <= '0';
     wait until rising_edge(Clk) and OutVld = '1';
-    CheckReal(16.0, PsiFixToReal(OutQuot, OutFmt_c), 0.01, "Saturation");
+    CheckReal(16.0, psi_fix_to_real(OutQuot, OutFmt_c), 0.01, "Saturation");
 
     -- Check Input Handshaking
     wait until rising_edge(Clk);
-    InNum   <= PsiFixFromReal(1.0, NumFmt_c);
-    InDenom <= PsiFixFromReal(0.001, DenomFmt_c);
+    InNum   <= psi_fix_from_real(1.0, NumFmt_c);
+    InDenom <= psi_fix_from_real(0.001, DenomFmt_c);
     InVld   <= '1';
     wait until rising_edge(Clk) and InRdy = '1';
-    InNum   <= PsiFixFromReal(3.0, NumFmt_c);
-    InDenom <= PsiFixFromReal(0.5, DenomFmt_c);
+    InNum   <= psi_fix_from_real(3.0, NumFmt_c);
+    InDenom <= psi_fix_from_real(0.5, DenomFmt_c);
     wait until rising_edge(Clk) and InRdy = '1';
-    InNum   <= PsiFixFromReal(0.0, NumFmt_c);
-    InDenom <= PsiFixFromReal(0.0, DenomFmt_c);
+    InNum   <= psi_fix_from_real(0.0, NumFmt_c);
+    InDenom <= psi_fix_from_real(0.0, DenomFmt_c);
     wait until rising_edge(Clk);
     wait until rising_edge(Clk);
     wait until rising_edge(Clk);
     InVld   <= '0';
     wait until rising_edge(Clk) and OutVld = '1';
-    CheckReal(6.0, PsiFixToReal(OutQuot, OutFmt_c), 0.01, "Handshaking");
+    CheckReal(6.0, psi_fix_to_real(OutQuot, OutFmt_c), 0.01, "Handshaking");
 
     -- Test file content (bittrueness)
-    file_open(fIn, DataDir_g & "/input.txt", read_mode);
-    file_open(fOut, DataDir_g & "/output.txt", read_mode);
+    file_open(fIn, data_dir_g & "/input.txt", read_mode);
+    file_open(fOut, data_dir_g & "/output.txt", read_mode);
     while not endfile(fIn) loop
       readline(fIn, r);
       read(r, iNum);
@@ -181,8 +181,8 @@ begin
       InDenom <= std_logic_vector(to_signed(iDenom, InDenom'length));
       InVld   <= '1';
       wait until rising_edge(Clk) and InRdy = '1';
-      InNum   <= PsiFixFromReal(0.0, NumFmt_c);
-      InDenom <= PsiFixFromReal(0.0, DenomFmt_c);
+      InNum   <= psi_fix_from_real(0.0, NumFmt_c);
+      InDenom <= psi_fix_from_real(0.0, DenomFmt_c);
       InVld   <= '0';
       wait until rising_edge(Clk) and OutVld = '1';
       assert to_integer(signed(OutQuot)) = resp

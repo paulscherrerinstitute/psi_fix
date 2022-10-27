@@ -24,9 +24,9 @@ use work.psi_tb_txt_util.all;
 ------------------------------------------------------------
 entity psi_fix_phase_unwrap_tb is
   generic(
-    FileFolder_g   : string  := "../testbench/psi_fix_phase_unwrap_tb/Data";
-    StimuliSet_g   : string  := "S";    -- "S" = signed, "U" = unsigned
-    VldDutyCycle_g : integer := 5
+    file_folder_g   : string  := "../testbench/psi_fix_phase_unwrap_tb/Data";
+    stimuli_set_g   : string  := "S";    -- "S" = signed, "U" = unsigned
+    vld_duty_cycle_g : integer := 5
   );
 end entity;
 
@@ -35,13 +35,13 @@ end entity;
 ------------------------------------------------------------
 architecture sim of psi_fix_phase_unwrap_tb is
   -- *** Fixed Generics ***
-  constant OutFmt_g : psi_fix_fmt_t := (1, 3, 15);
-  constant Round_g  : psi_fix_rnd_t := PsiFixTrunc;
+  constant out_fmt_g : psi_fix_fmt_t := (1, 3, 15);
+  constant round_g  : psi_fix_rnd_t := psi_fix_trunc;
 
   -- *** Constants ***
   constant InFmtS_c : psi_fix_fmt_t := (1, 0, 15);
   constant InFmtU_c : psi_fix_fmt_t := (0, 1, 15);
-  constant InFmt_c  : psi_fix_fmt_t := PsiFixChooseFmt(StimuliSet_g = "S", InFmtS_c, InFmtU_c);
+  constant InFmt_c  : psi_fix_fmt_t := psi_fix_choose_fmt(stimuli_set_g = "S", InFmtS_c, InFmtU_c);
 
   -- *** TB Control ***
   signal TbRunning             : boolean                  := True;
@@ -55,8 +55,8 @@ architecture sim of psi_fix_phase_unwrap_tb is
   signal Clk     : std_logic                                           := '1';
   signal Rst     : std_logic                                           := '1';
   signal InVld   : std_logic                                           := '0';
-  signal InData  : std_logic_vector(PsiFixSize(InFmt_c) - 1 downto 0)  := (others => '0');
-  signal OutData : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
+  signal InData  : std_logic_vector(psi_fix_size(InFmt_c) - 1 downto 0)  := (others => '0');
+  signal OutData : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
   signal OutVld  : std_logic                                           := '0';
   signal OutWrap : std_logic                                           := '0';
 
@@ -69,9 +69,9 @@ begin
   ------------------------------------------------------------
   i_dut : entity work.psi_fix_phase_unwrap
     generic map(
-      InFmt_g  => InFmt_C,
-      OutFmt_g => OutFmt_g,
-      Round_g  => Round_g
+      in_fmt_g  => InFmt_C,
+      out_fmt_g => out_fmt_g,
+      round_g  => round_g
     )
     port map(
       clk_i     => Clk,
@@ -135,8 +135,8 @@ begin
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => InVld,
                          Data        => SigIn,
-                         Filepath    => FileFolder_g & choose(StimuliSet_g = "S", "/InputS.txt", "/InputU.txt"),
-                         ClkPerSpl   => VldDutyCycle_g,
+                         Filepath    => file_folder_g & choose(stimuli_set_g = "S", "/InputS.txt", "/InputU.txt"),
+                         ClkPerSpl   => vld_duty_cycle_g,
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!
@@ -157,7 +157,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => OutVld,
                          Data        => SigOut,
-                         Filepath    => FileFolder_g & choose(StimuliSet_g = "S", "/OutputS.txt", "/OutputU.txt"),
+                         Filepath    => file_folder_g & choose(stimuli_set_g = "S", "/OutputS.txt", "/OutputU.txt"),
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!

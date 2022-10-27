@@ -22,9 +22,9 @@ use work.psi_common_math_pkg.all;
 
 entity psi_fix_dds_18b_tb is
   generic(
-    FileFolder_c  : string   := "../testbench/psi_fix_dds_18b_tb/Data";
-    IdleCycles_g  : integer  := 0;
-    TdmChannels_g : positive := 1
+    file_folder_g  : string   := "../testbench/psi_fix_dds_18b_tb/Data";
+    idle_cycles_g  : integer  := 0;
+    tdm_channels_g : positive := 1
   );
 end entity psi_fix_dds_18b_tb;
 
@@ -33,8 +33,8 @@ architecture sim of psi_fix_dds_18b_tb is
   -------------------------------------------------------------------------
   -- File Names
   -------------------------------------------------------------------------
-  constant ConfigFile : string := choose(TdmChannels_g = 1, "Config.txt", "Config2Ch.txt");
-  constant SinCosFile : string := choose(TdmChannels_g = 1, "SinCos.txt", "SinCos2Ch.txt");
+  constant ConfigFile : string := choose(tdm_channels_g = 1, "Config.txt", "Config2Ch.txt");
+  constant SinCosFile : string := choose(tdm_channels_g = 1, "SinCos.txt", "SinCos2Ch.txt");
 
   -------------------------------------------------------------------------
   -- TB Defnitions
@@ -54,10 +54,10 @@ architecture sim of psi_fix_dds_18b_tb is
   signal Rst           : std_logic                                             := '1';
   signal InVld         : std_logic                                             := '0';
   signal OutVld        : std_logic                                             := '0';
-  signal OutSin        : std_logic_vector(PsiFixSize(OutFmt_c) - 1 downto 0)   := (others => '0');
-  signal OutCos        : std_logic_vector(PsiFixSize(OutFmt_c) - 1 downto 0)   := (others => '0');
-  signal PhaseStep     : std_logic_vector(PsiFixSize(PhaseFmt_c) - 1 downto 0) := (others => '0');
-  signal PhaseOffs     : std_logic_vector(PsiFixSize(PhaseFmt_c) - 1 downto 0) := (others => '0');
+  signal OutSin        : std_logic_vector(psi_fix_size(OutFmt_c) - 1 downto 0)   := (others => '0');
+  signal OutCos        : std_logic_vector(psi_fix_size(OutFmt_c) - 1 downto 0)   := (others => '0');
+  signal PhaseStep     : std_logic_vector(psi_fix_size(PhaseFmt_c) - 1 downto 0) := (others => '0');
+  signal PhaseOffs     : std_logic_vector(psi_fix_size(PhaseFmt_c) - 1 downto 0) := (others => '0');
   signal Restart       : std_logic                                             := '0';
   signal AssertRestart : std_logic                                             := '0';
   signal SigIn         : TextfileData_t(0 to 1);
@@ -70,8 +70,8 @@ begin
   -------------------------------------------------------------------------
   i_dut : entity work.psi_fix_dds_18b
     generic map(
-      PhaseFmt_g    => PhaseFmt_c,
-      TdmChannels_g => TdmChannels_g
+      phase_fmt_g    => PhaseFmt_c,
+      tdm_channels_g => tdm_channels_g
     )
     port map(
       -- Control Signals
@@ -129,9 +129,9 @@ begin
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => InVld,
                          Data        => SigIn,
-                         Filepath    => FileFolder_c & "/" & ConfigFile,
+                         Filepath    => file_folder_g & "/" & ConfigFile,
                          IgnoreLines => 1,
-                         ClkPerSpl   => IdleCycles_g + 1);
+                         ClkPerSpl   => idle_cycles_g + 1);
     wait until ResponseDone = 0;
 
     -- *** Case 1: Restart ***
@@ -148,9 +148,9 @@ begin
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => InVld,
                          Data        => SigIn,
-                         Filepath    => FileFolder_c & "/" & ConfigFile,
+                         Filepath    => file_folder_g & "/" & ConfigFile,
                          IgnoreLines => 1,
-                         ClkPerSpl   => IdleCycles_g + 1,
+                         ClkPerSpl   => idle_cycles_g + 1,
                          MaxLines    => 11);
     wait until ResponseDone = 1;
 
@@ -165,7 +165,7 @@ begin
   begin
     wait until rising_edge(Clk) and AssertRestart = '1';
     Restart <= '1';
-    for ch in 0 to TdmChannels_g - 1 loop
+    for ch in 0 to tdm_channels_g - 1 loop
       wait until rising_edge(Clk) and InVld = '1';
     end loop;
     Restart <= '0';
@@ -182,7 +182,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => OutVld,
                          Data        => SigOut,
-                         Filepath    => FileFolder_c & "/" & SinCosFile,
+                         Filepath    => file_folder_g & "/" & SinCosFile,
                          IgnoreLines => 1);
 
     ResponseDone <= 0;
@@ -193,7 +193,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => OutVld,
                          Data        => SigOut,
-                         Filepath    => FileFolder_c & "/" & SinCosFile,
+                         Filepath    => file_folder_g & "/" & SinCosFile,
                          IgnoreLines => 1,
                          MaxLines    => 11);
     ResponseDone <= 1;

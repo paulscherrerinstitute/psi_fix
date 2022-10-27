@@ -30,10 +30,10 @@ end entity;
 ------------------------------------------------------------
 architecture sim of psi_fix_resize_tb is
 	-- *** Fixed Generics ***
-	constant InFmt_g : psi_fix_fmt_t := (1,1,14);
-	constant OutFmt_g : psi_fix_fmt_t := (0,0,3);
-	constant Round_g : psi_fix_rnd_t := PsiFixRound;
-	constant Sat_g : psi_fix_sat_t := PsiFixSat;
+	constant in_fmt_g : psi_fix_fmt_t := (1,1,14);
+	constant out_fmt_g : psi_fix_fmt_t := (0,0,3);
+	constant round_g : psi_fix_rnd_t := psi_fix_round;
+	constant sat_g : psi_fix_sat_t := psi_fix_sat;
 	
 	-- *** Not Assigned Generics (default values) ***
 	
@@ -50,21 +50,21 @@ architecture sim of psi_fix_resize_tb is
 	signal Rst : std_logic := '1';
 	signal InVld : std_logic := '0';
 	signal InRdy : std_logic := '1';
-	signal InData : std_logic_vector(PsiFixSize(InFmt_g)-1 downto 0) := (others => '0');
+	signal InData : std_logic_vector(psi_fix_size(in_fmt_g)-1 downto 0) := (others => '0');
 	signal OutVld : std_logic := '0';
 	signal OutRdy : std_logic := '0';
-	signal OutData : std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0) := (others => '0');
+	signal OutData : std_logic_vector(psi_fix_size(out_fmt_g)-1 downto 0) := (others => '0');
 	
 begin
 	------------------------------------------------------------
 	-- DUT Instantiation
 	------------------------------------------------------------
-	i_dut : entity work.psi_fix_resize
+	i_dut : entity work.psi_fix_resize_pipe
 		generic map (
-			InFmt_g => InFmt_g,
-			OutFmt_g => OutFmt_g,
-			Round_g => Round_g,
-			Sat_g => Sat_g
+			in_fmt_g => in_fmt_g,
+			out_fmt_g => out_fmt_g,
+			round_g => round_g,
+			sat_g => sat_g
 		)
 		port map (
 			clk_i => Clk,
@@ -128,31 +128,31 @@ begin
 		
 		-- Test no saturation/no rounding
 		InVld <= '1';
-		InData <= PsiFixFromReal(0.5, InFmt_g);
+		InData <= psi_fix_from_real(0.5, in_fmt_g);
 		wait until rising_edge(Clk) and InRdy = '1';
 		
-		InData <= PsiFixFromReal(0.25, InFmt_g);
+		InData <= psi_fix_from_real(0.25, in_fmt_g);
 		wait until rising_edge(Clk) and InRdy = '1';
 		
-		InData <= PsiFixFromReal(0.75, InFmt_g);
+		InData <= psi_fix_from_real(0.75, in_fmt_g);
 		wait until rising_edge(Clk) and InRdy = '1';
 		
 		-- Test Rounding
-		InData <= PsiFixFromReal(0.47, InFmt_g);
+		InData <= psi_fix_from_real(0.47, in_fmt_g);
 		wait until rising_edge(Clk) and InRdy = '1';
 		
-		InData <= PsiFixFromReal(0.53, InFmt_g);
+		InData <= psi_fix_from_real(0.53, in_fmt_g);
 		wait until rising_edge(Clk) and InRdy = '1';	
 
 		-- Test Saturation
-		InData <= PsiFixFromReal(1.8, InFmt_g);
+		InData <= psi_fix_from_real(1.8, in_fmt_g);
 		wait until rising_edge(Clk) and InRdy = '1';		
 		
-		InData <= PsiFixFromReal(-0.5, InFmt_g);
+		InData <= psi_fix_from_real(-0.5, in_fmt_g);
 		wait until rising_edge(Clk) and InRdy = '1';
 
 		-- Last check to see if normal numbers still pass
-		InData <= PsiFixFromReal(0.5, InFmt_g);
+		InData <= psi_fix_from_real(0.5, in_fmt_g);
 		wait until rising_edge(Clk) and InRdy = '1';
 		InVld <= '0';
 		
@@ -172,10 +172,10 @@ begin
 		OutRdy <= '1';
 		
 		wait until rising_edge(Clk) and OutVld = '1';
-		StdlvCompareStdlv(PsiFixFromReal(0.5, OutFmt_g), OutData, "Data0");
+		StdlvCompareStdlv(psi_fix_from_real(0.5, out_fmt_g), OutData, "Data0");
 
 		wait until rising_edge(Clk) and OutVld = '1';
-		StdlvCompareStdlv(PsiFixFromReal(0.25, OutFmt_g), OutData, "Data1");
+		StdlvCompareStdlv(psi_fix_from_real(0.25, out_fmt_g), OutData, "Data1");
 		
 		-- Test Back Pressure
 		OutRdy <= '0';
@@ -185,25 +185,25 @@ begin
 		OutRdy <= '1';
 		
 		wait until rising_edge(Clk) and OutVld = '1';
-		StdlvCompareStdlv(PsiFixFromReal(0.75, OutFmt_g), OutData, "Data2");
+		StdlvCompareStdlv(psi_fix_from_real(0.75, out_fmt_g), OutData, "Data2");
 		
 		-- Test Rounding
 		wait until rising_edge(Clk) and OutVld = '1';
-		StdlvCompareStdlv(PsiFixFromReal(0.5, OutFmt_g), OutData, "Data3");
+		StdlvCompareStdlv(psi_fix_from_real(0.5, out_fmt_g), OutData, "Data3");
 		
 		wait until rising_edge(Clk) and OutVld = '1';
-		StdlvCompareStdlv(PsiFixFromReal(0.5, OutFmt_g), OutData, "Data4");
+		StdlvCompareStdlv(psi_fix_from_real(0.5, out_fmt_g), OutData, "Data4");
 
 		-- Test Saturation
 		wait until rising_edge(Clk) and OutVld = '1';
-		StdlvCompareStdlv(PsiFixFromReal(1.0-1.0/8.0, OutFmt_g), OutData, "Data5");		
+		StdlvCompareStdlv(psi_fix_from_real(1.0-1.0/8.0, out_fmt_g), OutData, "Data5");		
 		
 		wait until rising_edge(Clk) and OutVld = '1';
-		StdlvCompareStdlv(PsiFixFromReal(0.0, OutFmt_g), OutData, "Data6");
+		StdlvCompareStdlv(psi_fix_from_real(0.0, out_fmt_g), OutData, "Data6");
 
 		-- Last check to see if normal numbers still pass
 		wait until rising_edge(Clk) and OutVld = '1';
-		StdlvCompareStdlv(PsiFixFromReal(0.5, OutFmt_g), OutData, "Data7");
+		StdlvCompareStdlv(psi_fix_from_real(0.5, out_fmt_g), OutData, "Data7");
 		
 		
 		-- end of process !DO NOT EDIT!

@@ -24,9 +24,9 @@ entity psi_fix_comparator is
   port(
       clk_i     : in  std_logic;                                       -- clk input
       rst_i     : in  std_logic;                                       -- rst input
-      set_min_i : in  std_logic_vector(PsiFixSize(fmt_g) - 1 downto 0);-- min threshold
-      set_max_i : in  std_logic_vector(PsiFixSize(fmt_g) - 1 downto 0);-- max threshold
-      data_i    : in  std_logic_vector(PsiFixSize(fmt_g) - 1 downto 0);-- data input 
+      set_min_i : in  std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0);-- min threshold
+      set_max_i : in  std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0);-- max threshold
+      data_i    : in  std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0);-- data input 
       vld_i     : in  std_logic;                                       -- valid input signal
       vld_o     : out std_logic;                                       -- valid signal output
       min_o     : out std_logic;                                       -- minimum flag output
@@ -61,14 +61,14 @@ begin
 
       if str_s = '1' then
         --*** comparison > ***
-        if PsiFixCompare("a>b", data_s, fmt_g, set_max_s, fmt_g) then
+        if psi_fix_compare("a>b", data_s, fmt_g, set_max_s, fmt_g) then
           max_s <= '1';
         else
           max_s <= '0';
         end if;
 
         --*** comparison < ***
-        if PsiFixCompare("a<b", data_s, fmt_g, set_min_s, fmt_g) then
+        if psi_fix_compare("a<b", data_s, fmt_g, set_min_s, fmt_g) then
           min_s <= '1';
         else
           min_s <= '0';

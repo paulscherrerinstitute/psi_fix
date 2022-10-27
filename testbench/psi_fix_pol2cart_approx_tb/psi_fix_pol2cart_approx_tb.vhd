@@ -28,7 +28,7 @@ use work.psi_tb_textfile_pkg.all;
 ------------------------------------------------------------
 entity psi_fix_pol2cart_approx_tb is
   generic(
-    FileFolder_g : string := "../tesbench/psi_fix_cordic_vect_tb/Data"
+    file_folder_g : string := "../tesbench/psi_fix_cordic_vect_tb/Data"
   );
 end entity;
 
@@ -37,9 +37,9 @@ end entity;
 ------------------------------------------------------------
 architecture sim of psi_fix_pol2cart_approx_tb is
   -- *** Fixed Generics ***
-  constant InAbsFmt_g   : psi_fix_fmt_t := (0, 0, 16);
-  constant InAngleFmt_g : psi_fix_fmt_t := (0, 0, 15);
-  constant OutFmt_g     : psi_fix_fmt_t := (1, 0, 16);
+  constant in_abs_fmt_g   : psi_fix_fmt_t := (0, 0, 16);
+  constant in_angle_fmt_g : psi_fix_fmt_t := (0, 0, 15);
+  constant out_fmt_g     : psi_fix_fmt_t := (1, 0, 16);
 
   -- *** Not Assigned Generics (default values) ***
 
@@ -55,11 +55,11 @@ architecture sim of psi_fix_pol2cart_approx_tb is
   signal Clk    : std_logic                                               := '0';
   signal Rst    : std_logic                                               := '1';
   signal InVld  : std_logic                                               := '0';
-  signal InAbs  : std_logic_vector(PsiFixSize(InAbsFmt_g) - 1 downto 0)   := (others => '0');
-  signal InAng  : std_logic_vector(PsiFixSize(InAngleFmt_g) - 1 downto 0) := (others => '0');
+  signal InAbs  : std_logic_vector(psi_fix_size(in_abs_fmt_g) - 1 downto 0)   := (others => '0');
+  signal InAng  : std_logic_vector(psi_fix_size(in_angle_fmt_g) - 1 downto 0) := (others => '0');
   signal OutVld : std_logic                                               := '0';
-  signal OutI   : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)     := (others => '0');
-  signal OutQ   : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)     := (others => '0');
+  signal OutI   : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0)     := (others => '0');
+  signal OutQ   : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0)     := (others => '0');
 
   -- *** User Definitions ***
   signal SigIn  : TextfileData_t(0 to 1) := (others => 0);
@@ -71,11 +71,11 @@ begin
   ------------------------------------------------------------
   i_dut : entity work.psi_fix_pol2cart_approx
     generic map(
-      InAbsFmt_g   => InAbsFmt_g,
-      InAngleFmt_g => InAngleFmt_g,
-      OutFmt_g     => OutFmt_g,
-      Round_g      => PsiFixRound,
-      Sat_g        => PsiFixSat
+      in_abs_fmt_g   => in_abs_fmt_g,
+      in_angle_fmt_g => in_angle_fmt_g,
+      out_fmt_g     => out_fmt_g,
+      round_g      => psi_fix_round,
+      sat_g        => psi_fix_sat
     )
     port map(
       clk_i  => Clk,
@@ -141,7 +141,7 @@ begin
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => InVld,
                          Data        => SigIn,
-                         Filepath    => FileFolder_g & "/input.txt",
+                         Filepath    => file_folder_g & "/input.txt",
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!
@@ -162,7 +162,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => OutVld,
                          Data        => SigOut,
-                         Filepath    => FileFolder_g & "/output.txt",
+                         Filepath    => file_folder_g & "/output.txt",
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!

@@ -73,7 +73,7 @@ package body psi_fix_fir_dec_ser_nch_chpar_conf_tb_case0_pkg is
     -- Inject 0.5 on channel 0
     InSig.Vld     <= '1';
     InSig.Data    <= (others => (others => '0'));
-    InSig.Data(0) <= PsiFixFromReal(0.5, InFmt_c);
+    InSig.Data(0) <= psi_fix_from_real(0.5, InFmt_c);
     for i in 0 to DutyCycle loop
       wait until rising_edge(Clk);
       InSig.Vld  <= '0';

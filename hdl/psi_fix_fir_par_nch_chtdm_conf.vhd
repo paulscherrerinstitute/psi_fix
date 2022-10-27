@@ -25,47 +25,47 @@ use work.psi_common_array_pkg.all;
 -- $$ processes=stim, resp $$
 entity psi_fix_fir_par_nch_chtdm_conf is
   generic(
-    InFmt_g       : psi_fix_fmt_t := (1, 0, 17);  -- input format FP      $$ constant=(1,0,15) $$
-    OutFmt_g      : psi_fix_fmt_t := (1, 0, 17);  -- output format FP     $$ constant=(1,2,13) $$
-    CoefFmt_g     : psi_fix_fmt_t := (1, 0, 17);  -- coeffcient format FP $$ constant=(1,0,17) $$
-    Channels_g    : natural     := 1;             -- number of channel    $$ export=true $$
-    Taps_g        : natural     := 48;            -- Taps number          $$ export=true $$
-    Rnd_g         : psi_fix_rnd_t := PsiFixRound; -- round or trunc
-    Sat_g         : psi_fix_sat_t := PsiFixSat;   -- sat or wrap
-    UseFixCoefs_g : boolean     := true;          -- use fixed coef or updated from table
-    Coefs_g       : t_areal     := (0.0, 0.0)     -- see doc
+    in_fmt_g       : psi_fix_fmt_t := (1, 0, 17);  -- input format FP      $$ constant=(1,0,15) $$
+    out_fmt_g      : psi_fix_fmt_t := (1, 0, 17);  -- output format FP     $$ constant=(1,2,13) $$
+    coef_fmt_g     : psi_fix_fmt_t := (1, 0, 17);  -- coeffcient format FP $$ constant=(1,0,17) $$
+    channels_g    : natural     := 1;             -- number of channel    $$ export=true $$
+    taps_g        : natural     := 48;            -- Taps number          $$ export=true $$
+    rnd_g         : psi_fix_rnd_t := psi_fix_round; -- round or trunc
+    sat_g         : psi_fix_sat_t := psi_fix_sat;   -- sat or wrap
+    use_fix_coefs_g : boolean     := true;          -- use fixed coef or updated from table
+    coefs_g       : t_areal     := (0.0, 0.0)     -- see doc
   );
   port(
     clk_i             : in  std_logic;                                                                -- system clock $$ type=clk; freq=100e6 $$
     rst_i             : in  std_logic;                                                                -- system reset $$ type=rst; clk=Clk $$
-    dat_i             : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);                       -- data input FP
+    dat_i             : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);                       -- data input FP
     vld_i             : in  std_logic;                                                                -- valid input frequency sampling 
-    dat_o             : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);                      -- data output 
+    dat_o             : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);                      -- data output 
     vld_o             : out std_logic;                                                                -- valid output frequency sampling
     -- Coefficient interface
     coef_if_wr_i      : in  std_logic                                            := '0';              -- write enable
-    coef_if_wr_addr_i : in  std_logic_vector(log2ceil(Taps_g) - 1 downto 0)      := (others => '0');  -- write address
-    coef_if_wr_dat_i  : in  std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0')   -- coef to write
+    coef_if_wr_addr_i : in  std_logic_vector(log2ceil(taps_g) - 1 downto 0)      := (others => '0');  -- write address
+    coef_if_wr_dat_i  : in  std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0) := (others => '0')   -- coef to write
   );
 end entity;
 
 architecture rtl of psi_fix_fir_par_nch_chtdm_conf is
 
   -- DSP Slice Chain
-  constant AccuFmt_c   : psi_fix_fmt_t                  := (1, OutFmt_g.I + 1, InFmt_g.F + CoefFmt_g.F);
-  constant RoundFmt_c  : psi_fix_fmt_t                  := (1, AccuFmt_c.I + 1, OutFmt_g.F);
-  type AccuChain_a is array (natural range <>) of std_logic_vector(PsiFixSize(AccuFmt_c) - 1 downto 0);
-  type InData_a is array (natural range <>) of std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-  signal DspDataChainI : InData_a(0 to Taps_g - 1);
-  signal DspDataChainO : InData_a(0 to Taps_g - 1);
-  signal DspAccuChain  : AccuChain_a(0 to Taps_g - 1) := (others => (others => '0'));
-  signal DspVldChain   : std_logic_vector(1 to Taps_g);
-  signal OutVldChain   : std_logic_vector(0 to Taps_g);
-  signal OutRound      : std_logic_vector(PsiFixSize(RoundFmt_c) - 1 downto 0);
+  constant AccuFmt_c   : psi_fix_fmt_t                  := (1, out_fmt_g.I + 1, in_fmt_g.F + coef_fmt_g.F);
+  constant RoundFmt_c  : psi_fix_fmt_t                  := (1, AccuFmt_c.I + 1, out_fmt_g.F);
+  type AccuChain_a is array (natural range <>) of std_logic_vector(psi_fix_size(AccuFmt_c) - 1 downto 0);
+  type InData_a is array (natural range <>) of std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);
+  signal DspDataChainI : InData_a(0 to taps_g - 1);
+  signal DspDataChainO : InData_a(0 to taps_g - 1);
+  signal DspAccuChain  : AccuChain_a(0 to taps_g - 1) := (others => (others => '0'));
+  signal DspVldChain   : std_logic_vector(1 to taps_g);
+  signal OutVldChain   : std_logic_vector(0 to taps_g);
+  signal OutRound      : std_logic_vector(psi_fix_size(RoundFmt_c) - 1 downto 0);
   signal OutRoundVld   : std_logic;
-  type Coef_a is array (natural range <>) of std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);
-  signal CoefReg       : Coef_a(0 to Taps_g - 1);
-  signal CoefWe        : std_logic_vector(0 to Taps_g - 1);
+  type Coef_a is array (natural range <>) of std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0);
+  signal CoefReg       : Coef_a(0 to taps_g - 1);
+  signal CoefWe        : std_logic_vector(0 to taps_g - 1);
   signal CoefRstDone   : std_logic                    := '0';
 
 begin
@@ -79,9 +79,9 @@ begin
       DspVldChain(1 to DspVldChain'high) <= vld_i & DspVldChain(1 to DspVldChain'high - 1);
       -- Coefficient handling (writable or fixed)
       CoefWe                             <= (others => '0');
-      if not UseFixCoefs_g then
+      if not use_fix_coefs_g then
         CoefReg <= (others => coef_if_wr_dat_i);
-        if coef_if_wr_i = '1' and unsigned(coef_if_wr_addr_i) < Taps_g then
+        if coef_if_wr_i = '1' and unsigned(coef_if_wr_addr_i) < taps_g then
           CoefWe(to_integer(unsigned(coef_if_wr_addr_i))) <= '1';
         end if;
       end if;
@@ -90,8 +90,8 @@ begin
         -- Make sure coefficients are initialized
         if CoefRstDone = '0' then
           CoefWe <= (others => '1');
-          for i in 0 to Taps_g - 1 loop
-            CoefReg(i) <= PsiFixFromReal(Coefs_g(i), CoefFmt_g);
+          for i in 0 to taps_g - 1 loop
+            CoefReg(i) <= psi_fix_from_real(coefs_g(i), coef_fmt_g);
           end loop;
         end if;
 
@@ -109,10 +109,10 @@ begin
   -- First DSP slice (connected differently)
   i_slice0 : entity work.psi_fix_mult_add_stage
     generic map(
-      InAFmt_g    => InFmt_g,
-      InBFmt_g    => CoefFmt_g,
-      AddFmt_g    => AccuFmt_c,
-      InBIsCoef_g => true
+      in_a_fmt_g    => in_fmt_g,
+      in_b_fmt_g    => coef_fmt_g,
+      add_fmt_g    => AccuFmt_c,
+      in_b_is_coef_g => true
     )
     port map(
       clk_i            => clk_i,
@@ -128,18 +128,18 @@ begin
     );
 
   -- Delays (the same for all taps)
-  g_delay : for i in 0 to Taps_g - 1 generate
+  g_delay : for i in 0 to taps_g - 1 generate
     -- No delay is required for the signle channel implementation
-    g_1ch : if Channels_g = 1 generate
+    g_1ch : if channels_g = 1 generate
       DspDataChainO(i) <= DspDataChainI(i);
     end generate;
 
     -- For the multi-channel implementation, adda shift-register based delay
-    g_nch : if Channels_g /= 1 generate
+    g_nch : if channels_g /= 1 generate
       i_delay : entity work.psi_common_delay
         generic map(
-          Width_g => PsiFixSize(InFmt_g),
-          Delay_g => Channels_g - 1
+          width_g => psi_fix_size(in_fmt_g),
+          delay_g => channels_g - 1
         )
         port map(
           Clk     => clk_i,
@@ -152,13 +152,13 @@ begin
   end generate;
 
   -- All DSP slices except the first one
-  g_slices : for i in 1 to Taps_g - 1 generate
+  g_slices : for i in 1 to taps_g - 1 generate
     i_slice : entity work.psi_fix_mult_add_stage
       generic map(
-        InAFmt_g    => InFmt_g,
-        InBFmt_g    => CoefFmt_g,
-        AddFmt_g    => AccuFmt_c,
-        InBIsCoef_g => true
+        in_a_fmt_g    => in_fmt_g,
+        in_b_fmt_g    => coef_fmt_g,
+        add_fmt_g    => AccuFmt_c,
+        in_b_is_coef_g => true
       )
       port map(
         clk_i            => clk_i,
@@ -182,12 +182,12 @@ begin
   begin
     if rising_edge(clk_i) then
       -- Round
-      OutRoundVld <= OutVldChain(Taps_g - 1);
-      OutRound    <= PsiFixResize(DspAccuChain(Taps_g - 1), AccuFmt_c, RoundFmt_c, Rnd_g, PsiFixWrap);
+      OutRoundVld <= OutVldChain(taps_g - 1);
+      OutRound    <= psi_fix_resize(DspAccuChain(taps_g - 1), AccuFmt_c, RoundFmt_c, rnd_g, psi_fix_wrap);
 
       -- Saturate
       vld_o <= OutRoundVld;
-      dat_o <= PsiFixResize(OutRound, RoundFmt_c, OutFmt_g, PsiFixTrunc, Sat_g);
+      dat_o <= psi_fix_resize(OutRound, RoundFmt_c, out_fmt_g, psi_fix_trunc, sat_g);
 
       -- Reset
       if rst_i = '1' then

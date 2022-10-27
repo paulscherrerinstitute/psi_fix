@@ -25,30 +25,30 @@ use work.psi_common_math_pkg.all;
 -- $$ processes=stim, resp $$
 entity psi_fix_cordic_vect is
   generic(
-    InFmt_g        : psi_fix_fmt_t          := (1, 0, 15);                -- Must be signed		                         $$ constant=(1,0,15) $$
-    OutFmt_g       : psi_fix_fmt_t          := (0, 2, 16);                -- Must be unsigned		                       $$ constant=(0,2,16) $$
-    InternalFmt_g  : psi_fix_fmt_t          := (1, 2, 22);                -- Must be signed		                         $$ constant=(1,2,22) $$
-    AngleFmt_g     : psi_fix_fmt_t          := (0, 0, 15);                -- Must be unsigned		                       $$ constant=(0,0,15) $$
-    AngleIntFmt_g  : psi_fix_fmt_t          := (1, 0, 18);                -- Must be signed		                         $$ constant=(1,0,18) $$
-    Iterations_g   : natural                := 13;                        -- number of iteration prior to get results	 $$ constant=13 $$
-    GainComp_g     : boolean               := False;                      -- gain compensation                         $$ export=true $$
-    Round_g        : psi_fix_rnd_t          := PsiFixTrunc;               -- round or trunc                            $$ export=true $$
-    Sat_g          : psi_fix_sat_t          := PsiFixWrap;                -- saturation or wrap                        $$ export=true $$
-    Mode_g         : string               := "SERIAL";                    -- PIPELINED or SERIAL                       $$ export=true $$
-    PlStgPerIter_g : integer range 1 to 2 := 1                            -- Number of pipeline stages per iteration (does only affect pipelined implementation)
+    in_fmt_g        : psi_fix_fmt_t          := (1, 0, 15);                -- Must be signed		                         $$ constant=(1,0,15) $$
+    out_fmt_g       : psi_fix_fmt_t          := (0, 2, 16);                -- Must be unsigned		                       $$ constant=(0,2,16) $$
+    internal_fmt_g  : psi_fix_fmt_t          := (1, 2, 22);                -- Must be signed		                         $$ constant=(1,2,22) $$
+    angle_fmt_g     : psi_fix_fmt_t          := (0, 0, 15);                -- Must be unsigned		                       $$ constant=(0,0,15) $$
+    angle_int_fmt_g  : psi_fix_fmt_t          := (1, 0, 18);                -- Must be signed		                         $$ constant=(1,0,18) $$
+    iterations_g   : natural                := 13;                        -- number of iteration prior to get results	 $$ constant=13 $$
+    gain_comp_g     : boolean               := False;                      -- gain compensation                         $$ export=true $$
+    round_g        : psi_fix_rnd_t          := psi_fix_trunc;               -- round or trunc                            $$ export=true $$
+    sat_g          : psi_fix_sat_t          := psi_fix_wrap;                -- saturation or wrap                        $$ export=true $$
+    mode_g         : string               := "SERIAL";                    -- PIPELINED or SERIAL                       $$ export=true $$
+    pl_stg_per_iter_g : integer range 1 to 2 := 1                            -- Number of pipeline stages per iteration (does only affect pipelined implementation)
   );
   port(
     -- Control Signals
     clk_i     : in  std_logic;                                            -- clk system $$ type=clk; freq=100e6 $$
     rst_i     : in  std_logic;                                            -- rst system $$ type=rst; clk=Clk $$
     -- Input
-    dat_inp_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);   -- data input input
-    dat_qua_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);   -- dat quadrature input
+    dat_inp_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- data input input
+    dat_qua_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- dat quadrature input
     vld_i     : in  std_logic;                                            -- valid signal in
     rdy_i     : out std_logic;                                            -- ready signal output $$ lowactive=true $$
     -- Output
-    dat_abs_o : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);  -- data amplitude output
-    dat_ang_o : out std_logic_vector(PsiFixSize(AngleFmt_g) - 1 downto 0);-- dat angle output    
+    dat_abs_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);  -- data amplitude output
+    dat_ang_o : out std_logic_vector(psi_fix_size(angle_fmt_g) - 1 downto 0);-- dat angle output    
     vld_o     : out std_logic                                             -- valid output
   );
 end entity;
@@ -65,13 +65,13 @@ architecture rtl of psi_fix_cordic_vect is
                                                    1.51781981556e-07, 7.58909907779e-08, 3.7945495389e-08, 1.89727476945e-08,
                                                    9.48637384724e-09, 4.74318692362e-09, 2.37159346181e-09, 1.1857967309e-09,
                                                    5.92898365452e-10, 2.96449182726e-10, 1.48224591363e-10, 7.41122956816e-11);
-  type AngleTable_t is array (0 to Iterations_g - 1) of std_logic_vector(PsiFixSize(AngleIntFmt_g) - 1 downto 0);
+  type AngleTable_t is array (0 to iterations_g - 1) of std_logic_vector(psi_fix_size(angle_int_fmt_g) - 1 downto 0);
 
   function AngleTableStdlv return AngleTable_t is
     variable Table : AngleTable_t;
   begin
-    for i in 0 to Iterations_g - 1 loop
-      Table(i) := PsiFixFromReal(AngleTableReal_c(i), AngleIntFmt_g);
+    for i in 0 to iterations_g - 1 loop
+      Table(i) := psi_fix_from_real(AngleTableReal_c(i), angle_int_fmt_g);
     end loop;
     return Table;
   end function;
@@ -88,28 +88,28 @@ architecture rtl of psi_fix_cordic_vect is
   end function;
 
   constant GcFmt_c        : psi_fix_fmt_t                                               := (0, 0, 17);
-  constant AngleIntExtFmt : psi_fix_fmt_t                                               := (AngleIntFmt_g.S, max(AngleIntFmt_g.I, 1), AngleIntFmt_g.F);
-  constant AbsFmt_c       : psi_fix_fmt_t                                               := (InFmt_g.S, InFmt_g.I + 1, InFmt_g.F);
-  constant GcCoef_c       : std_logic_vector(PsiFixSize(GcFmt_c) - 1 downto 0)        := PsiFixFromReal(1.0 / CordicGain(Iterations_g), GcFmt_c);
-  constant AngInt_0_5_c   : std_logic_vector(PsiFixSize(AngleIntExtFmt) - 1 downto 0) := PsiFixFromReal(0.5, AngleIntExtFmt);
-  constant AngInt_1_0_c   : std_logic_vector(PsiFixSize(AngleIntExtFmt) - 1 downto 0) := PsiFixFromReal(1.0, AngleIntExtFmt);
+  constant AngleIntExtFmt : psi_fix_fmt_t                                               := (angle_int_fmt_g.S, max(angle_int_fmt_g.I, 1), angle_int_fmt_g.F);
+  constant AbsFmt_c       : psi_fix_fmt_t                                               := (in_fmt_g.S, in_fmt_g.I + 1, in_fmt_g.F);
+  constant GcCoef_c       : std_logic_vector(psi_fix_size(GcFmt_c) - 1 downto 0)        := psi_fix_from_real(1.0 / CordicGain(iterations_g), GcFmt_c);
+  constant AngInt_0_5_c   : std_logic_vector(psi_fix_size(AngleIntExtFmt) - 1 downto 0) := psi_fix_from_real(0.5, AngleIntExtFmt);
+  constant AngInt_1_0_c   : std_logic_vector(psi_fix_size(AngleIntExtFmt) - 1 downto 0) := psi_fix_from_real(1.0, AngleIntExtFmt);
 
   -- *** Functions ***
   -- Cordic step for X
   function CordicStepX(xLast : std_logic_vector;
                        yLast : std_logic_vector;
                        shift : integer) return std_logic_vector is
-    constant yShifted : std_logic_vector := PsiFixShiftRight(yLast, InternalFmt_g, shift, Iterations_g - 1, InternalFmt_g, PsiFixTrunc, PsiFixWrap, true);
+    constant yShifted : std_logic_vector := psi_fix_shift_right(yLast, internal_fmt_g, shift, iterations_g - 1, internal_fmt_g, psi_fix_trunc, psi_fix_wrap, true);
   begin
 
     if signed(yLast) < 0 then
-      return PsiFixSub(xLast, InternalFmt_g,
-                       yShifted, InternalFmt_g,
-                       InternalFmt_g, PsiFixTrunc, PsiFixWrap);
+      return psi_fix_sub(xLast, internal_fmt_g,
+                       yShifted, internal_fmt_g,
+                       internal_fmt_g, psi_fix_trunc, psi_fix_wrap);
     else
-      return PsiFixAdd(xLast, InternalFmt_g,
-                       yShifted, InternalFmt_g,
-                       InternalFmt_g, PsiFixTrunc, PsiFixWrap);
+      return psi_fix_add(xLast, internal_fmt_g,
+                       yShifted, internal_fmt_g,
+                       internal_fmt_g, psi_fix_trunc, psi_fix_wrap);
 
     end if;
   end function;
@@ -118,17 +118,17 @@ architecture rtl of psi_fix_cordic_vect is
   function CordicStepY(xLast : std_logic_vector;
                        yLast : std_logic_vector;
                        shift : integer) return std_logic_vector is
-    constant xShifted : std_logic_vector := PsiFixShiftRight(xLast, InternalFmt_g, shift, Iterations_g - 1, InternalFmt_g, PsiFixTrunc, PsiFixWrap, true);
+    constant xShifted : std_logic_vector := psi_fix_shift_right(xLast, internal_fmt_g, shift, iterations_g - 1, internal_fmt_g, psi_fix_trunc, psi_fix_wrap, true);
   begin
 
     if signed(yLast) < 0 then
-      return PsiFixAdd(yLast, InternalFmt_g,
-                       xShifted, InternalFmt_g,
-                       InternalFmt_g, PsiFixTrunc, PsiFixWrap);
+      return psi_fix_add(yLast, internal_fmt_g,
+                       xShifted, internal_fmt_g,
+                       internal_fmt_g, psi_fix_trunc, psi_fix_wrap);
     else
-      return PsiFixSub(yLast, InternalFmt_g,
-                       xShifted, InternalFmt_g,
-                       InternalFmt_g, PsiFixTrunc, PsiFixWrap);
+      return psi_fix_sub(yLast, internal_fmt_g,
+                       xShifted, internal_fmt_g,
+                       internal_fmt_g, psi_fix_trunc, psi_fix_wrap);
     end if;
   end function;
 
@@ -136,16 +136,16 @@ architecture rtl of psi_fix_cordic_vect is
   function CordicStepZ(zLast     : std_logic_vector;
                        yLast     : std_logic_vector;
                        iteration : integer) return std_logic_vector is
-    constant Atan_c : std_logic_vector(PsiFixSize(AngleIntFmt_g) - 1 downto 0) := AngleTable_c(iteration);
+    constant Atan_c : std_logic_vector(psi_fix_size(angle_int_fmt_g) - 1 downto 0) := AngleTable_c(iteration);
   begin
     if signed(yLast) < 0 then
-      return PsiFixSub(zLast, AngleIntFmt_g,
-                       Atan_c, AngleIntFmt_g,
-                       AngleIntFmt_g, PsiFixTrunc, PsiFixWrap);
+      return psi_fix_sub(zLast, angle_int_fmt_g,
+                       Atan_c, angle_int_fmt_g,
+                       angle_int_fmt_g, psi_fix_trunc, psi_fix_wrap);
     else
-      return PsiFixAdd(zLast, AngleIntFmt_g,
-                       Atan_c, AngleIntFmt_g,
-                       AngleIntFmt_g, PsiFixTrunc, PsiFixWrap);
+      return psi_fix_add(zLast, angle_int_fmt_g,
+                       Atan_c, angle_int_fmt_g,
+                       angle_int_fmt_g, psi_fix_trunc, psi_fix_wrap);
     end if;
   end function;
 
@@ -153,33 +153,33 @@ architecture rtl of psi_fix_cordic_vect is
   attribute use_dsp48 : string;
 
   -- Types
-  type IntArr_t is array (natural range <>) of std_logic_vector(PsiFixSize(InternalFmt_g) - 1 downto 0);
-  type AngArr_t is array (natural range <>) of std_logic_vector(PsiFixSize(AngleIntFmt_g) - 1 downto 0);
+  type IntArr_t is array (natural range <>) of std_logic_vector(psi_fix_size(internal_fmt_g) - 1 downto 0);
+  type AngArr_t is array (natural range <>) of std_logic_vector(psi_fix_size(angle_int_fmt_g) - 1 downto 0);
 
 begin
   --------------------------------------------
   -- Assertions
   --------------------------------------------
-  assert InFmt_g.S = 1 report "psi_fix_cordic_vect: InFmt_g must be signed" severity error;
-  assert OutFmt_g.S = 0 report "psi_fix_cordic_vect: OutFmt_g must be unsigned" severity error;
-  assert InternalFmt_g.S = 1 report "psi_fix_cordic_vect: InternalFmt_g must be signed" severity error;
-  assert Mode_g = "PIPELINED" or Mode_g = "SERIAL" report "psi_fix_cordic_vect: Mode_g must be PIPELINED or SERIAL" severity error;
-  assert InternalFmt_g.I > InFmt_g.I report "psi_fix_cordic_vect: InternalFmt_g must have at least one more bit than InFmt_g" severity error;
-  assert AngleFmt_g.S = 0 report "psi_fix_cordic_vect: AngleFmt_g must be unsigned" severity error;
-  assert AngleIntFmt_g.S = 1 report "psi_fix_cordic_vect: AngleIntFmt_g must be signed" severity error;
+  assert in_fmt_g.S = 1 report "psi_fix_cordic_vect: in_fmt_g must be signed" severity error;
+  assert out_fmt_g.S = 0 report "psi_fix_cordic_vect: out_fmt_g must be unsigned" severity error;
+  assert internal_fmt_g.S = 1 report "psi_fix_cordic_vect: internal_fmt_g must be signed" severity error;
+  assert mode_g = "PIPELINED" or mode_g = "SERIAL" report "psi_fix_cordic_vect: mode_g must be PIPELINED or SERIAL" severity error;
+  assert internal_fmt_g.I > in_fmt_g.I report "psi_fix_cordic_vect: internal_fmt_g must have at least one more bit than in_fmt_g" severity error;
+  assert angle_fmt_g.S = 0 report "psi_fix_cordic_vect: angle_fmt_g must be unsigned" severity error;
+  assert angle_int_fmt_g.S = 1 report "psi_fix_cordic_vect: angle_int_fmt_g must be signed" severity error;
 
   --------------------------------------------
   -- Pipelined Implementation
   --------------------------------------------	
-  g_pipelined : if Mode_g = "PIPELINED" generate
-    signal XAbs, YAbs : std_logic_vector(PsiFixSize(AbsFmt_c) - 1 downto 0);
+  g_pipelined : if mode_g = "PIPELINED" generate
+    signal XAbs, YAbs : std_logic_vector(psi_fix_size(AbsFmt_c) - 1 downto 0);
     attribute use_dsp48 of XAbs, YAbs : signal is "no"; -- Never do absolute value calculation in DSP, is too slow
     signal VldAbs     : std_logic;
     signal QuadAbs    : std_logic_vector(1 downto 0);
-    signal X, Y       : IntArr_t(0 to Iterations_g * PlStgPerIter_g);
-    signal Z          : AngArr_t(0 to Iterations_g * PlStgPerIter_g);
-    signal Vld        : std_logic_vector(0 to Iterations_g * PlStgPerIter_g);
-    signal Quad       : t_aslv2(0 to Iterations_g * PlStgPerIter_g);
+    signal X, Y       : IntArr_t(0 to iterations_g * pl_stg_per_iter_g);
+    signal Z          : AngArr_t(0 to iterations_g * pl_stg_per_iter_g);
+    signal Vld        : std_logic_vector(0 to iterations_g * pl_stg_per_iter_g);
+    signal Quad       : t_aslv2(0 to iterations_g * pl_stg_per_iter_g);
   begin
     -- Pipelined implementation can take a sample every clock cycle
     rdy_i <= '1';
@@ -195,44 +195,44 @@ begin
         else
           -- Input registers
           VldAbs  <= vld_i;
-          XAbs    <= PsiFixAbs(dat_inp_i, InFmt_g, AbsFmt_c, PsiFixTrunc, PsiFixWrap); -- truncation is okay since internal format is usually bigger than input
-          YAbs    <= PsiFixAbs(dat_qua_i, InFmt_g, AbsFmt_c, PsiFixTrunc, PsiFixWrap); -- truncation is okay since internal format is usually bigger than input
+          XAbs    <= psi_fix_abs(dat_inp_i, in_fmt_g, AbsFmt_c, psi_fix_trunc, psi_fix_wrap); -- truncation is okay since internal format is usually bigger than input
+          YAbs    <= psi_fix_abs(dat_qua_i, in_fmt_g, AbsFmt_c, psi_fix_trunc, psi_fix_wrap); -- truncation is okay since internal format is usually bigger than input
           QuadAbs <= dat_inp_i(dat_inp_i'left) & dat_qua_i(dat_qua_i'left);
 
           -- Saturation
-          X(0)    <= PsiFixResize(XAbs, AbsFmt_c, InternalFmt_g, PsiFixTrunc, Sat_g);
-          Y(0)    <= PsiFixResize(YAbs, AbsFmt_c, InternalFmt_g, PsiFixTrunc, Sat_g);
+          X(0)    <= psi_fix_resize(XAbs, AbsFmt_c, internal_fmt_g, psi_fix_trunc, sat_g);
+          Y(0)    <= psi_fix_resize(YAbs, AbsFmt_c, internal_fmt_g, psi_fix_trunc, sat_g);
           Z(0)    <= (others => '0');
           Quad(0) <= QuadAbs;
           Vld(0)  <= VldAbs;
 
-          -- Cordic Iterations_g
+          -- Cordic iterations_g
           Vld(1 to Vld'high)   <= Vld(0 to Vld'high - 1);
           Quad(1 to Quad'high) <= Quad(0 to Quad'high - 1);
-          for i in 0 to Iterations_g - 1 loop
-            X(i * PlStgPerIter_g + 1) <= CordicStepX(X(i * PlStgPerIter_g), Y(i * PlStgPerIter_g), i);
-            Y(i * PlStgPerIter_g + 1) <= CordicStepY(X(i * PlStgPerIter_g), Y(i * PlStgPerIter_g), i);
-            Z(i * PlStgPerIter_g + 1) <= CordicStepZ(Z(i * PlStgPerIter_g), Y(i * PlStgPerIter_g), i);
+          for i in 0 to iterations_g - 1 loop
+            X(i * pl_stg_per_iter_g + 1) <= CordicStepX(X(i * pl_stg_per_iter_g), Y(i * pl_stg_per_iter_g), i);
+            Y(i * pl_stg_per_iter_g + 1) <= CordicStepY(X(i * pl_stg_per_iter_g), Y(i * pl_stg_per_iter_g), i);
+            Z(i * pl_stg_per_iter_g + 1) <= CordicStepZ(Z(i * pl_stg_per_iter_g), Y(i * pl_stg_per_iter_g), i);
             -- Additional pipeline registers if required
-            for k in 2 to PlStgPerIter_g loop
-              X(i * PlStgPerIter_g + k) <= X(i * PlStgPerIter_g + k - 1);
-              Y(i * PlStgPerIter_g + k) <= Y(i * PlStgPerIter_g + k - 1);
-              Z(i * PlStgPerIter_g + k) <= Z(i * PlStgPerIter_g + k - 1);
+            for k in 2 to pl_stg_per_iter_g loop
+              X(i * pl_stg_per_iter_g + k) <= X(i * pl_stg_per_iter_g + k - 1);
+              Y(i * pl_stg_per_iter_g + k) <= Y(i * pl_stg_per_iter_g + k - 1);
+              Z(i * pl_stg_per_iter_g + k) <= Z(i * pl_stg_per_iter_g + k - 1);
             end loop;
           end loop;
 
           -- Output 
-          vld_o <= Vld(Iterations_g * PlStgPerIter_g);
-          if GainComp_g then
-            dat_abs_o <= PsiFixMult(X(Iterations_g * PlStgPerIter_g), InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
+          vld_o <= Vld(iterations_g * pl_stg_per_iter_g);
+          if gain_comp_g then
+            dat_abs_o <= psi_fix_mult(X(iterations_g * pl_stg_per_iter_g), internal_fmt_g, GcCoef_c, GcFmt_c, out_fmt_g, round_g, sat_g);
           else
-            dat_abs_o <= PsiFixResize(X(Iterations_g * PlStgPerIter_g), InternalFmt_g, OutFmt_g, Round_g, Sat_g);
+            dat_abs_o <= psi_fix_resize(X(iterations_g * pl_stg_per_iter_g), internal_fmt_g, out_fmt_g, round_g, sat_g);
           end if;
-          case Quad(Iterations_g * PlStgPerIter_g) is
-            when "00"   => dat_ang_o <= PsiFixResize(Z(Iterations_g * PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-            when "10"   => dat_ang_o <= PsiFixSub(AngInt_0_5_c, AngleIntExtFmt, Z(Iterations_g * PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-            when "11"   => dat_ang_o <= PsiFixAdd(AngInt_0_5_c, AngleIntExtFmt, Z(Iterations_g * PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-            when "01"   => dat_ang_o <= PsiFixSub(AngInt_1_0_c, AngleIntExtFmt, Z(Iterations_g * PlStgPerIter_g), AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
+          case Quad(iterations_g * pl_stg_per_iter_g) is
+            when "00"   => dat_ang_o <= psi_fix_resize(Z(iterations_g * pl_stg_per_iter_g), angle_int_fmt_g, angle_fmt_g, round_g, sat_g);
+            when "10"   => dat_ang_o <= psi_fix_sub(AngInt_0_5_c, AngleIntExtFmt, Z(iterations_g * pl_stg_per_iter_g), angle_int_fmt_g, angle_fmt_g, round_g, sat_g);
+            when "11"   => dat_ang_o <= psi_fix_add(AngInt_0_5_c, AngleIntExtFmt, Z(iterations_g * pl_stg_per_iter_g), angle_int_fmt_g, angle_fmt_g, round_g, sat_g);
+            when "01"   => dat_ang_o <= psi_fix_sub(AngInt_1_0_c, AngleIntExtFmt, Z(iterations_g * pl_stg_per_iter_g), angle_int_fmt_g, angle_fmt_g, round_g, sat_g);
             when others => null;
           end case;
         end if;
@@ -243,16 +243,16 @@ begin
   --------------------------------------------
   -- Serial Implementation
   --------------------------------------------
-  g_serial : if Mode_g = "SERIAL" generate
-    signal Xin, Yin : std_logic_vector(PsiFixSize(InternalFmt_g) - 1 downto 0);
+  g_serial : if mode_g = "SERIAL" generate
+    signal Xin, Yin : std_logic_vector(psi_fix_size(internal_fmt_g) - 1 downto 0);
     signal XinVld   : std_logic;
     signal Quadin   : std_logic_vector(1 downto 0);
-    signal X, Y     : std_logic_vector(PsiFixSize(InternalFmt_g) - 1 downto 0);
-    signal Z        : std_logic_vector(PsiFixSize(AngleIntFmt_g) - 1 downto 0);
+    signal X, Y     : std_logic_vector(psi_fix_size(internal_fmt_g) - 1 downto 0);
+    signal Z        : std_logic_vector(psi_fix_size(angle_int_fmt_g) - 1 downto 0);
     signal CordVld  : std_logic;
-    signal IterCnt  : integer range 0 to Iterations_g - 1;
+    signal IterCnt  : integer range 0 to iterations_g - 1;
     signal Quad     : std_logic_vector(1 downto 0);
-    constant Z0_c   : std_logic_vector(PsiFixSize(AngleIntFmt_g) - 1 downto 0) := (others => '0');
+    constant Z0_c   : std_logic_vector(psi_fix_size(angle_int_fmt_g) - 1 downto 0) := (others => '0');
   begin
     rdy_i <= not XinVld;
 
@@ -268,8 +268,8 @@ begin
           -- Input latching
           if XinVld = '0' and vld_i = '1' then
             XinVld <= '1';
-            Xin    <= PsiFixAbs(dat_inp_i, InFmt_g, InternalFmt_g, Round_g, Sat_g);
-            Yin    <= PsiFixAbs(dat_qua_i, InFmt_g, InternalFmt_g, Round_g, Sat_g);
+            Xin    <= psi_fix_abs(dat_inp_i, in_fmt_g, internal_fmt_g, round_g, sat_g);
+            Yin    <= psi_fix_abs(dat_qua_i, in_fmt_g, internal_fmt_g, round_g, sat_g);
             Quadin <= dat_inp_i(dat_inp_i'left) & dat_qua_i(dat_qua_i'left);
           end if;
 
@@ -291,7 +291,7 @@ begin
             Y <= CordicStepY(X, Y, IterCnt);
             Z <= CordicStepZ(Z, Y, IterCnt);
 
-            if IterCnt = Iterations_g - 1 then
+            if IterCnt = iterations_g - 1 then
               IterCnt <= 0;
               CordVld <= '1';
             else
@@ -302,16 +302,16 @@ begin
           -- Output stage
           vld_o <= CordVld;
           if CordVld = '1' then
-            if GainComp_g then
-              dat_abs_o <= PsiFixMult(X, InternalFmt_g, GcCoef_c, GcFmt_c, OutFmt_g, Round_g, Sat_g);
+            if gain_comp_g then
+              dat_abs_o <= psi_fix_mult(X, internal_fmt_g, GcCoef_c, GcFmt_c, out_fmt_g, round_g, sat_g);
             else
-              dat_abs_o <= PsiFixResize(X, InternalFmt_g, OutFmt_g, Round_g, Sat_g);
+              dat_abs_o <= psi_fix_resize(X, internal_fmt_g, out_fmt_g, round_g, sat_g);
             end if;
             case Quad is
-              when "00"   => dat_ang_o <= PsiFixResize(Z, AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-              when "10"   => dat_ang_o <= PsiFixSub(AngInt_0_5_c, AngleIntExtFmt, Z, AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-              when "11"   => dat_ang_o <= PsiFixAdd(AngInt_0_5_c, AngleIntExtFmt, Z, AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
-              when "01"   => dat_ang_o <= PsiFixSub(AngInt_1_0_c, AngleIntExtFmt, Z, AngleIntFmt_g, AngleFmt_g, Round_g, Sat_g);
+              when "00"   => dat_ang_o <= psi_fix_resize(Z, angle_int_fmt_g, angle_fmt_g, round_g, sat_g);
+              when "10"   => dat_ang_o <= psi_fix_sub(AngInt_0_5_c, AngleIntExtFmt, Z, angle_int_fmt_g, angle_fmt_g, round_g, sat_g);
+              when "11"   => dat_ang_o <= psi_fix_add(AngInt_0_5_c, AngleIntExtFmt, Z, angle_int_fmt_g, angle_fmt_g, round_g, sat_g);
+              when "01"   => dat_ang_o <= psi_fix_sub(AngInt_1_0_c, AngleIntExtFmt, Z, angle_int_fmt_g, angle_fmt_g, round_g, sat_g);
               when others => null;
             end case;
           end if;

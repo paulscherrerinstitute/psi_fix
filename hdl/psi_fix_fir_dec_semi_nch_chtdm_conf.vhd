@@ -27,35 +27,35 @@ use work.psi_common_array_pkg.all;
 -- $$ processes=stim, resp $$
 entity psi_fix_fir_dec_semi_nch_chtdm_conf is
   generic(
-    InFmt_g              : psi_fix_fmt_t := (1, 0, 17);                                         -- input format FP $$ constant=(1,0,15) $$
-    OutFmt_g             : psi_fix_fmt_t := (1, 0, 17);                                         -- output format FP $$ constant=(1,2,13) $$
-    CoefFmt_g            : psi_fix_fmt_t := (1, 0, 17);                                         -- coef format FP $$ constant=(1,0,17) $$
-    Channels_g           : natural     := 4;                                                    -- number of parallel channels $$ export=true $$
-    Multipliers_g        : natural     := 4;                                                    -- number of multipliers to use in parallel
-    Ratio_g              : natural     := 8;                                                    -- decimation ratio
-    Taps_g               : natural     := 32;                                                   -- number of taps implemented
-    Rnd_g                : psi_fix_rnd_t := PsiFixRound;                                        -- round or trunc
-    Sat_g                : psi_fix_sat_t := PsiFixSat;                                          -- sat or wrap
-    UseFixCoefs_g        : boolean     := false;                                                -- if true fixed coefficient instead of configurable
-    FullInpRateSupport_g : boolean     := false;                                                -- True = valid signa can be High all the time
-    RamBehavior_g        : string      := "RBW";                                                -- "RBW" = read-before-write, "WBR" = write-before-read
-    Coefs_g              : t_areal     := (0.1, 0.2);                                           -- inital value for coefficients
-    ImplFlushIf_g        : boolean     := false                                                 -- implement memory flushing interface
+    in_fmt_g              : psi_fix_fmt_t := (1, 0, 17);                                         -- input format FP $$ constant=(1,0,15) $$
+    out_fmt_g             : psi_fix_fmt_t := (1, 0, 17);                                         -- output format FP $$ constant=(1,2,13) $$
+    coef_fmt_g            : psi_fix_fmt_t := (1, 0, 17);                                         -- coef format FP $$ constant=(1,0,17) $$
+    channels_g           : natural     := 4;                                                    -- number of parallel channels $$ export=true $$
+    multipliers_g        : natural     := 4;                                                    -- number of multipliers to use in parallel
+    ratio_g              : natural     := 8;                                                    -- decimation ratio
+    taps_g               : natural     := 32;                                                   -- number of taps implemented
+    rnd_g                : psi_fix_rnd_t := psi_fix_round;                                        -- round or trunc
+    sat_g                : psi_fix_sat_t := psi_fix_sat;                                          -- sat or wrap
+    use_fix_coefs_g        : boolean     := false;                                                -- if true fixed coefficient instead of configurable
+    full_inp_rate_support_g : boolean     := false;                                                -- True = valid signa can be High all the time
+    ram_behavior_g        : string      := "RBW";                                                -- "RBW" = read-before-write, "WBR" = write-before-read
+    coefs_g              : t_areal     := (0.1, 0.2);                                           -- inital value for coefficients
+    impl_flush_if_g        : boolean     := false                                                 -- implement memory flushing interface
   );
   port(
     -- Control Signals
     clk_i         : in  std_logic;                                                              -- clk system $$ type=clk; freq=100e6 $$
     rst_i         : in  std_logic;                                                              -- rst system $$ type=rst; clk=Clk $$
     -- Input
-    dat_i         : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);                     -- data input
+    dat_i         : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);                     -- data input
     vld_i         : in  std_logic;                                                              -- valid input - AXI-S handshaking 
     -- Output
-    dat_o         : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);                    -- Output data, one channel is passed after the other
+    dat_o         : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);                    -- Output data, one channel is passed after the other
     vld_o         : out std_logic;                                                              -- valid output signal - AXI-S handshaking 
     -- Coefficient interface		
     coef_wr_i     : in  std_logic                                            := '0';            -- Coefficient write enable signal
-    coef_addr_i   : in  std_logic_vector(log2ceil(Taps_g) - 1 downto 0)      := (others => '0');-- Address of the coefficient to access
-    coef_wr_dat_i : in  std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0');-- Coefficient value for write access (CoefWr = 1)
+    coef_addr_i   : in  std_logic_vector(log2ceil(taps_g) - 1 downto 0)      := (others => '0');-- Address of the coefficient to access
+    coef_wr_dat_i : in  std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0) := (others => '0');-- Coefficient value for write access (CoefWr = 1)
     -- Delay-line flushing interface
     flush_mem_i   : in  std_logic                                            := '0';            -- Inject a pulse to flush all data memories (usually done after reset).                                                                                            
     flush_done_o  : out std_logic;                                                              -- A pulse on this port indicates that a flush started by FlushMem = ‘1’ was completed.                                                                                            
@@ -70,55 +70,55 @@ end entity;
 architecture rtl of psi_fix_fir_dec_semi_nch_chtdm_conf is
 
   -- RAM Calculation
-  constant TapsPerStage_c     : natural := integer(ceil(real(Taps_g) / real(Multipliers_g)));
-  constant RamPerChPerStage_c : natural := 2**log2ceil(TapsPerStage_c + Ratio_g + 1);
+  constant TapsPerStage_c     : natural := integer(ceil(real(taps_g) / real(multipliers_g)));
+  constant RamPerChPerStage_c : natural := 2**log2ceil(TapsPerStage_c + ratio_g + 1);
   constant TapSelBits_c       : natural := log2ceil(RamPerChPerStage_c);
-  constant RamPerStage_c      : natural := 2**log2ceil(RamPerChPerStage_c * Channels_g);
+  constant RamPerStage_c      : natural := 2**log2ceil(RamPerChPerStage_c * channels_g);
   constant RamAddrBits_c      : natural := log2ceil(RamPerStage_c);
-  constant ChSelBits_c        : natural := log2ceil(Channels_g);
+  constant ChSelBits_c        : natural := log2ceil(channels_g);
 
   -- Constants
-  constant AccuFmt_c       : psi_fix_fmt_t := (1, InFmt_g.I + CoefFmt_g.I + log2ceil(Multipliers_g), InFmt_g.F + CoefFmt_g.F);
-  constant RoundFmt_c      : psi_fix_fmt_t := (1, AccuFmt_c.I + 1, OutFmt_g.F);
-  constant CyclesPerCalc_c : integer     := integer(ceil(real(Taps_g) / real(Multipliers_g)));
+  constant AccuFmt_c       : psi_fix_fmt_t := (1, in_fmt_g.I + coef_fmt_g.I + log2ceil(multipliers_g), in_fmt_g.F + coef_fmt_g.F);
+  constant RoundFmt_c      : psi_fix_fmt_t := (1, AccuFmt_c.I + 1, out_fmt_g.F);
+  constant CyclesPerCalc_c : integer     := integer(ceil(real(taps_g) / real(multipliers_g)));
 
   -- types
   type TapAddr_a is array (natural range <>) of unsigned(TapSelBits_c - 1 downto 0);
   type Channel_a is array (natural range <>) of unsigned(ChSelBits_c - 1 downto 0);
   type Data_a is array (natural range <>) of std_logic_vector(dat_i'range);
   type Addr_a is array (natural range <>) of std_logic_vector(RamAddrBits_c - 1 downto 0);
-  type Coef_a is array (natural range <>) of std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);
-  type Accu_a is array (natural range <>) of std_logic_vector(PsiFixSize(AccuFmt_c) - 1 downto 0);
+  type Coef_a is array (natural range <>) of std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0);
+  type Accu_a is array (natural range <>) of std_logic_vector(psi_fix_size(AccuFmt_c) - 1 downto 0);
   type CoefAddr_a is array (natural range <>) of std_logic_vector(log2ceil(TapsPerStage_c) - 1 downto 0);
 
   -- Two process method
   type two_process_r is record
-    Vld             : std_logic_vector(0 to max(1, Multipliers_g));
+    Vld             : std_logic_vector(0 to max(1, multipliers_g));
     Data_0          : std_logic_vector(dat_i'range);
     Data_1          : std_logic_vector(dat_i'range);
-    DecCnt_0        : integer range 0 to Ratio_g - 1;
-    ChCnt           : Channel_a(0 to max(Multipliers_g, 1));
+    DecCnt_0        : integer range 0 to ratio_g - 1;
+    ChCnt           : Channel_a(0 to max(multipliers_g, 1));
     TapUpdWrAddr_0  : unsigned(TapSelBits_c - 1 downto 0);
-    TapUpdAddr      : TapAddr_a(1 to max(Multipliers_g, 1));
+    TapUpdAddr      : TapAddr_a(1 to max(multipliers_g, 1));
     CalcStartLoop_1 : std_logic;
-    CalcFirst       : std_logic_vector(2 to 7 + Multipliers_g);
-    CalcLast        : std_logic_vector(2 to 7 + Multipliers_g);
+    CalcFirst       : std_logic_vector(2 to 7 + multipliers_g);
+    CalcLast        : std_logic_vector(2 to 7 + multipliers_g);
     CalcCycLeft_2   : integer range 0 to CyclesPerCalc_c - 1;
-    CalcChannel_2   : unsigned(log2ceil(Channels_g) - 1 downto 0);
+    CalcChannel_2   : unsigned(log2ceil(channels_g) - 1 downto 0);
     CalcFirstTap_2  : unsigned(TapSelBits_c - 1 downto 0);
-    CalcRunning     : std_logic_vector(2 to 7 + Multipliers_g);
+    CalcRunning     : std_logic_vector(2 to 7 + multipliers_g);
     TapRdAddr_2     : unsigned(TapSelBits_c - 1 downto 0);
     CoefRdIdx_2     : unsigned(TapSelBits_c - 1 downto 0);
-    CoefRdAddr      : TapAddr_a(3 to 3 + Multipliers_g);
-    TapRdAddr       : Addr_a(3 to 3 + Multipliers_g);
-    Accu_8n         : std_logic_vector(PsiFixSize(AccuFmt_c) - 1 downto 0);
+    CoefRdAddr      : TapAddr_a(3 to 3 + multipliers_g);
+    TapRdAddr       : Addr_a(3 to 3 + multipliers_g);
+    Accu_8n         : std_logic_vector(psi_fix_size(AccuFmt_c) - 1 downto 0);
     OutVld_n        : std_logic_vector(8 to 10);
-    Rnd_9n          : std_logic_vector(PsiFixSize(RoundFmt_c) - 1 downto 0);
-    OutData_10n     : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+    Rnd_9n          : std_logic_vector(psi_fix_size(RoundFmt_c) - 1 downto 0);
+    OutData_10n     : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);
     -- Coefficient write access (not in calculation pipeline)
-    CoefWrStg       : std_logic_vector(0 to Multipliers_g - 1);
+    CoefWrStg       : std_logic_vector(0 to multipliers_g - 1);
     CoefWrDataStg   : std_logic_vector(coef_wr_dat_i'range);
-    CoefAddrStg     : CoefAddr_a(0 to Multipliers_g - 1);
+    CoefAddrStg     : CoefAddr_a(0 to multipliers_g - 1);
     -- Memory Flusing
     FlushActive     : std_logic;
     FlushAddr       : std_logic_vector(RamAddrBits_c - 1 downto 0);
@@ -131,12 +131,12 @@ architecture rtl of psi_fix_fir_dec_semi_nch_chtdm_conf is
   -- Functions
   function GetCoefs(stage : integer) return Coef_a is
     variable Coefs_v : Coef_a(0 to TapsPerStage_c - 1) := (others => (others => '0'));
-    variable Idx_v   : natural                         := stage * Multipliers_g;
+    variable Idx_v   : natural                         := stage * multipliers_g;
   begin
-    if UseFixCoefs_g then
+    if use_fix_coefs_g then
       for i in 0 to TapsPerStage_c - 1 loop
-        if (stage * TapsPerStage_c + i < Taps_g) and (stage * TapsPerStage_c + i < Coefs_g'length) then
-          Coefs_v(i) := PsiFixFromReal(Coefs_g(stage * TapsPerStage_c + i), CoefFmt_g);
+        if (stage * TapsPerStage_c + i < taps_g) and (stage * TapsPerStage_c + i < coefs_g'length) then
+          Coefs_v(i) := psi_fix_from_real(coefs_g(stage * TapsPerStage_c + i), coef_fmt_g);
         end if;
       end loop;
     end if;
@@ -145,20 +145,20 @@ architecture rtl of psi_fix_fir_dec_semi_nch_chtdm_conf is
 
   function GetCoefsReal(stage : integer) return t_areal is
     variable Coefs_v : t_areal(0 to TapsPerStage_c - 1) := (others => 0.0);
-    variable Idx_v   : natural                          := stage * Multipliers_g;
+    variable Idx_v   : natural                          := stage * multipliers_g;
   begin
     for i in 0 to TapsPerStage_c - 1 loop
-      if (stage * TapsPerStage_c + i < Taps_g) and (stage * TapsPerStage_c + i < Coefs_g'length) then
-        Coefs_v(i) := Coefs_g(stage * TapsPerStage_c + i);
+      if (stage * TapsPerStage_c + i < taps_g) and (stage * TapsPerStage_c + i < coefs_g'length) then
+        Coefs_v(i) := coefs_g(stage * TapsPerStage_c + i);
       end if;
     end loop;
     return Coefs_v;
   end function;
 
   -- Component Instantiation Signals
-  signal DataInChain : Data_a(1 to Multipliers_g + 1);
-  signal AccuChain   : Accu_a(7 to 7 + Multipliers_g);
-  signal AccuVld     : std_logic_vector(8 to 8 + Multipliers_g - 1);
+  signal DataInChain : Data_a(1 to multipliers_g + 1);
+  signal AccuChain   : Accu_a(7 to 7 + multipliers_g);
+  signal AccuVld     : std_logic_vector(8 to 8 + multipliers_g - 1);
 
 begin
 
@@ -169,15 +169,15 @@ begin
   begin
     if rising_edge(clk_i) then
       -- Check if input rate is correct
-      if not FullInpRateSupport_g then
+      if not full_inp_rate_support_g then
         assert (r.Vld(0) /= '1') or (r.Vld(1) /= '1')
-        report "###ERROR###: psi_fix_fir_dec_semi_nch_chtdm_conf implemented with FullInpRateSupport_g=false but InVld asserted for two consecutive clock cycles!"
+        report "###ERROR###: psi_fix_fir_dec_semi_nch_chtdm_conf implemented with full_inp_rate_support_g=false but InVld asserted for two consecutive clock cycles!"
         severity error;
       end if;
       -- Check if processing power is sufficient and print errors otherwise so the problem is detected easily during simulations
       if r.CalcStartLoop_1 = '1' then
-        assert (r.CalcRunning(2) = '0') or (((r.CalcChannel_2 = Channels_g - 1) or (Channels_g = 1)) and (r.CalcLast(2) = '1'))
-        report "###ERROR###: psi_fix_fir_dec_semi_nch_chtdm_conf insufficient processing power to handle data rate! (Multipliers_g is set too low!)"
+        assert (r.CalcRunning(2) = '0') or (((r.CalcChannel_2 = channels_g - 1) or (channels_g = 1)) and (r.CalcLast(2) = '1'))
+        report "###ERROR###: psi_fix_fir_dec_semi_nch_chtdm_conf insufficient processing power to handle data rate! (multipliers_g is set too low!)"
         severity error;
       end if;
     end if;
@@ -209,10 +209,10 @@ begin
     v.Vld(0) := vld_i;
     v.Data_0 := dat_i;
     if r.Vld(0) = '1' then
-      if (r.ChCnt(0) = Channels_g - 1) or (Channels_g = 1) then
+      if (r.ChCnt(0) = channels_g - 1) or (channels_g = 1) then
         v.ChCnt(0)       := (others => '0');
         if r.DecCnt_0 = 0 then
-          v.DecCnt_0 := Ratio_g - 1;
+          v.DecCnt_0 := ratio_g - 1;
         else
           v.DecCnt_0 := r.DecCnt_0 - 1;
         end if;
@@ -225,14 +225,14 @@ begin
     -- *** Stage 1 ***
     v.Data_1          := r.Data_0;
     v.CalcStartLoop_1 := '0';
-    if r.Vld(0) = '1' and r.DecCnt_0 = 0 and ((r.ChCnt(0) = Channels_g - 1) or (Channels_g = 1)) then
+    if r.Vld(0) = '1' and r.DecCnt_0 = 0 and ((r.ChCnt(0) = channels_g - 1) or (channels_g = 1)) then
       v.CalcStartLoop_1 := '1';
     end if;
     -- Write on the cycle a new sample is arriving
     if r.Vld(0) = '1' then
       v.TapUpdAddr(1) := r.TapUpdWrAddr_0;
     -- Read in between to execute Read-before-write literally 
-    elsif not FullInpRateSupport_g then
+    elsif not full_inp_rate_support_g then
       v.TapUpdAddr(1) := r.TapUpdWrAddr_0 - TapsPerStage_c;
     end if;
 
@@ -262,7 +262,7 @@ begin
     if (r.CalcLast(2) = '1') and (r.CalcRunning(2) = '1') then
       v.CalcLast(2) := '0';
       -- ... start next channel if the current channe lwas not the last one
-      if (r.CalcChannel_2 /= Channels_g - 1) and (Channels_g /= 1) then
+      if (r.CalcChannel_2 /= channels_g - 1) and (channels_g /= 1) then
         v.CalcChannel_2 := r.CalcChannel_2 + 1;
         v.TapRdAddr_2   := r.CalcFirstTap_2;
         StartLoop_v     := true;
@@ -276,7 +276,7 @@ begin
       v.CalcFirst(2)  := '1';
       v.CalcCycLeft_2 := CyclesPerCalc_c - 1;
       v.CoefRdIdx_2   := to_unsigned(TapsPerStage_c - 1, v.CoefRdIdx_2'length);
-      if Taps_g <= Multipliers_g then
+      if taps_g <= multipliers_g then
         v.CalcLast(2) := '1';
       end if;
     end if;
@@ -287,7 +287,7 @@ begin
 
     -- *** Memory Flushing (happens outside of pipeline)
     v.FlushDone := '0';
-    if ImplFlushIf_g then
+    if impl_flush_if_g then
       -- start flushing
       if flush_mem_i = '1' then
         v.FlushActive := '1';
@@ -305,29 +305,29 @@ begin
 
     -- *** Output Summation ***
     v.OutVld_n(8) := '0';
-    if r.CalcRunning(7 + Multipliers_g) = '1' and AccuVld(7 + Multipliers_g) = '1' then
-      if r.CalcFirst(7 + Multipliers_g) = '1' then
-        v.Accu_8n := AccuChain(7 + Multipliers_g);
+    if r.CalcRunning(7 + multipliers_g) = '1' and AccuVld(7 + multipliers_g) = '1' then
+      if r.CalcFirst(7 + multipliers_g) = '1' then
+        v.Accu_8n := AccuChain(7 + multipliers_g);
       else
-        v.Accu_8n := PsiFixAdd(r.Accu_8n, AccuFmt_c, AccuChain(7 + Multipliers_g), AccuFmt_c, AccuFmt_c);
+        v.Accu_8n := psi_fix_add(r.Accu_8n, AccuFmt_c, AccuChain(7 + multipliers_g), AccuFmt_c, AccuFmt_c);
       end if;
-      if r.CalcLast(7 + Multipliers_g) = '1' then
+      if r.CalcLast(7 + multipliers_g) = '1' then
         v.OutVld_n(8) := '1';
       end if;
     end if;
 
     -- *** Output Rounding ***
-    v.Rnd_9n := PsiFixResize(r.Accu_8n, AccuFmt_c, RoundFmt_c, Rnd_g, PsiFixWrap);
+    v.Rnd_9n := psi_fix_resize(r.Accu_8n, AccuFmt_c, RoundFmt_c, rnd_g, psi_fix_wrap);
 
     -- *** Output Saturation ***
-    v.OutData_10n := PsiFixResize(r.Rnd_9n, RoundFmt_c, OutFmt_g, PsiFixTrunc, Sat_g);
+    v.OutData_10n := psi_fix_resize(r.Rnd_9n, RoundFmt_c, out_fmt_g, psi_fix_trunc, sat_g);
 
     -- *** Coefficient Write Access (not in calculation pipeline) ***
-    if not UseFixCoefs_g then
+    if not use_fix_coefs_g then
       v.CoefWrDataStg := coef_wr_dat_i;
       v.CoefWrStg     := (others => '0');
 
-      for m in 0 to Multipliers_g - 1 loop
+      for m in 0 to multipliers_g - 1 loop
         if unsigned(coef_addr_i) >= m * TapsPerStage_c and unsigned(coef_addr_i) < (m + 1) * TapsPerStage_c then
           v.CoefWrStg(m) := coef_wr_i;
         end if;
@@ -377,12 +377,12 @@ begin
   --------------------------------------------
   DataInChain(1) <= r.Data_1;
   AccuChain(7)   <= (others => '0');
-  g_mac : for i in 0 to Multipliers_g - 1 generate
+  g_mac : for i in 0 to multipliers_g - 1 generate
     signal DataWrAddr_1i   : std_logic_vector(RamAddrBits_c - 1 downto 0);
     signal DataWr          : std_logic;
     signal DataDin         : std_logic_vector(dat_i'range);
     signal RdData_4i       : std_logic_vector(dat_i'range);
-    signal Coef_4i         : std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);
+    signal Coef_4i         : std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0);
     constant StageCoefs_c  : Coef_a(0 to TapsPerStage_c - 1)  := GetCoefs(i);
     constant StageCoefsR_c : t_areal(0 to TapsPerStage_c - 1) := GetCoefsReal(i);
     signal RamRdData       : std_logic_vector(dat_i'range);
@@ -390,12 +390,12 @@ begin
   begin
 
     -- *** Tap Data RAM***
-    g_noflush : if not ImplFlushIf_g generate
+    g_noflush : if not impl_flush_if_g generate
       DataWrAddr_1i <= std_logic_vector(r.ChCnt(i + 1)) & std_logic_vector(r.TapUpdAddr(i + 1));
       DataWr        <= r.Vld(i + 1);
       DataDin       <= DataInChain(i + 1);
     end generate;
-    g_flush : if ImplFlushIf_g generate
+    g_flush : if impl_flush_if_g generate
       DataWrAddr_1i <= std_logic_vector(r.ChCnt(i + 1)) & std_logic_vector(r.TapUpdAddr(i + 1)) when r.FlushActive = '0' else r.FlushAddr;
       DataWr        <= r.Vld(i + 1) when r.FlushActive = '0' else '1';
       DataDin       <= DataInChain(i + 1) when r.FlushActive = '0' else (others => '0');
@@ -403,9 +403,9 @@ begin
 
     i_data_ram : entity work.psi_common_tdp_ram
       generic map(
-        Depth_g    => RamPerStage_c,
-        Width_g    => PsiFixSize(InFmt_g),
-        Behavior_g => RamBehavior_g
+        depth_g    => RamPerStage_c,
+        width_g    => psi_fix_size(in_fmt_g),
+        behavior_g => ram_behavior_g
       )
       port map(
         ClkA  => clk_i,
@@ -422,14 +422,14 @@ begin
 
     -- *** Tap data delay  ***
     -- for full input rate support, a separate delay chain is used
-    g_fullrate : if FullInpRateSupport_g generate
+    g_fullrate : if full_inp_rate_support_g generate
       i_tapdelay : entity work.psi_common_delay
         generic map(
-          Width_g       => PsiFixSize(InFmt_g),
-          Delay_g       => Channels_g * TapsPerStage_c,
+          Width_g       => psi_fix_size(in_fmt_g),
+          Delay_g       => channels_g * TapsPerStage_c,
           Resource_g    => "AUTO",
-          RstState_g    => ImplFlushIf_g, -- the tap delay only needs to be reset cleanly if the memory can be flushed too. Otherwise leftovers are in memory anyways.
-          RamBehavior_g => RamBehavior_g
+          RstState_g    => impl_flush_if_g, -- the tap delay only needs to be reset cleanly if the memory can be flushed too. Otherwise leftovers are in memory anyways.
+          RamBehavior_g => ram_behavior_g
         )
         port map(
           Clk     => clk_i,
@@ -443,7 +443,7 @@ begin
     p_ram_fw_del : process(clk_i)
     begin
       if rising_edge(clk_i) then
-        if not FullInpRateSupport_g then
+        if not full_inp_rate_support_g then
           DataInChain(i + 2) <= RamRdData;
         else
           DataInChain(i + 2) <= FullRateDel;
@@ -452,7 +452,7 @@ begin
     end process;
 
     -- *** Coefficient ROM (fixed coefs) ***
-    g_coefrom : if UseFixCoefs_g generate
+    g_coefrom : if use_fix_coefs_g generate
       p_coef_rom : process(clk_i)
       begin
         if rising_edge(clk_i) then
@@ -466,16 +466,16 @@ begin
     end generate;
 
     -- *** Coefficient RAM (configurable coefs) ***
-    g_coefram : if not UseFixCoefs_g generate
+    g_coefram : if not use_fix_coefs_g generate
       signal RdAddr : std_logic_vector(log2ceil(TapsPerStage_c) - 1 downto 0);
     begin
       RdAddr <= std_logic_vector(r.CoefRdAddr(3 + i)(RdAddr'range));
       i_coef_ram : entity work.psi_fix_param_ram
         generic map(
-          Depth_g    => 2**log2ceil(TapsPerStage_c),
-          Fmt_g      => CoefFmt_g,
-          Behavior_g => RamBehavior_g,
-          Init_g     => StageCoefsR_c
+          depth_g    => 2**log2ceil(TapsPerStage_c),
+          fmt_g      => coef_fmt_g,
+          behavior_g => ram_behavior_g,
+          init_g     => StageCoefsR_c
         )
         port map(
           ClkA  => clk_i,
@@ -494,10 +494,10 @@ begin
     -- *** Multiply and Add ***
     i_multadd : entity work.psi_fix_mult_add_stage
       generic map(
-        InAFmt_g    => InFmt_g,
-        InBFmt_g    => CoefFmt_g,
-        AddFmt_g    => AccuFmt_c,
-        InBIsCoef_g => false
+        in_a_fmt_g    => in_fmt_g,
+        in_b_fmt_g    => coef_fmt_g,
+        add_fmt_g    => AccuFmt_c,
+        in_b_is_coef_g => false
       )
       port map(
         clk_i            => clk_i,

@@ -21,22 +21,22 @@ use work.psi_common_logic_pkg.all;
 -- $$ processes=stimuli,response $$
 entity psi_fix_complex_abs is
   generic(
-    InFmt_g       : psi_fix_fmt_t := (1, 0, 15);                          -- FP format in
-    OutFmt_g      : psi_fix_fmt_t := (0, 1, 15);                          -- FP format out
-    Round_g       : psi_fix_rnd_t := PsiFixTrunc;                         -- trunc or round
-    Sat_g         : psi_fix_sat_t := PsiFixWrap;                          -- Wrap or sat
+    in_fmt_g       : psi_fix_fmt_t := (1, 0, 15);                          -- FP format in
+    out_fmt_g      : psi_fix_fmt_t := (0, 1, 15);                          -- FP format out
+    round_g       : psi_fix_rnd_t := psi_fix_trunc;                         -- trunc or round
+    sat_g         : psi_fix_sat_t := psi_fix_wrap;                          -- Wrap or sat
     rst_pol_g     : std_logic   := '1';
-    RamBehavior_g : string      := "RBW"                                  -- RBW = Read before write, WBR = write before read
+    ram_behavior_g : string      := "RBW"                                  -- RBW = Read before write, WBR = write before read
   );
   port(
     -- Control Signals
     clk_i     : in  std_logic;                                            -- $$ type=Clk; freq=127e6 $$
     rst_i     : in  std_logic;                                            -- $$ type=Rst; Clk=clk_i $$	
     -- Input    
-    dat_inp_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);   -- data inphase I
-    dat_qua_i : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);   -- data quadrature Q
+    dat_inp_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- data inphase I
+    dat_qua_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- data quadrature Q
     vld_i     : in  std_logic;                                            -- valid signal in
-    dat_o     : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);  -- results output DQRT(I^2+Q^2)
+    dat_o     : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);  -- results output DQRT(I^2+Q^2)
     vld_o     : out std_logic                                             -- valid signal out
   );
 end entity;
@@ -48,8 +48,8 @@ end entity;
 architecture rtl of psi_fix_complex_abs is
 
   -- Constants
-  constant InFmtNorm_c          : psi_fix_fmt_t := (InFmt_g.S, 0, InFmt_g.I + InFmt_g.F);
-  constant OutFmtNorm_c         : psi_fix_fmt_t := (OutFmt_g.S, 0, OutFmt_g.I + OutFmt_g.F + 1); -- rounding bit is kept
+  constant InFmtNorm_c          : psi_fix_fmt_t := (in_fmt_g.S, 0, in_fmt_g.I + in_fmt_g.F);
+  constant OutFmtNorm_c         : psi_fix_fmt_t := (out_fmt_g.S, 0, out_fmt_g.I + out_fmt_g.F + 1); -- rounding bit is kept
   constant SqrFmt_c             : psi_fix_fmt_t := (0, InFmtNorm_c.I + 1, InFmtNorm_c.F * 2);
   constant AddFmt_c             : psi_fix_fmt_t := (0, SqrFmt_c.I + 1, SqrFmt_c.F);
   constant LimFmt_c             : psi_fix_fmt_t := (0, 0, AddFmt_c.F); -- 2*15=30 fractional bits
@@ -61,35 +61,35 @@ architecture rtl of psi_fix_complex_abs is
   constant OutSftFmt_c          : psi_fix_fmt_t := (0, 0, OutFmtNorm_c.F);
 
   -- types
-  type LimArray_t is array (natural range <>) of std_logic_vector(PsiFixSize(LimFmt_c) - 1 downto 0);
+  type LimArray_t is array (natural range <>) of std_logic_vector(psi_fix_size(LimFmt_c) - 1 downto 0);
   type CntArray_t is array (natural range <>) of unsigned(SftStgBeforeApprox_c - 1 downto 0);
-  type OutSftArray_t is array (natural range <>) of std_logic_vector(PsiFixSize(OutSftFmt_c) - 1 downto 0);
+  type OutSftArray_t is array (natural range <>) of std_logic_vector(psi_fix_size(OutSftFmt_c) - 1 downto 0);
 
   -- Two Process Method
   type two_process_r is record
     InVld  : std_logic_vector(0 to 4 + SftStgBeforeApprox_c - 1);
-    I_0    : std_logic_vector(PsiFixSize(InFmtNorm_c) - 1 downto 0);
-    Q_0    : std_logic_vector(PsiFixSize(InFmtNorm_c) - 1 downto 0);
-    ISqr_1 : std_logic_vector(PsiFixSize(SqrFmt_c) - 1 downto 0);
-    QSqr_1 : std_logic_vector(PsiFixSize(SqrFmt_c) - 1 downto 0);
-    Sum_2  : std_logic_vector(PsiFixSize(AddFmt_c) - 1 downto 0);
-    Lim_3  : std_logic_vector(PsiFixSize(LimFmt_c) - 1 downto 0);
+    I_0    : std_logic_vector(psi_fix_size(InFmtNorm_c) - 1 downto 0);
+    Q_0    : std_logic_vector(psi_fix_size(InFmtNorm_c) - 1 downto 0);
+    ISqr_1 : std_logic_vector(psi_fix_size(SqrFmt_c) - 1 downto 0);
+    QSqr_1 : std_logic_vector(psi_fix_size(SqrFmt_c) - 1 downto 0);
+    Sum_2  : std_logic_vector(psi_fix_size(AddFmt_c) - 1 downto 0);
+    Lim_3  : std_logic_vector(psi_fix_size(LimFmt_c) - 1 downto 0);
     InSft  : LimArray_t(0 to SftStgBeforeApprox_c - 1);
     SftCnt : CntArray_t(0 to SftStgBeforeApprox_c - 1);
     OutVld : std_logic_vector(0 to SftStgAfterApprox_c + 1);
     OutSft : OutSftArray_t(0 to SftStgAfterApprox_c);
     OutCnt : CntArray_t(0 to SftStgAfterApprox_c);
-    OutRes : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+    OutRes : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);
   end record;
   signal r, r_next : two_process_r;
 
   -- Component Instantiation
-  signal SqrtIn_s    : std_logic_vector(PsiFixSize(SqrtInFmt_c) - 1 downto 0);
+  signal SqrtIn_s    : std_logic_vector(psi_fix_size(SqrtInFmt_c) - 1 downto 0);
   signal SftCntOut_s : std_logic_vector(SftStgBeforeApprox_c - 1 downto 0);
   signal IsZeroIn_s  : std_logic;
   signal IsZeroOut_s : std_logic;
   signal SqrtVld_s   : std_logic;
-  signal SqrtData_s  : std_logic_vector(PsiFixSize(SqrtOutFmt_c) - 1 downto 0);
+  signal SqrtData_s  : std_logic_vector(psi_fix_size(SqrtOutFmt_c) - 1 downto 0);
 
 begin
   --------------------------------------------------------------------------
@@ -97,7 +97,7 @@ begin
   --------------------------------------------------------------------------	
   proc_comb : process(r, vld_i, dat_inp_i, dat_qua_i, SftCntOut_s, SqrtVld_s, SqrtData_s, IsZeroOut_s)
     variable v              : two_process_r;
-    variable SftBeforeIn_v  : std_logic_vector(PsiFixSize(LimFmt_c) - 1 downto 0);
+    variable SftBeforeIn_v  : std_logic_vector(psi_fix_size(LimFmt_c) - 1 downto 0);
     variable SftBefore_v    : integer;
     variable SftAfter_v     : unsigned(SftStgBeforeApprox_c downto 0);
     variable SftStepAfter_v : integer;
@@ -120,16 +120,16 @@ begin
     -- Normalization is implicit by reinterpreting the number format (number of bits is not changed)
 
     -- Squaring
-    v.ISqr_1 := PsiFixMult(r.I_0, InFmtNorm_c, r.I_0, InFmtNorm_c, SqrFmt_c);
-    v.QSqr_1 := PsiFixMult(r.Q_0, InFmtNorm_c, r.Q_0, InFmtNorm_c, SqrFmt_c);
+    v.ISqr_1 := psi_fix_mult(r.I_0, InFmtNorm_c, r.I_0, InFmtNorm_c, SqrFmt_c);
+    v.QSqr_1 := psi_fix_mult(r.Q_0, InFmtNorm_c, r.Q_0, InFmtNorm_c, SqrFmt_c);
 
     -- *** Stage 2 ***
     -- Sum
-    v.Sum_2 := PsiFixAdd(r.ISqr_1, SqrFmt_c, r.QSqr_1, SqrFmt_c, AddFmt_c);
+    v.Sum_2 := psi_fix_add(r.ISqr_1, SqrFmt_c, r.QSqr_1, SqrFmt_c, AddFmt_c);
 
     -- *** Stage 3 ***
     -- Limit to 1
-    v.Lim_3 := PsiFixResize(r.Sum_2, AddFmt_c, LimFmt_c, PsiFixTrunc, PsiFixSat);
+    v.Lim_3 := psi_fix_resize(r.Sum_2, AddFmt_c, LimFmt_c, psi_fix_trunc, psi_fix_sat);
 
     -- *** Shift stages (0 ... x) ***
     for stg in 0 to SftStgBeforeApprox_c - 1 loop
@@ -158,7 +158,7 @@ begin
     if IsZeroOut_s = '1' then
       v.OutSft(0) := (others => '0');
     else
-      v.OutSft(0) := PsiFixResize(SqrtData_s, SqrtOutFmt_c, OutSftFmt_c);
+      v.OutSft(0) := psi_fix_resize(SqrtData_s, SqrtOutFmt_c, OutSftFmt_c);
     end if;
     v.OutCnt(0) := unsigned(SftCntOut_s);
 
@@ -171,11 +171,11 @@ begin
       v.OutCnt(stg + 1) := r.OutCnt(stg);
       StgIdx_v          := SftStgAfterApprox_c - 1 - stg;
       SftStepAfter_v    := 2**(2 * (StgIdx_v));
-      v.OutSft(stg + 1) := PsiFixShiftRight(r.OutSft(stg), OutFmtNorm_c, to_integer(r.OutCnt(stg)(2 * StgIdx_v + 1 downto 2 * StgIdx_v)) * SftStepAfter_v, 3 * SftStepAfter_v, OutFmtNorm_c, PsiFixTrunc, PsiFixWrap, true);
+      v.OutSft(stg + 1) := psi_fix_shift_right(r.OutSft(stg), OutFmtNorm_c, to_integer(r.OutCnt(stg)(2 * StgIdx_v + 1 downto 2 * StgIdx_v)) * SftStepAfter_v, 3 * SftStepAfter_v, OutFmtNorm_c, psi_fix_trunc, psi_fix_wrap, true);
     end loop;
 
     -- *** Output resize ***
-    v.OutRes := PsiFixShiftLeft(r.OutSft(r.OutSft'high), OutFmtNorm_c, InFmt_g.I, InFmt_g.I, OutFmt_g, Round_g, Sat_g);
+    v.OutRes := psi_fix_shift_left(r.OutSft(r.OutSft'high), OutFmtNorm_c, in_fmt_g.I, in_fmt_g.I, out_fmt_g, round_g, sat_g);
 
     -- Apply to record
     r_next <= v;
@@ -205,7 +205,7 @@ begin
   --------------------------------------------------------------------------
   -- Component Instantiation
   --------------------------------------------------------------------------
-  SqrtIn_s   <= PsiFixResize(r.InSft(r.InSft'high), LimFmt_c, SqrtInFmt_c);
+  SqrtIn_s   <= psi_fix_resize(r.InSft(r.InSft'high), LimFmt_c, SqrtInFmt_c);
   IsZeroIn_s <= '1' when unsigned(SqrtIn_s) = 0 else '0';
   inst_sqrt : entity work.psi_fix_lin_approx_sqrt18b
     port map(
@@ -226,7 +226,7 @@ begin
       generic map(
         Width_g       => SftStgBeforeApprox_c + 1,
         Depth_g       => 16,
-        RamBehavior_g => RamBehavior_g
+        RamBehavior_g => ram_behavior_g
       )
       port map(
         Clk     => clk_i,

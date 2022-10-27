@@ -23,9 +23,9 @@ use work.psi_tb_txt_util.all;
 ------------------------------------------------------------
 entity psi_fix_white_noise_tb is
   generic(
-    FileFolder_g   : string  := "../testbench/psi_fix_white_noise_tb/Data";
-    StimuliSet_g   : string  := "S";    -- "S" = signed, "U" = unsigned
-    VldDutyCycle_g : integer := 5
+    file_folder_g   : string  := "../testbench/psi_fix_white_noise_tb/Data";
+    stimuli_set_g   : string  := "S";    -- "S" = signed, "U" = unsigned
+    vld_duty_cycle_g : integer := 5
   );
 end entity;
 
@@ -37,7 +37,7 @@ architecture sim of psi_fix_white_noise_tb is
   -- *** Constants ***
   constant OutFmtS_c : psi_fix_fmt_t := (1, 2, 15);
   constant OutFmtU_c : psi_fix_fmt_t := (0, 2, 13);
-  constant OutFmt_c  : psi_fix_fmt_t := PsiFixChooseFmt(StimuliSet_g = "S", OutFmtS_c, OutFmtU_c);
+  constant OutFmt_c  : psi_fix_fmt_t := psi_fix_choose_fmt(stimuli_set_g = "S", OutFmtS_c, OutFmtU_c);
 
   -- *** TB Control ***
   signal TbRunning             : boolean                  := True;
@@ -51,7 +51,7 @@ architecture sim of psi_fix_white_noise_tb is
   signal Clk     : std_logic                                           := '1';
   signal Rst     : std_logic                                           := '1';
   signal InVld   : std_logic                                           := '0';
-  signal OutData : std_logic_vector(PsiFixSize(OutFmt_c) - 1 downto 0) := (others => '0');
+  signal OutData : std_logic_vector(psi_fix_size(OutFmt_c) - 1 downto 0) := (others => '0');
   signal OutVld  : std_logic                                           := '0';
 
   signal SigOut : TextfileData_t(0 to 0) := (others => 0);
@@ -62,7 +62,7 @@ begin
   ------------------------------------------------------------
   i_dut : entity work.psi_fix_white_noise
     generic map(
-      OutFmt_g => OutFmt_c
+      out_fmt_g => OutFmt_c
     )
     port map(
       clk_i => Clk,
@@ -123,9 +123,9 @@ begin
     while ProcessDone(TbProcNr_response_c) = '0' loop
       InVld <= '1';
       wait until rising_edge(Clk);
-      if VldDutyCycle_g > 1 then
+      if vld_duty_cycle_g > 1 then
         InVld <= '0';
-        for i in 1 to VldDutyCycle_g - 1 loop
+        for i in 1 to vld_duty_cycle_g - 1 loop
           wait until rising_edge(Clk);
         end loop;
       end if;
@@ -137,10 +137,10 @@ begin
   end process;
 
   -- *** response ***
-  g_signed : if StimuliSet_g = "S" generate
+  g_signed : if stimuli_set_g = "S" generate
     SigOut(0) <= to_integer(signed(OutData));
   end generate;
-  g_unsigned : if StimuliSet_g = "U" generate
+  g_unsigned : if stimuli_set_g = "U" generate
     SigOut(0) <= to_integer(unsigned(OutData));
   end generate;
   p_response : process
@@ -153,7 +153,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => OutVld,
                          Data        => SigOut,
-                         Filepath    => FileFolder_g & choose(StimuliSet_g = "S", "/output_S.txt", "/output_U.txt"),
+                         Filepath    => file_folder_g & choose(stimuli_set_g = "S", "/output_S.txt", "/output_U.txt"),
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!

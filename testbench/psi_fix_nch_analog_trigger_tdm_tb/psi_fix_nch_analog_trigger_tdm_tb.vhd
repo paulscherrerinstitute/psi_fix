@@ -37,12 +37,12 @@ architecture tb of psi_fix_nch_analog_trigger_tdm_tb is
   constant freq_clk_g     : real                                                           := 100.0E6; -- clock frequency arbitrary chosen
   constant ratio_g        : real                                                           := 20.0; -- ratio between clock and data strobe
   --internal signals
-  constant bit_c          : integer                                                        := PsiFixSize(fix_fmt_g);
+  constant bit_c          : integer                                                        := psi_fix_size(fix_fmt_g);
   constant period_c       : time                                                           := (1 sec) / freq_clk_g;
   signal clk_sti          : std_logic                                                      := '0';
   signal rst_sti          : std_logic                                                      := '1';
   signal str_s            : std_logic                                                      := '0';
-  signal dat_sti          : std_logic_vector(PsiFixSize(fix_fmt_g) - 1 downto 0)           := (others => '0');
+  signal dat_sti          : std_logic_vector(psi_fix_size(fix_fmt_g) - 1 downto 0)           := (others => '0');
   signal str_sti          : std_logic                                                      := '0';
   signal counter_s        : unsigned(bit_c - 1 downto 0)                                   := (others => '0');
   signal str_pipe_obs     : std_logic;
@@ -55,14 +55,14 @@ architecture tb of psi_fix_nch_analog_trigger_tdm_tb is
   type stimuli_array_t is array (0 to ch_nb_g - 1) of std_logic_vector(bit_c - 1 downto 0);
   signal data_array_s     : stimuli_array_t;
   signal check_array_s    : stimuli_array_t;
-  signal data_in_s        : std_logic_vector(ch_nb_g * PsiFixSize(fix_fmt_g) - 1 downto 0) := (others => '0');
+  signal data_in_s        : std_logic_vector(ch_nb_g * psi_fix_size(fix_fmt_g) - 1 downto 0) := (others => '0');
   signal str_dff_s        : std_logic                                                      := '0';
   signal idx_s            : integer                                                        := 0;
   ------------------------------------------------------------------------------------------------------------
   --*** resolutiuon function array to TDM ***
   function array_2_slv(signal data_i      : in stimuli_array_t;
                        constant ch_number : natural) return std_logic_vector is
-    constant width_c : natural := PsiFixSize(fix_fmt_g);
+    constant width_c : natural := psi_fix_size(fix_fmt_g);
     variable data_v  : std_logic_vector(ch_number * width_c - 1 downto 0);
   begin
     for i in 0 to ch_number - 1 loop
@@ -76,8 +76,8 @@ architecture tb of psi_fix_nch_analog_trigger_tdm_tb is
   signal mask_min_sti     : std_logic_vector(trig_nb_g * ch_nb_g - 1 downto 0)             := (others => '0');
   signal mask_max_sti     : std_logic_vector(trig_nb_g * ch_nb_g - 1 downto 0)             := (others => '0');
   signal mask_ext_sti     : std_logic_vector(trig_nb_g * trig_ext_nb_g - 1 downto 0)       := (others => '0');
-  signal thld_min_sti     : std_logic_vector(ch_nb_g * PsiFixSize(fix_fmt_g) - 1 downto 0) := (others => '0');
-  signal thld_max_sti     : std_logic_vector(ch_nb_g * PsiFixSize(fix_fmt_g) - 1 downto 0) := (others => '0');
+  signal thld_min_sti     : std_logic_vector(ch_nb_g * psi_fix_size(fix_fmt_g) - 1 downto 0) := (others => '0');
+  signal thld_max_sti     : std_logic_vector(ch_nb_g * psi_fix_size(fix_fmt_g) - 1 downto 0) := (others => '0');
   signal trig_clr_ext_sti : std_logic_vector(trig_nb_g * trig_ext_nb_g - 1 downto 0)       := (others => '0');
   signal trig_mode_sti    : std_logic_vector(trig_nb_g - 1 downto 0)                       := (others => '0');
   signal trig_arm_sti     : std_logic_vector(trig_nb_g - 1 downto 0)                       := (others => '0');
@@ -168,7 +168,7 @@ begin
   --*** TAG par 2 tdm block INP ***
   inst_par2tdm_inp : entity work.psi_common_par_tdm
     generic map(ChannelCount_g => ch_nb_g,
-                ChannelWidth_g => PsiFixSize(fix_fmt_g))
+                ChannelWidth_g => psi_fix_size(fix_fmt_g))
     port map(Clk         => clk_sti,
              Rst         => rst_sti,
              Parallel    => data_in_s,

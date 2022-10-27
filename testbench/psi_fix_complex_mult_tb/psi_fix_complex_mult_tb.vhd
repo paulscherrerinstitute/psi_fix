@@ -24,9 +24,9 @@ use work.psi_tb_textfile_pkg.all;
 -- Entity Declaration
 ------------------------------------------------------------
 entity psi_fix_complex_mult_tb is
-  generic(Pipeline_g   : boolean := false;
-          FileFolder_g : string  := "../tesbench/psi_fix_complex_mult_tb/Data";
-          ClkPerSpl_g  : integer := 1);
+  generic(pipeline_g   : boolean := false;
+          file_folder_g : string  := "../tesbench/psi_fix_complex_mult_tb/Data";
+          clk_per_spl_g  : integer := 1);
 end entity;
 
 ------------------------------------------------------------
@@ -34,13 +34,13 @@ end entity;
 ------------------------------------------------------------
 architecture sim of psi_fix_complex_mult_tb is
   -- *** Fixed Generics ***
-  constant RstPol_g      : std_logic   := '1';
-  constant InAFmt_g      : psi_fix_fmt_t := (1, 0, 15);
-  constant InBFmt_g      : psi_fix_fmt_t := (1, 0, 24);
-  constant InternalFmt_g : psi_fix_fmt_t := (1, 1, 24);
-  constant OutFmt_g      : psi_fix_fmt_t := (1, 0, 20);
-  constant Round_g       : psi_fix_rnd_t := PsiFixRound;
-  constant Sat_g         : psi_fix_sat_t := PsiFixSat;
+  constant rst_pol_g      : std_logic   := '1';
+  constant in_a_fmt_g      : psi_fix_fmt_t := (1, 0, 15);
+  constant in_b_fmt_g      : psi_fix_fmt_t := (1, 0, 24);
+  constant internal_fmt_g : psi_fix_fmt_t := (1, 1, 24);
+  constant out_fmt_g      : psi_fix_fmt_t := (1, 0, 20);
+  constant round_g       : psi_fix_rnd_t := psi_fix_round;
+  constant sat_g         : psi_fix_sat_t := psi_fix_sat;
 
   -- *** Not Assigned Generics (default values) ***
 
@@ -58,13 +58,13 @@ architecture sim of psi_fix_complex_mult_tb is
   -- *** DUT Signals ***
   signal clk_i  : std_logic                                           := '1';
   signal rst_i  : std_logic                                           := '1';
-  signal ai_i   : std_logic_vector(PsiFixSize(InAFmt_g) - 1 downto 0) := (others => '0');
-  signal aq_i   : std_logic_vector(PsiFixSize(InAFmt_g) - 1 downto 0) := (others => '0');
-  signal bi_i   : std_logic_vector(PsiFixSize(InBFmt_g) - 1 downto 0) := (others => '0');
-  signal bq_i   : std_logic_vector(PsiFixSize(InBFmt_g) - 1 downto 0) := (others => '0');
+  signal ai_i   : std_logic_vector(psi_fix_size(in_a_fmt_g) - 1 downto 0) := (others => '0');
+  signal aq_i   : std_logic_vector(psi_fix_size(in_a_fmt_g) - 1 downto 0) := (others => '0');
+  signal bi_i   : std_logic_vector(psi_fix_size(in_b_fmt_g) - 1 downto 0) := (others => '0');
+  signal bq_i   : std_logic_vector(psi_fix_size(in_b_fmt_g) - 1 downto 0) := (others => '0');
   signal vld_i  : std_logic                                           := '0';
-  signal iout_o : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
-  signal qout_o : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
+  signal iout_o : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
+  signal qout_o : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
   signal vld_o  : std_logic                                           := '0';
 
 begin
@@ -73,14 +73,14 @@ begin
   ------------------------------------------------------------
   i_dut : entity work.psi_fix_complex_mult
     generic map(
-      Pipeline_g    => Pipeline_g,
-      RstPol_g      => RstPol_g,
-      InAFmt_g      => InAFmt_g,
-      InBFmt_g      => InBFmt_g,
-      InternalFmt_g => InternalFmt_g,
-      OutFmt_g      => OutFmt_g,
-      Round_g       => Round_g,
-      Sat_g         => Sat_g
+      pipeline_g    => pipeline_g,
+      rst_pol_g      => rst_pol_g,
+      in_a_fmt_g      => in_a_fmt_g,
+      in_b_fmt_g      => in_b_fmt_g,
+      internal_fmt_g => internal_fmt_g,
+      out_fmt_g      => out_fmt_g,
+      round_g       => round_g,
+      sat_g         => sat_g
     )
     port map(
       clk_i         => clk_i,
@@ -146,8 +146,8 @@ begin
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => vld_i,
                          Data        => StimuliSig,
-                         Filepath    => FileFolder_g & "/input.txt",
-                         ClkPerSpl   => ClkPerSpl_g,
+                         Filepath    => file_folder_g & "/input.txt",
+                         ClkPerSpl   => clk_per_spl_g,
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!
@@ -172,7 +172,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => vld_o,
                          Data        => RespSig,
-                         Filepath    => FileFolder_g & "/output.txt",
+                         Filepath    => file_folder_g & "/output.txt",
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!

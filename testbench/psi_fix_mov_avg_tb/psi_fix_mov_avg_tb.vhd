@@ -28,10 +28,10 @@ library work;
 ------------------------------------------------------------
 entity psi_fix_mov_avg_tb is
 	generic (
-		GainCorr_g 		: string 	:= "ROUGH";
-		FileFolder_g	: string 	:= "../tesbench/psi_fix_demod_real2cplx_tb/Data";
-		DutyCycle_g		: integer	:= 1;
-		OutRegs_g		: integer	:= 1
+		gain_corr_g 		: string 	:= "ROUGH";
+		file_folder_g	: string 	:= "../tesbench/psi_fix_demod_real2cplx_tb/Data";
+		duty_cycle_g		: integer	:= 1;
+		out_regs_g		: integer	:= 1
 	);
 end entity;
 
@@ -40,13 +40,13 @@ end entity;
 ------------------------------------------------------------
 architecture sim of psi_fix_mov_avg_tb is
 	-- *** Fixed Generics ***
-	constant InFmt_g : psi_fix_fmt_t := (1,0,10);
-	constant OutFmt_g : psi_fix_fmt_t := (1,1,12);
-	constant Taps_g : positive := 7;
+	constant in_fmt_g : psi_fix_fmt_t := (1,0,10);
+	constant out_fmt_g : psi_fix_fmt_t := (1,1,12);
+	constant taps_g : positive := 7;
 	
 	-- *** Not Assigned Generics (default values) ***
-	constant Round_g : psi_fix_rnd_t := PsiFixRound ;
-	constant Sat_g : psi_fix_sat_t := PsiFixSat;
+	constant round_g : psi_fix_rnd_t := psi_fix_round ;
+	constant sat_g : psi_fix_sat_t := psi_fix_sat;
 	
 	-- *** TB Control ***
 	signal TbRunning : boolean := True;
@@ -60,9 +60,9 @@ architecture sim of psi_fix_mov_avg_tb is
 	signal Clk : std_logic := '0';
 	signal Rst : std_logic := '1';
 	signal InVld : std_logic := '0';
-	signal InData : std_logic_vector(PsiFixSize(InFmt_g)-1 downto 0) := (others => '0');
+	signal InData : std_logic_vector(psi_fix_size(in_fmt_g)-1 downto 0) := (others => '0');
 	signal OutVld : std_logic := '0';
-	signal OutData : std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0) := (others => '0');
+	signal OutData : std_logic_vector(psi_fix_size(out_fmt_g)-1 downto 0) := (others => '0');
 	signal SigIn					: TextfileData_t(0 to 0)	:= (others => 0);
 	signal SigOut					: TextfileData_t(0 to 0)	:= (others => 0);	
 	
@@ -72,11 +72,11 @@ begin
 	------------------------------------------------------------
 	i_dut : entity work.psi_fix_mov_avg
 		generic map (
-			GainCorr_g => GainCorr_g,
-			InFmt_g => InFmt_g,
-			OutFmt_g => OutFmt_g,
-			Taps_g => Taps_g,
-			OutRegs_g => OutRegs_g
+			gain_corr_g => gain_corr_g,
+			in_fmt_g => in_fmt_g,
+			out_fmt_g => out_fmt_g,
+			taps_g => taps_g,
+			out_regs_g => out_regs_g
 		)
 		port map (
 			clk_i => Clk,
@@ -141,8 +141,8 @@ begin
 								Rdy 		=> PsiTextfile_SigOne,
 								Vld 		=> InVld, 
 								Data		=> SigIn, 
-								Filepath	=> FileFolder_g & "/input.txt", 
-								ClkPerSpl	=> DutyCycle_g,
+								Filepath	=> file_folder_g & "/input.txt", 
+								ClkPerSpl	=> duty_cycle_g,
 								IgnoreLines => 1);	
 		
 		-- end of process !DO NOT EDIT!
@@ -162,7 +162,7 @@ begin
 								Rdy			=> PsiTextfile_SigUnused,
 								Vld			=> OutVld,
 								Data		=> SigOut,
-								Filepath	=> FileFolder_g & "/output_" & to_lower(GainCorr_g) & ".txt",
+								Filepath	=> file_folder_g & "/output_" & to_lower(gain_corr_g) & ".txt",
 								IgnoreLines => 1);
 		
 		-- end of process !DO NOT EDIT!

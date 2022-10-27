@@ -32,17 +32,17 @@ use work.psi_fix_fir_dec_semi_nch_chtdm_conf_tb_coefs_pkg.all;
 ------------------------------------------------------------
 entity psi_fix_fir_dec_semi_nch_chtdm_conf_tb is
   generic(
-    Channels_g           : natural  := 3;
-    Taps_g               : natural  := 48;
-    ClkPerSpl_g          : positive := 10;
-    UseFixCoefs_g        : boolean  := true;
-    InitCoefs_g          : boolean  := false;
-    FullInpRateSupport_g : boolean  := false;
-    Multipliers_g        : positive := 8;
-    Ratio_g              : positive := 3;
-    RamBehavior_g        : string   := "RBW";
-    FileFolder_g         : string   := "../testbench/psi_fix_fir_dec_semi_nch_chtdm_conf_tb/Data";
-    ImplFlushIf_g        : boolean  := true
+    channels_g           : natural  := 3;
+    taps_g               : natural  := 48;
+    clk_per_spl_g          : positive := 10;
+    use_fix_coefs_g        : boolean  := true;
+    init_coefs_g          : boolean  := false;
+    full_inp_rate_support_g : boolean  := false;
+    multipliers_g        : positive := 8;
+    ratio_g              : positive := 3;
+    ram_behavior_g        : string   := "RBW";
+    file_folder_g         : string   := "../testbench/psi_fix_fir_dec_semi_nch_chtdm_conf_tb/Data";
+    impl_flush_if_g        : boolean  := true
   );
 end entity;
 
@@ -52,19 +52,19 @@ end entity;
 architecture sim of psi_fix_fir_dec_semi_nch_chtdm_conf_tb is
 
   -- *** File Selection ***
-  constant InFile_c    : string := "Input_" & to_string(Channels_g) & "Ch.txt";
-  constant OutFile_c   : string := "Output_" & to_string(Channels_g) & "Ch_R" & to_string(Ratio_g) & "_" & to_string(Taps_g) & "Taps.txt";
-  constant CoefsFile_c : string := "Coefs_" & "R" & to_string(Ratio_g) & "_" & to_string(Taps_g) & "Taps.txt";
+  constant InFile_c    : string := "Input_" & to_string(channels_g) & "Ch.txt";
+  constant OutFile_c   : string := "Output_" & to_string(channels_g) & "Ch_R" & to_string(ratio_g) & "_" & to_string(taps_g) & "Taps.txt";
+  constant CoefsFile_c : string := "Coefs_" & "R" & to_string(ratio_g) & "_" & to_string(taps_g) & "Taps.txt";
 
   -- *** Fixed Generics ***
-  constant InFmt_g   : psi_fix_fmt_t := (1, 0, 15);
-  constant OutFmt_g  : psi_fix_fmt_t := (1, 0, 13);
-  constant CoefFmt_g : psi_fix_fmt_t := (1, 0, 17);
+  constant in_fmt_g   : psi_fix_fmt_t := (1, 0, 15);
+  constant out_fmt_g  : psi_fix_fmt_t := (1, 0, 13);
+  constant coef_fmt_g : psi_fix_fmt_t := (1, 0, 17);
 
   -- *** Not Assigned Generics (default values) ***
-  constant Rnd_g      : psi_fix_rnd_t := PsiFixRound;
-  constant Sat_g      : psi_fix_sat_t := PsiFixSat;
-  constant FixCoefs_g : t_areal     := (0.0, 0.0);
+  constant rnd_g      : psi_fix_rnd_t := psi_fix_round;
+  constant sat_g      : psi_fix_sat_t := psi_fix_sat;
+  constant fix_coefs_g : t_areal     := (0.0, 0.0);
 
   -- *** TB Control ***
   signal TbRunning            : boolean                  := True;
@@ -78,12 +78,12 @@ architecture sim of psi_fix_fir_dec_semi_nch_chtdm_conf_tb is
   signal Clk        : std_logic                                            := '1';
   signal Rst        : std_logic                                            := '1';
   signal InVld      : std_logic                                            := '0';
-  signal InData     : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0)   := (others => '0');
+  signal InData     : std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0)   := (others => '0');
   signal OutVld     : std_logic                                            := '0';
-  signal OutData    : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0)  := (others => '0');
+  signal OutData    : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0)  := (others => '0');
   signal CoefWr     : std_logic                                            := '0';
-  signal CoefAddr   : std_logic_vector(log2ceil(Taps_g) - 1 downto 0)      := (others => '0');
-  signal CoefWrData : std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0');
+  signal CoefAddr   : std_logic_vector(log2ceil(taps_g) - 1 downto 0)      := (others => '0');
+  signal CoefWrData : std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0) := (others => '0');
   signal FlushMem   : std_logic                                            := '0';
   signal FlushDone  : std_logic                                            := '0';
 
@@ -91,14 +91,14 @@ architecture sim of psi_fix_fir_dec_semi_nch_chtdm_conf_tb is
   signal SigOut : TextfileData_t(0 to 0) := (others => 0);
 
   function GetFixCoefs return t_areal is
-    constant ZeroCoefs : t_areal(0 to Taps_g - 1) := (others => 0.0);
+    constant ZeroCoefs : t_areal(0 to taps_g - 1) := (others => 0.0);
   begin
-    if UseFixCoefs_g or InitCoefs_g then
-      if Ratio_g = 3 and Taps_g = 48 then
+    if use_fix_coefs_g or init_coefs_g then
+      if ratio_g = 3 and taps_g = 48 then
         return Coefs_R3_48Taps;         -- from package
-      elsif Ratio_g = 1 and Taps_g = 48 then
+      elsif ratio_g = 1 and taps_g = 48 then
         return Coefs_R1_48Taps;         -- from package
-      elsif Ratio_g = 12 and Taps_g = 160 then
+      elsif ratio_g = 12 and taps_g = 160 then
         return Coefs_R12_160Taps;       -- from package
       else
         report "###ERROR###: psi_fix_fir_dec_semi_nch_chtdm_conf_tb: no fixed coef configuration for this Ratio/Taps setting" severity error;
@@ -115,20 +115,20 @@ begin
   ------------------------------------------------------------
   i_dut : entity work.psi_fix_fir_dec_semi_nch_chtdm_conf
     generic map(
-      Channels_g           => Channels_g,
-      Multipliers_g        => Multipliers_g,
-      Ratio_g              => Ratio_g,
-      Taps_g               => Taps_g,
-      InFmt_g              => InFmt_g,
-      OutFmt_g             => OutFmt_g,
-      CoefFmt_g            => CoefFmt_g,
-      UseFixCoefs_g        => UseFixCoefs_g,
-      Coefs_g              => GetFixCoefs,
-      FullInpRateSupport_g => FullInpRateSupport_g,
-      RamBehavior_g        => RamBehavior_g,
-      Rnd_g                => Rnd_g,
-      Sat_g                => Sat_g,
-      ImplFlushIf_g        => ImplFlushIf_g
+      channels_g           => channels_g,
+      multipliers_g        => multipliers_g,
+      ratio_g              => ratio_g,
+      taps_g               => taps_g,
+      in_fmt_g              => in_fmt_g,
+      out_fmt_g             => out_fmt_g,
+      coef_fmt_g            => coef_fmt_g,
+      use_fix_coefs_g        => use_fix_coefs_g,
+      coefs_g              => GetFixCoefs,
+      full_inp_rate_support_g => full_inp_rate_support_g,
+      ram_behavior_g        => ram_behavior_g,
+      rnd_g                => rnd_g,
+      sat_g                => sat_g,
+      impl_flush_if_g        => impl_flush_if_g
     )
     port map(
       clk_i         => Clk,
@@ -186,12 +186,12 @@ begin
     Rst <= '0';
     wait until rising_edge(Clk);
 
-    if not UseFixCoefs_g and not InitCoefs_g then
+    if not use_fix_coefs_g and not init_coefs_g then
       -- Write Coefficients
-      if not UseFixCoefs_g then
-        file_open(fp, FileFolder_g & "/" & CoefsFile_c, read_mode);
+      if not use_fix_coefs_g then
+        file_open(fp, file_folder_g & "/" & CoefsFile_c, read_mode);
         readline(fp, ln);               -- ignore title line
-        for i in 0 to Taps_g - 1 loop
+        for i in 0 to taps_g - 1 loop
           readline(fp, ln);
           read(ln, Coef);
           wait until rising_edge(Clk);
@@ -211,13 +211,13 @@ begin
                          Rdy           => PsiTextfile_SigOne,
                          Vld           => InVld,
                          Data          => SigIn,
-                         Filepath      => FileFolder_g & "/" & InFile_c,
-                         ClkPerSpl     => ClkPerSpl_g,
+                         Filepath      => file_folder_g & "/" & InFile_c,
+                         ClkPerSpl     => clk_per_spl_g,
                          IgnoreLines   => 1,
                          DataOnlyOnVld => true);
 
     -- In case flush-interface is implemented, try out if not leftovers are present after flushing
-    if ImplFlushIf_g then
+    if impl_flush_if_g then
       -- Wait until first stimuli run faded out
       wait for 10 us;
 
@@ -239,8 +239,8 @@ begin
                            Rdy           => PsiTextfile_SigOne,
                            Vld           => InVld,
                            Data          => SigIn,
-                           Filepath      => FileFolder_g & "/" & InFile_c,
-                           ClkPerSpl     => ClkPerSpl_g,
+                           Filepath      => file_folder_g & "/" & InFile_c,
+                           ClkPerSpl     => clk_per_spl_g,
                            IgnoreLines   => 1,
                            DataOnlyOnVld => true);
     end if;
@@ -262,16 +262,16 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => OutVld,
                          Data        => SigOut,
-                         Filepath    => FileFolder_g & "/" & OutFile_c,
+                         Filepath    => file_folder_g & "/" & OutFile_c,
                          IgnoreLines => 1);
 
     -- In case flush-interface is implemented, try out if not leftovers are present after flushing
-    if ImplFlushIf_g then
+    if impl_flush_if_g then
       CheckTextfileContent(Clk         => Clk,
                            Rdy         => PsiTextfile_SigUnused,
                            Vld         => OutVld,
                            Data        => SigOut,
-                           Filepath    => FileFolder_g & "/" & OutFile_c,
+                           Filepath    => file_folder_g & "/" & OutFile_c,
                            IgnoreLines => 1);
     end if;
 

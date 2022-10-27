@@ -25,7 +25,7 @@ use work.psi_common_array_pkg.all;
 
 entity psi_fix_fir_dec_ser_nch_chpar_conf_fix_coef_tb is
   generic(
-    TestRamInit_g : boolean := false
+    test_ram_init_g : boolean := false
   );
 end entity psi_fix_fir_dec_ser_nch_chpar_conf_fix_coef_tb;
 
@@ -52,9 +52,9 @@ architecture sim of psi_fix_fir_dec_ser_nch_chpar_conf_fix_coef_tb is
   signal Clk     : std_logic                                            := '0';
   signal Rst     : std_logic                                            := '1';
   signal InVld   : std_logic                                            := '0';
-  signal InData  : std_logic_vector(PsiFixSize(DataFmt_c) - 1 downto 0) := (others => '0');
+  signal InData  : std_logic_vector(psi_fix_size(DataFmt_c) - 1 downto 0) := (others => '0');
   signal OutVld  : std_logic                                            := '0';
-  signal OutData : std_logic_vector(PsiFixSize(DataFmt_c) - 1 downto 0) := (others => '0');
+  signal OutData : std_logic_vector(psi_fix_size(DataFmt_c) - 1 downto 0) := (others => '0');
 
 begin
 
@@ -63,16 +63,16 @@ begin
   -------------------------------------------------------------------------
   i_dut : entity work.psi_fix_fir_dec_ser_nch_chpar_conf
     generic map(
-      InFmt_g       => DataFmt_c,
-      OutFmt_g      => DataFmt_c,
-      CoefFmt_g     => CoefFmt_c,
-      Channels_g    => 1,
-      MaxRatio_g    => 3,
-      MaxTaps_g     => 10,
-      Rnd_g         => PsiFixTrunc,
-      Sat_g         => PsiFixSat,
-      UseFixCoefs_g => not TestRamInit_g,
-      Coefs_g       => Coefs_c
+      in_fmt_g       => DataFmt_c,
+      out_fmt_g      => DataFmt_c,
+      coef_fmt_g     => CoefFmt_c,
+      channels_g    => 1,
+      max_ratio_g    => 3,
+      max_taps_g     => 10,
+      rnd_g         => psi_fix_trunc,
+      sat_g         => psi_fix_sat,
+      use_fix_coefs_g => not test_ram_init_g,
+      coefs_g       => Coefs_c
     )
     port map(
       -- Control Signals
@@ -116,13 +116,13 @@ begin
     -- Apply Input
     wait until rising_edge(Clk);
     InVld  <= '1';
-    InData <= PsiFixFromReal(0.5, DataFmt_c);
+    InData <= psi_fix_from_real(0.5, DataFmt_c);
     wait until rising_edge(Clk);
     InVld  <= '0';
     wait until rising_edge(Clk);
     wait until rising_edge(Clk);
     wait until rising_edge(Clk);
-    InData <= PsiFixFromReal(0.0, DataFmt_c);
+    InData <= psi_fix_from_real(0.0, DataFmt_c);
     for i in 0 to 200 loop
       InVld <= '1';
       wait until rising_edge(Clk);
@@ -141,19 +141,19 @@ begin
   p_check : process
   begin
     wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = PsiFixFromReal(0.5 * Coefs_c(0), DataFmt_c) report "###ERROR###: Wrong output 0" severity error;
+    assert OutData = psi_fix_from_real(0.5 * Coefs_c(0), DataFmt_c) report "###ERROR###: Wrong output 0" severity error;
     wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = PsiFixFromReal(0.5 * Coefs_c(3), DataFmt_c) report "###ERROR###: Wrong output 1" severity error;
+    assert OutData = psi_fix_from_real(0.5 * Coefs_c(3), DataFmt_c) report "###ERROR###: Wrong output 1" severity error;
     wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = PsiFixFromReal(0.5 * Coefs_c(6), DataFmt_c) report "###ERROR###: Wrong output 2" severity error;
+    assert OutData = psi_fix_from_real(0.5 * Coefs_c(6), DataFmt_c) report "###ERROR###: Wrong output 2" severity error;
     wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = PsiFixFromReal(0.5 * Coefs_c(9), DataFmt_c) report "###ERROR###: Wrong output 3" severity error;
+    assert OutData = psi_fix_from_real(0.5 * Coefs_c(9), DataFmt_c) report "###ERROR###: Wrong output 3" severity error;
     wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = PsiFixFromReal(0.0, DataFmt_c) report "###ERROR###: Wrong output 4" severity error;
+    assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong output 4" severity error;
     wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = PsiFixFromReal(0.0, DataFmt_c) report "###ERROR###: Wrong output 5" severity error;
+    assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong output 5" severity error;
     wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = PsiFixFromReal(0.0, DataFmt_c) report "###ERROR###: Wrong output 6" severity error;
+    assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong output 6" severity error;
 
     -- TB done
     ResponseDone <= True;

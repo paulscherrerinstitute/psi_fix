@@ -72,7 +72,7 @@ package body psi_fix_fir_dec_ser_nch_chtdm_conf_tb_case0_pkg is
     wait until rising_edge(Clk);
     -- Inject 0.5 on channel 0
     InSig.Vld  <= '1';
-    InSig.Data <= PsiFixFromReal(0.0, InFmt_c);
+    InSig.Data <= psi_fix_from_real(0.0, InFmt_c);
     for i in 0 to DutyCycle loop
       wait until rising_edge(Clk);
       InSig.Vld  <= '0';
@@ -80,7 +80,7 @@ package body psi_fix_fir_dec_ser_nch_chtdm_conf_tb_case0_pkg is
     end loop;
     -- channel 1 stays zero
     InSig.Vld  <= '1';
-    InSig.Data <= PsiFixFromReal(0.5, InFmt_c);
+    InSig.Data <= psi_fix_from_real(0.5, InFmt_c);
     for i in 0 to DutyCycle loop
       wait until rising_edge(Clk);
       InSig.Vld  <= '0';
