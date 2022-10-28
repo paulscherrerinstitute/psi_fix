@@ -1,9 +1,9 @@
 <img align="right" src="../doc/psi_logo.png">
 ***
 
-# psi_fix_resize
- - VHDL source: [psi_fix_resize](../hdl/psi_fix_resize.vhd)
- - Testbench source: [psi_fix_resize_tb.vhd](../testbench/psi_fix_resize_tb.vhd)
+# psi_fix_resize_pipe
+ - VHDL source: [psi_fix_resize_pipe](../hdl/psi_fix_resize_pipe.vhd)
+ - Testbench source: [psi_fix_resize_pipe_tb.vhd](../testbench/psi_fix_resize_pipe_tb.vhd)
 
 ### Description
 *INSERT YOUR TEXT*
