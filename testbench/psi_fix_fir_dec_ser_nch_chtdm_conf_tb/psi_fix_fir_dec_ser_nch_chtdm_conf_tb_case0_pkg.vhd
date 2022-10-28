@@ -86,7 +86,7 @@ package body psi_fix_fir_dec_ser_nch_chtdm_conf_tb_case0_pkg is
       InSig.Vld  <= '0';
       InSig.Data <= (others => '0');
     end loop;
-    -- trailing zeros	
+    -- trailing zeros
     InSig.Data <= (others => '0');
     for i in 0 to 30 loop
       for ch in 0 to 1 loop

@@ -20,10 +20,10 @@ entity psi_fix_inv is
   );
   port(
     clk_i : in  std_logic;                                           -- system clock $$ type=Clk; freq=127e6 $$
-    rst_i : in  std_logic;                                           -- system reset $$ type=Rst; Clk=Clk $$   
+    rst_i : in  std_logic;                                           -- system reset $$ type=Rst; Clk=Clk $$
     dat_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);  -- data input
     vld_i : in  std_logic;                                           -- valid signal input frequency sampling
-    dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0); -- data output 
+    dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0); -- data output
     vld_o : out std_logic                                            -- valid output frequency samlping
     );
 end entity;
@@ -121,7 +121,7 @@ begin
 
     -- *** Shift stages (0 ... x) ***
     for stg in 0 to SftStgBeforeApprox_c - 1 loop
-      -- Select input 
+      -- Select input
       if stg = 0 then
         SftBeforeIn_v := r.Norm_2;
         v.SftCnt(stg) := (others => '0');
@@ -149,14 +149,14 @@ begin
 
     -- *** Out Shift Stages ***
     for stg in 0 to SftStgAfterApprox_c - 1 loop
-      -- Zero extend shift 
+      -- Zero extend shift
       SftAfter_v := resize(r.OutCnt(stg), SftAfter_v'length);
 
       -- Shift
       v.OutCnt(stg + 1) := r.OutCnt(stg);
       StgIdx_v          := SftStgAfterApprox_c - 1 - stg;
       SftStepAfter_v    := 2**(StgIdx_v);
-      --v.OutSft(stg+1)	:= psi_fix_shift_left(r.OutSft(stg), OutFmtNorm_c, 0, SftStepAfter_v, OutFmtNorm_c, psi_fix_trunc, psi_fix_wrap, true);
+      --v.OutSft(stg+1) := psi_fix_shift_left(r.OutSft(stg), OutFmtNorm_c, 0, SftStepAfter_v, OutFmtNorm_c, psi_fix_trunc, psi_fix_wrap, true);
       v.OutSft(stg + 1) := psi_fix_shift_left(r.OutSft(stg), OutFmtNorm_c, to_integer(r.OutCnt(stg)(StgIdx_v downto StgIdx_v)) * SftStepAfter_v, SftStepAfter_v, OutFmtNorm_c, psi_fix_trunc, psi_fix_wrap, true);
     end loop;
 

@@ -9,11 +9,11 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-  
+
 library work;
 use work.psi_fix_pkg.all;
 use work.psi_common_math_pkg.all;
-  
+
 ------------------------------------------------------------------------------
 -- Entity Declaration
 ------------------------------------------------------------------------------
@@ -43,18 +43,18 @@ architecture rtl of <ENTITY_NAME> is
   constant GradFmt_c    : psi_fix_fmt_t    := <GRAD_FMT>;
   constant TableSize_c  : integer      := <TABLE_SIZE>;
   constant TableWidth_c  : integer      := <TABLE_WIDTH>;
-  
+
   -- Table
-  
+
   type Table_t is array(0 to TableSize_c-1) of std_logic_vector(TableWidth_c-1 downto 0);
   constant Table_c : Table_t := (
 <TABLE_CONTENT>
   );
-  
+
   -- Signals
   signal TableAddr  : std_logic_vector(log2ceil(TableSize_c)-1 downto 0);
   signal TableData  : std_logic_vector(TableWidth_c-1 downto 0);
-  
+
 begin
 
   -- *** Calculation Unit ***
@@ -80,7 +80,7 @@ begin
       addr_table_o    => TableAddr,
       data_table_i    => TableData
     );
-    
+
   -- *** Table ***
   p_table : process(clk_i)
   begin
@@ -88,6 +88,6 @@ begin
       TableData <= Table_c(to_integer(unsigned(TableAddr)));
     end if;
   end process;
-  
+
 
 end rtl;

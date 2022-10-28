@@ -7,11 +7,11 @@
 ------------------------------------------------------------------------------
 -- Description
 ------------------------------------------------------------------------------
--- purpose	: smoothing block for pre-correction error
--- scalable generically (wd) / real coef parameter 
+-- purpose  : smoothing block for pre-correction error
+-- scalable generically (wd) / real coef parameter
 --                    ____
---	______  X  _ + ___|dff|___________
---	             |    |___|       |
+--  ______  X  _ + ___|dff|___________
+--               |    |___|       |
 --               |_________ X ____|
 --
 ------------------------------------------------------------------------------
@@ -33,12 +33,12 @@ entity psi_fix_lowpass_iir_order1 is
     coef_fmt_g       : psi_fix_fmt_t := (1, 0, 17);                  -- coef format
     round_g         : psi_fix_rnd_t := psi_fix_round;                 -- round or trunc
     sat_g           : psi_fix_sat_t := psi_fix_sat;                   -- sat or wrap
-    pipeline_g      : boolean     := True;                          -- True = Optimize for clock speed, False = Optimize for latency	$$ export=true $$
+    pipeline_g      : boolean     := True;                          -- True = Optimize for clock speed, False = Optimize for latency  $$ export=true $$
     reset_polarity_g : std_logic   := '1'                            -- reset polarity active high = '1'
   );
   port(
-    clk_i : in  std_logic;                                          -- clock input									$$ type=clk; freq=100e6 $$
-    rst_i : in  std_logic;                                          -- sync. reset									$$ type=rst; clk=clk_i $$
+    clk_i : in  std_logic;                                          -- clock input                  $$ type=clk; freq=100e6 $$
+    rst_i : in  std_logic;                                          -- sync. reset                  $$ type=rst; clk=clk_i $$
     dat_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0); -- data in
     vld_i : in  std_logic;                                          -- input valid signal
     dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);-- data out
@@ -90,7 +90,7 @@ begin
           end if;
           -- stage 4
           fbFF                 <= fb;
-          -- strobe pipeline				
+          -- strobe pipeline
           strb(1 to strb'high) <= strb(0 to strb'high - 1);
         end if;
 
@@ -108,7 +108,7 @@ begin
           fb   <= (others => '0');
           strb <= (others => '0');
         else
-          -- stage 0 
+          -- stage 0
           strb(0)              <= vld_i;
           mulIn                <= psi_fix_mult(dat_i, in_fmt_g, beta_c, coef_fmt_g, int_fmt_g, round_g, sat_g);
           -- stage 1
@@ -118,7 +118,7 @@ begin
           if strb(1) = '1' then
             fb <= psi_fix_mult(add, int_fmt_g, alpha_c, coef_fmt_g, int_fmt_g, round_g, sat_g);
           end if;
-          -- strobe pipeline				
+          -- strobe pipeline
           strb(1 to strb'high) <= strb(0 to strb'high - 1);
         end if;
 

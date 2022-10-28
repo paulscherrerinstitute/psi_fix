@@ -7,7 +7,7 @@
 ------------------------------------------------------------------------------
 -- Description
 ------------------------------------------------------------------------------
--- This entity implements a moving average with different options for the 
+-- This entity implements a moving average with different options for the
 -- gain correction (none, rough by shifting, exact by shifting and multiplication).
 ------------------------------------------------------------------------------
 library ieee;
@@ -34,7 +34,7 @@ entity psi_fix_mov_avg is
     clk_i : in  std_logic;                                          -- system clock $$ type=clk; freq=100e6 $$
     rst_i : in  std_logic;                                          -- system reset $$ type=rst; clk=clk_i $$
     dat_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0); -- data input
-    vld_i : in  std_logic;                                          -- valid input sampling frequency 
+    vld_i : in  std_logic;                                          -- valid input sampling frequency
     dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);-- data output
     vld_o : out std_logic                                           -- valid output sampling frequency
   );
@@ -140,7 +140,7 @@ begin
 
   --------------------------------------------------------------------------
   -- Sequential Process
-  --------------------------------------------------------------------------	
+  --------------------------------------------------------------------------
   p_seq : process(clk_i)
   begin
     if rising_edge(clk_i) then
@@ -155,7 +155,7 @@ begin
 
   --------------------------------------------------------------------------
   -- Component Instantiation
-  --------------------------------------------------------------------------		
+  --------------------------------------------------------------------------
   i_del : entity work.psi_common_delay
     generic map(
       Width_g    => psi_fix_size(in_fmt_g),

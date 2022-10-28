@@ -22,8 +22,8 @@ use work.psi_common_math_pkg.all;
 -- @formatter:off
 entity psi_fix_bin_div is
   generic(
-       num_fmt_g     : psi_fix_fmt_t := (1, 0, 17);                                -- numerator format 
-       denom_fmt_g   : psi_fix_fmt_t := (0, 0, 17);                                -- denominator format 
+       num_fmt_g     : psi_fix_fmt_t := (1, 0, 17);                                -- numerator format
+       denom_fmt_g   : psi_fix_fmt_t := (0, 0, 17);                                -- denominator format
        out_fmt_g     : psi_fix_fmt_t := (1, 0, 25);                                -- ouput format
        round_g       : psi_fix_rnd_t := psi_fix_trunc;                               -- rounding or trunc
        sat_g         : psi_fix_sat_t := psi_fix_sat;                                 -- saturation or wrap
@@ -197,10 +197,10 @@ begin
           r.OutVld <= '0';
           r.InRdy  <= '0';
       elsif rising_edge(clk_i) then
-        r <= r_next;     
+        r <= r_next;
       end if;
     end process;
   end generate;
-  
+
 end architecture;
 

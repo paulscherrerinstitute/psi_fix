@@ -9,10 +9,10 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-  
+
 library work;
 use work.psi_common_array_pkg.all;
-  
+
 ------------------------------------------------------------------------------
 -- Package Declaration
 ------------------------------------------------------------------------------
@@ -73,6 +73,6 @@ end package;
 ------------------------------------------------------------------------------
 -- Package Body
 ------------------------------------------------------------------------------
-package body psi_fix_fir_par_nch_chtdm_conf_tb_coefs_pkg is 
+package body psi_fix_fir_par_nch_chtdm_conf_tb_coefs_pkg is
 
 end psi_fix_fir_par_nch_chtdm_conf_tb_coefs_pkg;

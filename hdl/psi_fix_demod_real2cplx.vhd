@@ -12,7 +12,7 @@
 -- 1/Fcarrier (zeros at Fcarrier where DC ends up and Fcarrier*2 where the
 -- demodulation alias occurs).
 -- The demodulator only works well for very narrowband signals with very little
--- out of band noise. The signal frequency must be an integer multiple of the 
+-- out of band noise. The signal frequency must be an integer multiple of the
 -- sample frequency.
 ------------------------------------------------------------------------------
 
@@ -38,8 +38,8 @@ entity psi_fix_demod_real2cplx is
   port(
     clk_i        : in  std_logic;                                                    -- clk system $$ type=clk; freq=100e6 $$
     rst_i        : in  std_logic;                                                    -- rst system $$ type=rst; clk=clk_i $$
-    dat_i        : in  std_logic_vector(psi_fix_size(in_fmt_g)*channels_g - 1 downto 0);-- data input IF/RF 
-    vld_i        : in  std_logic;                                                    -- valid input freqeuncy sampling 
+    dat_i        : in  std_logic_vector(psi_fix_size(in_fmt_g)*channels_g - 1 downto 0);-- data input IF/RF
+    vld_i        : in  std_logic;                                                    -- valid input freqeuncy sampling
     phi_offset_i : in  std_logic_vector(log2ceil(ratio_g)-1 downto 0);               -- phase offset for demod LUT
     dat_inp_o    : out std_logic_vector(psi_fix_size(out_fmt_g)*channels_g- 1 downto 0);-- inphase data output
     dat_qua_o    : out std_logic_vector(psi_fix_size(out_fmt_g)*channels_g- 1 downto 0);-- quadrature data output
@@ -112,7 +112,7 @@ begin
   RstPos <= '1' when rst_i = rst_pol_g else '0';
 
   --===========================================================================
-  -- 		LIMIT the phase offset to max value and check value change
+  --    LIMIT the phase offset to max value and check value change
   --===========================================================================
   process(clk_i)
   begin
@@ -135,7 +135,7 @@ begin
   end process;
 
   --===========================================================================
-  -- 	 pointer ROM
+  --   pointer ROM
   --===========================================================================
   process(clk_i)
   begin

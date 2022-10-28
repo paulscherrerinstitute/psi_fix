@@ -78,12 +78,12 @@ architecture rtl of psi_fix_sqrt is
 begin
   --------------------------------------------------------------------------
   -- Assertions
-  --------------------------------------------------------------------------	
+  --------------------------------------------------------------------------
   assert in_fmt_g.S = 0 report "###ERROR###: psi_fix_sqrt in_fmt_g must be unsigned!" severity error;
 
   --------------------------------------------------------------------------
   -- Combinatorial Process
-  --------------------------------------------------------------------------	
+  --------------------------------------------------------------------------
   proc_comb : process(r, vld_i, dat_i, SftCntOut_s, SqrtVld_s, SqrtData_s, IsZeroOut_s)
     variable v              : two_process_r;
     variable SftBeforeIn_v  : std_logic_vector(psi_fix_size(InFmtNorm_c) - 1 downto 0);
@@ -106,7 +106,7 @@ begin
 
     -- *** Shift stages (0 ... x) ***
     for stg in 0 to SftStgBeforeApprox_c - 1 loop
-      -- Select input 
+      -- Select input
       if stg = 0 then
         SftBeforeIn_v := r.Norm_0;
         v.SftCnt(stg) := (others => '0');
@@ -137,7 +137,7 @@ begin
 
     -- *** Out Shift Stages ***
     for stg in 0 to SftStgAfterApprox_c - 1 loop
-      -- Zero extend shift 
+      -- Zero extend shift
       SftAfter_v := resize(r.OutCnt(stg), SftAfter_v'length);
 
       -- Shift

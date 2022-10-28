@@ -151,7 +151,7 @@ begin
     -- start of process !DO NOT EDIT
     wait until InRst = '0';
 
-    -- Apply Stimuli	
+    -- Apply Stimuli
     ApplyTextfileContent(Clk         => InClk,
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => InVld,
@@ -187,7 +187,7 @@ begin
                          Filepath    => file_folder_g & "/output_add.txt",
                          IgnoreLines => 1);
 
-    --	 end of process !DO NOT EDIT!
+    --   end of process !DO NOT EDIT!
     ProcessDone(TbProcNr_resp_c) <= '1';
     wait;
   end process;
@@ -206,7 +206,7 @@ begin
                          Data        => SubRespSig,
                          Filepath    => file_folder_g & "/output_sub.txt",
                          IgnoreLines => 1);
-    --	 end of process !DO NOT EDIT!
+    --   end of process !DO NOT EDIT!
     ProcessDone(TbProcNr_resp1_c) <= '1';
     wait;
   end process;

@@ -136,7 +136,7 @@ begin
     -- start of process !DO NOT EDIT
     wait until InRst_sti = '0';
 
-    -- Apply Stimuli	
+    -- Apply Stimuli
     ApplyTextfileContent(Clk         => InClk_sti,
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => InVld_sti,

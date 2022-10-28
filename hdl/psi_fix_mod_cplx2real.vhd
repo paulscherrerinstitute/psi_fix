@@ -9,7 +9,7 @@
 ------------------------------------------------------------------------------
 -- This entity is a simple modulator with complex input and real output. It
 -- modulates the signal with a specific ratio given comared to its clock
--- it automatically computes sin(w) cos(w) where w=2pi/ratio.Fclk.t 
+-- it automatically computes sin(w) cos(w) where w=2pi/ratio.Fclk.t
 -- and perform the following computation RF = I.sin(w)+Q.cos(w)
 ------------------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ entity psi_fix_mod_cplx2real is
   port(
     clk_i     : in  std_logic;                                         -- $$ type=clk; freq=100e6 $$
     rst_i     : in  std_logic;                                         -- $$ type=rst; clk=clk_i $$
-    dat_inp_i : in  std_logic_vector(psi_fix_size(inp_fmt_g)-1 downto 0); -- in-phase 	 data
+    dat_inp_i : in  std_logic_vector(psi_fix_size(inp_fmt_g)-1 downto 0); -- in-phase    data
     dat_qua_i : in  std_logic_vector(psi_fix_size(inp_fmt_g)-1 downto 0); -- quadrature data
     vld_i     : in  std_logic;                                         -- valid input frequency sampling
     dat_o     : out std_logic_vector(psi_fix_size(out_fmt_g)-1 downto 0); -- data output IF/RF
@@ -59,7 +59,7 @@ architecture rtl of psi_fix_mod_cplx2real is
     return array_v;
   end function;
 
-  ------------------------------------------------------------------------------	
+  ------------------------------------------------------------------------------
   --COS coef function <=> Q coef n = (cos(nx2pi/Ratio))
   ------------------------------------------------------------------------------
   function coef_cos_array_func return coef_array_t is

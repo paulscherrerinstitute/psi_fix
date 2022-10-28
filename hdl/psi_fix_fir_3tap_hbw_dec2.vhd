@@ -35,10 +35,10 @@ entity psi_fix_fir_3tap_hbw_dec2 is
   );
   port(
     clk_i : in  std_logic;                                                            -- clk system $$ TYPE=CLK; FREQ=100e6; Proc=Input $$
-    rst_i : in  std_logic;                                                            -- rst system $$ TYPE=RST; CLK=Clk $$   
+    rst_i : in  std_logic;                                                            -- rst system $$ TYPE=RST; CLK=Clk $$
     dat_i : in  std_logic_vector(psi_fix_size(in_fmt_g) * 2 * channels_g - 1 downto 0);  -- data input                     $$ PROC=Input $$
     vld_i : in  std_logic;                                                            -- valid input Frequency sampling $$ PROC=Input $$
-    dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) * channels_g - 1 downto 0);     -- data output  $$ PROC=Output $$    
+    dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) * channels_g - 1 downto 0);     -- data output  $$ PROC=Output $$
     vld_o : out std_logic                                                             -- valid otuput $$ PROC=Output $$
   );
 end entity;
@@ -173,11 +173,11 @@ begin
       p_seq : process(clk_i, rst_i)
       begin
          if rst_i = rst_pol_g then
-            r.Vld <= (others => '0'); 
+            r.Vld <= (others => '0');
         elsif rising_edge(clk_i) then
           r <= r_next;
         end if;
       end process;
    end generate;
-   
+
 end architecture;

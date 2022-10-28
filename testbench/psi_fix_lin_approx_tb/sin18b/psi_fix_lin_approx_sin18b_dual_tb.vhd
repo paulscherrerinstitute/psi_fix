@@ -105,7 +105,7 @@ begin
     Rst <= '0';
     wait for 1 us;
 
-    -- Apply stimuli_dir_g		
+    -- Apply stimuli_dir_g
     ApplyTextfileContent(Clk       => Clk,
                          Rdy       => PsiTextfile_SigOne,
                          Vld       => InVldA,

@@ -14,7 +14,7 @@ use work.psi_fix_pkg.all;
 -- @formatter:off
 entity psi_fix_cic_dec_fix_1ch is
   generic(
-    order_g        : integer              := 4;                       -- CIC filter order 
+    order_g        : integer              := 4;                       -- CIC filter order
     ratio_g        : integer              := 10;                      -- CIC decimation ratio
     diff_delay_g    : natural range 1 to 2 := 1;                       -- differential delay
     in_fmt_g        : psi_fix_fmt_t        := (1, 0, 15);              -- input format FP
@@ -156,7 +156,7 @@ begin
           DiffDel_v              := r.DiffLast2(stage + 1);
           v.DiffLast2(stage + 1) := r.DiffLast(stage + 1);
         end if;
-        -- Differentiate			
+        -- Differentiate
         v.DiffVal(stage + 1)  := psi_fix_sub(r.DiffVal(stage), DiffFmt_c,
                                            DiffDel_v, DiffFmt_c,
                                            DiffFmt_c);

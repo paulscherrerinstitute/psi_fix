@@ -151,7 +151,7 @@ begin
     -- start of process !DO NOT EDIT
 
     wait until Rst = '0';
-    -- Apply Stimuli	
+    -- Apply Stimuli
     ApplyTextfileContent(Clk         => Clk,
                          Rdy         => InRdy,
                          Vld         => InVld,

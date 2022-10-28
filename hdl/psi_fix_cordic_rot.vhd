@@ -25,16 +25,16 @@ use work.psi_common_math_pkg.all;
 -- $$ processes=stim, resp $$
 entity psi_fix_cordic_rot is
   generic(
-    in_abs_fmt_g    : psi_fix_fmt_t := (0, 0, 15);                              -- Must be unsigned		  $$ constant=(0,0,16) $$
-    in_angle_fmt_g  : psi_fix_fmt_t := (0, 0, 15);                              -- Must be unsigned	    $$ constant=(0,0,15) $$
-    out_fmt_g      : psi_fix_fmt_t := (1, 2, 16);                              -- Usually signed		    $$ constant=(1,2,16) $$
-    internal_fmt_g : psi_fix_fmt_t := (1, 2, 22);                              -- Must be signed		    $$ constant=(1,2,22) $$
-    angle_int_fmt_g : psi_fix_fmt_t := (1, -2, 18);                             -- Must be (1, -2, x)	  $$ constant=(1,-2,23) $$
-    iterations_g  : natural     := 13;                                        -- iterative required	  $$ constant=21 $$
+    in_abs_fmt_g    : psi_fix_fmt_t := (0, 0, 15);                              -- Must be unsigned     $$ constant=(0,0,16) $$
+    in_angle_fmt_g  : psi_fix_fmt_t := (0, 0, 15);                              -- Must be unsigned     $$ constant=(0,0,15) $$
+    out_fmt_g      : psi_fix_fmt_t := (1, 2, 16);                              -- Usually signed        $$ constant=(1,2,16) $$
+    internal_fmt_g : psi_fix_fmt_t := (1, 2, 22);                              -- Must be signed        $$ constant=(1,2,22) $$
+    angle_int_fmt_g : psi_fix_fmt_t := (1, -2, 18);                             -- Must be (1, -2, x)   $$ constant=(1,-2,23) $$
+    iterations_g  : natural     := 13;                                        -- iterative required   $$ constant=21 $$
     gain_comp_g    : boolean     := False;                                     -- gain compensation    $$ export=true $$
     round_g       : psi_fix_rnd_t := psi_fix_trunc;                             -- round or trunc       $$ export=true $$
     sat_g         : psi_fix_sat_t := psi_fix_wrap;                              -- sat or wrap          $$ export=true $$
-    mode_g        : string      := "SERIAL"                                   -- PIPELINED or SERIAL	$$ export=true $$
+    mode_g        : string      := "SERIAL"                                   -- PIPELINED or SERIAL  $$ export=true $$
   );
   port(
     -- Control Signals
@@ -47,7 +47,7 @@ entity psi_fix_cordic_rot is
     rdy_i      : out std_logic;                                               -- ready output signal $$ lowactive=true $$
     -- Output
     dat_inp_o   : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);    -- dat inphase out
-    dat_qua_o   : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);    -- dat quadrature out    
+    dat_qua_o   : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);    -- dat quadrature out
     vld_o       : out std_logic                                               -- valid output
   );
 end entity;
@@ -165,7 +165,7 @@ begin
 
   --------------------------------------------
   -- Pipelined Implementation
-  --------------------------------------------	
+  --------------------------------------------
   g_pipelined : if mode_g = "PIPELINED" generate
     signal X, Y     : IntArr_t(0 to iterations_g);
     signal Z        : AngArr_t(0 to iterations_g);
@@ -212,7 +212,7 @@ begin
             xQc <= psi_fix_neg(X(iterations_g), internal_fmt_g, internal_fmt_g, round_g, sat_g);
           end if;
 
-          -- Output 
+          -- Output
           vld_o <= QcVld;
           if gain_comp_g then
             dat_inp_o <= psi_fix_mult(xQc, internal_fmt_g, GcCoef_c, GcFmt_c, out_fmt_g, round_g, sat_g);
@@ -298,7 +298,7 @@ begin
             xQc <= psi_fix_neg(X, internal_fmt_g, internal_fmt_g, round_g, sat_g);
           end if;
 
-          -- Output 
+          -- Output
           vld_o <= QcVld;
           if gain_comp_g then
             dat_inp_o <= psi_fix_mult(xQc, internal_fmt_g, GcCoef_c, GcFmt_c, out_fmt_g, round_g, sat_g);

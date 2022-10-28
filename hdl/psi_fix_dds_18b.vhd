@@ -30,7 +30,7 @@ entity psi_fix_dds_18b is
     phi_offset_i : in  std_logic_vector(psi_fix_size(phase_fmt_g) - 1 downto 0); -- phase offset
     vld_i        : in  std_logic := '1';                                      -- frequency sampling input valid
     dat_sin_o    : out std_logic_vector(17 downto 0);                         -- sinus output
-    dat_cos_o    : out std_logic_vector(17 downto 0);                         -- cosine output 90° phase shifted 
+    dat_cos_o    : out std_logic_vector(17 downto 0);                         -- cosine output 90° phase shifted
     vld_o        : out std_logic                                              -- freqeuncy sampling output valid
   );
 end entity;
@@ -108,7 +108,7 @@ begin
     PhaseAccu_Next <= v.PhaseAccu_0;
 
     -- *** Stage 1 ***
-    -- Phase offset 
+    -- Phase offset
     v.PhaseOffs_1 := psi_fix_add(r.PhaseAccu_0, phase_fmt_g,
                                r.PhaseOffs_0, phase_fmt_g,
                                phase_fmt_g);
@@ -121,7 +121,7 @@ begin
                               SinInFmt_c);
 
     -- *** Stages 3 - 8 ***
-    -- Reserved for Linear approximation		
+    -- Reserved for Linear approximation
 
     -- *** Outputs ***
     vld_o     <= r.VldIn(9);
@@ -135,7 +135,7 @@ begin
 
   --------------------------------------------------------------------------
   -- Sequential Process
-  --------------------------------------------------------------------------	
+  --------------------------------------------------------------------------
   sync_rst_gene : if rst_sync_g generate
   begin
     p_seq : process(clk_i)
@@ -166,7 +166,7 @@ begin
   end generate;
   --------------------------------------------------------------------------
   -- Component Instantiation
-  --------------------------------------------------------------------------	
+  --------------------------------------------------------------------------
   i_sincos : entity work.psi_fix_lin_approx_sin18b_dual
     port map(
       -- Control Signals

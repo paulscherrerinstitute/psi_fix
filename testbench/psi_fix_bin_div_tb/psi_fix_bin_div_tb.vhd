@@ -55,7 +55,7 @@ architecture sim of psi_fix_bin_div_tb is
 
   -------------------------------------------------------------------------
   -- Procedure
-  -------------------------------------------------------------------------	
+  -------------------------------------------------------------------------
   procedure CheckReal(expected  : real;
                       actual    : real;
                       tolerance : real;
@@ -186,9 +186,9 @@ begin
       InVld   <= '0';
       wait until rising_edge(Clk) and OutVld = '1';
       assert to_integer(signed(OutQuot)) = resp
-      report "###ERROR###: received wrong output, sample " & integer'image(idx) & 
-						"[exp " & integer'image(resp) & 
-						", got " & integer'image(to_integer(signed(OutQuot))) & "]"
+      report "###ERROR###: received wrong output, sample " & integer'image(idx) &
+            "[exp " & integer'image(resp) &
+            ", got " & integer'image(to_integer(signed(OutQuot))) & "]"
       severity error;
       idx     := idx + 1;
     end loop;

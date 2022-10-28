@@ -15,18 +15,18 @@ use work.psi_fix_pkg.all;
 -- $$ processes=stim, resp $$
 entity psi_fix_pol2cart_approx is
   generic(
-    in_abs_fmt_g   : psi_fix_fmt_t := (0, 0, 15);   -- Must be unsigned		$$ constant=(0,0,16) $$
-    in_angle_fmt_g : psi_fix_fmt_t := (0, 0, 15);   -- Must be unsigned		$$ constant=(0,0,15) $$
-    out_fmt_g     : psi_fix_fmt_t := (1, 0, 16);   -- Usually signed		  $$ constant=(1,0,16) $$	
-    round_g      : psi_fix_rnd_t := psi_fix_round;  -- round or trunc					
-    sat_g        : psi_fix_sat_t := psi_fix_sat;    -- sat or wrap					
+    in_abs_fmt_g   : psi_fix_fmt_t := (0, 0, 15);   -- Must be unsigned   $$ constant=(0,0,16) $$
+    in_angle_fmt_g : psi_fix_fmt_t := (0, 0, 15);   -- Must be unsigned   $$ constant=(0,0,15) $$
+    out_fmt_g     : psi_fix_fmt_t := (1, 0, 16);   -- Usually signed      $$ constant=(1,0,16) $$
+    round_g      : psi_fix_rnd_t := psi_fix_round;  -- round or trunc
+    sat_g        : psi_fix_sat_t := psi_fix_sat;    -- sat or wrap
     rst_pol_g    : std_logic     :='1'            -- reset polarity
   );
   port(
     -- Control Signals
     clk_i     : in  std_logic;                                              -- clk system $$ type=clk; freq=100e6 $$
     rst_i     : in  std_logic;                                              -- rst system $$ type=rst; clk=clk_i $$
-    dat_abs_i : in  std_logic_vector(psi_fix_size(in_abs_fmt_g) - 1 downto 0);  -- data amplitude 
+    dat_abs_i : in  std_logic_vector(psi_fix_size(in_abs_fmt_g) - 1 downto 0);  -- data amplitude
     dat_ang_i : in  std_logic_vector(psi_fix_size(in_angle_fmt_g) - 1 downto 0);-- data phase
     vld_i     : in  std_logic;                                              -- valid input signal freqeucy sampling
     dat_inp_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);    -- data inphase
@@ -108,7 +108,7 @@ begin
                               SinInFmt_c, round_g, psi_fix_wrap);
 
     -- *** Stages 2 - 8 ***
-    -- Reserved for Linear approximation	
+    -- Reserved for Linear approximation
 
     -- *** Stage 9 ***
     -- Output Multiplications
@@ -132,7 +132,7 @@ begin
 
   --------------------------------------------------------------------------
   -- Sequential Process
-  --------------------------------------------------------------------------	
+  --------------------------------------------------------------------------
   p_seq : process(clk_i)
   begin
     if rising_edge(clk_i) then
@@ -145,7 +145,7 @@ begin
 
   --------------------------------------------------------------------------
   -- Component Instantiation
-  --------------------------------------------------------------------------	
+  --------------------------------------------------------------------------
   i_sincos : entity work.psi_fix_lin_approx_sin18b_dual
     generic map(rst_pol_g => rst_pol_g)
     port map(

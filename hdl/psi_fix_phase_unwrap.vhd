@@ -62,7 +62,7 @@ architecture rtl of psi_fix_phase_unwrap is
 begin
   --------------------------------------------------------------------------
   -- Assertions
-  --------------------------------------------------------------------------	
+  --------------------------------------------------------------------------
   assert out_fmt_g.S = 1 report "###ERROR###: psi_fix_phase_unwrap: output format must be signed!" severity error;
   assert out_fmt_g.I >= 1 report "###ERROR###: psi_fix_phase_unwrap: output format must at least have one integer bit!" severity error;
 

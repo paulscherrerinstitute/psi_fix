@@ -155,7 +155,7 @@ begin
     -- Differentiators
     for stage in 1 to order_g - 1 loop
       if r.VldDiff(stage) = '1' then
-        -- Differentiate			
+        -- Differentiate
         v.DiffVal(stage + 1) := psi_fix_sub(r.DiffVal(stage), DiffFmt_c,
                                           DiffDel(stage), DiffFmt_c,
                                           DiffFmt_c);

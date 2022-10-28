@@ -7,7 +7,7 @@
 ------------------------------------------------------------------------------
 -- Description
 ------------------------------------------------------------------------------
---  for more generic block about generating PRBS data output one can use 
+--  for more generic block about generating PRBS data output one can use
 --  PSI_COMMON PRBS - seeds can be moved but also length of sequence without
 --  FP format though
 ------------------------------------------------------------------------------
@@ -96,7 +96,7 @@ begin
 
   --------------------------------------------------------------------------
   -- Sequential Process
-  --------------------------------------------------------------------------	
+  --------------------------------------------------------------------------
   p_seq : process(clk_i)
   begin
     if rising_edge(clk_i) then
@@ -110,7 +110,7 @@ begin
 
   --------------------------------------------------------------------------
   -- Component Instantiation
-  --------------------------------------------------------------------------		
+  --------------------------------------------------------------------------
   i_white_noise : entity work.psi_fix_white_noise
     generic map(
       rst_pol_g => rst_pol_g,

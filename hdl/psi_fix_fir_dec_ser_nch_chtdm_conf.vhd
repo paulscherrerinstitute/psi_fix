@@ -36,7 +36,7 @@ entity psi_fix_fir_dec_ser_nch_chtdm_conf is
     sat_g         : psi_fix_sat_t := psi_fix_sat;    -- saturate or wrap
     use_fix_coefs_g : boolean     := false;          -- use fix coefficients or update them
     coefs_g       : t_areal     := (0.0, 0.0);     -- see doc
-    ram_behavior_g : string      := "RBW";          -- RBW = Read before write, WBR = Write before read 
+    ram_behavior_g : string      := "RBW";          -- RBW = Read before write, WBR = Write before read
     rst_pol_g     : std_logic   := '1'             -- reset polarity active high ='1'
   );
   port(
@@ -45,7 +45,7 @@ entity psi_fix_fir_dec_ser_nch_chtdm_conf is
     dat_i            : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0); -- data input
     vld_i            : in  std_logic;                                          -- valid input Frequency sampling
     dat_o            : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);-- data output
-    vld_o            : out std_logic;                                          -- valid output new frequency sampling 
+    vld_o            : out std_logic;                                          -- valid output new frequency sampling
     -- Parallel Configuration Interface
     cfg_ratio_i      : in  std_logic_vector(log2ceil(max_ratio_g) - 1 downto 0)  := std_logic_vector(to_unsigned(max_ratio_g - 1, log2ceil(max_ratio_g))); -- Ratio - 1 (0 => Ratio 1, 4 => Ratio 5)
     cfg_taps_i       : in  std_logic_vector(log2ceil(max_taps_g) - 1 downto 0)   := std_logic_vector(to_unsigned(max_taps_g - 1, log2ceil(max_taps_g)));   -- Number of taps - 1
@@ -246,7 +246,7 @@ begin
     end if;
     v.MultInCoef_4 := CoefRamDout_3;
 
-    -- *** Stage 5 *** 
+    -- *** Stage 5 ***
     -- Multiplication
     v.MultOut_5 := psi_fix_mult(r.MultInTap_4, in_fmt_g,
                               r.MultInCoef_4, coef_fmt_g,

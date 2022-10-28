@@ -27,7 +27,7 @@ entity psi_fix_cic_dec_fix_nch_par_tdm is
     -- Control Signals
     clk_i  : in  std_logic;                                                       --clk system
     rst_i  : in  std_logic;                                                       --rst system
-    -- Data Ports 
+    -- Data Ports
     dat_i  : in  std_logic_vector(psi_fix_size(in_fmt_g) * channels_g - 1 downto 0); -- data input
     vld_i  : in  std_logic;                                                       -- valid input frequency sampling
     dat_o  : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);             -- data output
@@ -154,7 +154,7 @@ begin
     -- Differentiators
     for stage in 1 to order_g - 1 loop
       if r.VldDiff(stage) = '1' then
-        -- Differentiate			
+        -- Differentiate
         v.DiffVal(stage + 1) := psi_fix_sub(r.DiffVal(stage), DiffFmt_c,
                                           DiffDel(stage), DiffFmt_c,
                                           DiffFmt_c);

@@ -183,7 +183,7 @@ begin
       end loop;
     end if;
 
-    -- Apply Stimuli	
+    -- Apply Stimuli
     ApplyTextfileContent(Clk           => Clk,
                          Rdy           => PsiTextfile_SigOne,
                          Vld           => InVld,

@@ -34,8 +34,8 @@ entity psi_fix_fir_dec_ser_nch_chpar_conf is
           sat_g         : psi_fix_sat_t := psi_fix_sat;     -- saturate or wrap
           use_fix_coefs_g : boolean     := false;           -- use fix coefficients or update them
           coefs_g       : t_areal     := (0.0, 0.0);      -- see doc
-          ram_behavior_g : string      := "RBW";           -- RBW = Read before write, WBR = Write before read  
-          rst_pol_g     : std_logic   := '1'              -- reset polarity active high ='1' 
+          ram_behavior_g : string      := "RBW";           -- RBW = Read before write, WBR = Write before read
+          rst_pol_g     : std_logic   := '1'              -- reset polarity active high ='1'
           );
   port(clk_i            : in  std_logic;                                                                -- system clock
        rst_i            : in  std_logic;                                                                -- system reset
@@ -204,7 +204,7 @@ begin
     end if;
     v.MultInCoef_4 := CoefRamDout_3;
 
-    -- *** Stage 5 *** 
+    -- *** Stage 5 ***
     -- Multiplication
     for i in 0 to channels_g - 1 loop
       v.MultOut_5(i) := psi_fix_mult(r.MultInTap_4(i), in_fmt_g,

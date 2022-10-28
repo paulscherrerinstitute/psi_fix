@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 --  All rights reserved.
---  Authors: Benoit Stef 
+--  Authors: Benoit Stef
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ use work.psi_common_math_pkg.all;
 -- $$ processes=stim, resp $$
 entity psi_fix_complex_addsub is
   generic(rst_pol_g   : std_logic   := '1';                                      -- set reset polarity                $$ constant='1' $$
-          pipeline_g : boolean     := false;                                    -- when false 3 pipes stages, when false 6 pipes (increase Fmax)			$$ export=true $$
+          pipeline_g : boolean     := false;                                    -- when false 3 pipes stages, when false 6 pipes (increase Fmax)      $$ export=true $$
           in_a_fmt_g   : psi_fix_fmt_t := (1, 0, 15);                             -- Input A Fixed Point format   $$ constant=(1,0,15) $$
           in_b_fmt_g   : psi_fix_fmt_t := (1, 0, 24);                             -- Input B Fixed Point format   $$ constant=(1,0,24) $$
           out_fmt_g   : psi_fix_fmt_t := (1, 0, 20);                             -- Output Fixed Point format    $$ constant=(1,0,20) $$

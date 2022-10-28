@@ -31,8 +31,8 @@ entity psi_fix_complex_abs is
   port(
     -- Control Signals
     clk_i     : in  std_logic;                                            -- $$ type=Clk; freq=127e6 $$
-    rst_i     : in  std_logic;                                            -- $$ type=Rst; Clk=clk_i $$	
-    -- Input    
+    rst_i     : in  std_logic;                                            -- $$ type=Rst; Clk=clk_i $$
+    -- Input
     dat_inp_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- data inphase I
     dat_qua_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- data quadrature Q
     vld_i     : in  std_logic;                                            -- valid signal in
@@ -94,7 +94,7 @@ architecture rtl of psi_fix_complex_abs is
 begin
   --------------------------------------------------------------------------
   -- Combinatorial Process
-  --------------------------------------------------------------------------	
+  --------------------------------------------------------------------------
   proc_comb : process(r, vld_i, dat_inp_i, dat_qua_i, SftCntOut_s, SqrtVld_s, SqrtData_s, IsZeroOut_s)
     variable v              : two_process_r;
     variable SftBeforeIn_v  : std_logic_vector(psi_fix_size(LimFmt_c) - 1 downto 0);
@@ -133,7 +133,7 @@ begin
 
     -- *** Shift stages (0 ... x) ***
     for stg in 0 to SftStgBeforeApprox_c - 1 loop
-      -- Select input 
+      -- Select input
       if stg = 0 then
         SftBeforeIn_v := r.Lim_3;
         v.SftCnt(stg) := (others => '0');
@@ -164,7 +164,7 @@ begin
 
     -- *** Out Shift Stages ***
     for stg in 0 to SftStgAfterApprox_c - 1 loop
-      -- Zero extend shift 
+      -- Zero extend shift
       SftAfter_v := resize(r.OutCnt(stg), SftAfter_v'length);
 
       -- Shift

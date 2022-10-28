@@ -48,17 +48,17 @@ entity psi_fix_fir_dec_semi_nch_chtdm_conf is
     rst_i         : in  std_logic;                                                              -- rst system $$ type=rst; clk=Clk $$
     -- Input
     dat_i         : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);                     -- data input
-    vld_i         : in  std_logic;                                                              -- valid input - AXI-S handshaking 
+    vld_i         : in  std_logic;                                                              -- valid input - AXI-S handshaking
     -- Output
     dat_o         : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);                    -- Output data, one channel is passed after the other
-    vld_o         : out std_logic;                                                              -- valid output signal - AXI-S handshaking 
-    -- Coefficient interface		
+    vld_o         : out std_logic;                                                              -- valid output signal - AXI-S handshaking
+    -- Coefficient interface
     coef_wr_i     : in  std_logic                                            := '0';            -- Coefficient write enable signal
     coef_addr_i   : in  std_logic_vector(log2ceil(taps_g) - 1 downto 0)      := (others => '0');-- Address of the coefficient to access
     coef_wr_dat_i : in  std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0) := (others => '0');-- Coefficient value for write access (CoefWr = 1)
     -- Delay-line flushing interface
-    flush_mem_i   : in  std_logic                                            := '0';            -- Inject a pulse to flush all data memories (usually done after reset).                                                                                            
-    flush_done_o  : out std_logic;                                                              -- A pulse on this port indicates that a flush started by FlushMem = ‘1’ was completed.                                                                                            
+    flush_mem_i   : in  std_logic                                            := '0';            -- Inject a pulse to flush all data memories (usually done after reset).
+    flush_done_o  : out std_logic;                                                              -- A pulse on this port indicates that a flush started by FlushMem = ‘1’ was completed.
     -- Status Output
     busy_o        : out std_logic                                                               -- busy signal output status
   );
@@ -231,7 +231,7 @@ begin
     -- Write on the cycle a new sample is arriving
     if r.Vld(0) = '1' then
       v.TapUpdAddr(1) := r.TapUpdWrAddr_0;
-    -- Read in between to execute Read-before-write literally 
+    -- Read in between to execute Read-before-write literally
     elsif not full_inp_rate_support_g then
       v.TapUpdAddr(1) := r.TapUpdWrAddr_0 - TapsPerStage_c;
     end if;
@@ -342,7 +342,7 @@ begin
       v.CalcOngoing := '0';
     end if;
 
-    -- *** Outputs ***	
+    -- *** Outputs ***
     dat_o        <= r.OutData_10n;
     vld_o        <= r.OutVld_n(10);
     flush_done_o <= r.FlushDone;

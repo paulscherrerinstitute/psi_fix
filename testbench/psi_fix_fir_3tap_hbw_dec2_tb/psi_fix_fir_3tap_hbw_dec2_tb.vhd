@@ -64,9 +64,9 @@ architecture sim of psi_fix_fir_3tap_hbw_dec2_tb is
   signal InData  : std_logic_vector(psi_fix_size(in_fmt_g)*2*channels_g-1 downto 0) := (others => '0');
   signal OutVld  : std_logic                                                     := '0';
   signal OutData : std_logic_vector(psi_fix_size(out_fmt_g)*channels_g-1 downto 0)  := (others => '0');
-  
-  signal SigIn					: TextfileData_t(0 to 2*channels_g-1)	:= (others => 0);
-  signal SigOut					: TextfileData_t(0 to channels_g-1)	:= (others => 0);		
+
+  signal SigIn          : TextfileData_t(0 to 2*channels_g-1) := (others => 0);
+  signal SigOut         : TextfileData_t(0 to channels_g-1) := (others => 0);
 
 begin
   ------------------------------------------------------------
@@ -140,26 +140,26 @@ begin
       end loop;
     end if;
   end process;
-  
+
   p_stimuli : process
   begin
     -- start of process !DO NOT EDIT
     wait until Rst = '0';
-    
+
     -- User Code
-    ApplyTextfileContent(	Clk 		=> Clk, 
-                            Rdy 		=> PsiTextfile_SigOne,
-                            Vld 		=> InVld, 
-                            Data		=> SigIn, 
-                            Filepath	=> file_folder_g & "/" & in_file_g,
-                            ClkPerSpl	=> vld_duty_cycle_g,
-                            IgnoreLines => 1);	
-    
+    ApplyTextfileContent( Clk     => Clk,
+                            Rdy     => PsiTextfile_SigOne,
+                            Vld     => InVld,
+                            Data    => SigIn,
+                            Filepath  => file_folder_g & "/" & in_file_g,
+                            ClkPerSpl => vld_duty_cycle_g,
+                            IgnoreLines => 1);
+
     -- end of process !DO NOT EDIT!
     ProcessDone(TbProcNr_input_c) <= '1';
     wait;
   end process;
-  
+
   -- *** response ***
   process (OutData) is
   begin
@@ -172,15 +172,15 @@ begin
   begin
     -- start of process !DO NOT EDIT
     wait until Rst = '0';
-    
+
     -- User Code
-    CheckTextfileContent(	Clk			=> Clk,
-                            Rdy			=> PsiTextfile_SigUnused,
-                            Vld			=> OutVld,
-                            Data		=> SigOut,
-                            Filepath	=> file_folder_g & "/" & out_file_g,
+    CheckTextfileContent( Clk     => Clk,
+                            Rdy     => PsiTextfile_SigUnused,
+                            Vld     => OutVld,
+                            Data    => SigOut,
+                            Filepath  => file_folder_g & "/" & out_file_g,
                             IgnoreLines => 1);
-    
+
     -- end of process !DO NOT EDIT!
     ProcessDone(TbProcNr_output_c) <= '1';
     wait;

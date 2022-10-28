@@ -15,7 +15,7 @@ entity psi_fix_lin_approx_gaussify20b is
   );
   port(
     clk_i : in  std_logic;
-    rst_i : in  std_logic;    
+    rst_i : in  std_logic;
     dat_i : in  std_logic_vector(20 - 1 downto 0);  -- Format (1, 0, 19)
     vld_i : in  std_logic;
     dat_o : out std_logic_vector(20 - 1 downto 0);  -- Format (1, 0, 19)

@@ -39,8 +39,8 @@ entity psi_fix_fir_par_nch_chtdm_conf is
     clk_i             : in  std_logic;                                                                -- system clock $$ type=clk; freq=100e6 $$
     rst_i             : in  std_logic;                                                                -- system reset $$ type=rst; clk=Clk $$
     dat_i             : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);                       -- data input FP
-    vld_i             : in  std_logic;                                                                -- valid input frequency sampling 
-    dat_o             : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);                      -- data output 
+    vld_i             : in  std_logic;                                                                -- valid input frequency sampling
+    dat_o             : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);                      -- data output
     vld_o             : out std_logic;                                                                -- valid output frequency sampling
     -- Coefficient interface
     coef_if_wr_i      : in  std_logic                                            := '0';              -- write enable

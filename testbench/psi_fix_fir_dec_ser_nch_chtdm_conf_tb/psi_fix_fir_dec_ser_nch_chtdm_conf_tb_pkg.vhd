@@ -33,7 +33,7 @@ package psi_fix_fir_dec_ser_nch_chtdm_conf_tb_pkg is
 
   -------------------------------------------------------------------------
   -- Types
-  -------------------------------------------------------------------------	
+  -------------------------------------------------------------------------
   subtype InData_t is std_logic_vector(psi_fix_size(InFmt_c) - 1 downto 0);
   subtype OutData_t is std_logic_vector(psi_fix_size(OutFmt_c) - 1 downto 0);
   type RealArray_t is array (natural range <>) of real;
@@ -62,7 +62,7 @@ package psi_fix_fir_dec_ser_nch_chtdm_conf_tb_pkg is
 
   -------------------------------------------------------------------------
   -- Procedures
-  -------------------------------------------------------------------------	
+  -------------------------------------------------------------------------
   procedure WriteCoef(Idx        : in natural;
                       Coef       : in real;
                       signal Wif : out CoefIn_t;
@@ -140,9 +140,9 @@ package body psi_fix_fir_dec_ser_nch_chtdm_conf_tb_pkg is
       wait until rising_edge(Clk) and OutSig.Vld = '1';
       ExpectedStdlv_v := psi_fix_from_real(Expected(i), OutFmt_c);
       assert ExpectedStdlv_v = OutSig.Data
-      report "###ERROR###: received wrong output on channel " & integer'image(i) & 
-						", expected " & integer'image(to_integer(signed(ExpectedStdlv_v))) &
-						", received " & integer'image(to_integer(signed(OutSig.Data)))
+      report "###ERROR###: received wrong output on channel " & integer'image(i) &
+            ", expected " & integer'image(to_integer(signed(ExpectedStdlv_v))) &
+            ", received " & integer'image(to_integer(signed(OutSig.Data)))
       severity error;
     end loop;
   end procedure;
@@ -157,10 +157,10 @@ package body psi_fix_fir_dec_ser_nch_chtdm_conf_tb_pkg is
       wait until rising_edge(Clk) and OutSig.Vld = '1';
       ExpectedStdlv_v := psi_fix_from_bits_as_int(Expected(i), OutFmt_c);
       assert ExpectedStdlv_v = OutSig.Data
-      report "###ERROR###: received wrong output on channel " & integer'image(i) & 
-						" Sample: " & integer'image(Sample) & 
-						", expected " & integer'image(to_integer(signed(ExpectedStdlv_v))) &
-						", received " & integer'image(to_integer(signed(OutSig.Data)))
+      report "###ERROR###: received wrong output on channel " & integer'image(i) &
+            " Sample: " & integer'image(Sample) &
+            ", expected " & integer'image(to_integer(signed(ExpectedStdlv_v))) &
+            ", received " & integer'image(to_integer(signed(OutSig.Data)))
       severity error;
     end loop;
   end procedure;

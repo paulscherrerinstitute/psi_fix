@@ -140,7 +140,7 @@ begin
     -- start of process !DO NOT EDIT
     wait until rst_i = '0';
 
-    -- Apply Stimuli	
+    -- Apply Stimuli
     ApplyTextfileContent(Clk         => clk_i,
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => str_i,

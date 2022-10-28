@@ -17,10 +17,10 @@ use work.psi_fix_pkg.all;
 ------------------------------------------------------------------------------
 -- Parameter Calculations
 ------------------------------------------------------------------------------
--- CIC_GAIN = (Ratio*DifDelay)^Order	
+-- CIC_GAIN = (Ratio*DifDelay)^Order
 -- CIC_GROWTH = ceil(log2(CIC_GAIN))
--- SHIFT = CIC_GROWTH					--> Apply this to CfgShift
--- GAINCORR = 2^CIC_GROWTH/CIC_GAIN		--> Apply this to CfgGainCorr
+-- SHIFT = CIC_GROWTH         --> Apply this to CfgShift
+-- GAINCORR = 2^CIC_GROWTH/CIC_GAIN   --> Apply this to CfgGainCorr
 ------------------------------------------------------------------------------
 
 entity psi_fix_cic_dec_cfg_1ch is
@@ -185,7 +185,7 @@ begin
           DiffDel_v              := r.DiffLast2(stage + 1);
           v.DiffLast2(stage + 1) := r.DiffLast(stage + 1);
         end if;
-        -- Differentiate			
+        -- Differentiate
         v.DiffVal(stage + 1)  := psi_fix_sub(r.DiffVal(stage), DiffFmt_c,
                                            DiffDel_v, DiffFmt_c,
                                            DiffFmt_c);

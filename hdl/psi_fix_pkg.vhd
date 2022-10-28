@@ -38,7 +38,7 @@ package psi_fix_pkg is
 
   --------------------------------------------------------------------------
   -- Helpers
-  --------------------------------------------------------------------------        
+  --------------------------------------------------------------------------
   function psi_fix_choose_fmt(sel : boolean;
                               fmt_a  : psi_fix_fmt_t;
                               fmt_b  : psi_fix_fmt_t)
@@ -46,7 +46,7 @@ package psi_fix_pkg is
 
   --------------------------------------------------------------------------
   -- Conversions between PSI and Enclustra Definitions
-  --------------------------------------------------------------------------	
+  --------------------------------------------------------------------------
   function psi_fix2_cl_fix(rnd : psi_fix_rnd_t)
   return FixRound_t;
 
@@ -73,7 +73,7 @@ package psi_fix_pkg is
 
   --------------------------------------------------------------------------
   -- Bittrue available in Python
-  --------------------------------------------------------------------------	
+  --------------------------------------------------------------------------
   function psi_fix_size(fmt : psi_fix_fmt_t)
   return integer;
 
@@ -184,7 +184,7 @@ package psi_fix_pkg is
 
   --------------------------------------------------------------------------
   -- VHDL Only
-  --------------------------------------------------------------------------		
+  --------------------------------------------------------------------------
   function psi_fix_to_real(a    : std_logic_vector;
                         a_fmt : psi_fix_fmt_t)
   return real;
@@ -529,7 +529,7 @@ package body psi_fix_pkg is
     return cl_fix_max_value(psi_fix2_cl_fix(fmt));
   end function;
 
-  -- *** psi_fix_lower_bound_stdlv ***	
+  -- *** psi_fix_lower_bound_stdlv ***
   function psi_fix_lower_bound_stdlv(fmt : psi_fix_fmt_t)
   return std_logic_vector is
   begin

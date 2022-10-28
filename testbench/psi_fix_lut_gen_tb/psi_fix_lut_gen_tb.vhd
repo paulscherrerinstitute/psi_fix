@@ -61,7 +61,7 @@ begin
     variable count_v : integer range 0 to 61 := 0;
   begin
     if rising_edge(clk_sti) then
-      --	rena_dff_sti <= rena_sti;
+      --  rena_dff_sti <= rena_sti;
       if rena_sti = '1' then
         if count_v < 60 then
           count_v := count_v + 1;
@@ -84,7 +84,7 @@ begin
              data_o  => data_obs);
 
   proc_stim : process
-    --	variable count_v : integer range 0 to 5 := 0;
+    --  variable count_v : integer range 0 to 5 := 0;
   begin
     tb_run   <= true;
     rst_sti  <= '1';

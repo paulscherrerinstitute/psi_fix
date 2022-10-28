@@ -206,7 +206,7 @@ begin
     wait until rising_edge(Clk);
     wait until rising_edge(Clk);
 
-    -- Apply Stimuli	
+    -- Apply Stimuli
     ApplyTextfileContent(Clk           => Clk,
                          Rdy           => PsiTextfile_SigOne,
                          Vld           => InVld,
@@ -221,7 +221,7 @@ begin
       -- Wait until first stimuli run faded out
       wait for 10 us;
 
-      -- Reset filter	
+      -- Reset filter
       wait until rising_edge(Clk);
       Rst <= '1';
       wait until rising_edge(Clk);

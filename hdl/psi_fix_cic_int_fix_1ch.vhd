@@ -24,7 +24,7 @@ entity psi_fix_cic_int_fix_1ch is
     auto_gain_corr_g : boolean              := True         -- Uses up to 25 bits of the datapath and 17 bit correction parameter
   );
   port(
-    -- Control Signals      
+    -- Control Signals
     clk_i : in  std_logic;                                          -- clk system
     rst_i : in  std_logic;                                          -- rst system
     -- Data Ports
@@ -166,7 +166,7 @@ begin
           DiffDel_v              := r.DiffLast2(stage + 1);
           v.DiffLast2(stage + 1) := r.DiffLast(stage + 1);
         end if;
-        -- Differentiate			
+        -- Differentiate
         v.DiffVal(stage + 1)  := psi_fix_sub(r.DiffVal(stage), DiffFmt_c,
                                            DiffDel_v, DiffFmt_c,
                                            DiffFmt_c);
@@ -206,7 +206,7 @@ begin
     -- Shifter (pure wiring)
     Sft_v := psi_fix_shift_right(r.Accu(order_g), AccuFmt_c, Shift_c, Shift_c, ShiftOutFmt_c);
 
-    -- *** Gain Correction ***		
+    -- *** Gain Correction ***
     if auto_gain_corr_g then
       -- *** Gain Correction Stage 0 ***
       if OutRdy_v = '1' then

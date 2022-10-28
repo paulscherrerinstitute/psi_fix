@@ -15,10 +15,10 @@ use work.psi_fix_pkg.all;
 ------------------------------------------------------------------------------
 -- Paramter Calculations
 ------------------------------------------------------------------------------
--- CIC_GAIN = (Ratio*DifDelay)^Order	
+-- CIC_GAIN = (Ratio*DifDelay)^Order
 -- CIC_GROWTH = ceil(log2(CIC_GAIN))
--- SHIFT = CIC_GROWTH					--> Apply this to CfgShift
--- GAINCORR = 2^CIC_GROWTH/CIC_GAIN		--> Apply this to CfgGainCorr
+-- SHIFT = CIC_GROWTH         --> Apply this to CfgShift
+-- GAINCORR = 2^CIC_GROWTH/CIC_GAIN   --> Apply this to CfgGainCorr
 ------------------------------------------------------------------------------
 
 entity psi_fix_cic_dec_cfg_nch_par_tdm is
@@ -186,7 +186,7 @@ begin
     -- Differentiators
     for stage in 1 to order_g - 1 loop
       if r.VldDiff(stage) = '1' then
-        -- Differentiate			
+        -- Differentiate
         v.DiffVal(stage + 1) := psi_fix_sub(r.DiffVal(stage), DiffFmt_c,
                                           DiffDel(stage), DiffFmt_c,
                                           DiffFmt_c);
@@ -232,13 +232,13 @@ begin
 
   --------------------------------------------------------------------------
   -- Output Assignment
-  --------------------------------------------------------------------------		
+  --------------------------------------------------------------------------
   vld_o <= r.OutVld;
   dat_o <= r.Outp;
 
   --------------------------------------------------------------------------
   -- Sequential Process
-  --------------------------------------------------------------------------	
+  --------------------------------------------------------------------------
   p_seq : process(clk_i)
   begin
     if rising_edge(clk_i) then
