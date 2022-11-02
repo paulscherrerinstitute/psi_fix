@@ -3,7 +3,7 @@
 
 # psi_fix_nch_analog_trigger_tdm
  - VHDL source: [psi_fix_nch_analog_trigger_tdm](../hdl/psi_fix_nch_analog_trigger_tdm.vhd)
- - Testbench source: [psi_fix_nch_analog_trigger_tdm_tb.vhd](../testbench/psi_fix_nch_analog_trigger_tdm_tb.vhd)
+ - Testbench source: [psi_fix_nch_analog_trigger_tdm_tb.vhd](../testbench/psi_fix_nch_analog_trigger_tdm_tb/psi_fix_nch_analog_trigger_tdm_tb.vhd)
 
 ### Description
 *INSERT YOUR TEXT*

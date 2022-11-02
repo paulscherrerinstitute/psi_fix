@@ -3,7 +3,7 @@
 
 # psi_fix_lin_approx_sin18b
  - VHDL source: [psi_fix_lin_approx_sin18b](../hdl/psi_fix_lin_approx_sin18b.vhd)
- - Testbench source: [psi_fix_lin_approx_sin18b_tb.vhd](../testbench/psi_fix_lin_approx_sin18b_tb.vhd)
+ - Testbench source: [psi_fix_lin_approx_sin18b_tb.vhd](../testbench/psi_fix_lin_approx_sin18b_tb/psi_fix_lin_approx_sin18b_tb.vhd)
 
 ### Description
 *INSERT YOUR TEXT*
