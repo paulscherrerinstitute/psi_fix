@@ -58,7 +58,7 @@ entity psi_fix_fir_dec_semi_nch_chtdm_conf is
     coef_wr_dat_i : in  std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0) := (others => '0');-- Coefficient value for write access (CoefWr = 1)
     -- Delay-line flushing interface
     flush_mem_i   : in  std_logic                                            := '0';            -- Inject a pulse to flush all data memories (usually done after reset).
-    flush_done_o  : out std_logic;                                                              -- A pulse on this port indicates that a flush started by FlushMem = ‘1’ was completed.
+    flush_done_o  : out std_logic;                                                              -- A pulse on this port indicates that a flush started by flush_mem = '1' was completed.
     -- Status Output
     busy_o        : out std_logic                                                               -- busy signal output status
   );

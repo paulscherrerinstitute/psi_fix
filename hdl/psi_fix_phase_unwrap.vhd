@@ -7,7 +7,7 @@
 ------------------------------------------------------------------------------
 -- Description
 ------------------------------------------------------------------------------
--- unwrap phase signal for instance +/- 180 -> 360° and so on with indicator
+-- unwrap phase signal for instance +/- 180 -> 360Â° and so on with indicator
 ------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;

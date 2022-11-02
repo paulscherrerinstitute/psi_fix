@@ -29,12 +29,12 @@ entity psi_fix_cic_dec_fix_nch_tdm_tdm is
     clk_i  : in  std_logic;                                          -- clk system
     rst_i  : in  std_logic;                                          -- rst system
     -- Data Ports
-    dat_i  : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0); -- data input FP
-    vld_i  : in  std_logic;                                          -- valid input frequency sampling
-    dat_o  : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);-- data output FP
-    vld_o  : out std_logic;                                          -- valid output frequency sampéing Fs/Ratio
+    dat_i  : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);  -- data input FP
+    vld_i  : in  std_logic;                                              -- valid input frequency sampling
+    dat_o  : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0); -- data output FP
+    vld_o  : out std_logic;                                              -- valid output frequency sampling Fs/Ratio
     -- Status Output
-    busy_o : out std_logic                                           -- busy/ready signal active high
+    busy_o : out std_logic                                                -- busy/ready signal active high
   );
 end entity;
 -- @formatter:on

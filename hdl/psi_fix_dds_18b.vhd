@@ -30,7 +30,7 @@ entity psi_fix_dds_18b is
     phi_offset_i : in  std_logic_vector(psi_fix_size(phase_fmt_g) - 1 downto 0); -- phase offset
     vld_i        : in  std_logic := '1';                                      -- frequency sampling input valid
     dat_sin_o    : out std_logic_vector(17 downto 0);                         -- sinus output
-    dat_cos_o    : out std_logic_vector(17 downto 0);                         -- cosine output 90° phase shifted
+    dat_cos_o    : out std_logic_vector(17 downto 0);                         -- cosine output 90Â°  phase shifted
     vld_o        : out std_logic                                              -- freqeuncy sampling output valid
   );
 end entity;
