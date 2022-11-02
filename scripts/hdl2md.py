@@ -146,7 +146,7 @@ def hdl2md (file_name_i, path_name_o, psi_lib):
     f.write('\n')
     f.write(" - VHDL source: ["+md_name[0]+"]("+file_name_i+")\n")
     if psi_lib:
-        f.write(" - Testbench source: ["+md_name[0]+"_tb.vhd](../testbench/"+md_name[0]+"_tb.vhd)\n")
+        f.write(" - Testbench source: ["+md_name[0]+"_tb.vhd](../testbench/"+md_name[0]+"_tb/"+md_name[0]+"_tb.vhd)\n")
     f.write('\n')
     f.write('### Description')
     f.write('\n')
