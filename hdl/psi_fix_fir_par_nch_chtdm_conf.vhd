@@ -25,27 +25,27 @@ use work.psi_common_array_pkg.all;
 -- $$ processes=stim, resp $$
 entity psi_fix_fir_par_nch_chtdm_conf is
   generic(
-    in_fmt_g       : psi_fix_fmt_t := (1, 0, 17);  -- input format FP      $$ constant=(1,0,15) $$
-    out_fmt_g      : psi_fix_fmt_t := (1, 0, 17);  -- output format FP     $$ constant=(1,2,13) $$
-    coef_fmt_g     : psi_fix_fmt_t := (1, 0, 17);  -- coeffcient format FP $$ constant=(1,0,17) $$
-    channels_g    : natural     := 1;             -- number of channel    $$ export=true $$
-    taps_g        : natural     := 48;            -- Taps number          $$ export=true $$
-    rnd_g         : psi_fix_rnd_t := psi_fix_round; -- round or trunc
-    sat_g         : psi_fix_sat_t := psi_fix_sat;   -- sat or wrap
-    use_fix_coefs_g : boolean     := true;          -- use fixed coef or updated from table
-    coefs_g       : t_areal     := (0.0, 0.0)     -- see doc
+    in_fmt_g        : psi_fix_fmt_t := (1, 0, 17);    -- input format FP      $$ constant=(1,0,15) $$
+    out_fmt_g       : psi_fix_fmt_t := (1, 0, 17);    -- output format FP     $$ constant=(1,2,13) $$
+    coef_fmt_g      : psi_fix_fmt_t := (1, 0, 17);    -- coeffcient format FP $$ constant=(1,0,17) $$
+    channels_g      : natural     := 1;               -- number of channel    $$ export=true $$
+    taps_g          : natural     := 48;              -- Taps number          $$ export=true $$
+    rnd_g           : psi_fix_rnd_t := psi_fix_round; -- round or trunc
+    sat_g           : psi_fix_sat_t := psi_fix_sat;   -- sat or wrap
+    use_fix_coefs_g : boolean     := true;            -- use fixed coef or updated from table
+    coefs_g         : t_areal     := (0.0, 0.0)       -- see doc
   );
   port(
     clk_i             : in  std_logic;                                                                -- system clock $$ type=clk; freq=100e6 $$
     rst_i             : in  std_logic;                                                                -- system reset $$ type=rst; clk=Clk $$
-    dat_i             : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);                       -- data input FP
+    dat_i             : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);                    -- data input FP
     vld_i             : in  std_logic;                                                                -- valid input frequency sampling
-    dat_o             : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);                      -- data output
+    dat_o             : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);                   -- data output
     vld_o             : out std_logic;                                                                -- valid output frequency sampling
     -- Coefficient interface
     coef_if_wr_i      : in  std_logic                                            := '0';              -- write enable
     coef_if_wr_addr_i : in  std_logic_vector(log2ceil(taps_g) - 1 downto 0)      := (others => '0');  -- write address
-    coef_if_wr_dat_i  : in  std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0) := (others => '0')   -- coef to write
+    coef_if_wr_dat_i  : in  std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0) := (others => '0')-- coef to write
   );
 end entity;
 

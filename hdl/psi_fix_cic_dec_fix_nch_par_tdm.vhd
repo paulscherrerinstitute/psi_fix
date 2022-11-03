@@ -14,26 +14,23 @@ use work.psi_fix_pkg.all;
 -- @formatter : off
 entity psi_fix_cic_dec_fix_nch_par_tdm is
   generic(
-    channels_g     : integer              := 3;                                   -- Min. 2
-    order_g        : integer              := 4;                                   -- CIC Filter Order
-    ratio_g        : integer              := 10;                                  -- Decimation ratio watch out the number of channels
-    diff_delay_g    : natural range 1 to 2 := 1;                                   -- diffrential delay
-    in_fmt_g        : psi_fix_fmt_t        := (1, 0, 15);                          -- input format FP
-    out_fmt_g       : psi_fix_fmt_t        := (1, 0, 15);                          -- output fromat FP
-    rst_pol_g      : std_logic;                                                   -- reset polarity active high = '1'
+    channels_g       : integer              := 3;                                   -- Min. 2
+    order_g          : integer              := 4;                                   -- CIC Filter Order
+    ratio_g          : integer              := 10;                                  -- Decimation ratio watch out the number of channels
+    diff_delay_g     : natural range 1 to 2 := 1;                                   -- diffrential delay
+    in_fmt_g         : psi_fix_fmt_t        := (1, 0, 15);                          -- input format FP
+    out_fmt_g        : psi_fix_fmt_t        := (1, 0, 15);                          -- output fromat FP
+    rst_pol_g        : std_logic;                                                   -- reset polarity active high = '1'
     auto_gain_corr_g : boolean              := True                                 -- Uses up to 25 bits of the datapath and 17 bit correction parameter
   );
   port(
-    -- Control Signals
-    clk_i  : in  std_logic;                                                       --clk system
-    rst_i  : in  std_logic;                                                       --rst system
-    -- Data Ports
+    clk_i  : in  std_logic;                                                          --clk system
+    rst_i  : in  std_logic;                                                          --rst system
     dat_i  : in  std_logic_vector(psi_fix_size(in_fmt_g) * channels_g - 1 downto 0); -- data input
-    vld_i  : in  std_logic;                                                       -- valid input frequency sampling
+    vld_i  : in  std_logic;                                                          -- valid input frequency sampling
     dat_o  : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);             -- data output
-    vld_o  : out std_logic;                                                       -- valid output new frequency sampling Fs/Ratio
-    -- Status Output
-    busy_o : out std_logic                                                        -- active high
+    vld_o  : out std_logic;                                                          -- valid output new frequency sampling Fs/Ratio
+    busy_o : out std_logic                                                           -- active high
   );
 end entity;
 -- @formatter : on

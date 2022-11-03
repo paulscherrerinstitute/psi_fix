@@ -15,7 +15,7 @@
 | out_fmt_g      | psi_fix_fmt_t | fp format out                                    |
 | round_g        | psi_fix_rnd_t | trunc or round                                   |
 | sat_g          | psi_fix_sat_t | wrap or sat                                      |
-| rst_pol_g      | std_logic     | N.A                                              |
+| rst_pol_g      | std_logic     | reset polarity active high                       |
 | ram_behavior_g | string        | rbw = read before write, wbr = write before read |
 
 ### Interfaces

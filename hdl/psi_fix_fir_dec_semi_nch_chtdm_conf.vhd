@@ -27,40 +27,37 @@ use work.psi_common_array_pkg.all;
 -- $$ processes=stim, resp $$
 entity psi_fix_fir_dec_semi_nch_chtdm_conf is
   generic(
-    in_fmt_g              : psi_fix_fmt_t := (1, 0, 17);                                         -- input format FP $$ constant=(1,0,15) $$
-    out_fmt_g             : psi_fix_fmt_t := (1, 0, 17);                                         -- output format FP $$ constant=(1,2,13) $$
-    coef_fmt_g            : psi_fix_fmt_t := (1, 0, 17);                                         -- coef format FP $$ constant=(1,0,17) $$
-    channels_g           : natural     := 4;                                                    -- number of parallel channels $$ export=true $$
-    multipliers_g        : natural     := 4;                                                    -- number of multipliers to use in parallel
-    ratio_g              : natural     := 8;                                                    -- decimation ratio
-    taps_g               : natural     := 32;                                                   -- number of taps implemented
-    rnd_g                : psi_fix_rnd_t := psi_fix_round;                                        -- round or trunc
-    sat_g                : psi_fix_sat_t := psi_fix_sat;                                          -- sat or wrap
-    use_fix_coefs_g        : boolean     := false;                                                -- if true fixed coefficient instead of configurable
+    in_fmt_g                : psi_fix_fmt_t := (1, 0, 17);                                         -- input format FP $$ constant=(1,0,15) $$
+    out_fmt_g               : psi_fix_fmt_t := (1, 0, 17);                                         -- output format FP $$ constant=(1,2,13) $$
+    coef_fmt_g              : psi_fix_fmt_t := (1, 0, 17);                                         -- coef format FP $$ constant=(1,0,17) $$
+    channels_g              : natural     := 4;                                                    -- number of parallel channels $$ export=true $$
+    multipliers_g           : natural     := 4;                                                    -- number of multipliers to use in parallel
+    ratio_g                 : natural     := 8;                                                    -- decimation ratio
+    taps_g                  : natural     := 32;                                                   -- number of taps implemented
+    rnd_g                   : psi_fix_rnd_t := psi_fix_round;                                      -- round or trunc
+    sat_g                   : psi_fix_sat_t := psi_fix_sat;                                        -- sat or wrap
+    use_fix_coefs_g         : boolean     := false;                                                -- if true fixed coefficient instead of configurable
     full_inp_rate_support_g : boolean     := false;                                                -- True = valid signa can be High all the time
-    ram_behavior_g        : string      := "RBW";                                                -- "RBW" = read-before-write, "WBR" = write-before-read
-    coefs_g              : t_areal     := (0.1, 0.2);                                           -- inital value for coefficients
-    impl_flush_if_g        : boolean     := false                                                 -- implement memory flushing interface
+    ram_behavior_g          : string      := "RBW";                                                -- "RBW" = read-before-write, "WBR" = write-before-read
+    coefs_g                 : t_areal     := (0.1, 0.2);                                           -- inital value for coefficients
+    impl_flush_if_g         : boolean     := false                                                 -- implement memory flushing interface
   );
   port(
-    -- Control Signals
-    clk_i         : in  std_logic;                                                              -- clk system $$ type=clk; freq=100e6 $$
-    rst_i         : in  std_logic;                                                              -- rst system $$ type=rst; clk=Clk $$
-    -- Input
+    clk_i         : in  std_logic;                                                                 -- clk system $$ type=clk; freq=100e6 $$
+    rst_i         : in  std_logic;                                                                 -- rst system $$ type=rst; clk=Clk $$
     dat_i         : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);                     -- data input
-    vld_i         : in  std_logic;                                                              -- valid input - AXI-S handshaking
-    -- Output
+    vld_i         : in  std_logic;                                                                 -- valid input - AXI-S handshaking
     dat_o         : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);                    -- Output data, one channel is passed after the other
-    vld_o         : out std_logic;                                                              -- valid output signal - AXI-S handshaking
+    vld_o         : out std_logic;                                                                 -- valid output signal - AXI-S handshaking
     -- Coefficient interface
-    coef_wr_i     : in  std_logic                                            := '0';            -- Coefficient write enable signal
-    coef_addr_i   : in  std_logic_vector(log2ceil(taps_g) - 1 downto 0)      := (others => '0');-- Address of the coefficient to access
+    coef_wr_i     : in  std_logic                                            := '0';               -- Coefficient write enable signal
+    coef_addr_i   : in  std_logic_vector(log2ceil(taps_g) - 1 downto 0)      := (others => '0');   -- Address of the coefficient to access
     coef_wr_dat_i : in  std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0) := (others => '0');-- Coefficient value for write access (CoefWr = 1)
     -- Delay-line flushing interface
-    flush_mem_i   : in  std_logic                                            := '0';            -- Inject a pulse to flush all data memories (usually done after reset).
-    flush_done_o  : out std_logic;                                                              -- A pulse on this port indicates that a flush started by flush_mem = '1' was completed.
+    flush_mem_i   : in  std_logic                                            := '0';               -- Inject a pulse to flush all data memories (usually done after reset).
+    flush_done_o  : out std_logic;                                                                 -- A pulse on this port indicates that a flush started by flush_mem = '1' was completed.
     -- Status Output
-    busy_o        : out std_logic                                                               -- busy signal output status
+    busy_o        : out std_logic                                                                  -- busy signal output status
   );
 end entity;
 

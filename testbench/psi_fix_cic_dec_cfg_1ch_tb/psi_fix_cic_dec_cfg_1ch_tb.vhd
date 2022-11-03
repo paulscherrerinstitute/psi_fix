@@ -18,13 +18,13 @@ use std.textio.all;
 
 entity psi_fix_cic_dec_cfg_1ch_tb is
   generic(
-    data_dir_g      : string               := "../testbench/psi_fix_cic_dec_cfg_1ch_tb/Data";
-    in_file_g       : string               := "input_o4_r9_dd2_gcTrue.txt";
-    out_file_g      : string               := "output_o4_r9_dd2_gcTrue.txt";
-    idle_cycles_g   : integer              := 2;
-    order_g        : integer              := 4;
-    ratio_g        : integer              := 9;
-    diff_delay_g    : natural range 1 to 2 := 2;
+    data_dir_g       : string               := "../testbench/psi_fix_cic_dec_cfg_1ch_tb/Data";
+    in_file_g        : string               := "input_o4_r9_dd2_gcTrue.txt";
+    out_file_g       : string               := "output_o4_r9_dd2_gcTrue.txt";
+    idle_cycles_g    : integer              := 2;
+    order_g          : integer              := 4;
+    ratio_g          : integer              := 9;
+    diff_delay_g     : natural range 1 to 2 := 2;
     auto_gain_corr_g : boolean              := True
   );
 end entity psi_fix_cic_dec_cfg_1ch_tb;

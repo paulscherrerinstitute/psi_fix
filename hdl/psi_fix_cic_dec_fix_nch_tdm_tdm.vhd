@@ -3,7 +3,6 @@
 --  All rights reserved.
 --  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -15,34 +14,31 @@ use work.psi_fix_pkg.all;
 -- @formatter:off
 entity psi_fix_cic_dec_fix_nch_tdm_tdm is
   generic(
-    channels_g     : integer              := 3;                      -- Min. 2
-    order_g        : integer              := 4;                      -- CIC filter order
-    ratio_g        : integer              := 10;                     -- decimation ratio watch out the number of channels
-    diff_delay_g    : natural range 1 to 2 := 1;                      -- differential delay
-    in_fmt_g        : psi_fix_fmt_t          := (1, 0, 15);           -- input format FP
-    out_fmt_g       : psi_fix_fmt_t          := (1, 0, 15);           -- output format FP
-    rst_pol_g      : std_logic            := '1';                    -- reset polarity active high = '1'
+    channels_g       : integer              := 3;                      -- Min. 2
+    order_g          : integer              := 4;                      -- CIC filter order
+    ratio_g          : integer              := 10;                     -- decimation ratio watch out the number of channels
+    diff_delay_g     : natural range 1 to 2 := 1;                      -- differential delay
+    in_fmt_g         : psi_fix_fmt_t          := (1, 0, 15);           -- input format FP
+    out_fmt_g        : psi_fix_fmt_t          := (1, 0, 15);           -- output format FP
+    rst_pol_g        : std_logic            := '1';                    -- reset polarity active high = '1'
     auto_gain_corr_g : boolean              := True                    -- Uses up to 25 bits of the datapath and 17 bit correction parameter
   );
   port(
-    -- Control Signals
-    clk_i  : in  std_logic;                                          -- clk system
-    rst_i  : in  std_logic;                                          -- rst system
-    -- Data Ports
-    dat_i  : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);  -- data input FP
-    vld_i  : in  std_logic;                                              -- valid input frequency sampling
-    dat_o  : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0); -- data output FP
-    vld_o  : out std_logic;                                              -- valid output frequency sampling Fs/Ratio
-    -- Status Output
+    clk_i  : in  std_logic;                                               -- clk system
+    rst_i  : in  std_logic;                                               -- rst system
+    dat_i  : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- data input FP
+    vld_i  : in  std_logic;                                               -- valid input frequency sampling
+    dat_o  : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);  -- data output FP
+    vld_o  : out std_logic;                                               -- valid output frequency sampling Fs/Ratio
     busy_o : out std_logic                                                -- busy/ready signal active high
   );
 end entity;
 -- @formatter:on
 architecture rtl of psi_fix_cic_dec_fix_nch_tdm_tdm is
   -- Constants
-  constant CicGain_c    : real                                                   := (real(ratio_g) * real(diff_delay_g))**real(order_g);
-  constant CicAddBits_c : natural                                                := log2ceil(CicGain_c - 0.1); -- WORKAROUND: Vivado does real calculations imprecisely. With the -0.1, wrong results are avoided.
-  constant Shift_c      : integer                                                := CicAddBits_c;
+  constant CicGain_c    : real                                                     := (real(ratio_g) * real(diff_delay_g))**real(order_g);
+  constant CicAddBits_c : natural                                                  := log2ceil(CicGain_c - 0.1); -- WORKAROUND: Vivado does real calculations imprecisely. With the -0.1, wrong results are avoided.
+  constant Shift_c      : integer                                                  := CicAddBits_c;
   constant AccuFmt_c    : psi_fix_fmt_t                                            := (in_fmt_g.S, in_fmt_g.I + CicAddBits_c, in_fmt_g.F);
   constant DiffFmt_c    : psi_fix_fmt_t                                            := (out_fmt_g.S, in_fmt_g.I, out_fmt_g.F + order_g + 1);
   constant GcInFmt_c    : psi_fix_fmt_t                                            := (1, out_fmt_g.I, work.psi_common_math_pkg.min(24 - out_fmt_g.I, DiffFmt_c.F));

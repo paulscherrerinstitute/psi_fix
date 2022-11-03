@@ -22,16 +22,16 @@ use work.psi_fix_pkg.all;
 
 entity psi_fix_noise_awgn is
   generic(
-    out_fmt_g  : psi_fix_fmt_t           := (1, 0, 19);                -- output format FP
-    seed_g    : unsigned(31 downto 0) := X"A38E3C1D";                 -- seed 32 bits
-    rst_pol_g : std_logic             := '1'                          -- reset polarity
+    out_fmt_g : psi_fix_fmt_t         := (1, 0, 19);                    -- output format FP
+    seed_g    : unsigned(31 downto 0) := X"A38E3C1D";                   -- seed 32 bits
+    rst_pol_g : std_logic             := '1'                            -- reset polarity
   );
   port(
-    clk_i : in  std_logic;                                            -- system clock
-    rst_i : in  std_logic;                                            -- system reset
-    vld_i : in  std_logic := '1';                                     -- valid input freq sampling
-    dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);  -- output data
-    vld_o : out std_logic                                             -- valid output
+    clk_i : in  std_logic;                                              -- system clock
+    rst_i : in  std_logic;                                              -- system reset
+    vld_i : in  std_logic := '1';                                       -- valid input freq sampling
+    dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0); -- output data
+    vld_o : out std_logic                                               -- valid output
   );
 end entity;
 

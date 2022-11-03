@@ -27,22 +27,22 @@ entity psi_fix_lowpass_iir_order1 is
   generic(
     f_sample_hz_g     : real        := 10_000_000.0;                  -- $$constant=100.0e6$$
     f_cutoff_hz_g     : real        := 30_000.0;                      -- $$constant=1.0e6$$
-    in_fmt_g         : psi_fix_fmt_t := (1, 0, 15);                  -- $$constant='(1, 0, 15)'$$
-    out_fmt_g        : psi_fix_fmt_t := (1, 0, 15);                  -- $$constant='(1, 0, 14)'$$
-    int_fmt_g        : psi_fix_fmt_t := (1, 0, 24);                  -- Number format for calculations, for details see documentation
-    coef_fmt_g       : psi_fix_fmt_t := (1, 0, 17);                  -- coef format
-    round_g         : psi_fix_rnd_t := psi_fix_round;                 -- round or trunc
-    sat_g           : psi_fix_sat_t := psi_fix_sat;                   -- sat or wrap
-    pipeline_g      : boolean     := True;                          -- True = Optimize for clock speed, False = Optimize for latency  $$ export=true $$
-    reset_polarity_g : std_logic   := '1'                            -- reset polarity active high = '1'
+    in_fmt_g          : psi_fix_fmt_t := (1, 0, 15);                  -- $$constant='(1, 0, 15)'$$
+    out_fmt_g         : psi_fix_fmt_t := (1, 0, 15);                  -- $$constant='(1, 0, 14)'$$
+    int_fmt_g         : psi_fix_fmt_t := (1, 0, 24);                  -- Number format for calculations, for details see documentation
+    coef_fmt_g        : psi_fix_fmt_t := (1, 0, 17);                  -- coef format
+    round_g           : psi_fix_rnd_t := psi_fix_round;               -- round or trunc
+    sat_g             : psi_fix_sat_t := psi_fix_sat;                 -- sat or wrap
+    pipeline_g        : boolean     := True;                          -- True = Optimize for clock speed, False = Optimize for latency  $$ export=true $$
+    reset_polarity_g  : std_logic   := '1'                            -- reset polarity active high = '1'
   );
   port(
-    clk_i : in  std_logic;                                          -- clock input                  $$ type=clk; freq=100e6 $$
-    rst_i : in  std_logic;                                          -- sync. reset                  $$ type=rst; clk=clk_i $$
+    clk_i : in  std_logic;                                             -- clock input                  $$ type=clk; freq=100e6 $$
+    rst_i : in  std_logic;                                             -- sync. reset                  $$ type=rst; clk=clk_i $$
     dat_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0); -- data in
-    vld_i : in  std_logic;                                          -- input valid signal
+    vld_i : in  std_logic;                                             -- input valid signal
     dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);-- data out
-    vld_o : out std_logic                                           -- output valid signal
+    vld_o : out std_logic                                              -- output valid signal
   );
 end entity;
 -- @formatter:on
@@ -57,7 +57,7 @@ architecture rtl of psi_fix_lowpass_iir_order1 is
   end function;
 
   --constant computation at compilation process
-  constant alpha_raw_c  : real                                                 := coef_alpha_func(f_sample_hz_g, f_cutoff_hz_g);
+  constant alpha_raw_c  : real                                                    := coef_alpha_func(f_sample_hz_g, f_cutoff_hz_g);
   constant alpha_c      : std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0) := psi_fix_from_real(alpha_raw_c, coef_fmt_g);
   constant beta_c       : std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0) := psi_fix_from_real(1.0 - alpha_raw_c, coef_fmt_g);
   --internal signals delaration

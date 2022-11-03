@@ -23,22 +23,22 @@ use work.psi_fix_pkg.all;
 --@formatter:off
 -- $$ processes=stim,check $$
 entity psi_fix_mod_cplx2real is
-  generic(rst_pol_g   : std_logic            := '1';           -- reset polarity $$ constant = '1' $$
-          pl_stages_g : integer range 5 to 6 := 5;             -- select the pipelines stages required
-          inp_fmt_g   : psi_fix_fmt_t        := (1, 1, 15);    -- input format FP $$ constant=(1,1,15) $$
-          coef_fmt_g  : psi_fix_fmt_t        := (1, 1, 15);    -- coef format $$ constant=(1,1,15) $$
-          int_fmt_g   : psi_fix_fmt_t        := (1, 1, 15);    -- internal format computation $$ constant=(1,1,15) $$
-          out_fmt_g   : psi_fix_fmt_t        := (1, 1, 15);    -- output format FP $$ constant=(1,1,15) $$
-          ratio_g    : natural              := 5              -- ratio for deciamtion $$ constant=5 $$
+  generic(rst_pol_g   : std_logic            := '1';                      -- reset polarity $$ constant = '1' $$
+          pl_stages_g : integer range 5 to 6 := 5;                        -- select the pipelines stages required
+          inp_fmt_g   : psi_fix_fmt_t        := (1, 1, 15);               -- input format FP $$ constant=(1,1,15) $$
+          coef_fmt_g  : psi_fix_fmt_t        := (1, 1, 15);               -- coef format $$ constant=(1,1,15) $$
+          int_fmt_g   : psi_fix_fmt_t        := (1, 1, 15);               -- internal format computation $$ constant=(1,1,15) $$
+          out_fmt_g   : psi_fix_fmt_t        := (1, 1, 15);               -- output format FP $$ constant=(1,1,15) $$
+          ratio_g     : natural              := 5                         -- ratio for deciamtion $$ constant=5 $$
          );
   port(
-    clk_i     : in  std_logic;                                         -- $$ type=clk; freq=100e6 $$
-    rst_i     : in  std_logic;                                         -- $$ type=rst; clk=clk_i $$
+    clk_i     : in  std_logic;                                            -- $$ type=clk; freq=100e6 $$
+    rst_i     : in  std_logic;                                            -- $$ type=rst; clk=clk_i $$
     dat_inp_i : in  std_logic_vector(psi_fix_size(inp_fmt_g)-1 downto 0); -- in-phase    data
     dat_qua_i : in  std_logic_vector(psi_fix_size(inp_fmt_g)-1 downto 0); -- quadrature data
-    vld_i     : in  std_logic;                                         -- valid input frequency sampling
+    vld_i     : in  std_logic;                                            -- valid input frequency sampling
     dat_o     : out std_logic_vector(psi_fix_size(out_fmt_g)-1 downto 0); -- data output IF/RF
-    vld_o     : out std_logic                                          -- valid output frequency sampling
+    vld_o     : out std_logic                                             -- valid output frequency sampling
   );
 end entity;
 --@formatter:on

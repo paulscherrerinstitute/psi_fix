@@ -24,24 +24,24 @@ use work.psi_common_math_pkg.all;
 ------------------------------------------------------------------------------
 -- $$ processes=stim, resp $$
 entity psi_fix_complex_addsub is
-  generic(rst_pol_g   : std_logic   := '1';                                      -- set reset polarity                $$ constant='1' $$
-          pipeline_g : boolean     := false;                                    -- when false 3 pipes stages, when false 6 pipes (increase Fmax)      $$ export=true $$
-          in_a_fmt_g   : psi_fix_fmt_t := (1, 0, 15);                             -- Input A Fixed Point format   $$ constant=(1,0,15) $$
-          in_b_fmt_g   : psi_fix_fmt_t := (1, 0, 24);                             -- Input B Fixed Point format   $$ constant=(1,0,24) $$
-          out_fmt_g   : psi_fix_fmt_t := (1, 0, 20);                             -- Output Fixed Point format    $$ constant=(1,0,20) $$
-          round_g    : psi_fix_rnd_t := psi_fix_round;                            -- Round or trunc  $$ constant=psi_fix_round $$
-          sat_g      : psi_fix_sat_t := psi_fix_sat;                              -- Adder or Subtracter  $$ constant=psi_fix_sat $$
+  generic(rst_pol_g   : std_logic   := '1';                                         -- set reset polarity                $$ constant='1' $$
+          pipeline_g  : boolean     := false;                                       -- when false 3 pipes stages, when false 6 pipes (increase Fmax)      $$ export=true $$
+          in_a_fmt_g  : psi_fix_fmt_t := (1, 0, 15);                                -- Input A Fixed Point format   $$ constant=(1,0,15) $$
+          in_b_fmt_g  : psi_fix_fmt_t := (1, 0, 24);                                -- Input B Fixed Point format   $$ constant=(1,0,24) $$
+          out_fmt_g   : psi_fix_fmt_t := (1, 0, 20);                                -- Output Fixed Point format    $$ constant=(1,0,20) $$
+          round_g     : psi_fix_rnd_t := psi_fix_round;                             -- Round or trunc  $$ constant=psi_fix_round $$
+          sat_g       : psi_fix_sat_t := psi_fix_sat;                               -- Adder or Subtracter  $$ constant=psi_fix_sat $$
           add_sub_g   : string      := "ADD");
-  port(clk_i         : in  std_logic;                                           -- clk    $$ type=clk; freq=100e6 $$
-       rst_i         : in  std_logic;                                           -- sync. rst    $$ type=rst; clk=clk_i $$
+  port(clk_i         : in  std_logic;                                               -- clk    $$ type=clk; freq=100e6 $$
+       rst_i         : in  std_logic;                                               -- sync. rst    $$ type=rst; clk=clk_i $$
        dat_inA_inp_i : in  std_logic_vector(psi_fix_size(in_a_fmt_g) - 1 downto 0); -- Inphase input of signal A
        dat_inA_qua_i : in  std_logic_vector(psi_fix_size(in_a_fmt_g) - 1 downto 0); -- Quadrature input of signal A
        dat_inB_inp_i : in  std_logic_vector(psi_fix_size(in_b_fmt_g) - 1 downto 0); -- Inphase input of signal B
        dat_inB_qua_i : in  std_logic_vector(psi_fix_size(in_b_fmt_g) - 1 downto 0); -- Quadrature input of signal B
-       vld_i         : in  std_logic;                                           -- strobe input
-       dat_out_inp_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0); -- data output I
-       dat_out_qua_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0); -- data output Q
-       vld_o         : out std_logic                                            -- strobe output
+       vld_i         : in  std_logic;                                               -- strobe input
+       dat_out_inp_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);  -- data output I
+       dat_out_qua_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);  -- data output Q
+       vld_o         : out std_logic                                                -- strobe output
       );
 begin
   assert add_sub_g = "ADD" or add_sub_g = "SUB"

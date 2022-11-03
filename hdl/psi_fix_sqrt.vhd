@@ -18,20 +18,20 @@ entity psi_fix_sqrt is
   generic(
     in_fmt_g       : psi_fix_fmt_t := (0, 0, 15);                    -- Must be unsigned, wuare root not defined for negative numbers
     out_fmt_g      : psi_fix_fmt_t := (0, 1, 15);                    -- output format FP
-    round_g       : psi_fix_rnd_t := psi_fix_trunc;                   -- round or trunc
-    sat_g         : psi_fix_sat_t := psi_fix_wrap;                    -- sat or wrap
+    round_g        : psi_fix_rnd_t := psi_fix_trunc;                 -- round or trunc
+    sat_g          : psi_fix_sat_t := psi_fix_wrap;                  -- sat or wrap
     ram_behavior_g : string      := "RBW";                           -- RBW = Read before write, WBR = write before read
-    rst_pol_g     : std_logic   := '1'
+    rst_pol_g      : std_logic   := '1'
   );
   port(
     -- Control Signals
-    clk_i : in  std_logic;                                          -- $$ type=Clk; freq=127e6 $$
-    rst_i : in  std_logic;                                          -- $$ type=Rst; Clk=Clk $
+    clk_i : in  std_logic;                                             -- $$ type=Clk; freq=127e6 $$
+    rst_i : in  std_logic;                                             -- $$ type=Rst; Clk=Clk $
     -- Input
     dat_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0); -- data input
-    vld_i : in  std_logic;                                          -- valid signal (strobe input)
+    vld_i : in  std_logic;                                             -- valid signal (strobe input)
     dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);-- data output
-    vld_o : out std_logic                                           -- output signal
+    vld_o : out std_logic                                              -- output signal
   );
 end entity;
 -- @formatter:on

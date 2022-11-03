@@ -28,4 +28,4 @@
 | vld_i  | i        | 1          | valid input sampling frequency              |
 | dat_o  | o        | out_fmt_g) | data output                                 |
 | vld_o  | o        | 1          | vaid output new sampling frequency fs/ratio |
-| busy_o | o        | 1          | active high                                 |
+| busy_o | o        | 1          | active high - calc ongoing                  |

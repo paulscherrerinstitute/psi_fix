@@ -23,30 +23,30 @@ use work.psi_fix_pkg.all;
 
 entity psi_fix_cic_dec_cfg_nch_par_tdm is
   generic(
-    channels_g     : integer              := 3;         -- Min. 2
-    order_g        : integer              := 4;         -- filter order
-    max_ratio_g     : natural              := 12;        -- maximaum decimation ratio
-    diff_delay_g    : natural range 1 to 2 := 1;         -- differential delay
-    in_fmt_g        : psi_fix_fmt_t        := (1, 0, 15);-- input fomrat FP
-    out_fmt_g       : psi_fix_fmt_t        := (1, 0, 15);-- output fromat FP
-    rst_pol_g      : std_logic            := '1';       -- reset polarity active high ='1'
+    channels_g       : integer              := 3;         -- Min. 2
+    order_g          : integer              := 4;         -- filter order
+    max_ratio_g      : natural              := 12;        -- maximaum decimation ratio
+    diff_delay_g     : natural range 1 to 2 := 1;         -- differential delay
+    in_fmt_g         : psi_fix_fmt_t        := (1, 0, 15);-- input fomrat FP
+    out_fmt_g        : psi_fix_fmt_t        := (1, 0, 15);-- output fromat FP
+    rst_pol_g        : std_logic            := '1';       -- reset polarity active high ='1'
     auto_gain_corr_g : boolean              := True       -- Use CfgGainCorr for fine-grained gain correction (beyond pure shifting)
   );
   port(
     -- Control Signals
-    clk_i           : in  std_logic;                                                      -- clk system
-    rst_i           : in  std_logic;                                                      -- rst system
+    clk_i           : in  std_logic;                                                         -- clk system
+    rst_i           : in  std_logic;                                                         -- rst system
     -- Configuration (only change when in reset!)
-    cfg_ratio_i     : in  std_logic_vector(log2ceil(max_ratio_g) - 1 downto 0);             -- Ratio-1 (0 --> no decimation, 3 --> decimation by 4)
-    cfg_shift_i     : in  std_logic_vector(7 downto 0);                                    -- Shifting by more than 255 bits is not supported, this would lead to timing issues anyways
-    cfg_gain_corr_i : in  std_logic_vector(16 downto 0);                                   -- Gain correction factor in format [0,1,16]
+    cfg_ratio_i     : in  std_logic_vector(log2ceil(max_ratio_g) - 1 downto 0);              -- Ratio-1 (0 --> no decimation, 3 --> decimation by 4)
+    cfg_shift_i     : in  std_logic_vector(7 downto 0);                                      -- Shifting by more than 255 bits is not supported, this would lead to timing issues anyways
+    cfg_gain_corr_i : in  std_logic_vector(16 downto 0);                                     -- Gain correction factor in format [0,1,16]
     -- Data Ports
     dat_i           : in  std_logic_vector(psi_fix_size(in_fmt_g) * channels_g - 1 downto 0); -- data input
-    vld_i           : in  std_logic;                                                       -- valid input
+    vld_i           : in  std_logic;                                                          -- valid input
     dat_o           : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);             -- data output
-    vld_o           : out std_logic;                                                       -- valid otuput
+    vld_o           : out std_logic;                                                          -- valid otuput
     -- Status output
-    busy_o          : out std_logic                                                        --  busy signal output active high
+    busy_o          : out std_logic                                                           --  busy signal output active high
   );
 end entity;
 

@@ -15,25 +15,23 @@ use work.psi_fix_pkg.all;
 -- @formatter : off
 entity psi_fix_cic_int_fix_1ch is
   generic(
-    order_g        : integer              := 4;           -- CIC filter order
-    ratio_g        : integer              := 10;          -- ratio interpolation
-    diff_delay_g    : natural range 1 to 2 := 1;           -- differential delay
-    in_fmt_g        : psi_fix_fmt_t        := (1, 0, 15);  -- input format
-    out_fmt_g       : psi_fix_fmt_t        := (1, 0, 15);  -- output fromat
-    rst_pol_g      : std_logic            := '1';         -- reset polarity active high
+    order_g          : integer              := 4;           -- CIC filter order
+    ratio_g          : integer              := 10;          -- ratio interpolation
+    diff_delay_g     : natural range 1 to 2 := 1;           -- differential delay
+    in_fmt_g         : psi_fix_fmt_t        := (1, 0, 15);  -- input format
+    out_fmt_g        : psi_fix_fmt_t        := (1, 0, 15);  -- output fromat
+    rst_pol_g        : std_logic            := '1';         -- reset polarity active high
     auto_gain_corr_g : boolean              := True         -- Uses up to 25 bits of the datapath and 17 bit correction parameter
   );
   port(
-    -- Control Signals
-    clk_i : in  std_logic;                                          -- clk system
-    rst_i : in  std_logic;                                          -- rst system
-    -- Data Ports
+    clk_i : in  std_logic;                                             -- clk system
+    rst_i : in  std_logic;                                             -- rst system
     dat_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0); -- data input
-    vld_i : in  std_logic;                                          -- valid input Frequency sampling
-    rdy_o : out std_logic;                                          -- ready signal output
+    vld_i : in  std_logic;                                             -- valid input Frequency sampling
+    rdy_o : out std_logic;                                             -- ready signal output
     dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);-- data output
-    vld_o : out std_logic;                                          -- valid signal output new Fs*Ratio
-    rdy_i : in  std_logic                                           -- ready signal input
+    vld_o : out std_logic;                                             -- valid signal output new Fs*Ratio
+    rdy_i : in  std_logic                                              -- ready signal input
   );
 end entity;
 -- @formatter : on

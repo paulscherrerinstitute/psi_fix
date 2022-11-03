@@ -25,5 +25,5 @@
 | phi_step_i   | i        | rasterized   | phase step (rasterized make sens for phase noise) |
 | phi_offset_i | i        | phase_fmt_g) | phase offset                                      |
 | dat_sin_o    | o        | 17           | sinus output                                      |
-| dat_cos_o    | o        | 17           | cosine output 90Â° phase shifted                   |
+| dat_cos_o    | o        | 17           | cosine output 90â° phase shifted                  |
 | vld_o        | o        | 1            | freqeuncy sampling output valid                   |

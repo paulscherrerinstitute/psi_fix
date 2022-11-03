@@ -25,17 +25,17 @@ entity psi_fix_lin_approx_calc is
     offs_fmt_g   : psi_fix_fmt_t := (1, 0, 17); -- depending ont table so do not touch
     grad_fmt_g   : psi_fix_fmt_t := (1, 0, 17); -- depending ont table so do not touch
     table_size_g : natural     := 1024;         -- depending ont table so do not touch
-    rst_pol_g   : std_logic   := '1'           -- reset polarity
+    rst_pol_g    : std_logic   := '1'           -- reset polarity
   );
   port(
     clk_i        : in  std_logic;                                             -- system clock
     rst_i        : in  std_logic;                                             -- system reset
-    dat_i        : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);    -- data input
+    dat_i        : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0); -- data input
     vld_i        : in  std_logic;                                             -- valid input freqeuncy sampling
-    dat_o        : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);   -- data output
+    dat_o        : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);-- data output
     vld_o        : out std_logic;                                             -- valid output frequency sampling
     -- Table Interface
-    addr_table_o : out std_logic_vector(log2ceil(table_size_g) - 1 downto 0);                        --
+    addr_table_o : out std_logic_vector(log2ceil(table_size_g) - 1 downto 0);                             --
     data_table_i : in  std_logic_vector(psi_fix_size(offs_fmt_g) + psi_fix_size(grad_fmt_g) - 1 downto 0) --
   );
 end entity;

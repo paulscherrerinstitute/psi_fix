@@ -1,7 +1,7 @@
 ########################################################################################################################
 #  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 #  All rights reserved.
-#  Authors: Oliver Bruendler
+#  Authors: Oliver Bruendler, Benoit Stef
 ########################################################################################################################
 
 ########################################################################################################################
@@ -31,10 +31,10 @@ class psi_fix_demod_real2cplx:
         """
         self.inFmt = inFmt
         self.outFmt = outFmt
-        coefUnusedIntBits = np.floor(np.log2(ratio))
-        self.coefFmt = PsiFixFmt(1, 0-coefUnusedIntBits, coefBits+coefUnusedIntBits-1)
         self.outFmt = outFmt
         self.ratio = ratio
+        coefUnusedIntBits = np.floor(np.log2(ratio))
+        self.coefFmt = PsiFixFmt(1, 0-coefUnusedIntBits, coefBits+coefUnusedIntBits-1)
         self.multFmt = PsiFixFmt(1, self.inFmt.I+self.coefFmt.I, self.outFmt.F+np.ceil(np.log2(ratio)) + 2) #truncation error does only lead to 1/4 LSB error on output
         self.movAvg = psi_fix_mov_avg(self.multFmt, self.outFmt, ratio, psi_fix_mov_avg.GAINCORR_NONE, PsiFixRnd.Round, PsiFixSat.Sat)
 
@@ -58,7 +58,7 @@ class psi_fix_demod_real2cplx:
         #Generate phases (use integer to prevent floating point precision errors)
         phaseSteps = np.ones(inData.size,dtype=np.int64)
         phaseSteps[0] = 0 #start at zero
-        cptInt = np.cumsum(phaseSteps,dtype=np.int64) % self.ratio
+        cptInt = np.cumsum(phaseSteps+self.ratio,dtype=np.int64) % self.ratio
         cptIntOffs = cptInt + phaseOffset
         cpt = np.where(cptIntOffs > self.ratio-1, cptIntOffs - self.ratio, cptIntOffs)
 
@@ -76,4 +76,3 @@ class psi_fix_demod_real2cplx:
         resQ = self.movAvg.Process(multQ)
 
         return resI, resQ
-

@@ -28,15 +28,15 @@ entity psi_fix_param_ram is
   );
   port(
     -- Port A
-    ClkA  : in  std_logic                                        := '0';            -- clock port A
-    AddrA : in  std_logic_vector(log2ceil(depth_g) - 1 downto 0) := (others => '0');-- address port A
-    WrA   : in  std_logic                                        := '0';            -- write enable A
+    ClkA  : in  std_logic                                        := '0';              -- clock port A
+    AddrA : in  std_logic_vector(log2ceil(depth_g) - 1 downto 0) := (others => '0');  -- address port A
+    WrA   : in  std_logic                                        := '0';              -- write enable A
     DinA  : in  std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');-- data input A
     DoutA : out std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0);                   -- data output A
     -- Port B
-    ClkB  : in  std_logic                                        := '0';            -- clock port B
-    AddrB : in  std_logic_vector(log2ceil(depth_g) - 1 downto 0) := (others => '0');-- address port B
-    WrB   : in  std_logic                                        := '0';            -- write enable B
+    ClkB  : in  std_logic                                        := '0';              -- clock port B
+    AddrB : in  std_logic_vector(log2ceil(depth_g) - 1 downto 0) := (others => '0');  -- address port B
+    WrB   : in  std_logic                                        := '0';              -- write enable B
     DinB  : in  std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');-- data input B
     DoutB : out std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0)                    -- data output B
   );

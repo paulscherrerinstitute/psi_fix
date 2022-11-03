@@ -25,19 +25,19 @@ entity psi_fix_bin_div is
        num_fmt_g     : psi_fix_fmt_t := (1, 0, 17);                                -- numerator format
        denom_fmt_g   : psi_fix_fmt_t := (0, 0, 17);                                -- denominator format
        out_fmt_g     : psi_fix_fmt_t := (1, 0, 25);                                -- ouput format
-       round_g       : psi_fix_rnd_t := psi_fix_trunc;                               -- rounding or trunc
-       sat_g         : psi_fix_sat_t := psi_fix_sat;                                 -- saturation or wrap
+       round_g       : psi_fix_rnd_t := psi_fix_trunc;                             -- rounding or trunc
+       sat_g         : psi_fix_sat_t := psi_fix_sat;                               -- saturation or wrap
        rst_pol_g     : std_logic   := '1';                                         -- polarity reset
        rst_sync_g    : boolean     := true                                         -- sync reset ?
         );
   port(
-       clk_i         : in  std_logic;                                              -- clk system
-       rst_i         : in  std_logic;                                              -- rst system depends on polarity
-       vld_i         : in  std_logic;                                              -- valid signal input
-       rdy_i         : out std_logic;                                              -- ready signal output
+       clk_i         : in  std_logic;                                                -- clk system
+       rst_i         : in  std_logic;                                                -- rst system depends on polarity
+       vld_i         : in  std_logic;                                                -- valid signal input
+       rdy_i         : out std_logic;                                                -- ready signal output
        numerator_i   : in  std_logic_vector(psi_fix_size(num_fmt_g) - 1 downto 0);   -- numerator to divide
        denominator_i : in  std_logic_vector(psi_fix_size(denom_fmt_g) - 1 downto 0); -- denominator divider
-       vld_o         : out std_logic;                                              -- valid output signal
+       vld_o         : out std_logic;                                                -- valid output signal
        result_o      : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0)    -- result output = Num/Den
         );
 end entity;

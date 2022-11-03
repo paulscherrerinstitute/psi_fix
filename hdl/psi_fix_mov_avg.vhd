@@ -21,22 +21,22 @@ use work.psi_fix_pkg.all;
 -- $$ processes=stim,check $$
 entity psi_fix_mov_avg is
   generic(
-    in_fmt_g    : psi_fix_fmt_t;                                     -- input format   $$ constant=(1,0,10) $$
-    out_fmt_g   : psi_fix_fmt_t;                                     -- output format  $$ constant=(1,1,12) $$
-    taps_g     : positive;                                          -- number of Taps $$ constant=7 $$
-    gain_corr_g : string      := "ROUGH";                            -- gain coorection either:= ROUGH, NONE or EXACT $$ export=true $$
-    round_g    : psi_fix_rnd_t := psi_fix_round;                      -- round or trunc
-    sat_g      : psi_fix_sat_t := psi_fix_sat;                        -- saturate or wrap
-    out_regs_g  : natural     := 1                                   -- add number of output register $$ export=true $$
+    in_fmt_g    : psi_fix_fmt_t;                                        -- input format   $$ constant=(1,0,10) $$
+    out_fmt_g   : psi_fix_fmt_t;                                        -- output format  $$ constant=(1,1,12) $$
+    taps_g      : positive;                                             -- number of Taps $$ constant=7 $$
+    gain_corr_g : string      := "ROUGH";                               -- gain coorection either:= ROUGH, NONE or EXACT $$ export=true $$
+    round_g     : psi_fix_rnd_t := psi_fix_round;                       -- round or trunc
+    sat_g       : psi_fix_sat_t := psi_fix_sat;                         -- saturate or wrap
+    out_regs_g  : natural     := 1                                      -- add number of output register $$ export=true $$
   );
   port(
     -- Control Signals
-    clk_i : in  std_logic;                                          -- system clock $$ type=clk; freq=100e6 $$
-    rst_i : in  std_logic;                                          -- system reset $$ type=rst; clk=clk_i $$
-    dat_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0); -- data input
-    vld_i : in  std_logic;                                          -- valid input sampling frequency
-    dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);-- data output
-    vld_o : out std_logic                                           -- valid output sampling frequency
+    clk_i : in  std_logic;                                              -- system clock $$ type=clk; freq=100e6 $$
+    rst_i : in  std_logic;                                              -- system reset $$ type=rst; clk=clk_i $$
+    dat_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);  -- data input
+    vld_i : in  std_logic;                                              -- valid input sampling frequency
+    dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0); -- data output
+    vld_o : out std_logic                                               -- valid output sampling frequency
   );
 end entity;
 
