@@ -21,10 +21,10 @@ class psi_fix_lin_cfg_settings:
 
 
     def __init__(self, function,
-                 inFmt: PsiFixFmt,
-                 outFmt: PsiFixFmt,
-                 offsFmt: PsiFixFmt,
-                 gradFmt: PsiFixFmt,
+                 inFmt: psi_fix_fmt_t,
+                 outFmt: psi_fix_fmt_t,
+                 offsFmt: psi_fix_fmt_t,
+                 gradFmt: psi_fix_fmt_t,
                  points: int,
                  name : str,
                  validRange : tuple = (0, np.inf)):
@@ -41,8 +41,8 @@ class psi_fix_lin_cfg_settings:
         :param name:        Name suffix of the approximator generated (used for code generation)
         :param validRange:  Range in which the approximation is valid
         """
-        self.validRange = (max(validRange[0], PsiFixLowerBound(inFmt)),
-                           min(validRange[1], PsiFixUpperBound(inFmt)))
+        self.validRange = (max(validRange[0], psi_fix_lower_bound(inFmt)),
+                           min(validRange[1], psi_fix_upper_bound(inFmt)))
         self.function = function
         self.inFmt = inFmt
         self.outFmt = outFmt
@@ -78,36 +78,36 @@ class psi_fix_lin_approx:
     class CONFIGS:
         Sin18Bit = psi_fix_lin_cfg_settings(
                         function=lambda x: np.sin(x * 2 * np.pi)*(1-1/2**17), #Prevent +1 from occurring
-                        inFmt=PsiFixFmt(0,0,20),
-                        outFmt=PsiFixFmt(1,0,17),
-                        offsFmt=PsiFixFmt(1,0,19),
-                        gradFmt=PsiFixFmt(1,3,8),
+                        inFmt=psi_fix_fmt_t(0,0,20),
+                        outFmt=psi_fix_fmt_t(1,0,17),
+                        offsFmt=psi_fix_fmt_t(1,0,19),
+                        gradFmt=psi_fix_fmt_t(1,3,8),
                         points=2048,
                         name="sin18b")
         Sqrt18Bit = psi_fix_lin_cfg_settings(
                         function=lambda x: np.sqrt(x), #Prevent +1 from occurring
-                        inFmt=PsiFixFmt(0,0,20),
-                        outFmt=PsiFixFmt(0,0,17),
-                        offsFmt=PsiFixFmt(0,0,19),
-                        gradFmt=PsiFixFmt(0,0,10),
+                        inFmt=psi_fix_fmt_t(0,0,20),
+                        outFmt=psi_fix_fmt_t(0,0,17),
+                        offsFmt=psi_fix_fmt_t(0,0,19),
+                        gradFmt=psi_fix_fmt_t(0,0,10),
                         points=512,
                         name="sqrt18b",
                         validRange=(0.25,(1-(2**-17))**2))
         Gaussify20Bit = psi_fix_lin_cfg_settings(
                         function=lambda x: psi_fix_lin_approx._Gaussify(x),
-                        inFmt=PsiFixFmt(1,0,19),
-                        outFmt=PsiFixFmt(1,0,19),
-                        offsFmt=PsiFixFmt(1,0,21),
-                        gradFmt=PsiFixFmt(0,5,9),
+                        inFmt=psi_fix_fmt_t(1,0,19),
+                        outFmt=psi_fix_fmt_t(1,0,19),
+                        offsFmt=psi_fix_fmt_t(1,0,21),
+                        gradFmt=psi_fix_fmt_t(0,5,9),
                         points=1024,
                         name="gaussify20b",
                         validRange=(-1,1))
         Invert18Bit = psi_fix_lin_cfg_settings(
                         function=lambda  x: 1.0/x,
-                        inFmt=PsiFixFmt(0,1,18),
-                        outFmt=PsiFixFmt(0,0,18),
-                        offsFmt=PsiFixFmt(1,0,21),
-                        gradFmt=PsiFixFmt(1,0,14),
+                        inFmt=psi_fix_fmt_t(0,1,18),
+                        outFmt=psi_fix_fmt_t(0,0,18),
+                        offsFmt=psi_fix_fmt_t(1,0,21),
+                        gradFmt=psi_fix_fmt_t(1,0,14),
                         points=1024,
                         name="inv18b",
                         validRange=(1, 2-(2**-20)))
@@ -161,19 +161,19 @@ class psi_fix_lin_approx:
         self.cfg = cfg
         self.indexBits =  np.log2(cfg.points)
         #Formats
-        offsBits = PsiFixSize(self.cfg.inFmt) - self.indexBits
-        self.remFmt = PsiFixFmt(0, offsBits - self.cfg.inFmt.F, self.cfg.inFmt.F)
-        self.idxFmt = PsiFixFmt(0, self.cfg.inFmt.S + self.cfg.inFmt.I,
-                                self.cfg.inFmt.F - self.remFmt.F - self.remFmt.I)
-        self.intFmt = PsiFixFmt(1, self.remFmt.I + self.cfg.gradFmt.I + 1,
-                                self.remFmt.F + self.cfg.gradFmt.F)
-        self.addFmt = PsiFixFmt(max(self.intFmt.S, self.cfg.offsFmt.S), max(self.intFmt.I, self.cfg.offsFmt.I)+1, max(self.intFmt.F, self.cfg.offsFmt.F))
+        offsBits = psi_fix_size(self.cfg.inFmt) - self.indexBits
+        self.remFmt = psi_fix_fmt_t(0, offsBits - self.cfg.inFmt.f, self.cfg.inFmt.f)
+        self.idxFmt = psi_fix_fmt_t(0, self.cfg.inFmt.s + self.cfg.inFmt.i,
+                                self.cfg.inFmt.f - self.remFmt.f - self.remFmt.i)
+        self.intFmt = psi_fix_fmt_t(1, self.remFmt.i + self.cfg.gradFmt.i + 1,
+                                self.remFmt.f + self.cfg.gradFmt.f)
+        self.addFmt = psi_fix_fmt_t(max(self.intFmt.s, self.cfg.offsFmt.s), max(self.intFmt.i, self.cfg.offsFmt.i)+1, max(self.intFmt.f, self.cfg.offsFmt.f))
         #Calculate tables
-        inputRange = [PsiFixLowerBound(self.cfg.inFmt), 2 ** self.cfg.inFmt.I]
+        inputRange = [psi_fix_lower_bound(self.cfg.inFmt), 2 ** self.cfg.inFmt.i]
         fullRange = inputRange[1] - inputRange[0]
         step = fullRange / self.cfg.points
         centers = np.arange(inputRange[0] + step / 2, inputRange[1], step)
-        if self.cfg.inFmt.S == 1:
+        if self.cfg.inFmt.s == 1:
             centers = np.concatenate((centers[int(centers.size / 2):], centers[0:int(centers.size / 2)]))
         gradients = derivative(self.cfg.function, centers, dx=1e-6)
         offsets = self.cfg.function(centers)
@@ -187,9 +187,9 @@ class psi_fix_lin_approx:
                 usedIdx = list(range(0,minIdx+1)) + list(range(maxIdx,len(gradients)))
             print("gradients: {} ... {}".format(min(gradients[usedIdx]), max(gradients[usedIdx])))
             print("offsets: {} ... {}".format(min(offsets[usedIdx]), max(offsets[usedIdx])))
-            print("table memory width: {}".format(PsiFixSize(self.cfg.offsFmt)+PsiFixSize(self.cfg.gradFmt)))
-        self.gradTable = PsiFixFromReal(gradients, self.cfg.gradFmt, errSat=False)
-        self.offsTable = PsiFixFromReal(offsets, self.cfg.offsFmt, errSat=False)
+            print("table memory width: {}".format(psi_fix_size(self.cfg.offsFmt)+psi_fix_size(self.cfg.gradFmt)))
+        self.gradTable = psi_fix_from_real(gradients, self.cfg.gradFmt, err_sat=False)
+        self.offsTable = psi_fix_from_real(offsets, self.cfg.offsFmt, err_sat=False)
 
     ####################################################################################################################
     # Public Methods and Properties
@@ -200,19 +200,19 @@ class psi_fix_lin_approx:
         :param inp: Input to the approximation
         :return:    Output from the approximation
         """
-        inp = PsiFixFromReal(inp, self.cfg.inFmt)
+        inp = psi_fix_from_real(inp, self.cfg.inFmt)
         tblIdx = self._GetTblIdx(inp)
-        tblRem = PsiFixResize(inp, self.cfg.inFmt, self.remFmt)-2**(self.remFmt.I-1) #Invert MSB to have signed offset
+        tblRem = psi_fix_resize(inp, self.cfg.inFmt, self.remFmt)-2**(self.remFmt.i-1) #Invert MSB to have signed offset
         offsVal = self.offsTable[tblIdx]
         grad = self.gradTable[tblIdx]
-        gradVal= PsiFixMult(grad, self.cfg.gradFmt,
+        gradVal= psi_fix_mult(grad, self.cfg.gradFmt,
                             tblRem, self.remFmt,
                             self.intFmt)
-        addVal = PsiFixAdd(offsVal, self.cfg.offsFmt,
+        addVal = psi_fix_add(offsVal, self.cfg.offsFmt,
                            gradVal, self.intFmt,
-                           self.addFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
-        output = PsiFixResize(addVal, self.addFmt,
-                              self.cfg.outFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+                           self.addFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
+        output = psi_fix_resize(addVal, self.addFmt,
+                              self.cfg.outFmt, psi_fix_rnd_t.round, psi_fix_sat_t.sat)
         return output
 
     def Analyze(self, simPoints,
@@ -226,12 +226,12 @@ class psi_fix_lin_approx:
         #Run test
         if simRange is None:
             simRange = self.cfg.validRange
-        input = PsiFixFromReal(np.linspace(simRange[0], simRange[1], simPoints), self.cfg.inFmt)
+        input = psi_fix_from_real(np.linspace(simRange[0], simRange[1], simPoints), self.cfg.inFmt)
         actualOut = self.Approximate(input)
         expectedOut = self.cfg.function(input)
         #Analyze
         error = actualOut-expectedOut
-        errorLSb = error*2**self.cfg.outFmt.F
+        errorLSb = error*2**self.cfg.outFmt.f
         maxerr = max(abs(error))
         maxerrLsb = max(abs(errorLSb))
         print("maximum error: {} = {} LSB".format(maxerr, maxerrLsb))
@@ -263,29 +263,29 @@ class psi_fix_lin_approx:
 
         #Modify content
         content = content.replace("<ENTITY_NAME>", entityName)
-        content = content.replace("<IN_WIDTH>", str(PsiFixSize(self.cfg.inFmt)))
-        content = content.replace("<OUT_WIDTH>", str(PsiFixSize(self.cfg.outFmt)))
+        content = content.replace("<IN_WIDTH>", str(psi_fix_size(self.cfg.inFmt)))
+        content = content.replace("<OUT_WIDTH>", str(psi_fix_size(self.cfg.outFmt)))
         content = content.replace("<IN_FMT>", str(self.cfg.inFmt))
         content = content.replace("<OUT_FMT>", str(self.cfg.outFmt))
         content = content.replace("<GRAD_FMT>", str(self.cfg.gradFmt))
         content = content.replace("<OFFS_FMT>", str(self.cfg.offsFmt))
         content = content.replace("<TABLE_SIZE>", str(self.cfg.points))
-        content = content.replace("<TABLE_WIDTH>", str(PsiFixSize(self.cfg.gradFmt)+PsiFixSize(self.cfg.offsFmt)))
+        content = content.replace("<TABLE_WIDTH>", str(psi_fix_size(self.cfg.gradFmt)+psi_fix_size(self.cfg.offsFmt)))
 
         #Offset Strings
         conv = "to_unsigned"
-        if self.cfg.offsFmt.S == 1:
+        if self.cfg.offsFmt.s == 1:
             conv = "to_signed"
         offsStr = ["{}({}, {})".format(conv,
-                                       PsiFixGetBitsAsInt(v, self.cfg.offsFmt),
-                                       PsiFixSize(self.cfg.offsFmt))
+                                       psi_fix_get_bits_as_int(v, self.cfg.offsFmt),
+                                       psi_fix_size(self.cfg.offsFmt))
                    for v in self.offsTable]
         #Gradient Strings
-        if self.cfg.gradFmt.S == 1:
+        if self.cfg.gradFmt.s == 1:
             conv = "to_signed"
         gradStr = ["{}({}, {})".format(conv,
-                                       PsiFixGetBitsAsInt(v, self.cfg.gradFmt),
-                                       PsiFixSize(self.cfg.gradFmt))
+                                       psi_fix_get_bits_as_int(v, self.cfg.gradFmt),
+                                       psi_fix_size(self.cfg.gradFmt))
                    for v in self.gradTable]
         tableLines = ["\t\tstd_logic_vector({} & {}),".format(g, o) for g, o in zip(gradStr, offsStr)]
         tableLines[-1] = tableLines[-1][:-1] #remove last comma
@@ -312,7 +312,7 @@ class psi_fix_lin_approx:
             # Run test
             if simRange is None:
                 simRange = self.cfg.validRange
-            input = PsiFixFromReal(np.linspace(simRange[0], simRange[1], simPoints), self.cfg.inFmt)
+            input = psi_fix_from_real(np.linspace(simRange[0], simRange[1], simPoints), self.cfg.inFmt)
             actualOut = self.Approximate(input)
 
             # Read template
@@ -336,9 +336,9 @@ class psi_fix_lin_approx:
 
             # write stimuli/response
             with open(path + "/" + "stimuli.txt", "w+") as f:
-                f.writelines([str(i) + "\n" for i in PsiFixGetBitsAsInt(input, self.cfg.inFmt)])
+                f.writelines([str(i) + "\n" for i in psi_fix_get_bits_as_int(input, self.cfg.inFmt)])
             with open(path + "/" + "response.txt", "w+") as f:
-                f.writelines([str(i) + "\n" for i in PsiFixGetBitsAsInt(actualOut, self.cfg.outFmt)])
+                f.writelines([str(i) + "\n" for i in psi_fix_get_bits_as_int(actualOut, self.cfg.outFmt)])
 
     ####################################################################################################################
     # Private Methods (do not call!)
@@ -346,7 +346,7 @@ class psi_fix_lin_approx:
 
     # Helper function to get the table index for a given input value
     def _GetTblIdx(self, inp):
-        return PsiFixGetBitsAsInt(PsiFixResize(inp, self.cfg.inFmt, self.idxFmt), self.idxFmt)
+        return psi_fix_get_bits_as_int(psi_fix_resize(inp, self.cfg.inFmt, self.idxFmt), self.idxFmt)
 
 ########################################################################################################################
 # Code to design a new filter

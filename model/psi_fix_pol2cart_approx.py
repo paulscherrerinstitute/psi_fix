@@ -25,11 +25,11 @@ class psi_fix_pol2cart_approx:
     ####################################################################################################################
     # Constructor
     ####################################################################################################################
-    def __init__(self, inAbsFmt : PsiFixFmt,
-                 inAngleFmt : PsiFixFmt,
-                 outFmt : PsiFixFmt,
-                 rnd : PsiFixRnd = PsiFixRnd.Round,
-                 sat : PsiFixSat = PsiFixSat.Sat):
+    def __init__(self, inAbsFmt : psi_fix_fmt_t,
+                 inAngleFmt : psi_fix_fmt_t,
+                 outFmt : psi_fix_fmt_t,
+                 rnd : psi_fix_rnd_t = psi_fix_rnd_t.round,
+                 sat : psi_fix_sat_t = psi_fix_sat_t.sat):
         """
         Constructor of the polar to cartesian model
         :param inAbsFmt: Input fixed-point format for absolute value
@@ -39,9 +39,9 @@ class psi_fix_pol2cart_approx:
         :param sat: Saturation mode at the output
         """
         #checks
-        if inAngleFmt.S == 1:    raise ValueError("psi_fix_pol2cart_approx: InAngleFmt must be unsigned")
-        if inAbsFmt.S == 1:      raise ValueError("psi_fix_pol2cart_approx: InAbsFmt must be unsigned")
-        if inAngleFmt.I > 0 :    raise ValueError("psi_fix_pol2cart_approx: InAngleFmt_g must be (1,0,x)")
+        if inAngleFmt.s == 1:    raise ValueError("psi_fix_pol2cart_approx: InAngleFmt must be unsigned")
+        if inAbsFmt.s == 1:      raise ValueError("psi_fix_pol2cart_approx: InAbsFmt must be unsigned")
+        if inAngleFmt.i > 0 :    raise ValueError("psi_fix_pol2cart_approx: InAngleFmt_g must be (1,0,x)")
         #Implementation
         self.inAbsFmt = inAbsFmt
         self.inAngleFmt = inAngleFmt
@@ -60,10 +60,10 @@ class psi_fix_pol2cart_approx:
         :param inpAngle: Input angle value(s)
         :return: Cartesian representation as tuple (I, Q)
         """
-        phaseSin = PsiFixResize(inpAngle, self.inAngleFmt, self.SIN_IN_FMT, self.rnd, PsiFixSat.Wrap)
-        phaseCos = PsiFixAdd(inpAngle, self.inAngleFmt, 0.25, self.SIN_IN_FMT, self.SIN_IN_FMT, self.rnd, PsiFixSat.Wrap)
+        phaseSin = psi_fix_resize(inpAngle, self.inAngleFmt, self.SIN_IN_FMT, self.rnd, psi_fix_sat_t.wrap)
+        phaseCos = psi_fix_add(inpAngle, self.inAngleFmt, 0.25, self.SIN_IN_FMT, self.SIN_IN_FMT, self.rnd, psi_fix_sat_t.wrap)
         sinData = self.sineApprox.Approximate(phaseSin)
         cosData = self.sineApprox.Approximate(phaseCos)
-        outI = PsiFixMult(inpAbs, self.inAbsFmt, cosData, self.SIN_OUT_FMT, self.outFmt, self.rnd, self.sat)
-        outQ = PsiFixMult(inpAbs, self.inAbsFmt, sinData, self.SIN_OUT_FMT, self.outFmt, self.rnd, self.sat)
+        outI = psi_fix_mult(inpAbs, self.inAbsFmt, cosData, self.SIN_OUT_FMT, self.outFmt, self.rnd, self.sat)
+        outQ = psi_fix_mult(inpAbs, self.inAbsFmt, sinData, self.SIN_OUT_FMT, self.outFmt, self.rnd, self.sat)
         return (outI, outQ)

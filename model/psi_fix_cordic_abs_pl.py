@@ -18,7 +18,7 @@ class psi_fix_cordic_abs_pl:
     ####################################################################################################################
     # Constructor
     ####################################################################################################################
-    def __init__(self, inFmt : PsiFixFmt, outFmt : PsiFixFmt, internalFmt : PsiFixFmt, iterations : int, round : PsiFixRnd, sat : PsiFixSat):
+    def __init__(self, inFmt : psi_fix_fmt_t, outFmt : psi_fix_fmt_t, internalFmt : psi_fix_fmt_t, iterations : int, round : psi_fix_rnd_t, sat : psi_fix_sat_t):
         """
         Constructor for a CORDIC based absolute value calculation
         :param inFmt: Input fixed point format
@@ -45,21 +45,21 @@ class psi_fix_cordic_abs_pl:
         :param inpQ: Imaginary-part of the input
         :return: Result (absolute value)
         """
-        x = PsiFixAbs(PsiFixFromReal(inpI, self.inFmt), self.inFmt, self.internalFmt, self.round, self.sat)
-        y = PsiFixResize(PsiFixFromReal(inpQ, self.inFmt), self.inFmt, self.internalFmt, self.round, self.sat)
+        x = psi_fix_abs(psi_fix_from_real(inpI, self.inFmt), self.inFmt, self.internalFmt, self.round, self.sat)
+        y = psi_fix_resize(psi_fix_from_real(inpQ, self.inFmt), self.inFmt, self.internalFmt, self.round, self.sat)
         for i in range(0, self.iterations):
-            sftFmt = PsiFixFmt(1, self.internalFmt.I-i, self.internalFmt.F+i)
-            x_sft = PsiFixFromReal(x / 2 ** i, sftFmt)
-            y_sft = PsiFixFromReal(y / 2 ** i, sftFmt)
-            x_sub = PsiFixSub(x, self.internalFmt, y_sft, sftFmt, self.internalFmt, self.round, self.sat)
-            x_add = PsiFixAdd(x, self.internalFmt, y_sft, sftFmt, self.internalFmt, self.round, self.sat)
+            sftFmt = psi_fix_fmt_t(1, self.internalFmt.i-i, self.internalFmt.f+i)
+            x_sft = psi_fix_from_real(x / 2 ** i, sftFmt)
+            y_sft = psi_fix_from_real(y / 2 ** i, sftFmt)
+            x_sub = psi_fix_sub(x, self.internalFmt, y_sft, sftFmt, self.internalFmt, self.round, self.sat)
+            x_add = psi_fix_add(x, self.internalFmt, y_sft, sftFmt, self.internalFmt, self.round, self.sat)
             x_next = np.where(y < 0, x_sub, x_add)
-            y_sub = PsiFixSub(y, self.internalFmt, x_sft, sftFmt, self.internalFmt, self.round, self.sat)
-            y_add = PsiFixAdd(y, self.internalFmt, x_sft, sftFmt, self.internalFmt, self.round, self.sat)
+            y_sub = psi_fix_sub(y, self.internalFmt, x_sft, sftFmt, self.internalFmt, self.round, self.sat)
+            y_add = psi_fix_add(y, self.internalFmt, x_sft, sftFmt, self.internalFmt, self.round, self.sat)
             y_next = np.where(y < 0, y_add, y_sub)
             x = x_next
             y = y_next
-        return PsiFixResize(x, self.internalFmt, self.outFmt, self.round, self.sat)
+        return psi_fix_resize(x, self.internalFmt, self.outFmt, self.round, self.sat)
 
 
 

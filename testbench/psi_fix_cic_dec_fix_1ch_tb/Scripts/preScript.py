@@ -38,8 +38,8 @@ def WriteFile(signal, filePath, fracBits):
 #############################################################
 # Data Generation
 #############################################################
-inFmt = PsiFixFmt(1, 0, 16)
-outFmt = PsiFixFmt(1, 0, 17)
+inFmt = psi_fix_fmt_t(1, 0, 16)
+outFmt = psi_fix_fmt_t(1, 0, 17)
 
 np.random.seed(0)
 t = np.linspace(0,TEND,SAMPLES)
@@ -55,7 +55,7 @@ inSig = []
 outSig = []
 for cfg in configs:
     inp = sps.chirp(t, 0, TEND, FREQ_SAMPLE/cfg.ratio)
-    inp = PsiFixFromReal(inp, inFmt, errSat=False)
+    inp = psi_fix_from_real(inp, inFmt, err_sat=False)
     model = psi_fix_cic_dec(cfg.order, cfg.ratio, cfg.diffDel, inFmt, outFmt, cfg.gainCorr)
     outp = model.Process(inp)
     if PLOT_ON:
@@ -72,12 +72,12 @@ for nr, sig in enumerate(inSig):
     cfg = configs[nr]
     with open(STIM_DIR + "/input_o{}_r{}_dd{}_gc{}.txt".format(cfg.order, cfg.ratio, cfg.diffDel, cfg.gainCorr), "w+") as f:
         for spl in sig:
-            f.write("{}\n".format(PsiFixGetBitsAsInt(spl, inFmt)))
+            f.write("{}\n".format(psi_fix_get_bits_as_int(spl, inFmt)))
 
 for nr, sig in enumerate(outSig):
     cfg = configs[nr]
     with open(STIM_DIR + "/output_o{}_r{}_dd{}_gc{}.txt".format(cfg.order, cfg.ratio, cfg.diffDel, cfg.gainCorr), "w+") as f:
         for spl in sig:
-            f.write("{}\n".format(PsiFixGetBitsAsInt(spl, outFmt)))
+            f.write("{}\n".format(psi_fix_get_bits_as_int(spl, outFmt)))
 
 

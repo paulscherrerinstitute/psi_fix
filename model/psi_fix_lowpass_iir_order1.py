@@ -20,12 +20,12 @@ class psi_fix_lowpass_iir_order1:
     ####################################################################################################################
     def __init__(self,  fSampleHz : float,
                         fCutoffHz : float,
-                        inFmt : PsiFixFmt,
-                        outFmt : PsiFixFmt,
-                        intFmt : PsiFixFmt,
-                        coefFmt : PsiFixFmt,
-                        rnd : PsiFixRnd = PsiFixRnd.Round,
-                        sat : PsiFixSat = PsiFixSat.Sat):
+                        inFmt : psi_fix_fmt_t,
+                        outFmt : psi_fix_fmt_t,
+                        intFmt : psi_fix_fmt_t,
+                        coefFmt : psi_fix_fmt_t,
+                        rnd : psi_fix_rnd_t = psi_fix_rnd_t.round,
+                        sat : psi_fix_sat_t = psi_fix_sat_t.sat):
         """
         Constructor for the IIR model
         :param fSampleHz: Sample frequency in Hz
@@ -47,8 +47,8 @@ class psi_fix_lowpass_iir_order1:
 
         #Coefficient calculation
         alpha = self.CoefAlphaCalc(fSampleHz, fCutoffHz)
-        self.alpha = PsiFixFromReal(alpha, coefFmt)
-        self.beta = PsiFixFromReal(1.0-alpha, coefFmt)
+        self.alpha = psi_fix_from_real(alpha, coefFmt)
+        self.beta = psi_fix_from_real(1.0-alpha, coefFmt)
 
     ####################################################################################################################
     # Public Methods
@@ -59,16 +59,16 @@ class psi_fix_lowpass_iir_order1:
         :param data: Input data
         :return: Output data
         """
-        dataFix = PsiFixFromReal(data, self.inFmt)
-        mulIn = PsiFixMult(dataFix, self.inFmt, self.beta, self.coefFmt, self.intFmt, self.rnd, self.sat)
+        dataFix = psi_fix_from_real(data, self.inFmt)
+        mulIn = psi_fix_mult(dataFix, self.inFmt, self.beta, self.coefFmt, self.intFmt, self.rnd, self.sat)
 
         #Looping is not avoidable for a recorsive filter...
         out = np.empty_like(data)
         fb = 0
         for i, mulIn_i in enumerate(mulIn):
-            add = PsiFixAdd(mulIn_i, self.intFmt, fb, self.intFmt, self.intFmt, sat=self.sat) #Rounding not required since fractional bits are not changed
-            fb = PsiFixMult(add, self.intFmt, self.alpha, self.coefFmt, self.intFmt, self.rnd, self.sat)
-            out[i] = PsiFixResize(add, self.intFmt, self.outFmt, self.rnd, self.sat)
+            add = psi_fix_add(mulIn_i, self.intFmt, fb, self.intFmt, self.intFmt, sat=self.sat) #Rounding not required since fractional bits are not changed
+            fb = psi_fix_mult(add, self.intFmt, self.alpha, self.coefFmt, self.intFmt, self.rnd, self.sat)
+            out[i] = psi_fix_resize(add, self.intFmt, self.outFmt, self.rnd, self.sat)
         return out
 
     ####################################################################################################################
