@@ -1,7 +1,8 @@
 <img align="right" src="../doc/psi_logo.png">
 
 ***
-[**components list**](index.md)
+
+[**component list**](index.md)
 
 # psi_fix_bin_div
  - VHDL source: [psi_fix_bin_div](../hdl/psi_fix_bin_div.vhd)
@@ -41,4 +42,4 @@ The component converts numerator and denominator to unsigned numbers, so a stand
 | vld_o         | o        | 1           | valid output signal            |
 | result_o      | o        | outfmt_g    | result output = num/den        |
 
-[**components list**](index.md)
+[**component list**](index.md)
