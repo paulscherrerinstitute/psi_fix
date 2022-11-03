@@ -27,8 +27,8 @@ use work.psi_fix_pkg.all;
 ------------------------------------------------------------
 entity psi_fix_demod_real2cplx_tb is
   generic(
-    FileFolder_g : string  := "../tesbench/psi_fix_demod_real2cplx_tb/Data";
-    DutyCycle_g  : integer := 1
+    file_folder_g : string  := "../tesbench/psi_fix_demod_real2cplx_tb/Data";
+    duty_cycle_g  : integer := 1
   );
 end entity;
 
@@ -37,13 +37,13 @@ end entity;
 ------------------------------------------------------------
 architecture sim of psi_fix_demod_real2cplx_tb is
   -- *** Fixed Generics ***
-  constant RstPol_g   : std_logic   := '1';
-  constant InFmt_g    : psi_fix_fmt_t := (1, 0, 15);
-  constant OutFmt_g   : psi_fix_fmt_t := (1, 0, 16);
-  constant CoefBits_g : integer     := 25;
+  constant rst_pol_g   : std_logic   := '1';
+  constant in_fmt_g    : psi_fix_fmt_t := (1, 0, 15);
+  constant out_fmt_g   : psi_fix_fmt_t := (1, 0, 16);
+  constant coef_bits_g : integer     := 25;
 
   -- *** Not Assigned Generics (default values) ***
-  constant Ratio_g : natural := 5;      -- $$ constant=5 $$;
+  constant ratio_g : natural := 5;      -- $$ constant=5 $$;
 
   -- *** TB Control ***
   signal TbRunning            : boolean                  := True;
@@ -57,11 +57,11 @@ architecture sim of psi_fix_demod_real2cplx_tb is
   signal clk_i         : std_logic                                               := '0';
   signal rst_i         : std_logic                                               := '1';
   signal str_i         : std_logic                                               := '0';
-  signal data1_i       : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0)      := (others => '0');
-  signal data2_i       : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0)      := (others => '0');
-  signal data_i        : std_logic_vector(2 * PsiFixSize(InFmt_g) - 1 downto 0)  := (others => '0');
-  signal data_I_o      : std_logic_vector(2 * PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
-  signal data_Q_o      : std_logic_vector(2 * PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
+  signal data1_i       : std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0)      := (others => '0');
+  signal data2_i       : std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0)      := (others => '0');
+  signal data_i        : std_logic_vector(2 * psi_fix_size(in_fmt_g) - 1 downto 0)  := (others => '0');
+  signal data_I_o      : std_logic_vector(2 * psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
+  signal data_Q_o      : std_logic_vector(2 * psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
   signal str_o         : std_logic                                               := '0';
   signal phi_offset_16 : std_logic_vector(data_i'range)                          := (others => '0');
   signal SigIn         : TextfileData_t(0 to 2)                                  := (others => 0);
@@ -74,11 +74,11 @@ begin
   data_i <= data2_i & data1_i;
   i_dut : entity work.psi_fix_demod_real2cplx
     generic map(
-      RstPol_g   => RstPol_g,
-      InFmt_g    => InFmt_g,
-      OutFmt_g   => OutFmt_g,
-      CoefBits_g => CoefBits_g,
-      Channels_g => 2
+      rst_pol_g   => rst_pol_g,
+      in_fmt_g    => in_fmt_g,
+      out_fmt_g   => out_fmt_g,
+      coef_bits_g => coef_bits_g,
+      channels_g => 2
     )
     port map(
       clk_i        => clk_i,
@@ -140,13 +140,13 @@ begin
     -- start of process !DO NOT EDIT
     wait until rst_i = '0';
 
-    -- Apply Stimuli	
+    -- Apply Stimuli
     ApplyTextfileContent(Clk         => clk_i,
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => str_i,
                          Data        => SigIn,
-                         Filepath    => FileFolder_g & "/input.txt",
-                         ClkPerSpl   => DutyCycle_g,
+                         Filepath    => file_folder_g & "/input.txt",
+                         ClkPerSpl   => duty_cycle_g,
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!
@@ -155,10 +155,10 @@ begin
   end process;
 
   -- *** check ***
-  SigOut(0) <= to_integer(signed(data_I_o(1 * PsiFixSize(OutFmt_g) - 1 downto 0 * PsiFixSize(OutFmt_g))));
-  SigOut(1) <= to_integer(signed(data_Q_o(1 * PsiFixSize(OutFmt_g) - 1 downto 0 * PsiFixSize(OutFmt_g))));
-  SigOut(2) <= to_integer(signed(data_I_o(2 * PsiFixSize(OutFmt_g) - 1 downto 1 * PsiFixSize(OutFmt_g))));
-  SigOut(3) <= to_integer(signed(data_Q_o(2 * PsiFixSize(OutFmt_g) - 1 downto 1 * PsiFixSize(OutFmt_g))));
+  SigOut(0) <= to_integer(signed(data_I_o(1 * psi_fix_size(out_fmt_g) - 1 downto 0 * psi_fix_size(out_fmt_g))));
+  SigOut(1) <= to_integer(signed(data_Q_o(1 * psi_fix_size(out_fmt_g) - 1 downto 0 * psi_fix_size(out_fmt_g))));
+  SigOut(2) <= to_integer(signed(data_I_o(2 * psi_fix_size(out_fmt_g) - 1 downto 1 * psi_fix_size(out_fmt_g))));
+  SigOut(3) <= to_integer(signed(data_Q_o(2 * psi_fix_size(out_fmt_g) - 1 downto 1 * psi_fix_size(out_fmt_g))));
   p_check : process
   begin
     -- start of process !DO NOT EDIT
@@ -169,7 +169,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => str_o,
                          Data        => SigOut,
-                         Filepath    => FileFolder_g & "/output.txt",
+                         Filepath    => file_folder_g & "/output.txt",
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!

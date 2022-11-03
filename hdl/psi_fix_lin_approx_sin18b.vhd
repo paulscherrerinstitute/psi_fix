@@ -2094,11 +2094,11 @@ begin
   -- *** Calculation Unit ***
   i_calc : entity work.psi_fix_lin_approx_calc
     generic map(
-      InFmt_g     => InFmt_c,
-      OutFmt_g    => OutFmt_c,
-      OffsFmt_g   => OffsFmt_c,
-      GradFmt_g   => GradFmt_c,
-      TableSize_g => TableSize_c
+      in_fmt_g     => InFmt_c,
+      out_fmt_g    => OutFmt_c,
+      offs_fmt_g   => OffsFmt_c,
+      grad_fmt_g   => GradFmt_c,
+      table_size_g => TableSize_c
     )
     port map(
       -- Control Signals

@@ -19,12 +19,12 @@ entity psi_fix_lin_approx_sin18b_dual is
     clk_i   : in  std_logic;                         -- system clock
     rst_i   : in  std_logic;                         -- system reset
     dat_a_i : in  std_logic_vector(20 - 1 downto 0); -- data A input A fixed Format (0, 0, 20)
-    vld_a_i : in  std_logic;                         -- valid input data A 
+    vld_a_i : in  std_logic;                         -- valid input data A
     dat_b_i : in  std_logic_vector(20 - 1 downto 0); -- data B input fixed Format (0, 0, 20)
     vld_b_i : in  std_logic;                         -- data B valid input data B
-    dat_a_o : out std_logic_vector(18 - 1 downto 0); -- data A out fixed Format (1, 0, 17)    
+    dat_a_o : out std_logic_vector(18 - 1 downto 0); -- data A out fixed Format (1, 0, 17)
     vld_a_o : out std_logic;                         -- valid output data A
-    dat_b_o : out std_logic_vector(18 - 1 downto 0); -- data B out fixed Format (1, 0, 17)		
+    dat_b_o : out std_logic_vector(18 - 1 downto 0); -- data B out fixed Format (1, 0, 17)
     vld_b_o : out std_logic                          -- valid output data B
   );
 end entity;
@@ -39,7 +39,7 @@ architecture rtl of psi_fix_lin_approx_sin18b_dual is
   constant TableSize_c  : integer       := 2048;
   constant TableWidth_c : integer       := 32;
 
-  -- Table	
+  -- Table
   type Table_t is array (0 to TableSize_c - 1) of std_logic_vector(TableWidth_c - 1 downto 0);
   constant Table_c : Table_t := (
     std_logic_vector(to_signed(1608, 12) & to_signed(804, 20)),
@@ -2103,11 +2103,11 @@ begin
   -- *** Calculation Unit ***
   i_calc_a : entity work.psi_fix_lin_approx_calc
     generic map(
-      InFmt_g     => InFmt_c,
-      OutFmt_g    => OutFmt_c,
-      OffsFmt_g   => OffsFmt_c,
-      GradFmt_g   => GradFmt_c,
-      TableSize_g => TableSize_c
+      in_fmt_g     => InFmt_c,
+      out_fmt_g    => OutFmt_c,
+      offs_fmt_g   => OffsFmt_c,
+      grad_fmt_g   => GradFmt_c,
+      table_size_g => TableSize_c
     )
     port map(
       -- Control Signals
@@ -2126,11 +2126,11 @@ begin
   i_calc_b : entity work.psi_fix_lin_approx_calc
     generic map(
       rst_pol_g   => rst_pol_g,
-      InFmt_g     => InFmt_c,
-      OutFmt_g    => OutFmt_c,
-      OffsFmt_g   => OffsFmt_c,
-      GradFmt_g   => GradFmt_c,
-      TableSize_g => TableSize_c
+      in_fmt_g     => InFmt_c,
+      out_fmt_g    => OutFmt_c,
+      offs_fmt_g   => OffsFmt_c,
+      grad_fmt_g   => GradFmt_c,
+      table_size_g => TableSize_c
     )
     port map(
       -- Control Signals

@@ -79,10 +79,10 @@ fileName = "psi_fix_lut_test1"
 path     = "../"
 
 cfg = psi_fix_lut(a,coefFmt)
-c = psi_fix_lut.Process(cfg,np.arange(size(a)))
+c = psi_fix_lut.Process(cfg,np.arange(np.size(a)))
 np.savetxt(STIM_DIR + 'model.txt', PsiFixGetBitsAsInt(c,coefFmt), fmt='% i', newline='\n', header='model')
 print(c)
 
 psi_fix_lut.Generate(cfg,path,fileName)
 
-show()
+#show()

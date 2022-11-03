@@ -12,7 +12,7 @@
 -- 1/Fcarrier (zeros at Fcarrier where DC ends up and Fcarrier*2 where the
 -- demodulation alias occurs).
 -- The demodulator only works well for very narrowband signals with very little
--- out of band noise. The signal frequency must be an integer multiple of the 
+-- out of band noise. The signal frequency must be an integer multiple of the
 -- sample frequency.
 ------------------------------------------------------------------------------
 
@@ -28,40 +28,40 @@ use work.psi_fix_pkg.all;
 -- @formatter:off
 entity psi_fix_demod_real2cplx is
   generic(
-    RstPol_g   : std_logic := '1';                                                  -- reset polarity active high ='1'    $$ constant = '1' $$
-    InFmt_g    : psi_fix_fmt_t;                                                     -- input format FP                    $$ constant=(1,0,15) $$
-    OutFmt_g   : psi_fix_fmt_t;                                                     -- output format FP                   $$ constant=(1,0,16) $$
-    CoefBits_g : positive  := 18;                                                   -- internal coefficent number of bits $$ constant=25 $$
-    Channels_g : natural   := 1;                                                    -- number of channels TDM             $$ constant=2 $$
-    Ratio_g    : natural   := 5                                                     -- ratio betwenn clock and IF/RF      $$ constant=5 $$
+    rst_pol_g   : std_logic := '1';                                                  -- reset polarity active high ='1'    $$ constant = '1' $$
+    in_fmt_g    : psi_fix_fmt_t;                                                     -- input format FP                    $$ constant=(1,0,15) $$
+    out_fmt_g   : psi_fix_fmt_t;                                                     -- output format FP                   $$ constant=(1,0,16) $$
+    coef_bits_g : positive  := 18;                                                   -- internal coefficent number of bits $$ constant=25 $$
+    channels_g : natural   := 1;                                                    -- number of channels TDM             $$ constant=2 $$
+    ratio_g    : natural   := 5                                                     -- ratio betwenn clock and IF/RF      $$ constant=5 $$
   );
   port(
     clk_i        : in  std_logic;                                                    -- clk system $$ type=clk; freq=100e6 $$
     rst_i        : in  std_logic;                                                    -- rst system $$ type=rst; clk=clk_i $$
-    dat_i        : in  std_logic_vector(PsiFixSize(InFmt_g)*Channels_g - 1 downto 0);-- data input IF/RF 
-    vld_i        : in  std_logic;                                                    -- valid input freqeuncy sampling 
-    phi_offset_i : in  std_logic_vector(log2ceil(Ratio_g)-1 downto 0);               -- phase offset for demod LUT
-    dat_inp_o    : out std_logic_vector(PsiFixSize(OutFmt_g)*Channels_g- 1 downto 0);-- inphase data output
-    dat_qua_o    : out std_logic_vector(PsiFixSize(OutFmt_g)*Channels_g- 1 downto 0);-- quadrature data output
+    dat_i        : in  std_logic_vector(psi_fix_size(in_fmt_g)*channels_g - 1 downto 0);-- data input IF/RF
+    vld_i        : in  std_logic;                                                    -- valid input freqeuncy sampling
+    phi_offset_i : in  std_logic_vector(log2ceil(ratio_g)-1 downto 0);               -- phase offset for demod LUT
+    dat_inp_o    : out std_logic_vector(psi_fix_size(out_fmt_g)*channels_g- 1 downto 0);-- inphase data output
+    dat_qua_o    : out std_logic_vector(psi_fix_size(out_fmt_g)*channels_g- 1 downto 0);-- quadrature data output
     vld_o        : out std_logic                                                     -- valid output
   );
 end entity;
 -- @formatter:on
 architecture RTL of psi_fix_demod_real2cplx is
 
-  constant coefUnusedBits_c : integer     := log2(Ratio_g);
-  constant CoefFmt_c        : psi_fix_fmt_t := (1, 0-coefUnusedBits_c, CoefBits_g + coefUnusedBits_c-1);
-  constant MultFmt_c        : psi_fix_fmt_t := (1, InFmt_g.I + CoefFmt_c.I, OutFmt_g.F+log2ceil(Ratio_g)+2); -- truncation error does only lead to 1/4 LSB error on output
-  constant coef_scale_c     : real        := (1.0-2.0**(-real(CoefFmt_c.F)))/real(Ratio_g); -- prevent +/- 1.0 and pre-compensate for gain of moving average
+  constant coefUnusedBits_c : integer     := log2(ratio_g);
+  constant CoefFmt_c        : psi_fix_fmt_t := (1, 0-coefUnusedBits_c, coef_bits_g + coefUnusedBits_c-1);
+  constant MultFmt_c        : psi_fix_fmt_t := (1, in_fmt_g.I + CoefFmt_c.I, out_fmt_g.F+log2ceil(ratio_g)+2); -- truncation error does only lead to 1/4 LSB error on output
+  constant coef_scale_c     : real        := (1.0-2.0**(-real(CoefFmt_c.F)))/real(ratio_g); -- prevent +/- 1.0 and pre-compensate for gain of moving average
 
-  type coef_array_t is array (0 to Ratio_g - 1) of std_logic_vector(PsiFixSize(CoefFmt_c) - 1 downto 0);
+  type coef_array_t is array (0 to ratio_g - 1) of std_logic_vector(psi_fix_size(CoefFmt_c) - 1 downto 0);
 
   --SIN coef function <=> Q coef n = (sin(nx2pi/Ratio)(2/Ratio))
   function coef_sin_array_func return coef_array_t is
     variable array_v : coef_array_t;
   begin
-    for i in 0 to Ratio_g - 1 loop
-      array_v(i) := PsiFixFromReal(sin(2.0 * MATH_PI * real(i) / real(Ratio_g)) * coef_scale_c, CoefFmt_c);
+    for i in 0 to ratio_g - 1 loop
+      array_v(i) := psi_fix_from_real(sin(2.0 * MATH_PI * real(i) / real(ratio_g)) * coef_scale_c, CoefFmt_c);
     end loop;
     return array_v;
   end function;
@@ -70,8 +70,8 @@ architecture RTL of psi_fix_demod_real2cplx is
   function coef_cos_array_func return coef_array_t is
     variable array_v : coef_array_t;
   begin
-    for i in 0 to Ratio_g - 1 loop
-      array_v(i) := PsiFixFromReal(cos(2.0 * MATH_PI * real(i) / real(Ratio_g)) * coef_scale_c, CoefFmt_c);
+    for i in 0 to ratio_g - 1 loop
+      array_v(i) := psi_fix_from_real(cos(2.0 * MATH_PI * real(i) / real(ratio_g)) * coef_scale_c, CoefFmt_c);
     end loop;
     return array_v;
   end function;
@@ -84,12 +84,12 @@ architecture RTL of psi_fix_demod_real2cplx is
   attribute rom_style      : string;
   attribute rom_style of nonIQ_table_sin, nonIQ_table_cos : constant is "distributed";
 
-  type MultArray_t is array (0 to Channels_g - 1) of std_logic_vector(PsiFixSize(MultFmt_c) - 1 downto 0);
-  type InArray_t is array (0 to Channels_g - 1) of std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-  type OutArray_t is array (0 to Channels_g - 1) of std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+  type MultArray_t is array (0 to channels_g - 1) of std_logic_vector(psi_fix_size(MultFmt_c) - 1 downto 0);
+  type InArray_t is array (0 to channels_g - 1) of std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);
+  type OutArray_t is array (0 to channels_g - 1) of std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);
   --
-  signal cptInt        : integer range 0 to Ratio_g - 1 := 0;
-  signal cpt_s         : integer range 0 to Ratio_g - 1 := 0;
+  signal cptInt        : integer range 0 to ratio_g - 1 := 0;
+  signal cpt_s         : integer range 0 to ratio_g - 1 := 0;
   signal mult_i_s      : MultArray_t;
   signal mult_q_s      : MultArray_t;
   --
@@ -97,27 +97,27 @@ architecture RTL of psi_fix_demod_real2cplx is
   signal mult_q_dff_s  : MultArray_t;
   signal mult_i_dff2_s : MultArray_t;
   signal mult_q_dff2_s : MultArray_t;
-  signal coef_i_s      : std_logic_vector(PsiFixSize(CoefFmt_c) - 1 downto 0);
-  signal coef_q_s      : std_logic_vector(PsiFixSize(CoefFmt_c) - 1 downto 0);
+  signal coef_i_s      : std_logic_vector(psi_fix_size(CoefFmt_c) - 1 downto 0);
+  signal coef_q_s      : std_logic_vector(psi_fix_size(CoefFmt_c) - 1 downto 0);
   signal data_s        : InArray_t;
   signal data_dff_s    : InArray_t;
   signal out_q_s       : OutArray_t;
   signal out_i_s       : OutArray_t;
   signal strIn         : std_logic_vector(0 to 4);
   signal RstPos        : std_logic;
-  signal out_str_s     : std_logic_vector(0 to Channels_g - 1);
+  signal out_str_s     : std_logic_vector(0 to channels_g - 1);
 
 begin
 
-  RstPos <= '1' when rst_i = RstPol_g else '0';
+  RstPos <= '1' when rst_i = rst_pol_g else '0';
 
   --===========================================================================
-  -- 		LIMIT the phase offset to max value and check value change
+  --    LIMIT the phase offset to max value and check value change
   --===========================================================================
   process(clk_i)
   begin
     if rising_edge(clk_i) then
-      if rst_i = RstPol_g then
+      if rst_i = rst_pol_g then
         data_s     <= (others => (others => '0'));
         data_dff_s <= (others => (others => '0'));
         strIn      <= (others => '0');
@@ -125,8 +125,8 @@ begin
         strIn(0)               <= vld_i;
         strIn(1 to strIn'high) <= strIn(0 to strIn'high - 1);
         -- Channel Splitting
-        for i in 0 to Channels_g - 1 loop
-          data_s(i) <= dat_i((i + 1) * PsiFixSize(InFmt_g) - 1 downto i * PsiFixSize(InFmt_g));
+        for i in 0 to channels_g - 1 loop
+          data_s(i) <= dat_i((i + 1) * psi_fix_size(in_fmt_g) - 1 downto i * psi_fix_size(in_fmt_g));
         end loop;
         -- Delay
         data_dff_s             <= data_s;
@@ -135,16 +135,16 @@ begin
   end process;
 
   --===========================================================================
-  -- 	 pointer ROM
+  --   pointer ROM
   --===========================================================================
   process(clk_i)
   begin
     if rising_edge(clk_i) then
-      if rst_i = RstPol_g then
+      if rst_i = rst_pol_g then
         cptInt <= 0;
       else
         if vld_i = '1' then
-          if cptInt = Ratio_g - 1 then
+          if cptInt = ratio_g - 1 then
             cptInt <= 0;
           else
             cptInt <= cptInt + 1;
@@ -155,18 +155,18 @@ begin
   end process;
 
   process(clk_i)
-    variable cptIntOffs : integer range 0 to 2 * Ratio_g - 1 := 0;
+    variable cptIntOffs : integer range 0 to 2 * ratio_g - 1 := 0;
   begin
     if rising_edge(clk_i) then
-      if rst_i = RstPol_g then
+      if rst_i = rst_pol_g then
         cpt_s <= 0;
       else
-        assert unsigned(phi_offset_i) <= Ratio_g - 1 report "###ERROR###: psi_fix_demod_real2cpls: phi_offset_i must be <= Ratio_g-1" severity error;
+        assert unsigned(phi_offset_i) <= ratio_g - 1 report "###ERROR###: psi_fix_demod_real2cpls: phi_offset_i must be <= ratio_g-1" severity error;
         cptIntOffs := cptInt + to_integer(unsigned(phi_offset_i));
-        if unsigned(phi_offset_i) > Ratio_g - 1 then
-          cpt_s <= cptInt + Ratio_g - 1;
-        elsif cptIntOffs > Ratio_g - 1 then
-          cpt_s <= cptIntOffs - Ratio_g;
+        if unsigned(phi_offset_i) > ratio_g - 1 then
+          cpt_s <= cptInt + ratio_g - 1;
+        elsif cptIntOffs > ratio_g - 1 then
+          cpt_s <= cptIntOffs - ratio_g;
         else
           cpt_s <= cptIntOffs;
         end if;
@@ -180,7 +180,7 @@ begin
   imult_proc : process(clk_i)
   begin
     if rising_edge(clk_i) then
-      if rst_i = RstPol_g then
+      if rst_i = rst_pol_g then
         mult_i_s      <= (others => (others => '0'));
         mult_i_dff_s  <= (others => (others => '0'));
         mult_i_dff2_s <= (others => (others => '0'));
@@ -190,26 +190,26 @@ begin
         coef_i_s <= nonIQ_table_sin(cpt_s);
 
         -- Processing per channel
-        for i in 0 to Channels_g - 1 loop
-          mult_i_s(i) <= PsiFixMult(data_dff_s(i), InFmt_g,
+        for i in 0 to channels_g - 1 loop
+          mult_i_s(i) <= psi_fix_mult(data_dff_s(i), in_fmt_g,
                                     coef_i_s, CoefFmt_c,
-                                    MultFmt_c, PsiFixTrunc, PsiFixWrap);
+                                    MultFmt_c, psi_fix_trunc, psi_fix_wrap);
         end loop;
         mult_i_dff_s  <= mult_i_s;
         mult_i_dff2_s <= mult_i_dff_s;
       end if;
     end if;
   end process;
-  g_mov_avg_i : for i in 0 to Channels_g - 1 generate
+  g_mov_avg_i : for i in 0 to channels_g - 1 generate
     i_mov_avg : entity work.psi_fix_mov_avg
       generic map(
-        InFmt_g    => MultFmt_c,
-        OutFmt_g   => OutFmt_g,
-        Taps_g     => Ratio_g,
-        GainCorr_g => "NONE",
-        Round_g    => PsiFixRound,
-        Sat_g      => PsiFixSat,
-        OutRegs_g  => 2
+        in_fmt_g    => MultFmt_c,
+        out_fmt_g   => out_fmt_g,
+        taps_g     => ratio_g,
+        gain_corr_g => "NONE",
+        round_g    => psi_fix_round,
+        sat_g      => psi_fix_sat,
+        out_regs_g  => 2
       )
       port map(
         clk_i     => clk_i,
@@ -220,7 +220,7 @@ begin
         dat_o => out_i_s(i)
       );
 
-    dat_inp_o((i + 1) * PsiFixSize(OutFmt_g) - 1 downto i * PsiFixSize(OutFmt_g)) <= out_i_s(i);
+    dat_inp_o((i + 1) * psi_fix_size(out_fmt_g) - 1 downto i * psi_fix_size(out_fmt_g)) <= out_i_s(i);
   end generate;
   vld_o <= out_str_s(0);
 
@@ -230,7 +230,7 @@ begin
   process(clk_i)
   begin
     if rising_edge(clk_i) then
-      if rst_i = RstPol_g then
+      if rst_i = rst_pol_g then
         mult_q_s      <= (others => (others => '0'));
         mult_q_dff_s  <= (others => (others => '0'));
         mult_q_dff2_s <= (others => (others => '0'));
@@ -240,10 +240,10 @@ begin
         coef_q_s <= nonIQ_table_cos(cpt_s);
 
         -- Processing per channel
-        for i in 0 to Channels_g - 1 loop
-          mult_q_s(i) <= PsiFixMult(data_dff_s(i), InFmt_g,
+        for i in 0 to channels_g - 1 loop
+          mult_q_s(i) <= psi_fix_mult(data_dff_s(i), in_fmt_g,
                                     coef_q_s, CoefFmt_c,
-                                    MultFmt_c, PsiFixTrunc, PsiFixWrap);
+                                    MultFmt_c, psi_fix_trunc, psi_fix_wrap);
         end loop;
         mult_q_dff_s  <= mult_q_s;
         mult_q_dff2_s <= mult_q_dff_s;
@@ -251,16 +251,16 @@ begin
     end if;
   end process;
 
-  g_mov_avg_q : for i in 0 to Channels_g - 1 generate
+  g_mov_avg_q : for i in 0 to channels_g - 1 generate
     i_mov_avg : entity work.psi_fix_mov_avg
       generic map(
-        InFmt_g    => MultFmt_c,
-        OutFmt_g   => OutFmt_g,
-        Taps_g     => Ratio_g,
-        GainCorr_g => "NONE",
-        Round_g    => PsiFixRound,
-        Sat_g      => PsiFixSat,
-        OutRegs_g  => 2
+        in_fmt_g    => MultFmt_c,
+        out_fmt_g   => out_fmt_g,
+        taps_g     => ratio_g,
+        gain_corr_g => "NONE",
+        round_g    => psi_fix_round,
+        sat_g      => psi_fix_sat,
+        out_regs_g  => 2
       )
       port map(
         clk_i     => clk_i,
@@ -271,7 +271,7 @@ begin
         dat_o => out_q_s(i)
       );
 
-    dat_qua_o((i + 1) * PsiFixSize(OutFmt_g) - 1 downto i * PsiFixSize(OutFmt_g)) <= out_q_s(i);
+    dat_qua_o((i + 1) * psi_fix_size(out_fmt_g) - 1 downto i * psi_fix_size(out_fmt_g)) <= out_q_s(i);
   end generate;
 
 end architecture;

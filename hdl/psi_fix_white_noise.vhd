@@ -21,15 +21,15 @@ use work.psi_fix_pkg.all;
 -- Entity
 ------------------------------------------------------------------------------
 entity psi_fix_white_noise is
-  generic( OutFmt_g : psi_fix_fmt_t           := (0, 0, 31);
-           Seed_g   : unsigned(31 downto 0) := X"A38E3C1D";
+  generic( out_fmt_g : psi_fix_fmt_t           := (0, 0, 31);
+           seed_g   : unsigned(31 downto 0) := X"A38E3C1D";
            rst_pol_g: std_logic             :='1');
   port(    -- Control Signals
           clk_i     : in  std_logic;
           rst_i     : in  std_logic;
           vld_i     : in  std_logic := '1';
           vld_o     : out std_logic;
-          dat_o     : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0));
+          dat_o     : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0));
 end entity;
 
 ------------------------------------------------------------------------------
@@ -38,12 +38,12 @@ end entity;
 
 architecture rtl of psi_fix_white_noise is
   -- Constants
-  constant OutBits_c : integer := PsiFixSize(OutFmt_g);
+  constant OutBits_c : integer := psi_fix_size(out_fmt_g);
 
   -- Two Process Method
   type two_process_r is record
     Lfsr    : t_aslv32(0 to OutBits_c - 1);
-    OutData : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+    OutData : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);
     OutVld  : std_logic;
   end record;
   signal r, r_next : two_process_r;
@@ -56,7 +56,7 @@ begin
   begin
     if rising_edge(clk_i) then
       if rst_i = not rst_pol_g then
-        assert PsiFixSize(OutFmt_g) <= 32 report "###ERROR###: psi_fix_white_noise: Output width cannot be larger than 32 bits" severity error;
+        assert psi_fix_size(out_fmt_g) <= 32 report "###ERROR###: psi_fix_white_noise: Output width cannot be larger than 32 bits" severity error;
       end if;
     end if;
   end process;
@@ -94,14 +94,14 @@ begin
 
   --------------------------------------------------------------------------
   -- Sequential Process
-  --------------------------------------------------------------------------	
+  --------------------------------------------------------------------------
   p_seq : process(clk_i)
   begin
     if rising_edge(clk_i) then
       r <= r_next;
       if rst_i = rst_pol_g then
         for i in 0 to OutBits_c - 1 loop
-          r.Lfsr(i) <= std_logic_vector(Seed_g + shift_left(to_unsigned(1, 32), i));
+          r.Lfsr(i) <= std_logic_vector(seed_g + shift_left(to_unsigned(1, 32), i));
         end loop;
         r.OutVld <= '0';
       end if;

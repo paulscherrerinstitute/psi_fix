@@ -35,10 +35,10 @@ architecture sim of psi_fix_param_ram_tb is
   -- *** Fixed Generics ***
 
   -- *** Not Assigned Generics (default values) ***
-  constant Depth_g    : positive    := 8;
-  constant Fmt_g      : psi_fix_fmt_t := (1, 0, 15);
-  constant Behavior_g : string      := "RBW";
-  constant Init_g     : t_areal     := (0.1, 0.2, 0.3);
+  constant depth_g    : positive    := 8;
+  constant fmt_g      : psi_fix_fmt_t := (1, 0, 15);
+  constant behavior_g : string      := "RBW";
+  constant init_g     : t_areal     := (0.1, 0.2, 0.3);
 
   -- *** TB Control ***
   signal TbRunning            : boolean                  := True;
@@ -49,15 +49,15 @@ architecture sim of psi_fix_param_ram_tb is
 
   -- *** DUT Signals ***
   signal ClkA  : std_logic                                        := '0';
-  signal AddrA : std_logic_vector(log2ceil(Depth_g) - 1 downto 0) := (others => '0');
+  signal AddrA : std_logic_vector(log2ceil(depth_g) - 1 downto 0) := (others => '0');
   signal WrA   : std_logic                                        := '0';
-  signal DinA  : std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0) := (others => '0');
-  signal DoutA : std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0) := (others => '0');
+  signal DinA  : std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');
+  signal DoutA : std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');
   signal ClkB  : std_logic                                        := '0';
-  signal AddrB : std_logic_vector(log2ceil(Depth_g) - 1 downto 0) := (others => '0');
+  signal AddrB : std_logic_vector(log2ceil(depth_g) - 1 downto 0) := (others => '0');
   signal WrB   : std_logic                                        := '0';
-  signal DinB  : std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0) := (others => '0');
-  signal DoutB : std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0) := (others => '0');
+  signal DinB  : std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');
+  signal DoutB : std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');
 
 begin
   ------------------------------------------------------------
@@ -65,10 +65,10 @@ begin
   ------------------------------------------------------------
   i_dut : entity work.psi_fix_param_ram
     generic map(
-      Depth_g    => Depth_g,
-      Fmt_g      => Fmt_g,
-      Behavior_g => Behavior_g,
-      Init_g     => Init_g
+      depth_g    => depth_g,
+      fmt_g      => fmt_g,
+      behavior_g => behavior_g,
+      init_g     => init_g
     )
     port map(
       ClkA  => ClkA,
@@ -128,12 +128,12 @@ begin
   begin
     -- Check Initial Content (Port A)
     wait until rising_edge(ClkA);
-    for i in 0 to Depth_g - 1 loop
+    for i in 0 to depth_g - 1 loop
       AddrA <= to_uslv(i, AddrA'length);
       wait until rising_edge(ClkA);
       wait until rising_edge(ClkA);
-      if i < Init_g'length then
-        StdlvCompareStdlv(PsiFixFromReal(Init_g(i), Fmt_g), DoutA, "InitA");
+      if i < init_g'length then
+        StdlvCompareStdlv(psi_fix_from_real(init_g(i), fmt_g), DoutA, "InitA");
       else
         StdlvCompareInt(0, DoutA, "ZeroA");
       end if;
@@ -141,12 +141,12 @@ begin
 
     -- Check Initial Content (Port B)
     wait until rising_edge(ClkB);
-    for i in 0 to Depth_g - 1 loop
+    for i in 0 to depth_g - 1 loop
       AddrB <= to_uslv(i, AddrB'length);
       wait until rising_edge(ClkB);
       wait until rising_edge(ClkB);
-      if i < Init_g'length then
-        StdlvCompareStdlv(PsiFixFromReal(Init_g(i), Fmt_g), DoutB, "InitB");
+      if i < init_g'length then
+        StdlvCompareStdlv(psi_fix_from_real(init_g(i), fmt_g), DoutB, "InitB");
       else
         StdlvCompareInt(0, DoutB, "ZeroB");
       end if;
@@ -154,14 +154,14 @@ begin
 
     -- Check Overwrite Content (Port A)
     wait until rising_edge(ClkA);
-    for i in 0 to Depth_g - 1 loop
+    for i in 0 to depth_g - 1 loop
       AddrA <= to_uslv(i, AddrA'length);
       DinA  <= to_uslv(i + 10, DinA'length);
       WrA   <= '1';
       wait until rising_edge(ClkA);
     end loop;
     WrA <= '0';
-    for i in 0 to Depth_g - 1 loop
+    for i in 0 to depth_g - 1 loop
       AddrA <= to_uslv(i, AddrA'length);
       wait until rising_edge(ClkA);
       wait until rising_edge(ClkA);
@@ -170,14 +170,14 @@ begin
 
     -- Check Overwrite Content (Port B)
     wait until rising_edge(ClkB);
-    for i in 0 to Depth_g - 1 loop
+    for i in 0 to depth_g - 1 loop
       AddrB <= to_uslv(i, AddrA'length);
       DinB  <= to_uslv(i + 20, DinA'length);
       WrB   <= '1';
       wait until rising_edge(ClkB);
     end loop;
     WrB <= '0';
-    for i in 0 to Depth_g - 1 loop
+    for i in 0 to depth_g - 1 loop
       AddrB <= to_uslv(i, AddrB'length);
       wait until rising_edge(ClkB);
       wait until rising_edge(ClkB);

@@ -12,7 +12,7 @@ use work.psi_common_math_pkg.all;
 use work.psi_tb_textfile_pkg.all;
 
 entity psi_fix_lut_gen_tb is
-  generic(FileFolder_g : string := "../testbench/psi_fix_lut_gen_tb/Data");
+  generic(file_folder_g : string := "../testbench/psi_fix_lut_gen_tb/Data");
 end entity;
 
 architecture tb of psi_fix_lut_gen_tb is
@@ -26,7 +26,7 @@ architecture tb of psi_fix_lut_gen_tb is
   signal rst_sti        : std_logic;
   signal radd_sti       : std_logic_vector(log2ceil(61) - 1 downto 0);
   signal rena_sti       : std_logic              := '0';
-  signal data_obs       : std_logic_vector(PsiFixSize((data_fmt_c)) - 1 downto 0);
+  signal data_obs       : std_logic_vector(psi_fix_size((data_fmt_c)) - 1 downto 0);
   signal process_done_s : std_logic              := '0';
   signal SigOut         : TextfileData_t(0 to 0) := (others => 0);
 begin
@@ -52,7 +52,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => rena_sti,
                          Data        => SigOut,
-                         Filepath    => (FileFolder_g & "/model.txt"),
+                         Filepath    => (file_folder_g & "/model.txt"),
                          IgnoreLines => 1);
     process_done_s <= '1';
   end process;
@@ -61,7 +61,7 @@ begin
     variable count_v : integer range 0 to 61 := 0;
   begin
     if rising_edge(clk_sti) then
-      --	rena_dff_sti <= rena_sti;
+      --  rena_dff_sti <= rena_sti;
       if rena_sti = '1' then
         if count_v < 60 then
           count_v := count_v + 1;
@@ -76,15 +76,15 @@ begin
   --insert your DUT
   inst_dut : entity work.psi_fix_lut_test1
     generic map(rst_pol_g   => '1',
-                rom_stlye_g => "block")
-    port map(InClk   => clk_sti,
-             InRst   => rst_sti,
-             InRdAdd => radd_sti,
-             InRdEna => rena_sti,
-             OutDat  => data_obs);
+                rom_style_g => "block")
+    port map(clk_i   => clk_sti,
+             rst_i   => rst_sti,
+             radd_i => radd_sti,
+             rena_i => rena_sti,
+             data_o  => data_obs);
 
   proc_stim : process
-    --	variable count_v : integer range 0 to 5 := 0;
+    --  variable count_v : integer range 0 to 5 := 0;
   begin
     tb_run   <= true;
     rst_sti  <= '1';

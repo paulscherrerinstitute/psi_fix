@@ -24,7 +24,7 @@ use work.psi_tb_textfile_pkg.all;
 ------------------------------------------------------------------------------
 entity psi_fix_lin_approx_sin18b_dual_tb is
   generic(
-    StimuliDir_g : string := "../testbench/psi_fix_lin_approx_tb/sin18b"
+    stimuli_dir_g : string := "../testbench/psi_fix_lin_approx_tb/sin18b"
   );
 end entity;
 
@@ -42,13 +42,13 @@ architecture sim of psi_fix_lin_approx_sin18b_dual_tb is
   signal Clk      : std_logic                                           := '0';
   signal Rst      : std_logic                                           := '1';
   signal InVldA   : std_logic                                           := '0';
-  signal InDataA  : std_logic_vector(PsiFixSize(InFmt_c) - 1 downto 0)  := (others => '0');
+  signal InDataA  : std_logic_vector(psi_fix_size(InFmt_c) - 1 downto 0)  := (others => '0');
   signal InVldB   : std_logic                                           := '0';
-  signal InDataB  : std_logic_vector(PsiFixSize(InFmt_c) - 1 downto 0)  := (others => '0');
+  signal InDataB  : std_logic_vector(psi_fix_size(InFmt_c) - 1 downto 0)  := (others => '0');
   signal OutVldA  : std_logic                                           := '0';
-  signal OutDataA : std_logic_vector(PsiFixSize(OutFmt_c) - 1 downto 0) := (others => '0');
+  signal OutDataA : std_logic_vector(psi_fix_size(OutFmt_c) - 1 downto 0) := (others => '0');
   signal OutVldB  : std_logic                                           := '0';
-  signal OutDataB : std_logic_vector(PsiFixSize(OutFmt_c) - 1 downto 0) := (others => '0');
+  signal OutDataB : std_logic_vector(psi_fix_size(OutFmt_c) - 1 downto 0) := (others => '0');
 
   -- Tb Signals
   signal TbRunning : boolean                := true;
@@ -95,7 +95,7 @@ begin
     end if;
   end process;
 
-  InDataA <= PsiFixFromBitsAsInt(SigIn(0), InFmt_c);
+  InDataA <= psi_fix_from_bits_as_int(SigIn(0), InFmt_c);
   p_stimuli : process
   begin
     Rst <= '1';
@@ -105,12 +105,12 @@ begin
     Rst <= '0';
     wait for 1 us;
 
-    -- Apply StimuliDir_g		
+    -- Apply stimuli_dir_g
     ApplyTextfileContent(Clk       => Clk,
                          Rdy       => PsiTextfile_SigOne,
                          Vld       => InVldA,
                          Data      => SigIn,
-                         Filepath  => StimuliDir_g & "/stimuli.txt",
+                         Filepath  => stimuli_dir_g & "/stimuli.txt",
                          ClkPerSpl => 1);
 
     -- Finish
@@ -120,26 +120,26 @@ begin
     wait;
   end process;
 
-  SigOutA(0) <= PsiFixGetBitsAsInt(OutDataA, OutFmt_c);
+  SigOutA(0) <= psi_fix_get_bits_as_int(OutDataA, OutFmt_c);
   p_response_a : process
   begin
     CheckTextfileContent(Clk      => Clk,
                          Rdy      => PsiTextfile_SigUnused,
                          Vld      => OutVldA,
                          Data     => SigOutA,
-                         Filepath => StimuliDir_g & "/response.txt");
+                         Filepath => stimuli_dir_g & "/response.txt");
 
     wait;
   end process;
 
-  SigOutB(0) <= PsiFixGetBitsAsInt(OutDataB, OutFmt_c);
+  SigOutB(0) <= psi_fix_get_bits_as_int(OutDataB, OutFmt_c);
   p_response_b : process
   begin
     CheckTextfileContent(Clk      => Clk,
                          Rdy      => PsiTextfile_SigUnused,
                          Vld      => OutVldB,
                          Data     => SigOutB,
-                         Filepath => StimuliDir_g & "/response.txt");
+                         Filepath => stimuli_dir_g & "/response.txt");
 
     wait;
   end process;

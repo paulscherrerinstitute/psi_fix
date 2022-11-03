@@ -15,7 +15,7 @@ entity psi_fix_lin_approx_gaussify20b is
   );
   port(
     clk_i : in  std_logic;
-    rst_i : in  std_logic;    
+    rst_i : in  std_logic;
     dat_i : in  std_logic_vector(20 - 1 downto 0);  -- Format (1, 0, 19)
     vld_i : in  std_logic;
     dat_o : out std_logic_vector(20 - 1 downto 0);  -- Format (1, 0, 19)
@@ -1073,11 +1073,11 @@ begin
   i_calc : entity work.psi_fix_lin_approx_calc
     generic map(
       rst_pol_g   => rst_pol_g,
-      InFmt_g     => InFmt_c,
-      OutFmt_g    => OutFmt_c,
-      OffsFmt_g   => OffsFmt_c,
-      GradFmt_g   => GradFmt_c,
-      TableSize_g => TableSize_c
+      in_fmt_g     => InFmt_c,
+      out_fmt_g    => OutFmt_c,
+      offs_fmt_g   => OffsFmt_c,
+      grad_fmt_g   => GradFmt_c,
+      table_size_g => TableSize_c
     )
     port map(
       -- Control Signals

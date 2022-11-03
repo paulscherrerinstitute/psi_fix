@@ -82,9 +82,9 @@ package body psi_fix_fir_dec_ser_nch_chpar_conf_tb_case1_pkg is
       wait until rising_edge(Clk);
       readline(fInput, l);
       read(l, s);
-      InSig.Data(0) <= PsiFixFromBitsAsInt(s, InFmt_c);
+      InSig.Data(0) <= psi_fix_from_bits_as_int(s, InFmt_c);
       read(l, s);
-      InSig.Data(1) <= PsiFixFromBitsAsInt(s, InFmt_c);
+      InSig.Data(1) <= psi_fix_from_bits_as_int(s, InFmt_c);
       InSig.Vld     <= '1';
       wait until rising_edge(Clk);
       InSig.Vld     <= '0';

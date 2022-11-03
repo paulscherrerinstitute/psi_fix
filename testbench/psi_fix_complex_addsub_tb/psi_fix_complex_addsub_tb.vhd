@@ -14,19 +14,19 @@ use work.psi_fix_pkg.all;
 use work.psi_tb_textfile_pkg.all;
 -- @foramter:off
 entity psi_fix_complex_addsub_tb is
-  generic(Pipeline_g   : boolean := true;
-          FileFolder_g : string  := "../testbench/psi_fix_complex_addsub_tb/Data";
-          ClkPerSpl_g  : integer := 1);
+  generic(pipeline_g   : boolean := true;
+          file_folder_g : string  := "../testbench/psi_fix_complex_addsub_tb/Data";
+          clk_per_spl_g  : integer := 1);
 end entity;
 
 architecture sim of psi_fix_complex_addsub_tb is
   -- *** Fixed Generics ***
-  constant RstPol_g : std_logic   := '1';
-  constant InAFmt_g : psi_fix_fmt_t := (1, 0, 15);
-  constant InBFmt_g : psi_fix_fmt_t := (1, 0, 15);
-  constant OutFmt_g : psi_fix_fmt_t := (1, 0, 15);
-  constant Round_g  : psi_fix_rnd_t := PsiFixRound;
-  constant Sat_g    : psi_fix_sat_t := PsiFixSat;
+  constant rst_pol_g : std_logic   := '1';
+  constant in_a_fmt_g : psi_fix_fmt_t := (1, 0, 15);
+  constant in_b_fmt_g : psi_fix_fmt_t := (1, 0, 15);
+  constant out_fmt_g : psi_fix_fmt_t := (1, 0, 15);
+  constant round_g  : psi_fix_rnd_t := psi_fix_round;
+  constant sat_g    : psi_fix_sat_t := psi_fix_sat;
 
   -- *** TB Control ***
   signal TbRunning            : boolean                  := True;
@@ -42,16 +42,16 @@ architecture sim of psi_fix_complex_addsub_tb is
   signal AddRespSig   : TextfileData_t(0 to 1);
   signal InClk        : std_logic := '0';
   signal InRst        : std_logic;
-  signal InInpADat    : std_logic_vector(PsiFixSize(InAFmt_g) - 1 downto 0);
-  signal InQuaADat    : std_logic_vector(PsiFixSize(InAFmt_g) - 1 downto 0);
-  signal InInpBDat    : std_logic_vector(PsiFixSize(InBFmt_g) - 1 downto 0);
-  signal InQuaBDat    : std_logic_vector(PsiFixSize(InBFmt_g) - 1 downto 0);
+  signal InInpADat    : std_logic_vector(psi_fix_size(in_a_fmt_g) - 1 downto 0);
+  signal InQuaADat    : std_logic_vector(psi_fix_size(in_a_fmt_g) - 1 downto 0);
+  signal InInpBDat    : std_logic_vector(psi_fix_size(in_b_fmt_g) - 1 downto 0);
+  signal InQuaBDat    : std_logic_vector(psi_fix_size(in_b_fmt_g) - 1 downto 0);
   signal InVld        : std_logic;
-  signal SubOutInpDat : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-  signal SubOutQuaDat : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+  signal SubOutInpDat : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);
+  signal SubOutQuaDat : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);
   signal OutVld       : std_logic;
-  signal AddOutInpDat : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-  signal AddOutQuaDat : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
+  signal AddOutInpDat : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);
+  signal AddOutQuaDat : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);
 
 begin
   ------------------------------------------------------------
@@ -59,14 +59,14 @@ begin
   ------------------------------------------------------------
   i_dut_add : entity work.psi_fix_complex_addsub
     generic map(
-      RstPol_g   => RstPol_g,
-      Pipeline_g => Pipeline_g,
-      InAFmt_g   => InAFmt_g,
-      InBFmt_g   => InBFmt_g,
-      OutFmt_g   => OutFmt_g,
-      Round_g    => Round_g,
-      Sat_g      => Sat_g,
-      AddSub_g   => "ADD")
+      rst_pol_g   => rst_pol_g,
+      pipeline_g => pipeline_g,
+      in_a_fmt_g   => in_a_fmt_g,
+      in_b_fmt_g   => in_b_fmt_g,
+      out_fmt_g   => out_fmt_g,
+      round_g    => round_g,
+      sat_g      => sat_g,
+      add_sub_g   => "ADD")
     port map(
       clk_i         => InClk,
       rst_i         => InRst,
@@ -84,14 +84,14 @@ begin
   ------------------------------------------------------------
   i_dut_sub : entity work.psi_fix_complex_addsub
     generic map(
-      RstPol_g   => RstPol_g,
-      Pipeline_g => Pipeline_g,
-      InAFmt_g   => InAFmt_g,
-      InBFmt_g   => InBFmt_g,
-      OutFmt_g   => OutFmt_g,
-      Round_g    => Round_g,
-      Sat_g      => Sat_g,
-      AddSub_g   => "SUB")
+      rst_pol_g   => rst_pol_g,
+      pipeline_g => pipeline_g,
+      in_a_fmt_g   => in_a_fmt_g,
+      in_b_fmt_g   => in_b_fmt_g,
+      out_fmt_g   => out_fmt_g,
+      round_g    => round_g,
+      sat_g      => sat_g,
+      add_sub_g   => "SUB")
     port map(
       clk_i         => InClk,
       rst_i         => InRst,
@@ -151,13 +151,13 @@ begin
     -- start of process !DO NOT EDIT
     wait until InRst = '0';
 
-    -- Apply Stimuli	
+    -- Apply Stimuli
     ApplyTextfileContent(Clk         => InClk,
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => InVld,
                          Data        => StimuliSig,
-                         Filepath    => FileFolder_g & "/input.txt",
-                         ClkPerSpl   => ClkPerSpl_g,
+                         Filepath    => file_folder_g & "/input.txt",
+                         ClkPerSpl   => clk_per_spl_g,
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!
@@ -184,10 +184,10 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => OutVld,
                          Data        => AddRespSig,
-                         Filepath    => FileFolder_g & "/output_add.txt",
+                         Filepath    => file_folder_g & "/output_add.txt",
                          IgnoreLines => 1);
 
-    --	 end of process !DO NOT EDIT!
+    --   end of process !DO NOT EDIT!
     ProcessDone(TbProcNr_resp_c) <= '1';
     wait;
   end process;
@@ -204,9 +204,9 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => OutVld,
                          Data        => SubRespSig,
-                         Filepath    => FileFolder_g & "/output_sub.txt",
+                         Filepath    => file_folder_g & "/output_sub.txt",
                          IgnoreLines => 1);
-    --	 end of process !DO NOT EDIT!
+    --   end of process !DO NOT EDIT!
     ProcessDone(TbProcNr_resp1_c) <= '1';
     wait;
   end process;

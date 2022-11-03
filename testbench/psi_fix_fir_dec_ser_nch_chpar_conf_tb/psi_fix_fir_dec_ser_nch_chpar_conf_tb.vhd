@@ -23,9 +23,9 @@ use work.psi_fix_fir_dec_ser_nch_chpar_conf_tb_case1_pkg.all;
 
 entity psi_fix_fir_dec_ser_nch_chpar_conf_tb is
   generic(
-    DutyCycle_g   : natural := 32;
-    StimuliPath_g : string  := "../testbench/psi_fix_fir_dec_ser_nch_chpar_conf_tb/Data";
-    RamBehavior_g : string  := "RBW"
+    duty_cycle_g   : natural := 32;
+    stimuli_path_g : string  := "../testbench/psi_fix_fir_dec_ser_nch_chpar_conf_tb/Data";
+    ram_behavior_g : string  := "RBW"
   );
 end entity psi_fix_fir_dec_ser_nch_chpar_conf_tb;
 
@@ -53,10 +53,10 @@ architecture sim of psi_fix_fir_dec_ser_nch_chpar_conf_tb is
   signal CoefIn  : CoefIn_t  := (Wr   => '0',
                                  Addr => (others => '0'),
                                  Data => (others => '0'));
-  signal CoefOut : std_logic_vector(PsiFixSize(CoefFmt_c) - 1 downto 0);
+  signal CoefOut : std_logic_vector(psi_fix_size(CoefFmt_c) - 1 downto 0);
 
-  signal InDataDut  : std_logic_vector(PsiFixSize(InFmt_c) * Channels_c - 1 downto 0);
-  signal OutDataDut : std_logic_vector(PsiFixSize(OutFmt_c) * Channels_c - 1 downto 0);
+  signal InDataDut  : std_logic_vector(psi_fix_size(InFmt_c) * Channels_c - 1 downto 0);
+  signal OutDataDut : std_logic_vector(psi_fix_size(OutFmt_c) * Channels_c - 1 downto 0);
 
 begin
 
@@ -64,21 +64,21 @@ begin
   -- DUT
   -------------------------------------------------------------------------
   g_array : for i in 0 to Channels_c - 1 generate
-    InDataDut(PsiFixSize(InFmt_c) * (i + 1) - 1 downto PsiFixSize(InFmt_c) * i) <= SigIn.Data(i);
-    SigOut.Data(i)                                                              <= OutDataDut(PsiFixSize(OutFmt_c) * (i + 1) - 1 downto PsiFixSize(OutFmt_c) * i);
+    InDataDut(psi_fix_size(InFmt_c) * (i + 1) - 1 downto psi_fix_size(InFmt_c) * i) <= SigIn.Data(i);
+    SigOut.Data(i)                                                              <= OutDataDut(psi_fix_size(OutFmt_c) * (i + 1) - 1 downto psi_fix_size(OutFmt_c) * i);
   end generate;
 
   i_dut : entity work.psi_fix_fir_dec_ser_nch_chpar_conf
     generic map(
-      InFmt_g       => InFmt_c,
-      OutFmt_g      => OutFmt_c,
-      CoefFmt_g     => CoefFmt_c,
-      Channels_g    => Channels_c,
-      MaxRatio_g    => MaxRatio_c,
-      MaxTaps_g     => MaxTaps_c,
-      Rnd_g         => PsiFixRound,
-      Sat_g         => PsiFixSat,
-      RamBehavior_g => RamBehavior_g
+      in_fmt_g       => InFmt_c,
+      out_fmt_g      => OutFmt_c,
+      coef_fmt_g     => CoefFmt_c,
+      channels_g    => Channels_c,
+      max_ratio_g    => MaxRatio_c,
+      max_taps_g     => MaxTaps_c,
+      rnd_g         => psi_fix_round,
+      sat_g         => psi_fix_sat,
+      ram_behavior_g => ram_behavior_g
     )
     port map(
       -- Control Signals
@@ -130,7 +130,7 @@ begin
 
     -- Test Cases
     TestCase <= 0;
-    work.psi_fix_fir_dec_ser_nch_chpar_conf_tb_case0_pkg.run(Config, CoefIn, SigIn, CoefOut, Clk, DutyCycle_g);
+    work.psi_fix_fir_dec_ser_nch_chpar_conf_tb_case0_pkg.run(Config, CoefIn, SigIn, CoefOut, Clk, duty_cycle_g);
     if ResponseDone /= 0 then
       wait until ResponseDone = 0;
     end if;
@@ -140,7 +140,7 @@ begin
     wait until rising_edge(Clk);
     Rst      <= '0';
     TestCase <= 1;
-    work.psi_fix_fir_dec_ser_nch_chpar_conf_tb_case1_pkg.run(Config, CoefIn, SigIn, Clk, DutyCycle_g, StimuliPath_g);
+    work.psi_fix_fir_dec_ser_nch_chpar_conf_tb_case1_pkg.run(Config, CoefIn, SigIn, Clk, duty_cycle_g, stimuli_path_g);
     if ResponseDone /= 1 then
       wait until ResponseDone = 1;
     end if;
@@ -162,7 +162,7 @@ begin
     if TestCase /= 1 then
       wait until TestCase = 1;
     end if;
-    work.psi_fix_fir_dec_ser_nch_chpar_conf_tb_case1_pkg.check(SigOut, Clk, StimuliPath_g);
+    work.psi_fix_fir_dec_ser_nch_chpar_conf_tb_case1_pkg.check(SigOut, Clk, stimuli_path_g);
     ResponseDone <= 1;
 
     -- TB done

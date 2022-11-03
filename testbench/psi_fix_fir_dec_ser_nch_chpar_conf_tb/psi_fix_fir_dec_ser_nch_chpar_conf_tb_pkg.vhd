@@ -33,9 +33,9 @@ package psi_fix_fir_dec_ser_nch_chpar_conf_tb_pkg is
 
   -------------------------------------------------------------------------
   -- Types
-  -------------------------------------------------------------------------	
-  type InData_t is array (0 to Channels_c - 1) of std_logic_vector(PsiFixSize(InFmt_c) - 1 downto 0);
-  type OutData_t is array (0 to Channels_c - 1) of std_logic_vector(PsiFixSize(OutFmt_c) - 1 downto 0);
+  -------------------------------------------------------------------------
+  type InData_t is array (0 to Channels_c - 1) of std_logic_vector(psi_fix_size(InFmt_c) - 1 downto 0);
+  type OutData_t is array (0 to Channels_c - 1) of std_logic_vector(psi_fix_size(OutFmt_c) - 1 downto 0);
   type RealArray_t is array (natural range <>) of real;
   type IntArray_t is array (natural range <>) of integer;
 
@@ -57,12 +57,12 @@ package psi_fix_fir_dec_ser_nch_chpar_conf_tb_pkg is
   type CoefIn_t is record
     Wr   : std_logic;
     Addr : std_logic_vector(log2ceil(MaxTaps_c) - 1 downto 0);
-    Data : std_logic_vector(PsiFixSize(CoefFmt_c) - 1 downto 0);
+    Data : std_logic_vector(psi_fix_size(CoefFmt_c) - 1 downto 0);
   end record;
 
   -------------------------------------------------------------------------
   -- Procedures
-  -------------------------------------------------------------------------	
+  -------------------------------------------------------------------------
   procedure WriteCoef(Idx        : in natural;
                       Coef       : in real;
                       signal Wif : out CoefIn_t;
@@ -99,7 +99,7 @@ package body psi_fix_fir_dec_ser_nch_chpar_conf_tb_pkg is
   begin
     wait until rising_edge(Clk);
     Wif.Wr   <= '1';
-    Wif.Data <= PsiFixFromReal(Coef, CoefFmt_c);
+    Wif.Data <= psi_fix_from_real(Coef, CoefFmt_c);
     Wif.Addr <= std_logic_vector(to_unsigned(Idx, Wif.Addr'length));
     wait until rising_edge(Clk);
     Wif.Wr   <= '0';
@@ -128,21 +128,21 @@ package body psi_fix_fir_dec_ser_nch_chpar_conf_tb_pkg is
     Wif.Addr <= std_logic_vector(to_unsigned(Idx, Wif.Addr'length));
     wait until rising_edge(Clk);
     wait until rising_edge(Clk);
-    assert PsiFixFromReal(Coef, CoefFmt_c) = RdCoef report "###ERROR###: read wrong coefficient" severity error;
+    assert psi_fix_from_real(Coef, CoefFmt_c) = RdCoef report "###ERROR###: read wrong coefficient" severity error;
   end procedure;
 
   procedure CheckOut(Expected      : in RealArray_t(0 to Channels_c-1);
                      signal OutSig : in Out_t;
                      signal Clk    : in std_logic) is
-    variable ExpectedStdlv_v : std_logic_vector(PsiFixSize(OutFmt_c) - 1 downto 0);
+    variable ExpectedStdlv_v : std_logic_vector(psi_fix_size(OutFmt_c) - 1 downto 0);
   begin
     wait until rising_edge(Clk) and OutSig.Vld = '1';
     for i in 0 to Channels_c - 1 loop
-      ExpectedStdlv_v := PsiFixFromReal(Expected(i), OutFmt_c);
+      ExpectedStdlv_v := psi_fix_from_real(Expected(i), OutFmt_c);
       assert ExpectedStdlv_v = OutSig.Data(i)
-      report "###ERROR###: received wrong output on channel " & integer'image(i) & 
-						", expected " & integer'image(to_integer(signed(ExpectedStdlv_v))) &
-						", received " & integer'image(to_integer(signed(OutSig.Data(i))))
+      report "###ERROR###: received wrong output on channel " & integer'image(i) &
+            ", expected " & integer'image(to_integer(signed(ExpectedStdlv_v))) &
+            ", received " & integer'image(to_integer(signed(OutSig.Data(i))))
       severity error;
     end loop;
   end procedure;
@@ -151,16 +151,16 @@ package body psi_fix_fir_dec_ser_nch_chpar_conf_tb_pkg is
                         signal OutSig : in Out_t;
                         signal Clk    : in std_logic;
                         Sample        : in integer) is
-    variable ExpectedStdlv_v : std_logic_vector(PsiFixSize(OutFmt_c) - 1 downto 0);
+    variable ExpectedStdlv_v : std_logic_vector(psi_fix_size(OutFmt_c) - 1 downto 0);
   begin
     wait until rising_edge(Clk) and OutSig.Vld = '1';
     for i in 0 to Channels_c - 1 loop
-      ExpectedStdlv_v := PsiFixFromBitsAsInt(Expected(i), OutFmt_c);
+      ExpectedStdlv_v := psi_fix_from_bits_as_int(Expected(i), OutFmt_c);
       assert ExpectedStdlv_v = OutSig.Data(i)
-      report "###ERROR###: received wrong output on channel " & integer'image(i) & 
-						" Sample: " & integer'image(Sample) & 
-						", expected " & integer'image(to_integer(signed(ExpectedStdlv_v))) &
-						", received " & integer'image(to_integer(signed(OutSig.Data(i))))
+      report "###ERROR###: received wrong output on channel " & integer'image(i) &
+            " Sample: " & integer'image(Sample) &
+            ", expected " & integer'image(to_integer(signed(ExpectedStdlv_v))) &
+            ", received " & integer'image(to_integer(signed(OutSig.Data(i))))
       severity error;
     end loop;
   end procedure;

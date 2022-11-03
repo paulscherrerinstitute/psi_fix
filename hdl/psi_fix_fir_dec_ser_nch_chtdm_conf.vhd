@@ -14,7 +14,7 @@
 -- - Coefficients are configurable but the same for each channel
 ------------------------------------------------------------------------------
 --
--- Required Memory depth per channel = MaxTaps_g + MaxRatio_g
+-- Required Memory depth per channel = max_taps_g + max_ratio_g
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -26,35 +26,35 @@ use work.psi_common_array_pkg.all;
 
 entity psi_fix_fir_dec_ser_nch_chtdm_conf is
   generic(
-    InFmt_g       : psi_fix_fmt_t := (1, 0, 17);   -- internal format
-    OutFmt_g      : psi_fix_fmt_t := (1, 0, 17);   -- output format
-    CoefFmt_g     : psi_fix_fmt_t := (1, 0, 17);   -- coefficient format
-    Channels_g    : natural     := 2;              -- channels
-    MaxRatio_g    : natural     := 8;              -- max decimation ratio
-    MaxTaps_g     : natural     := 1024;           -- max number of taps
-    Rnd_g         : psi_fix_rnd_t := PsiFixRound;  -- rounding truncation
-    Sat_g         : psi_fix_sat_t := PsiFixSat;    -- saturate or wrap
-    UseFixCoefs_g : boolean     := false;          -- use fix coefficients or update them
-    Coefs_g       : t_areal     := (0.0, 0.0);     -- see doc
-    RamBehavior_g : string      := "RBW";          -- RBW = Read before write, WBR = Write before read 
+    in_fmt_g       : psi_fix_fmt_t := (1, 0, 17);   -- internal format
+    out_fmt_g      : psi_fix_fmt_t := (1, 0, 17);   -- output format
+    coef_fmt_g     : psi_fix_fmt_t := (1, 0, 17);   -- coefficient format
+    channels_g    : natural     := 2;              -- channels
+    max_ratio_g    : natural     := 8;              -- max decimation ratio
+    max_taps_g     : natural     := 1024;           -- max number of taps
+    rnd_g         : psi_fix_rnd_t := psi_fix_round;  -- rounding truncation
+    sat_g         : psi_fix_sat_t := psi_fix_sat;    -- saturate or wrap
+    use_fix_coefs_g : boolean     := false;          -- use fix coefficients or update them
+    coefs_g       : t_areal     := (0.0, 0.0);     -- see doc
+    ram_behavior_g : string      := "RBW";          -- RBW = Read before write, WBR = Write before read
     rst_pol_g     : std_logic   := '1'             -- reset polarity active high ='1'
   );
   port(
     clk_i            : in  std_logic;                                          -- system clock
     rst_i            : in  std_logic;                                          -- system reset
-    dat_i            : in  std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0); -- data input
+    dat_i            : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0); -- data input
     vld_i            : in  std_logic;                                          -- valid input Frequency sampling
-    dat_o            : out std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);-- data output
-    vld_o            : out std_logic;                                          -- valid output new frequency sampling 
+    dat_o            : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);-- data output
+    vld_o            : out std_logic;                                          -- valid output new frequency sampling
     -- Parallel Configuration Interface
-    cfg_ratio_i      : in  std_logic_vector(log2ceil(MaxRatio_g) - 1 downto 0)  := std_logic_vector(to_unsigned(MaxRatio_g - 1, log2ceil(MaxRatio_g))); -- Ratio - 1 (0 => Ratio 1, 4 => Ratio 5)
-    cfg_taps_i       : in  std_logic_vector(log2ceil(MaxTaps_g) - 1 downto 0)   := std_logic_vector(to_unsigned(MaxTaps_g - 1, log2ceil(MaxTaps_g)));   -- Number of taps - 1
+    cfg_ratio_i      : in  std_logic_vector(log2ceil(max_ratio_g) - 1 downto 0)  := std_logic_vector(to_unsigned(max_ratio_g - 1, log2ceil(max_ratio_g))); -- Ratio - 1 (0 => Ratio 1, 4 => Ratio 5)
+    cfg_taps_i       : in  std_logic_vector(log2ceil(max_taps_g) - 1 downto 0)   := std_logic_vector(to_unsigned(max_taps_g - 1, log2ceil(max_taps_g)));   -- Number of taps - 1
     -- Coefficient interface
     coef_if_clk_i    : in  std_logic                                            := '0';               -- clock for coef intereface
     coef_if_wr_i     : in  std_logic                                            := '0';               -- write enable
-    coef_if_addr_i   : in  std_logic_vector(log2ceil(MaxTaps_g) - 1 downto 0)   := (others => '0');   -- address of coef access
-    coef_if_wr_dat_i : in  std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0) := (others => '0');   -- coef to write
-    coef_if_rd_dat_o : out std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);                      -- coef read
+    coef_if_addr_i   : in  std_logic_vector(log2ceil(max_taps_g) - 1 downto 0)   := (others => '0');   -- address of coef access
+    coef_if_wr_dat_i : in  std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0) := (others => '0');   -- coef to write
+    coef_if_rd_dat_o : out std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0);                      -- coef read
     -- Status Output
     busy_o           : out std_logic                                                                  -- calculation on going active high
   );
@@ -63,24 +63,24 @@ end entity;
 architecture rtl of psi_fix_fir_dec_ser_nch_chtdm_conf is
 
   -- Data Memory needs twice the depth since a almost a full set of data can arrive until the last channel is fully processed
-  constant DataMemDepthRequired_c : natural := MaxTaps_g + MaxRatio_g; -- MaxRatio_g is the maximum samples to arrive before a calculation starts
+  constant DataMemDepthRequired_c : natural := max_taps_g + max_ratio_g; -- max_ratio_g is the maximum samples to arrive before a calculation starts
   constant DataMemAddBits_c       : natural := log2ceil(DataMemDepthRequired_c);
   constant DataMemDepthApplied_c  : natural := 2**DataMemAddBits_c;
-  constant CoefMemDepthApplied_c  : natural := 2**log2ceil(MaxTaps_g);
+  constant CoefMemDepthApplied_c  : natural := 2**log2ceil(max_taps_g);
 
   -- Constants
-  constant MultFmt_c : psi_fix_fmt_t := (max(InFmt_g.S, CoefFmt_g.S), InFmt_g.I + CoefFmt_g.I, InFmt_g.F + CoefFmt_g.F);
-  constant AccuFmt_c : psi_fix_fmt_t := (1, OutFmt_g.I + 1, InFmt_g.F + CoefFmt_g.F);
-  constant RndFmt_c  : psi_fix_fmt_t := (1, OutFmt_g.I + 1, OutFmt_g.F);
+  constant MultFmt_c : psi_fix_fmt_t := (max(in_fmt_g.S, coef_fmt_g.S), in_fmt_g.I + coef_fmt_g.I, in_fmt_g.F + coef_fmt_g.F);
+  constant AccuFmt_c : psi_fix_fmt_t := (1, out_fmt_g.I + 1, in_fmt_g.F + coef_fmt_g.F);
+  constant RndFmt_c  : psi_fix_fmt_t := (1, out_fmt_g.I + 1, out_fmt_g.F);
 
   -- types
-  subtype InData_t is std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
+  subtype InData_t is std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);
   type InData_a is array (natural range <>) of InData_t;
-  subtype Mult_t is std_logic_vector(PsiFixSize(MultFmt_c) - 1 downto 0);
-  subtype Accu_t is std_logic_vector(PsiFixSize(AccuFmt_c) - 1 downto 0);
-  subtype Rnd_t is std_logic_vector(PsiFixSize(RndFmt_c) - 1 downto 0);
-  subtype Out_t is std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0);
-  type ChNr_a is array (natural range <>) of std_logic_vector(log2ceil(Channels_g) - 1 downto 0);
+  subtype Mult_t is std_logic_vector(psi_fix_size(MultFmt_c) - 1 downto 0);
+  subtype Accu_t is std_logic_vector(psi_fix_size(AccuFmt_c) - 1 downto 0);
+  subtype Rnd_t is std_logic_vector(psi_fix_size(RndFmt_c) - 1 downto 0);
+  subtype Out_t is std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);
+  type ChNr_a is array (natural range <>) of std_logic_vector(log2ceil(channels_g) - 1 downto 0);
 
   -- Two process method
   type two_process_r is record
@@ -90,17 +90,17 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chtdm_conf is
     ChannelNr      : ChNr_a(0 to 3);
     TapWrAddr_1    : std_logic_vector(DataMemAddBits_c - 1 downto 0);
     Tap0Addr_1     : std_logic_vector(DataMemAddBits_c - 1 downto 0);
-    DecCnt_1       : std_logic_vector(log2ceil(MaxRatio_g) - 1 downto 0);
-    TapCnt_1       : std_logic_vector(log2ceil(MaxTaps_g) - 1 downto 0);
-    CalcChnl_1     : std_logic_vector(log2ceil(Channels_g) - 1 downto 0);
-    CalcChnl_2     : std_logic_vector(log2ceil(Channels_g) - 1 downto 0);
+    DecCnt_1       : std_logic_vector(log2ceil(max_ratio_g) - 1 downto 0);
+    TapCnt_1       : std_logic_vector(log2ceil(max_taps_g) - 1 downto 0);
+    CalcChnl_1     : std_logic_vector(log2ceil(channels_g) - 1 downto 0);
+    CalcChnl_2     : std_logic_vector(log2ceil(channels_g) - 1 downto 0);
     TapRdAddr_2    : std_logic_vector(DataMemAddBits_c - 1 downto 0);
-    CoefRdAddr_2   : std_logic_vector(log2ceil(MaxTaps_g) - 1 downto 0);
+    CoefRdAddr_2   : std_logic_vector(log2ceil(max_taps_g) - 1 downto 0);
     CalcOn         : std_logic_vector(1 to 6);
     Last           : std_logic_vector(1 to 6);
     First          : std_logic_vector(1 to 5);
     MultInTap_4    : InData_t;
-    MultInCoef_4   : std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);
+    MultInCoef_4   : std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0);
     MultOut_5      : Mult_t;
     Accu_6         : Accu_t;
     Rnd_7          : Rnd_t;
@@ -116,25 +116,25 @@ architecture rtl of psi_fix_fir_dec_ser_nch_chtdm_conf is
   signal r, r_next : two_process_r;
 
   -- Component Interface Signals
-  signal DataRamWrAddr_1 : std_logic_vector(DataMemAddBits_c + log2ceil(Channels_g) - 1 downto 0);
-  signal DataRamRdAddr_2 : std_logic_vector(DataMemAddBits_c + log2ceil(Channels_g) - 1 downto 0);
-  signal DataRamDout_3   : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0);
-  signal CoefRamDout_3   : std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0);
+  signal DataRamWrAddr_1 : std_logic_vector(DataMemAddBits_c + log2ceil(channels_g) - 1 downto 0);
+  signal DataRamRdAddr_2 : std_logic_vector(DataMemAddBits_c + log2ceil(channels_g) - 1 downto 0);
+  signal DataRamDout_3   : std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);
+  signal CoefRamDout_3   : std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0);
 
   -- coef ROM
-  type CoefRom_t is array (0 to 2**log2ceil(MaxTaps_g) - 1) of std_logic_vector(PsiFixSize(CoefFmt_g) - 1 downto 0); -- full power of two to ensure index is always valid
+  type CoefRom_t is array (0 to 2**log2ceil(max_taps_g) - 1) of std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0); -- full power of two to ensure index is always valid
   signal CoefRom : CoefRom_t := (others => (others => '0'));
 
 begin
 
-  assert Channels_g >= 2 report "###ERROR###: psi_fix_fir_dec_ser_nch_chtdm_conf only works for Channels_g >= 2, use psi_fix_fir_dec_ser_nch_chtpar_conf for single channel implementation" severity error;
+  assert channels_g >= 2 report "###ERROR###: psi_fix_fir_dec_ser_nch_chtdm_conf only works for channels_g >= 2, use psi_fix_fir_dec_ser_nch_chtpar_conf for single channel implementation" severity error;
 
   --------------------------------------------
   -- Combinatorial Process
   --------------------------------------------
   p_comb : process(r, vld_i, dat_i, cfg_ratio_i, cfg_taps_i, DataRamDout_3, CoefRamDout_3)
     variable v        : two_process_r;
-    variable AccuIn_v : std_logic_vector(PsiFixSize(AccuFmt_c) - 1 downto 0);
+    variable AccuIn_v : std_logic_vector(psi_fix_size(AccuFmt_c) - 1 downto 0);
   begin
     -- *** Hold variables stable ***
     v := r;
@@ -154,7 +154,7 @@ begin
 
     -- Calculate channel number
     if vld_i = '1' then
-      if unsigned(r.ChannelNr(0)) = Channels_g - 1 or r.FirstAfterRst = '1' then
+      if unsigned(r.ChannelNr(0)) = channels_g - 1 or r.FirstAfterRst = '1' then
         v.ChannelNr(0)  := (others => '0');
         v.FirstAfterRst := '0';
       else
@@ -164,7 +164,7 @@ begin
 
     -- *** Stage 1 ***
     -- Increment tap address after data was written for last channel
-    if (r.Vld(1) = '1') and (unsigned(r.ChannelNr(1)) = Channels_g - 1) then
+    if (r.Vld(1) = '1') and (unsigned(r.ChannelNr(1)) = channels_g - 1) then
       v.TapWrAddr_1 := std_logic_vector(unsigned(r.TapWrAddr_1) + 1);
     end if;
 
@@ -182,7 +182,7 @@ begin
     -- goto next channel or finish calculation
     if unsigned(r.TapCnt_1) = 0 then
       -- last channel
-      if unsigned(r.CalcChnl_1) = Channels_g - 1 then
+      if unsigned(r.CalcChnl_1) = channels_g - 1 then
         v.CalcOn(1) := '0';
       -- goto next channel
       else
@@ -195,8 +195,8 @@ begin
     -- start of calculation and decimation
     if r.Vld(0) = '1' then
       -- Start calculation (data from all channels available)
-      if unsigned(r.ChannelNr(0)) = Channels_g - 1 then
-        if (unsigned(r.DecCnt_1) = 0) or (MaxRatio_g = 0) then
+      if unsigned(r.ChannelNr(0)) = channels_g - 1 then
+        if (unsigned(r.DecCnt_1) = 0) or (max_ratio_g = 0) then
           v.Tap0Addr_1 := r.TapWrAddr_1;
           v.TapCnt_1   := cfg_taps_i;
           v.CalcOn(1)  := '1';
@@ -235,7 +235,7 @@ begin
     elsif r.CalcOn(3) = '1' then
       if r.First(3) = '1' and unsigned(r.TapRdAddr_3) <= unsigned(cfg_ratio_i) then
         v.ReplaceZero_4 := '0';
-        if unsigned(r.ChannelNr(3)) = Channels_g - 1 then
+        if unsigned(r.ChannelNr(3)) = channels_g - 1 then
           v.FirstTapLoop_3 := '0';
         end if;
       elsif r.Last(3) = '1' then
@@ -246,10 +246,10 @@ begin
     end if;
     v.MultInCoef_4 := CoefRamDout_3;
 
-    -- *** Stage 5 *** 
+    -- *** Stage 5 ***
     -- Multiplication
-    v.MultOut_5 := PsiFixMult(r.MultInTap_4, InFmt_g,
-                              r.MultInCoef_4, CoefFmt_g,
+    v.MultOut_5 := psi_fix_mult(r.MultInTap_4, in_fmt_g,
+                              r.MultInCoef_4, coef_fmt_g,
                               MultFmt_c); -- Full precision, no rounding or saturation required
 
     -- *** Stage 6 ***
@@ -259,7 +259,7 @@ begin
     else
       AccuIn_v := r.Accu_6;
     end if;
-    v.Accu_6 := PsiFixAdd(r.MultOut_5, MultFmt_c,
+    v.Accu_6 := psi_fix_add(r.MultOut_5, MultFmt_c,
                           AccuIn_v, AccuFmt_c,
                           AccuFmt_c);   -- Overflows compensate at the end of the calculation and rounding not required
 
@@ -267,14 +267,14 @@ begin
     -- Rounding
     v.RndVld_7 := '0';
     if r.Last(6) = '1' then
-      v.Rnd_7    := PsiFixResize(r.Accu_6, AccuFmt_c, RndFmt_c, Rnd_g, PsiFixWrap);
+      v.Rnd_7    := psi_fix_resize(r.Accu_6, AccuFmt_c, RndFmt_c, rnd_g, psi_fix_wrap);
       v.RndVld_7 := r.CalcOn(6);
     end if;
 
     -- *** Stage 8 ***
     -- Output Handling and saturation
     v.OutVld_8 := r.RndVld_7;
-    v.Output_8 := PsiFixResize(r.Rnd_7, RndFmt_c, OutFmt_g, PsiFixTrunc, Sat_g);
+    v.Output_8 := psi_fix_resize(r.Rnd_7, RndFmt_c, out_fmt_g, psi_fix_trunc, sat_g);
 
     -- *** Status Output ***
     if (unsigned(r.Vld) /= 0) or (unsigned(r.CalcOn) /= 0) or (r.RndVld_7 = '1') then
@@ -321,13 +321,13 @@ begin
   -- Component Instantiations
   --------------------------------------------
   -- Coefficient RAM for configurable coefficients
-  g_nFixCoef : if not UseFixCoefs_g generate
+  g_nFixCoef : if not use_fix_coefs_g generate
     i_coef_ram : entity work.psi_fix_param_ram
       generic map(
-        Depth_g    => CoefMemDepthApplied_c,
-        Fmt_g      => CoefFmt_g,
-        Behavior_g => RamBehavior_g,
-        Init_g     => Coefs_g
+        depth_g    => CoefMemDepthApplied_c,
+        fmt_g      => coef_fmt_g,
+        behavior_g => ram_behavior_g,
+        init_g     => coefs_g
       )
       port map(
         ClkA  => coef_if_clk_i,
@@ -344,10 +344,10 @@ begin
   end generate;
 
   -- Coefficient ROM for non-configurable coefficients
-  g_FixCoef : if UseFixCoefs_g generate
+  g_FixCoef : if use_fix_coefs_g generate
     -- Table must be generated outside of the ROM process to make code synthesizable
-    g_CoefTable : for i in Coefs_g'low to Coefs_g'high generate
-      CoefRom(i) <= PsiFixFromReal(Coefs_g(i), CoefFmt_g);
+    g_CoefTable : for i in coefs_g'low to coefs_g'high generate
+      CoefRom(i) <= psi_fix_from_real(coefs_g(i), coef_fmt_g);
     end generate;
 
     -- Assign unused outputs
@@ -367,9 +367,9 @@ begin
 
   i_data_ram : entity work.psi_common_tdp_ram
     generic map(
-      Depth_g    => DataMemDepthApplied_c * Channels_g,
-      Width_g    => PsiFixSize(InFmt_g),
-      Behavior_g => RamBehavior_g
+      depth_g    => DataMemDepthApplied_c * channels_g,
+      width_g    => psi_fix_size(in_fmt_g),
+      behavior_g => ram_behavior_g
     )
     port map(
       ClkA  => clk_i,

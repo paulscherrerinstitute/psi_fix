@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
---	Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
---	All rights reserved.
---	Authors: Oliver Bruendler
+--  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
+--  All rights reserved.
+--  Authors: Oliver Bruendler
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -21,37 +21,37 @@ use work.psi_fix_pkg.all;
 
 entity psi_fix_param_ram is
   generic(
-    Depth_g    : positive    := 1024;         -- memory depth
-    Fmt_g      : psi_fix_fmt_t := (1, 0, 15); -- fixed format
-    Behavior_g : string      := "RBW";        -- "RBW" = read-before-write, "WBR" = write-before-read
-    Init_g     : t_areal     := (0.0, 0.0)    -- First N parameters are initialized, others are zero
+    depth_g    : positive    := 1024;         -- memory depth
+    fmt_g      : psi_fix_fmt_t := (1, 0, 15); -- fixed format
+    behavior_g : string      := "RBW";        -- "RBW" = read-before-write, "WBR" = write-before-read
+    init_g     : t_areal     := (0.0, 0.0)    -- First N parameters are initialized, others are zero
   );
   port(
     -- Port A
     ClkA  : in  std_logic                                        := '0';            -- clock port A
-    AddrA : in  std_logic_vector(log2ceil(Depth_g) - 1 downto 0) := (others => '0');-- address port A
+    AddrA : in  std_logic_vector(log2ceil(depth_g) - 1 downto 0) := (others => '0');-- address port A
     WrA   : in  std_logic                                        := '0';            -- write enable A
-    DinA  : in  std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0) := (others => '0');-- data input A
-    DoutA : out std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0);                   -- data output A
+    DinA  : in  std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');-- data input A
+    DoutA : out std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0);                   -- data output A
     -- Port B
     ClkB  : in  std_logic                                        := '0';            -- clock port B
-    AddrB : in  std_logic_vector(log2ceil(Depth_g) - 1 downto 0) := (others => '0');-- address port B
-    WrB   : in  std_logic                                        := '0';            -- write enable B 
-    DinB  : in  std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0) := (others => '0');-- data input B
-    DoutB : out std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0)                    -- data output B
+    AddrB : in  std_logic_vector(log2ceil(depth_g) - 1 downto 0) := (others => '0');-- address port B
+    WrB   : in  std_logic                                        := '0';            -- write enable B
+    DinB  : in  std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');-- data input B
+    DoutB : out std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0)                    -- data output B
   );
 end entity;
 
 architecture rtl of psi_fix_param_ram is
 
   -- memory array
-  type mem_t is array (Depth_g - 1 downto 0) of std_logic_vector(PsiFixSize(Fmt_g) - 1 downto 0);
+  type mem_t is array (depth_g - 1 downto 0) of std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0);
 
   function GetInit return mem_t is
     variable mem_v : mem_t := (others => (others => '0'));
   begin
-    for i in 0 to Init_g'length - 1 loop
-      mem_v(i) := PsiFixFromReal(Init_g(i), Fmt_g);
+    for i in 0 to init_g'length - 1 loop
+      mem_v(i) := psi_fix_from_real(init_g(i), fmt_g);
     end loop;
     return mem_v;
   end function;
@@ -60,19 +60,19 @@ architecture rtl of psi_fix_param_ram is
 
 begin
 
-  assert Behavior_g = "RBW" or Behavior_g = "WBR" report "psi_fix_param_ram: Behavior_g must be RBW or WBR" severity error;
+  assert behavior_g = "RBW" or behavior_g = "WBR" report "psi_fix_param_ram: behavior_g must be RBW or WBR" severity error;
 
   -- Port A
   porta_p : process(ClkA)
   begin
     if rising_edge(ClkA) then
-      if Behavior_g = "RBW" then
+      if behavior_g = "RBW" then
         DoutA <= mem(to_integer(unsigned(AddrA)));
       end if;
       if WrA = '1' then
         mem(to_integer(unsigned(AddrA))) := DinA;
       end if;
-      if Behavior_g = "WBR" then
+      if behavior_g = "WBR" then
         DoutA <= mem(to_integer(unsigned(AddrA)));
       end if;
     end if;
@@ -82,17 +82,17 @@ begin
   portb_p : process(ClkB)
   begin
     if rising_edge(ClkB) then
-      if Behavior_g = "RBW" then
+      if behavior_g = "RBW" then
         DoutB <= mem(to_integer(unsigned(AddrB)));
       end if;
       if WrB = '1' then
         mem(to_integer(unsigned(AddrB))) := DinB;
       end if;
-      if Behavior_g = "WBR" then
+      if behavior_g = "WBR" then
         DoutB <= mem(to_integer(unsigned(AddrB)));
       end if;
     end if;
   end process;
-  
+
 end architecture;
 

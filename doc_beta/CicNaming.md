@@ -3,7 +3,7 @@
 
 # CicNaming
  - VHDL source: [CicNaming](../hdl/CicNaming.txt)
- - Testbench source: [CicNaming_tb.vhd](../testbench/CicNaming_tb.vhd)
+ - Testbench source: [CicNaming_tb.vhd](../testbench/CicNaming_tb/CicNaming_tb.vhd)
 
 ### Description
 *INSERT YOUR TEXT*

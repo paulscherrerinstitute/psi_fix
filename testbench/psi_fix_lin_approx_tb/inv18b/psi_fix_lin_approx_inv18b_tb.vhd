@@ -23,7 +23,7 @@ use work.psi_tb_textfile_pkg.all;
 ------------------------------------------------------------------------------
 entity psi_fix_lin_approx_inv18b_tb is
   generic(
-    StimuliDir_g : string := "../testbench/psi_fix_lin_approx_tb/sin18b"
+    stimuli_dir_g : string := "../testbench/psi_fix_lin_approx_tb/sin18b"
   );
 end entity;
 
@@ -41,9 +41,9 @@ architecture sim of psi_fix_lin_approx_inv18b_tb is
   signal Clk     : std_logic                                           := '0';
   signal Rst     : std_logic                                           := '1';
   signal InVld   : std_logic                                           := '0';
-  signal InData  : std_logic_vector(PsiFixSize(InFmt_c) - 1 downto 0)  := (others => '0');
+  signal InData  : std_logic_vector(psi_fix_size(InFmt_c) - 1 downto 0)  := (others => '0');
   signal OutVld  : std_logic                                           := '0';
-  signal OutData : std_logic_vector(PsiFixSize(OutFmt_c) - 1 downto 0) := (others => '0');
+  signal OutData : std_logic_vector(psi_fix_size(OutFmt_c) - 1 downto 0) := (others => '0');
 
   -- Tb Signals
   signal TbRunning : boolean                := true;
@@ -77,7 +77,7 @@ begin
     wait;
   end process;
 
-  InData <= PsiFixFromBitsAsInt(SigIn(0), InFmt_c);
+  InData <= psi_fix_from_bits_as_int(SigIn(0), InFmt_c);
   p_stimuli : process
   begin
     Rst <= '1';
@@ -87,12 +87,12 @@ begin
     Rst <= '0';
     wait for 1 us;
 
-    -- Apply StimuliDir_g
+    -- Apply stimuli_dir_g
     ApplyTextfileContent(Clk       => Clk,
                          Rdy       => PsiTextfile_SigOne,
                          Vld       => InVld,
                          Data      => SigIn,
-                         Filepath  => StimuliDir_g & "/stimuli.txt",
+                         Filepath  => stimuli_dir_g & "/stimuli.txt",
                          ClkPerSpl => 1);
 
     -- Finish
@@ -102,7 +102,7 @@ begin
     wait;
   end process;
 
-  SigOut(0) <= PsiFixGetBitsAsInt(OutData, OutFmt_c);
+  SigOut(0) <= psi_fix_get_bits_as_int(OutData, OutFmt_c);
   p_response : process
   begin
     -- Check
@@ -110,7 +110,7 @@ begin
                          Rdy      => PsiTextfile_SigUnused,
                          Vld      => OutVld,
                          Data     => SigOut,
-                         Filepath => StimuliDir_g & "/response.txt");
+                         Filepath => stimuli_dir_g & "/response.txt");
 
     -- Finish
     wait;

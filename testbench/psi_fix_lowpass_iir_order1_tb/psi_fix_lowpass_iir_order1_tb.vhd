@@ -26,8 +26,8 @@ use work.psi_tb_textfile_pkg.all;
 ------------------------------------------------------------
 entity psi_fix_lowpass_iir_order1_tb is
   generic(
-    FileFolder_g : string  := "../testbench/psi_fix_lowpass_iir_order1_tb/Data";
-    Pipeline_g   : boolean := false
+    file_folder_g : string  := "../testbench/psi_fix_lowpass_iir_order1_tb/Data";
+    pipeline_g   : boolean := false
   );
 end entity;
 
@@ -36,17 +36,17 @@ end entity;
 ------------------------------------------------------------
 architecture sim of psi_fix_lowpass_iir_order1_tb is
   -- *** Fixed Generics ***
-  constant FSampleHz_g : real        := 100.0e6;
-  constant FCutoffHz_g : real        := 1.0e6;
-  constant InFmt_g     : psi_fix_fmt_t := (1, 0, 15);
-  constant OutFmt_g    : psi_fix_fmt_t := (1, 0, 14);
+  constant f_sample_hz_g : real        := 100.0e6;
+  constant f_cutoff_hz_g : real        := 1.0e6;
+  constant in_fmt_g     : psi_fix_fmt_t := (1, 0, 15);
+  constant out_fmt_g    : psi_fix_fmt_t := (1, 0, 14);
 
   -- *** Not Assigned Generics (default values) ***
-  constant IntFmt_g        : psi_fix_fmt_t := (1, 0, 24);
-  constant CoefFmt_g       : psi_fix_fmt_t := (1, 0, 17);
-  constant Round_g         : psi_fix_rnd_t := PsiFixRound;
-  constant Sat_g           : psi_fix_sat_t := PsiFixSat;
-  constant ResetPolarity_g : std_logic   := '1';
+  constant int_fmt_g        : psi_fix_fmt_t := (1, 0, 24);
+  constant coef_fmt_g       : psi_fix_fmt_t := (1, 0, 17);
+  constant round_g         : psi_fix_rnd_t := psi_fix_round;
+  constant sat_g           : psi_fix_sat_t := psi_fix_sat;
+  constant reset_polarity_g : std_logic   := '1';
 
   -- *** TB Control ***
   signal TbRunning            : boolean                  := True;
@@ -60,9 +60,9 @@ architecture sim of psi_fix_lowpass_iir_order1_tb is
   signal InClk_sti  : std_logic                                           := '0';
   signal InRst_sti  : std_logic                                           := '1';
   signal InVld_sti  : std_logic                                           := '0';
-  signal InDat_sti  : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0)  := (others => '0');
+  signal InDat_sti  : std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0)  := (others => '0');
   signal OutVld_obs : std_logic                                           := '0';
-  signal OutDat_obs : std_logic_vector(PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
+  signal OutDat_obs : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
 
   constant MaxStrbRate : integer                := 3;
   signal SigIn         : TextfileData_t(0 to 0) := (others => 0);
@@ -74,11 +74,11 @@ begin
   ------------------------------------------------------------
   i_dut : entity work.psi_fix_lowpass_iir_order1
     generic map(
-      Pipeline_g  => Pipeline_g,
-      FSampleHz_g => FSampleHz_g,
-      FCutoffHz_g => FCutoffHz_g,
-      InFmt_g     => InFmt_g,
-      OutFmt_g    => OutFmt_g
+      pipeline_g  => pipeline_g,
+      f_sample_hz_g => f_sample_hz_g,
+      f_cutoff_hz_g => f_cutoff_hz_g,
+      in_fmt_g     => in_fmt_g,
+      out_fmt_g    => out_fmt_g
     )
     port map(
       clk_i => InClk_sti,
@@ -136,12 +136,12 @@ begin
     -- start of process !DO NOT EDIT
     wait until InRst_sti = '0';
 
-    -- Apply Stimuli	
+    -- Apply Stimuli
     ApplyTextfileContent(Clk         => InClk_sti,
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => InVld_sti,
                          Data        => SigIn,
-                         Filepath    => FileFolder_g & "/input.txt",
+                         Filepath    => file_folder_g & "/input.txt",
                          ClkPerSpl   => MaxStrbRate,
                          IgnoreLines => 1);
 
@@ -162,7 +162,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => OutVld_obs,
                          Data        => SigOut,
-                         Filepath    => FileFolder_g & "/output.txt",
+                         Filepath    => file_folder_g & "/output.txt",
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!

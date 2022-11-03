@@ -82,7 +82,7 @@ package body psi_fix_fir_dec_ser_nch_chtdm_conf_tb_case1_pkg is
       readline(fInput, l);
       for ch in 0 to Channels_c - 1 loop
         read(l, s);
-        InSig.Data <= PsiFixFromBitsAsInt(s, InFmt_c);
+        InSig.Data <= psi_fix_from_bits_as_int(s, InFmt_c);
         InSig.Vld  <= '1';
         wait until rising_edge(Clk);
         InSig.Vld  <= '0';

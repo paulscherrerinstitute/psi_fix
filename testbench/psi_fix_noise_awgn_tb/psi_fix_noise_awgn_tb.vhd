@@ -23,8 +23,8 @@ use work.psi_tb_txt_util.all;
 ------------------------------------------------------------
 entity psi_fix_noise_awgn_tb is
   generic(
-    FileFolder_g   : string  := "../testbench/psi_fix_noise_awgn_tb/Data";
-    VldDutyCycle_g : integer := 5
+    file_folder_g   : string  := "../testbench/psi_fix_noise_awgn_tb/Data";
+    vld_duty_cycle_g : integer := 5
   );
 end entity;
 
@@ -48,7 +48,7 @@ architecture sim of psi_fix_noise_awgn_tb is
   signal Clk     : std_logic                                           := '1';
   signal Rst     : std_logic                                           := '1';
   signal InVld   : std_logic                                           := '0';
-  signal OutData : std_logic_vector(PsiFixSize(OutFmt_c) - 1 downto 0) := (others => '0');
+  signal OutData : std_logic_vector(psi_fix_size(OutFmt_c) - 1 downto 0) := (others => '0');
   signal OutVld  : std_logic                                           := '0';
 
   signal SigOut : TextfileData_t(0 to 0) := (others => 0);
@@ -59,7 +59,7 @@ begin
   ------------------------------------------------------------
   i_dut : entity work.psi_fix_noise_awgn
     generic map(
-      OutFmt_g => OutFmt_c
+      out_fmt_g => OutFmt_c
     )
     port map(
       clk_i     => Clk,
@@ -120,9 +120,9 @@ begin
     while ProcessDone(TbProcNr_response_c) = '0' loop
       InVld <= '1';
       wait until rising_edge(Clk);
-      if VldDutyCycle_g > 1 then
+      if vld_duty_cycle_g > 1 then
         InVld <= '0';
-        for i in 1 to VldDutyCycle_g - 1 loop
+        for i in 1 to vld_duty_cycle_g - 1 loop
           wait until rising_edge(Clk);
         end loop;
       end if;
@@ -145,7 +145,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => OutVld,
                          Data        => SigOut,
-                         Filepath    => FileFolder_g & "/output.txt",
+                         Filepath    => file_folder_g & "/output.txt",
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!
