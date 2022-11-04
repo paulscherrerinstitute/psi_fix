@@ -19,21 +19,21 @@ use work.psi_fix_pkg.all;
 -- $$ processes=stim, resp $$
 entity psi_fix_resize_pipe is
   generic(
-    in_fmt_g   : psi_fix_fmt_t := (1, 0, 15);   -- Must be signed     $$ constant=(1,1,14) $$
-    out_fmt_g  : psi_fix_fmt_t := (0, 2, 16);   -- Must be unsigned   $$ constant=(0,0,8) $$
-    round_g   : psi_fix_rnd_t := psi_fix_round;  -- round or trunc      $$ constant=true $$
-    sat_g     : psi_fix_sat_t := psi_fix_sat;    -- saturate or wrap    $$ constant=true $$
-    rst_pol_g : std_logic:='1'                 -- reset polarity
+    in_fmt_g   : psi_fix_fmt_t := (1, 0, 15);     -- Must be signed     $$ constant=(1,1,14) $$
+    out_fmt_g  : psi_fix_fmt_t := (0, 2, 16);     -- Must be unsigned   $$ constant=(0,0,8) $$
+    round_g    : psi_fix_rnd_t := psi_fix_round;  -- round or trunc      $$ constant=true $$
+    sat_g      : psi_fix_sat_t := psi_fix_sat;    -- saturate or wrap    $$ constant=true $$
+    rst_pol_g  : std_logic:='1'                   -- reset polarity
   );
   port(
-    clk_i : in  std_logic;                                          -- system clock       $$ type=clk; freq=100e6 $$
-    rst_i : in  std_logic;                                          -- system reset       $$ type=rst; clk=clk_i $$
-    vld_i : in  std_logic;                                          -- valid input sampling freqeuncy
-    rdy_o : out std_logic;                                          -- ready output signal active high  $$ lowactive=true $$
-    dat_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0); -- data input
-    vld_o : out std_logic;                                          -- valid signa output
-    rdy_i : in  std_logic := '1';                                   -- ready in signal
-    dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0) -- daat output signal
+    clk_i : in  std_logic;                                              -- system clock       $$ type=clk; freq=100e6 $$
+    rst_i : in  std_logic;                                              -- system reset       $$ type=rst; clk=clk_i $$
+    vld_i : in  std_logic;                                              -- valid input sampling freqeuncy
+    rdy_o : out std_logic;                                              -- ready output signal active high  $$ lowactive=true $$
+    dat_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);  -- data input
+    vld_o : out std_logic;                                              -- valid signa output
+    rdy_i : in  std_logic := '1';                                       -- ready in signal
+    dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0)  -- daat output signal
   );
 end entity;
 -- @formatter:on

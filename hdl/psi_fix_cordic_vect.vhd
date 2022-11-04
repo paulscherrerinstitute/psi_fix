@@ -25,31 +25,28 @@ use work.psi_common_math_pkg.all;
 -- $$ processes=stim, resp $$
 entity psi_fix_cordic_vect is
   generic(
-    in_fmt_g        : psi_fix_fmt_t          := (1, 0, 15);                -- Must be signed                             $$ constant=(1,0,15) $$
-    out_fmt_g       : psi_fix_fmt_t          := (0, 2, 16);                -- Must be unsigned                           $$ constant=(0,2,16) $$
-    internal_fmt_g  : psi_fix_fmt_t          := (1, 2, 22);                -- Must be signed                             $$ constant=(1,2,22) $$
-    angle_fmt_g     : psi_fix_fmt_t          := (0, 0, 15);                -- Must be unsigned                           $$ constant=(0,0,15) $$
-    angle_int_fmt_g  : psi_fix_fmt_t          := (1, 0, 18);                -- Must be signed                            $$ constant=(1,0,18) $$
-    iterations_g   : natural                := 13;                        -- number of iteration prior to get results  $$ constant=13 $$
-    gain_comp_g     : boolean               := False;                      -- gain compensation                         $$ export=true $$
-    round_g        : psi_fix_rnd_t          := psi_fix_trunc;               -- round or trunc                            $$ export=true $$
-    sat_g          : psi_fix_sat_t          := psi_fix_wrap;                -- saturation or wrap                        $$ export=true $$
-    mode_g         : string               := "SERIAL";                    -- PIPELINED or SERIAL                       $$ export=true $$
-    pl_stg_per_iter_g : integer range 1 to 2 := 1                            -- Number of pipeline stages per iteration (does only affect pipelined implementation)
+    in_fmt_g          : psi_fix_fmt_t          := (1, 0, 15);                -- Must be signed                            $$ constant=(1,0,15) $$
+    out_fmt_g         : psi_fix_fmt_t          := (0, 2, 16);                -- Must be unsigned                          $$ constant=(0,2,16) $$
+    internal_fmt_g    : psi_fix_fmt_t          := (1, 2, 22);                -- Must be signed                            $$ constant=(1,2,22) $$
+    angle_fmt_g       : psi_fix_fmt_t          := (0, 0, 15);                -- Must be unsigned                          $$ constant=(0,0,15) $$
+    angle_int_fmt_g   : psi_fix_fmt_t          := (1, 0, 18);                -- Must be signed                            $$ constant=(1,0,18) $$
+    iterations_g      : natural                := 13;                        -- number of iteration prior to get results  $$ constant=13 $$
+    gain_comp_g       : boolean                := False;                     -- gain compensation                         $$ export=true $$
+    round_g           : psi_fix_rnd_t          := psi_fix_trunc;             -- round or trunc                            $$ export=true $$
+    sat_g             : psi_fix_sat_t          := psi_fix_wrap;              -- saturation or wrap                        $$ export=true $$
+    mode_g            : string                 := "SERIAL";                  -- PIPELINED or SERIAL                       $$ export=true $$
+    pl_stg_per_iter_g : integer range 1 to 2   := 1                          -- Number of pipeline stages per iteration (does only affect pipelined implementation)
   );
   port(
-    -- Control Signals
-    clk_i     : in  std_logic;                                            -- clk system $$ type=clk; freq=100e6 $$
-    rst_i     : in  std_logic;                                            -- rst system $$ type=rst; clk=Clk $$
-    -- Input
+    clk_i     : in  std_logic;                                               -- clk system $$ type=clk; freq=100e6 $$
+    rst_i     : in  std_logic;                                               -- rst system $$ type=rst; clk=Clk $$
     dat_inp_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- data input input
     dat_qua_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- dat quadrature input
-    vld_i     : in  std_logic;                                            -- valid signal in
-    rdy_i     : out std_logic;                                            -- ready signal output $$ lowactive=true $$
-    -- Output
+    vld_i     : in  std_logic;                                               -- valid signal in
+    rdy_i     : out std_logic;                                               -- ready signal output $$ lowactive=true $$
     dat_abs_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);  -- data amplitude output
     dat_ang_o : out std_logic_vector(psi_fix_size(angle_fmt_g) - 1 downto 0);-- dat angle output
-    vld_o     : out std_logic                                             -- valid output
+    vld_o     : out std_logic                                                -- valid output
   );
 end entity;
 -- @formatter:on

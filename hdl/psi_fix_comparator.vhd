@@ -22,15 +22,15 @@ entity psi_fix_comparator is
       rst_pol_g : std_logic   := '1'                                   -- reset polarity active high ='1'
       );
   port(
-      clk_i     : in  std_logic;                                       -- clk input
-      rst_i     : in  std_logic;                                       -- rst input
+      clk_i     : in  std_logic;                                         -- clk input
+      rst_i     : in  std_logic;                                         -- rst input
       set_min_i : in  std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0);-- min threshold
       set_max_i : in  std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0);-- max threshold
       data_i    : in  std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0);-- data input
-      vld_i     : in  std_logic;                                       -- valid input signal
-      vld_o     : out std_logic;                                       -- valid signal output
-      min_o     : out std_logic;                                       -- minimum flag output
-      max_o     : out std_logic                                        -- maximum fag output
+      vld_i     : in  std_logic;                                         -- valid input signal
+      vld_o     : out std_logic;                                         -- valid signal output
+      min_o     : out std_logic;                                         -- minimum flag output
+      max_o     : out std_logic                                          -- maximum fag output
      );
 end entity;
 

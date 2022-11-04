@@ -17,21 +17,19 @@ entity psi_fix_dds_18b is
     phase_fmt_g    : psi_fix_fmt_t := (0, 0, 31);                              -- phase format width => generally counter length
     tdm_channels_g : positive    := 1;                                         -- time division multiplexed number of channels
     ram_behavior_g : string      := "RBW";                                     -- RAM beahvior read before write
-    rst_pol_g     : std_logic   :='1';                                        -- reset polarity active high = '1'
-    rst_sync_g    : boolean     := true                                       -- reset sync or async
+    rst_pol_g      : std_logic   :='1';                                        -- reset polarity active high = '1'
+    rst_sync_g     : boolean     := true                                       -- reset sync or async
   );
   port(
-    -- Control Signals
-    clk_i        : in  std_logic;                                             -- clk system
-    rst_i        : in  std_logic;                                             -- rst system
-    -- Control Signals
-    restart_i    : in  std_logic := '0';                                      -- restart counter (init phase)
+    clk_i        : in  std_logic;                                                -- clk system
+    rst_i        : in  std_logic;                                                -- rst system
+    restart_i    : in  std_logic := '0';                                         -- restart counter (init phase)
     phi_step_i   : in  std_logic_vector(psi_fix_size(phase_fmt_g) - 1 downto 0); -- phase step (rasterized make sens for phase noise)
     phi_offset_i : in  std_logic_vector(psi_fix_size(phase_fmt_g) - 1 downto 0); -- phase offset
-    vld_i        : in  std_logic := '1';                                      -- frequency sampling input valid
-    dat_sin_o    : out std_logic_vector(17 downto 0);                         -- sinus output
-    dat_cos_o    : out std_logic_vector(17 downto 0);                         -- cosine output 90°  phase shifted
-    vld_o        : out std_logic                                              -- freqeuncy sampling output valid
+    vld_i        : in  std_logic := '1';                                         -- frequency sampling input valid
+    dat_sin_o    : out std_logic_vector(17 downto 0);                            -- sinus output
+    dat_cos_o    : out std_logic_vector(17 downto 0);                            -- cosine output 90°  phase shifted
+    vld_o        : out std_logic                                                 -- freqeuncy sampling output valid
   );
 end entity;
 -- @formatter:on

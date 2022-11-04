@@ -27,28 +27,25 @@ entity psi_fix_cordic_rot is
   generic(
     in_abs_fmt_g    : psi_fix_fmt_t := (0, 0, 15);                              -- Must be unsigned     $$ constant=(0,0,16) $$
     in_angle_fmt_g  : psi_fix_fmt_t := (0, 0, 15);                              -- Must be unsigned     $$ constant=(0,0,15) $$
-    out_fmt_g      : psi_fix_fmt_t := (1, 2, 16);                              -- Usually signed        $$ constant=(1,2,16) $$
-    internal_fmt_g : psi_fix_fmt_t := (1, 2, 22);                              -- Must be signed        $$ constant=(1,2,22) $$
+    out_fmt_g       : psi_fix_fmt_t := (1, 2, 16);                              -- Usually signed        $$ constant=(1,2,16) $$
+    internal_fmt_g  : psi_fix_fmt_t := (1, 2, 22);                              -- Must be signed        $$ constant=(1,2,22) $$
     angle_int_fmt_g : psi_fix_fmt_t := (1, -2, 18);                             -- Must be (1, -2, x)   $$ constant=(1,-2,23) $$
-    iterations_g  : natural     := 13;                                        -- iterative required   $$ constant=21 $$
-    gain_comp_g    : boolean     := False;                                     -- gain compensation    $$ export=true $$
-    round_g       : psi_fix_rnd_t := psi_fix_trunc;                             -- round or trunc       $$ export=true $$
-    sat_g         : psi_fix_sat_t := psi_fix_wrap;                              -- sat or wrap          $$ export=true $$
-    mode_g        : string      := "SERIAL"                                   -- PIPELINED or SERIAL  $$ export=true $$
+    iterations_g    : natural     := 13;                                        -- iterative required   $$ constant=21 $$
+    gain_comp_g     : boolean     := False;                                     -- gain compensation    $$ export=true $$
+    round_g         : psi_fix_rnd_t := psi_fix_trunc;                           -- round or trunc       $$ export=true $$
+    sat_g           : psi_fix_sat_t := psi_fix_wrap;                            -- sat or wrap          $$ export=true $$
+    mode_g          : string      := "SERIAL"                                   -- PIPELINED or SERIAL  $$ export=true $$
   );
   port(
-    -- Control Signals
-    clk_i      : in  std_logic;                                               -- clk system $$ type=clk; freq=100e6 $$
-    rst_i      : in  std_logic;                                               -- rst system $$ type=rst; clk=Clk $$
-    -- Input
-    dat_abs_i  : in  std_logic_vector(psi_fix_size(in_abs_fmt_g) - 1 downto 0);   -- amplitude signal input
-    dat_ang_i  : in  std_logic_vector(psi_fix_size(in_angle_fmt_g) - 1 downto 0); -- phase signal input
-    vld_i      : in  std_logic;                                               -- valid input
-    rdy_i      : out std_logic;                                               -- ready output signal $$ lowactive=true $$
-    -- Output
-    dat_inp_o   : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);    -- dat inphase out
-    dat_qua_o   : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);    -- dat quadrature out
-    vld_o       : out std_logic                                               -- valid output
+    clk_i       : in  std_logic;                                                   -- clk system $$ type=clk; freq=100e6 $$
+    rst_i       : in  std_logic;                                                   -- rst system $$ type=rst; clk=Clk $$
+    dat_abs_i   : in  std_logic_vector(psi_fix_size(in_abs_fmt_g) - 1 downto 0);   -- amplitude signal input
+    dat_ang_i   : in  std_logic_vector(psi_fix_size(in_angle_fmt_g) - 1 downto 0); -- phase signal input
+    vld_i       : in  std_logic;                                                   -- valid input
+    rdy_i       : out std_logic;                                                   -- ready output signal $$ lowactive=true $$
+    dat_inp_o   : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);      -- dat inphase out
+    dat_qua_o   : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);      -- dat quadrature out
+    vld_o       : out std_logic                                                    -- valid output
   );
 end entity;
 -- @formatter:on

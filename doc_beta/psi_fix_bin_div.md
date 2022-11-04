@@ -1,12 +1,23 @@
 <img align="right" src="../doc/psi_logo.png">
+
 ***
+
+[**component list**](index.md)
 
 # psi_fix_bin_div
  - VHDL source: [psi_fix_bin_div](../hdl/psi_fix_bin_div.vhd)
  - Testbench source: [psi_fix_bin_div_tb.vhd](../testbench/psi_fix_bin_div_tb/psi_fix_bin_div_tb.vhd)
 
 ### Description
-*INSERT YOUR TEXT*
+This component implements a fixed point binary divider.
+
+Quotient=Numerator/Denominator
+
+### Architecture
+
+The component converts numerator and denominator to unsigned numbers, so a standard binary divider can be implemented. At the output, the sign is restored correctly.
+
+<img align="center" src="psi_fix_bin_div.png">
 
 ### Generics
 | Name        | type          | Description        |
@@ -20,13 +31,16 @@
 | rst_sync_g  | boolean       | sync reset ?       |
 
 ### Interfaces
-| Name          | In/Out   | Length       | Description                    |
-|:--------------|:---------|:-------------|:-------------------------------|
-| clk_i         | i        | 1            | clk system                     |
-| rst_i         | i        | 1            | rst system depends on polarity |
-| vld_i         | i        | 1            | valid signal input             |
-| rdy_i         | o        | 1            | ready signal output            |
-| numerator_i   | i        | num_fmt_g)   | numerator to divide            |
-| denominator_i | i        | denom_fmt_g) | denominator divider            |
-| vld_o         | o        | 1            | valid output signal            |
-| result_o      | o        | out_fmt_g)   | result output = num/den        |
+| Name          | In/Out   | Length      | Description                    |
+|:--------------|:---------|:------------|:-------------------------------|
+| clk_i         | i        | 1           | clk system                     |
+| rst_i         | i        | 1           | rst system depends on polarity |
+| vld_i         | i        | 1           | valid signal input             |
+| rdy_i         | o        | 1           | ready signal output            |
+| numerator_i   | i        | numfmt_g    | numerator to divide            |
+| denominator_i | i        | denomfmt_g  | denominator divider            |
+| vld_o         | o        | 1           | valid output signal            |
+| result_o      | o        | outfmt_g    | result output = num/den        |
+
+---
+[**component list**](index.md)

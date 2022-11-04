@@ -24,36 +24,36 @@ use work.psi_common_array_pkg.all;
 
 -- @ formatter:off
 entity psi_fix_fir_dec_ser_nch_chpar_conf is
-  generic(in_fmt_g       : psi_fix_fmt_t := (1, 0, 17);    -- internal format
-          out_fmt_g      : psi_fix_fmt_t := (1, 0, 17);    -- output format
-          coef_fmt_g     : psi_fix_fmt_t := (1, 0, 17);    -- coefficient format
-          channels_g    : natural     := 2;               -- channels
-          max_ratio_g    : natural     := 8;               -- max decimation ratio
-          max_taps_g     : natural     := 1024;            -- max number of taps
-          rnd_g         : psi_fix_rnd_t := psi_fix_round;   -- rounding truncation
-          sat_g         : psi_fix_sat_t := psi_fix_sat;     -- saturate or wrap
+  generic(in_fmt_g        : psi_fix_fmt_t := (1, 0, 17);    -- internal format
+          out_fmt_g       : psi_fix_fmt_t := (1, 0, 17);    -- output format
+          coef_fmt_g      : psi_fix_fmt_t := (1, 0, 17);    -- coefficient format
+          channels_g      : natural     := 2;               -- channels
+          max_ratio_g     : natural     := 8;               -- max decimation ratio
+          max_taps_g      : natural     := 1024;            -- max number of taps
+          rnd_g           : psi_fix_rnd_t := psi_fix_round; -- rounding truncation
+          sat_g           : psi_fix_sat_t := psi_fix_sat;   -- saturate or wrap
           use_fix_coefs_g : boolean     := false;           -- use fix coefficients or update them
-          coefs_g       : t_areal     := (0.0, 0.0);      -- see doc
-          ram_behavior_g : string      := "RBW";           -- RBW = Read before write, WBR = Write before read
-          rst_pol_g     : std_logic   := '1'              -- reset polarity active high ='1'
+          coefs_g         : t_areal     := (0.0, 0.0);      -- see doc
+          ram_behavior_g  : string      := "RBW";           -- RBW = Read before write, WBR = Write before read
+          rst_pol_g       : std_logic   := '1'              -- reset polarity active high ='1'
           );
   port(clk_i            : in  std_logic;                                                                -- system clock
        rst_i            : in  std_logic;                                                                -- system reset
-       dat_i            : in  std_logic_vector(psi_fix_size(in_fmt_g) * channels_g - 1 downto 0);          -- data input
+       dat_i            : in  std_logic_vector(psi_fix_size(in_fmt_g) * channels_g - 1 downto 0);       -- data input
        vld_i            : in  std_logic;                                                                -- valid input Frequency sampling
-       dat_o            : out std_logic_vector(psi_fix_size(out_fmt_g) * channels_g - 1 downto 0);         -- data output
+       dat_o            : out std_logic_vector(psi_fix_size(out_fmt_g) * channels_g - 1 downto 0);      -- data output
        vld_o            : out std_logic;                                                                -- valid output new frequency sampling
        -- Parallel Configuration Interface
        cfg_ratio_i      : in  std_logic_vector(log2ceil(max_ratio_g) - 1 downto 0)  := std_logic_vector(to_unsigned(max_ratio_g - 1, log2ceil(max_ratio_g))); -- Ratio - 1 (0 => Ratio 1, 4 => Ratio 5)
        cfg_taps_i       : in  std_logic_vector(log2ceil(max_taps_g) - 1 downto 0)   := std_logic_vector(to_unsigned(max_taps_g - 1, log2ceil(max_taps_g)));   -- Number of taps - 1
        -- Coefficient interface
-       coef_if_clk_i    : in  std_logic                                            := '0';             -- clock for coef intereface
-       coef_if_wr_i     : in  std_logic                                            := '0';             -- write enable
-       coef_if_addr_i   : in  std_logic_vector(log2ceil(max_taps_g) - 1 downto 0)   := (others => '0'); -- address of coef access
+       coef_if_clk_i    : in  std_logic                                            := '0';                -- clock for coef intereface
+       coef_if_wr_i     : in  std_logic                                            := '0';                -- write enable
+       coef_if_addr_i   : in  std_logic_vector(log2ceil(max_taps_g) - 1 downto 0)   := (others => '0');   -- address of coef access
        coef_if_wr_dat_i : in  std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0) := (others => '0'); -- coef to write
        coef_if_rd_dat_o : out std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0);                    -- coef read
        -- Status Output
-       busy_o           : out std_logic);                                                              -- calculation on going active high
+       busy_o           : out std_logic);                                                                 -- calculation on going active high
 end entity;
 -- @ formatter:on
 

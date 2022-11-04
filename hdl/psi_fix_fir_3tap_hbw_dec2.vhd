@@ -26,20 +26,20 @@ entity psi_fix_fir_3tap_hbw_dec2 is
   generic(
     in_fmt_g    : psi_fix_fmt_t := (1, 0, 17);                                         -- input format FP
     out_fmt_g   : psi_fix_fmt_t := (1, 0, 17);                                         -- output format FP
-    channels_g : natural     := 2;                                                    -- number of channels TDM $$ EXPORT=true $$
-    separate_g : boolean     := true;                                                 -- $$ EXPORT=true $$
-    rnd_g      : psi_fix_rnd_t := psi_fix_round;                                        -- Round or trunc
-    sat_g      : psi_fix_sat_t := psi_fix_sat;                                          -- saturation or wrap
-    rst_pol_g  : std_logic   := '1';                                                  -- reset polarity active high ='1'
-    rst_sync_g : boolean     := true                                                  -- async reset or sync architecture
+    channels_g  : natural     := 2;                                                    -- number of channels TDM $$ EXPORT=true $$
+    separate_g  : boolean     := true;                                                 -- $$ EXPORT=true $$
+    rnd_g       : psi_fix_rnd_t := psi_fix_round;                                      -- Round or trunc
+    sat_g       : psi_fix_sat_t := psi_fix_sat;                                        -- saturation or wrap
+    rst_pol_g   : std_logic   := '1';                                                  -- reset polarity active high ='1'
+    rst_sync_g  : boolean     := true                                                  -- async reset or sync architecture
   );
   port(
-    clk_i : in  std_logic;                                                            -- clk system $$ TYPE=CLK; FREQ=100e6; Proc=Input $$
-    rst_i : in  std_logic;                                                            -- rst system $$ TYPE=RST; CLK=Clk $$
-    dat_i : in  std_logic_vector(psi_fix_size(in_fmt_g) * 2 * channels_g - 1 downto 0);  -- data input                     $$ PROC=Input $$
-    vld_i : in  std_logic;                                                            -- valid input Frequency sampling $$ PROC=Input $$
-    dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) * channels_g - 1 downto 0);     -- data output  $$ PROC=Output $$
-    vld_o : out std_logic                                                             -- valid otuput $$ PROC=Output $$
+    clk_i : in  std_logic;                                                              -- clk system $$ TYPE=CLK; FREQ=100e6; Proc=Input $$
+    rst_i : in  std_logic;                                                              -- rst system $$ TYPE=RST; CLK=Clk $$
+    dat_i : in  std_logic_vector(psi_fix_size(in_fmt_g) * 2 * channels_g - 1 downto 0); -- data input                     $$ PROC=Input $$
+    vld_i : in  std_logic;                                                              -- valid input Frequency sampling $$ PROC=Input $$
+    dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) * channels_g - 1 downto 0);    -- data output  $$ PROC=Output $$
+    vld_o : out std_logic                                                               -- valid otuput $$ PROC=Output $$
   );
 end entity;
 

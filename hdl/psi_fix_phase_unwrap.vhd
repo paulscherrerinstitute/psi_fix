@@ -23,19 +23,19 @@ use work.psi_common_logic_pkg.all;
 -- $$ processes=stimuli,response $$
 entity psi_fix_phase_unwrap is
   generic(
-    in_fmt_g   : psi_fix_fmt_t := (1, 0, 15);                          -- input format
-    out_fmt_g  : psi_fix_fmt_t := (0, 1, 15);                          -- output format
-    round_g   : psi_fix_rnd_t := psi_fix_trunc;                         -- round or trunc
-    rst_pol_g : std_logic   := '1'                                    -- reset polarity
+    in_fmt_g   : psi_fix_fmt_t := (1, 0, 15);                           -- input format
+    out_fmt_g  : psi_fix_fmt_t := (0, 1, 15);                           -- output format
+    round_g    : psi_fix_rnd_t := psi_fix_trunc;                        -- round or trunc
+    rst_pol_g  : std_logic   := '1'                                     -- reset polarity
   );
   port(
-    clk_i  : in  std_logic;                                           -- $$ type=Clk; freq=127e6 $$
-    rst_i  : in  std_logic;                                           -- $$ type=Rst; Clk=Clk $$
-    dat_i  : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);  -- data input
-    vld_i  : in  std_logic;                                           -- valid signal input
-    dat_o  : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0); -- data output
-    vld_o  : out std_logic;                                           -- valid signal output
-    wrap_o : out std_logic                                            -- wrap output
+    clk_i  : in  std_logic;                                             -- $$ type=Clk; freq=127e6 $$
+    rst_i  : in  std_logic;                                             -- $$ type=Rst; Clk=Clk $$
+    dat_i  : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0); -- data input
+    vld_i  : in  std_logic;                                             -- valid signal input
+    dat_o  : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);-- data output
+    vld_o  : out std_logic;                                             -- valid signal output
+    wrap_o : out std_logic                                              -- wrap output
   );
 end entity;
 

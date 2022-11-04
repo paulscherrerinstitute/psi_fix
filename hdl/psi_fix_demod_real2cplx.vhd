@@ -32,18 +32,18 @@ entity psi_fix_demod_real2cplx is
     in_fmt_g    : psi_fix_fmt_t;                                                     -- input format FP                    $$ constant=(1,0,15) $$
     out_fmt_g   : psi_fix_fmt_t;                                                     -- output format FP                   $$ constant=(1,0,16) $$
     coef_bits_g : positive  := 18;                                                   -- internal coefficent number of bits $$ constant=25 $$
-    channels_g : natural   := 1;                                                    -- number of channels TDM             $$ constant=2 $$
-    ratio_g    : natural   := 5                                                     -- ratio betwenn clock and IF/RF      $$ constant=5 $$
+    channels_g  : natural   := 1;                                                    -- number of channels TDM             $$ constant=2 $$
+    ratio_g     : natural   := 5                                                     -- ratio betwenn clock and IF/RF      $$ constant=5 $$
   );
   port(
-    clk_i        : in  std_logic;                                                    -- clk system $$ type=clk; freq=100e6 $$
-    rst_i        : in  std_logic;                                                    -- rst system $$ type=rst; clk=clk_i $$
+    clk_i        : in  std_logic;                                                       -- clk system $$ type=clk; freq=100e6 $$
+    rst_i        : in  std_logic;                                                       -- rst system $$ type=rst; clk=clk_i $$
     dat_i        : in  std_logic_vector(psi_fix_size(in_fmt_g)*channels_g - 1 downto 0);-- data input IF/RF
-    vld_i        : in  std_logic;                                                    -- valid input freqeuncy sampling
-    phi_offset_i : in  std_logic_vector(log2ceil(ratio_g)-1 downto 0);               -- phase offset for demod LUT
+    vld_i        : in  std_logic;                                                       -- valid input freqeuncy sampling
+    phi_offset_i : in  std_logic_vector(log2ceil(ratio_g)-1 downto 0);                  -- phase offset for demod LUT
     dat_inp_o    : out std_logic_vector(psi_fix_size(out_fmt_g)*channels_g- 1 downto 0);-- inphase data output
     dat_qua_o    : out std_logic_vector(psi_fix_size(out_fmt_g)*channels_g- 1 downto 0);-- quadrature data output
-    vld_o        : out std_logic                                                     -- valid output
+    vld_o        : out std_logic                                                        -- valid output
   );
 end entity;
 -- @formatter:on

@@ -29,20 +29,20 @@ entity psi_fix_nch_analog_trigger_tdm is
   port(   clk_i         : in  std_logic;                                                  --processing clock
           rst_i         : in  std_logic;                                                  --Reset  processing '1' <=> active high
           --*** signals ***
-          dat_i         : in  std_logic_vector(psi_fix_size(fix_fmt_g)- 1 downto 0);        --// Data Input
+          dat_i         : in  std_logic_vector(psi_fix_size(fix_fmt_g)- 1 downto 0);      --// Data Input
           vld_i         : in  std_logic;                                                  --TDM Strobe Input
           ext_i         : in  std_logic_vector(trig_ext_nb_g-1 downto 0);                 --external trigger input
           --*** parameters ***
           mask_min_i    : in std_logic_vector(trig_nb_g*ch_nb_g-1 downto 0);              --mask min results
           mask_max_i    : in std_logic_vector(trig_nb_g*ch_nb_g-1 downto 0);              --mask max results
           mask_ext_i    : in std_logic_vector(trig_nb_g*trig_ext_nb_g-1 downto 0);        --mask external trigger
-          thld_min_i    : in std_logic_vector(ch_nb_g*psi_fix_size(fix_fmt_g)-1 downto 0);  --thld to set max window
-          thld_max_i    : in std_logic_vector(ch_nb_g*psi_fix_size(fix_fmt_g)-1 downto 0);  --thld to set Min window
+          thld_min_i    : in std_logic_vector(ch_nb_g*psi_fix_size(fix_fmt_g)-1 downto 0);--thld to set max window
+          thld_max_i    : in std_logic_vector(ch_nb_g*psi_fix_size(fix_fmt_g)-1 downto 0);--thld to set Min window
           trig_clr_ext_i: in std_logic_vector(trig_nb_g*trig_ext_nb_g-1 downto 0);
           trig_mode_i   : in std_logic_vector(trig_nb_g-1 downto 0);                      -- Trigger mode (0:Continuous,1:Single) configuration register
           trig_arm_i    : in std_logic_vector(trig_nb_g-1   downto 0);                    -- Arm/dis--arm the trigger, rising edge sensitive
           --*** out ***
-          dat_pipe_o    : out std_logic_vector(psi_fix_size(fix_fmt_g)-1 downto 0);         --data out pipelined   for recording
+          dat_pipe_o    : out std_logic_vector(psi_fix_size(fix_fmt_g)-1 downto 0);       --data out pipelined   for recording
           str_pipe_o    : out std_logic;                                                  --strobe out pipelined for recording
           --*** status ***
           trig_o        : out std_logic_vector(trig_nb_g-1 downto 0);                     --trigger out

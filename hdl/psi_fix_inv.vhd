@@ -7,26 +7,27 @@ use work.psi_common_array_pkg.all;
 use work.psi_common_math_pkg.all;
 use work.psi_fix_pkg.all;
 use work.psi_common_logic_pkg.all;
-
+--@formatter:off
 -- $$ tbpkg=psi_lib.psi_tb_textfile_pkg,psi_lib.psi_tb_txt_util $$
 -- $$ processes=stimuli,response $$
 entity psi_fix_inv is
   generic(
-    in_fmt_g       : psi_fix_fmt_t := (0, 0, 15);  -- Must be unsigned, wuare root not defined for negative numbers
-    out_fmt_g      : psi_fix_fmt_t := (0, 1, 15);  -- output fomrat FP
-    round_g       : psi_fix_rnd_t := psi_fix_trunc; -- round or trunc
-    sat_g         : psi_fix_sat_t := psi_fix_wrap;  -- sat or wrap
-    ram_behavior_g : string      := "RBW"          -- RBW = Read before write, WBR = write before read
+    in_fmt_g       : psi_fix_fmt_t := (0, 0, 15);                       -- Must be unsigned, wuare root not defined for negative numbers
+    out_fmt_g      : psi_fix_fmt_t := (0, 1, 15);                       -- output fomrat FP
+    round_g        : psi_fix_rnd_t := psi_fix_trunc;                    -- round or trunc
+    sat_g          : psi_fix_sat_t := psi_fix_wrap;                     -- sat or wrap
+    ram_behavior_g : string      := "RBW"                               -- RBW = Read before write, WBR = write before read
   );
   port(
-    clk_i : in  std_logic;                                           -- system clock $$ type=Clk; freq=127e6 $$
-    rst_i : in  std_logic;                                           -- system reset $$ type=Rst; Clk=Clk $$
+    clk_i : in  std_logic;                                              -- system clock $$ type=Clk; freq=127e6 $$
+    rst_i : in  std_logic;                                              -- system reset $$ type=Rst; Clk=Clk $$
     dat_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);  -- data input
-    vld_i : in  std_logic;                                           -- valid signal input frequency sampling
+    vld_i : in  std_logic;                                              -- valid signal input frequency sampling
     dat_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0); -- data output
-    vld_o : out std_logic                                            -- valid output frequency samlping
+    vld_o : out std_logic                                               -- valid output frequency samlping
     );
 end entity;
+--@formatter:on
 
 architecture rtl of psi_fix_inv is
 

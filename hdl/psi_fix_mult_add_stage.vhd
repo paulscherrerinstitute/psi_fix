@@ -27,25 +27,25 @@ use work.psi_common_array_pkg.all;
 
 entity psi_fix_mult_add_stage is
   generic(
-    in_a_fmt_g    : psi_fix_fmt_t := (1, 0, 17);                                -- data A input format FP
-    in_b_fmt_g    : psi_fix_fmt_t := (1, 0, 17);                                -- data B input format FP
-    add_fmt_g    : psi_fix_fmt_t := (1, 0, 17);                                -- output format FP
-    in_b_is_coef_g : boolean       := false;                                     -- If True, InBVld is only used to write a cst coef to the input reg of the DSP slice
-                                                                              -- If False, InBVld leads to a multiply-add operation and is propagated to AddChainOutVld
-    rst_pol_g   : std_logic     := '1'                                        -- reset polarity
+    in_a_fmt_g     : psi_fix_fmt_t := (1, 0, 17);                                   -- data A input format FP
+    in_b_fmt_g     : psi_fix_fmt_t := (1, 0, 17);                                   -- data B input format FP
+    add_fmt_g      : psi_fix_fmt_t := (1, 0, 17);                                   -- output format FP
+    in_b_is_coef_g : boolean       := false;                                        -- If True, InBVld is only used to write a cst coef to the input reg of the DSP slice
+                                                                                    -- If False, InBVld leads to a multiply-add operation and is propagated to AddChainOutVld
+    rst_pol_g      : std_logic     := '1'                                           -- reset polarity
   );
   port(
-    clk_i           : in  std_logic;                                           -- system clock $$ type=clk; freq=100e6 $$
-    rst_i           : in  std_logic;                                           -- system reset $$ type=rst; clk=clk_i $$
-    dat_a_i         : in  std_logic_vector(psi_fix_size(in_a_fmt_g) - 1 downto 0); -- data in put a
-    vld_a_i         : in  std_logic;                                           -- vld a
-    del2_a_o        : out std_logic_vector(psi_fix_size(in_a_fmt_g) - 1 downto 0); -- registred data a by 2 clock cycles (efficient pipeline for FIR implementation)
-    dat_b_i         : in  std_logic_vector(psi_fix_size(in_b_fmt_g) - 1 downto 0); -- data input b
-    vld_b_i         : in  std_logic;                                           -- vld b
-    del2_b_o        : out std_logic_vector(psi_fix_size(in_b_fmt_g) - 1 downto 0); -- registered data b by 2 clock cycles (efficient pipeline for FIR implementation)
-    chain_add_i     : in  std_logic_vector(psi_fix_size(add_fmt_g) - 1 downto 0); -- adder chain input data
-    chain_add_o     : out std_logic_vector(psi_fix_size(add_fmt_g) - 1 downto 0); -- adder chain output data
-    chain_add_vld_o : out std_logic                                            -- adder chain output valid
+    clk_i           : in  std_logic;                                                -- system clock $$ type=clk; freq=100e6 $$
+    rst_i           : in  std_logic;                                                -- system reset $$ type=rst; clk=clk_i $$
+    dat_a_i         : in  std_logic_vector(psi_fix_size(in_a_fmt_g) - 1 downto 0);  -- data in put a
+    vld_a_i         : in  std_logic;                                                -- vld a
+    del2_a_o        : out std_logic_vector(psi_fix_size(in_a_fmt_g) - 1 downto 0);  -- registred data a by 2 clock cycles (efficient pipeline for FIR implementation)
+    dat_b_i         : in  std_logic_vector(psi_fix_size(in_b_fmt_g) - 1 downto 0);  -- data input b
+    vld_b_i         : in  std_logic;                                                -- vld b
+    del2_b_o        : out std_logic_vector(psi_fix_size(in_b_fmt_g) - 1 downto 0);  -- registered data b by 2 clock cycles (efficient pipeline for FIR implementation)
+    chain_add_i     : in  std_logic_vector(psi_fix_size(add_fmt_g) - 1 downto 0);   -- adder chain input data
+    chain_add_o     : out std_logic_vector(psi_fix_size(add_fmt_g) - 1 downto 0);   -- adder chain output data
+    chain_add_vld_o : out std_logic                                                 -- adder chain output valid
   );
 end entity;
 

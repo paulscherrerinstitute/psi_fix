@@ -21,23 +21,21 @@ use work.psi_common_logic_pkg.all;
 -- $$ processes=stimuli,response $$
 entity psi_fix_complex_abs is
   generic(
-    in_fmt_g       : psi_fix_fmt_t := (1, 0, 15);                          -- FP format in
-    out_fmt_g      : psi_fix_fmt_t := (0, 1, 15);                          -- FP format out
-    round_g       : psi_fix_rnd_t := psi_fix_trunc;                         -- trunc or round
-    sat_g         : psi_fix_sat_t := psi_fix_wrap;                          -- Wrap or sat
-    rst_pol_g     : std_logic   := '1';
-    ram_behavior_g : string      := "RBW"                                  -- RBW = Read before write, WBR = write before read
+    in_fmt_g       : psi_fix_fmt_t := (1, 0, 15);                            -- FP format in
+    out_fmt_g      : psi_fix_fmt_t := (0, 1, 15);                            -- FP format out
+    round_g        : psi_fix_rnd_t := psi_fix_trunc;                         -- trunc or round
+    sat_g          : psi_fix_sat_t := psi_fix_wrap;                          -- Wrap or sat
+    rst_pol_g      : std_logic   := '1';                                     -- reset polarity active high
+    ram_behavior_g : string      := "RBW"                                    -- RBW = Read before write, WBR = write before read
   );
   port(
-    -- Control Signals
-    clk_i     : in  std_logic;                                            -- $$ type=Clk; freq=127e6 $$
-    rst_i     : in  std_logic;                                            -- $$ type=Rst; Clk=clk_i $$
-    -- Input
-    dat_inp_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- data inphase I
-    dat_qua_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- data quadrature Q
-    vld_i     : in  std_logic;                                            -- valid signal in
-    dat_o     : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);  -- results output DQRT(I^2+Q^2)
-    vld_o     : out std_logic                                             -- valid signal out
+    clk_i     : in  std_logic;                                              -- $$ type=Clk; freq=127e6 $$
+    rst_i     : in  std_logic;                                              -- $$ type=Rst; Clk=clk_i $$
+    dat_inp_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);  -- data inphase I
+    dat_qua_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);  -- data quadrature Q
+    vld_i     : in  std_logic;                                              -- valid signal in
+    dat_o     : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0); -- results output DQRT(I^2+Q^2)
+    vld_o     : out std_logic                                               -- valid signal out
   );
 end entity;
 -- @formatter:on

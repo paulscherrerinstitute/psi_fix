@@ -20,29 +20,28 @@ use work.psi_common_math_pkg.all;
 -- $$ processes=stim, resp $$
 entity psi_fix_complex_mult is
   generic(
-    rst_pol_g      : std_logic   := '1';                                      -- set reset polarity                             $$ constant='1' $$
-    pipeline_g    : boolean     := false;                                    -- when false 3 pipes stages, when false 6 pipes (increase Fmax)     $$ export=true $$
+    rst_pol_g       : std_logic   := '1';                                      -- set reset polarity                             $$ constant='1' $$
+    pipeline_g      : boolean     := false;                                    -- when false 3 pipes stages, when false 6 pipes (increase Fmax)     $$ export=true $$
     in_a_fmt_g      : psi_fix_fmt_t := (1, 0, 15);                             -- Input A Fixed Point format                     $$ constant=(1,0,15) $$
     in_b_fmt_g      : psi_fix_fmt_t := (1, 0, 24);                             -- Input B Fixed Point format                     $$ constant=(1,0,24) $$
-    internal_fmt_g : psi_fix_fmt_t := (1, 1, 24);                             -- Internal Calc. Fixed Point format              $$ constant=(1,1,24) $$
-    out_fmt_g      : psi_fix_fmt_t := (1, 0, 20);                             -- Output Fixed Point format                      $$ constant=(1,0,20) $$
-    round_g       : psi_fix_rnd_t := psi_fix_round;                            -- Trunc or Round                                 $$ constant=psi_fix_round $$
-    sat_g         : psi_fix_sat_t := psi_fix_sat;                              -- Sat or wrap                                    $$ constant=psi_fix_sat $$
-    in_a_is_cplx_g   : boolean     := true;                                     -- Complex number?
-    in_b_is_cplx_g   : boolean     := true                                      -- Complex number?
+    internal_fmt_g  : psi_fix_fmt_t := (1, 1, 24);                             -- Internal Calc. Fixed Point format              $$ constant=(1,1,24) $$
+    out_fmt_g       : psi_fix_fmt_t := (1, 0, 20);                             -- Output Fixed Point format                      $$ constant=(1,0,20) $$
+    round_g         : psi_fix_rnd_t := psi_fix_round;                          -- Trunc or Round                                 $$ constant=psi_fix_round $$
+    sat_g           : psi_fix_sat_t := psi_fix_sat;                            -- Sat or wrap                                    $$ constant=psi_fix_sat $$
+    in_a_is_cplx_g  : boolean     := true;                                     -- Complex number?
+    in_b_is_cplx_g  : boolean     := true                                      -- Complex number?
   );
   port(
-    clk_i         : in  std_logic;                                           -- clk        $$ type=clk; freq=100e6 $$
-    rst_i         : in  std_logic;                                           -- sync. rst  $$ type=rst; clk=clk_i $$
+    clk_i         : in  std_logic;                                               -- clk        $$ type=clk; freq=100e6 $$
+    rst_i         : in  std_logic;                                               -- sync. rst  $$ type=rst; clk=clk_i $$
     dat_inA_inp_i : in  std_logic_vector(psi_fix_size(in_a_fmt_g) - 1 downto 0); -- Inphase input of signal A
     dat_inA_qua_i : in  std_logic_vector(psi_fix_size(in_a_fmt_g) - 1 downto 0); -- Quadrature input of signal A
     dat_inB_inp_i : in  std_logic_vector(psi_fix_size(in_b_fmt_g) - 1 downto 0); -- Inphase input of signal B
     dat_inB_qua_i : in  std_logic_vector(psi_fix_size(in_b_fmt_g) - 1 downto 0); -- Quadrature input of signal B
-    vld_i         : in  std_logic;                                           -- strobe input
-
+    vld_i         : in  std_logic;                                               -- strobe input
     dat_inp_o     : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0); -- data output I
     dat_qua_o     : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0); -- data output Q
-    vld_o         : out std_logic                                            -- strobe output
+    vld_o         : out std_logic                                               -- strobe output
   );
 end entity;
 -- @formatter:on
