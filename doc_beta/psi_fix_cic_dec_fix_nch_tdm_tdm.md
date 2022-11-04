@@ -44,4 +44,5 @@ CIC are most commonly used in streaming signal processing systems that require p
 | vld_o  | o        | 1          | valid output frequency sampling fs/ratio |
 | busy_o | o        | 1          | busy/ready signal active high            |
 
+---
 [**component list**](index.md)

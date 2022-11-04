@@ -59,4 +59,5 @@ The addition after the multiplication is executed at full precision and without 
 
 <img align="center" src="psi_fix_lin_approx_calc_c.png">
 
+---
 [**component list**](index.md)

@@ -81,4 +81,5 @@ Obviously the architecture requires one clock cycle per tap calculation. As a re
 
 In case of fixed coefficient implementation, the coefficient RAM is replaced by a ROM automatically.
 
+---
 [**component list**](index.md)

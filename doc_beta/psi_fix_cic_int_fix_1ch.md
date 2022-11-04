@@ -65,5 +65,5 @@ Since this formula evaluates to 1.0 for the case R=x^2 (interpolation ratio is a
 The optimal setting for the differential delay depends on the use case. Only the values 1 and 2 are supported. Other values are uncommon in real-life. Usually 1 is used if the input signal is already oversampled (does not contain frequency components close to fs/2) and 2 is used otherwise.
 Note that the CIC does not control timing on its own. This means by default, the CIC outputs one sample per clock cycle. If the input sample rate is slow, the output is bursting. If the time between two output samples has to be constant, the timing can be controlled by applying pulses at the desired frequency to the OutRdy handshaking signal. The reason for the CIC to not control any timing at the output is that this is a library component and it may also be used in offline processing algorithms.
 
-
+---
 [**component list**](index.md)

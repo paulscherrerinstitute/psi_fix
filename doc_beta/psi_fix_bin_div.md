@@ -42,4 +42,5 @@ The component converts numerator and denominator to unsigned numbers, so a stand
 | vld_o         | o        | 1           | valid output signal            |
 | result_o      | o        | outfmt_g    | result output = num/den        |
 
+---
 [**component list**](index.md)

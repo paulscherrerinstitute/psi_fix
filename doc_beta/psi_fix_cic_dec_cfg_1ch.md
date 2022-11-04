@@ -67,4 +67,5 @@ For the case that the gain correction amplifier is disabled, the overall gain of
 | vld_o           | o        | 1         | valid otuput                                                                              |
 | busy_o          | o        | 1         | busy signal output active high                                                            |
 
+---
 [**component list**](index.md)

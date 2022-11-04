@@ -42,4 +42,5 @@ CIC are most commonly used in streaming signal processing systems that require p
 | vld_o  | o        | 1          | valid output new frequency sampling fs/ratio |
 | busy_o | o        | 1          | Asserted one clock cycle after (InVld=1); deasserted one clock cycle after (OutVld=1) only when no further data is processed     |
 
+---
 [**component list**](index.md)

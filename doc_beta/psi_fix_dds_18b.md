@@ -35,7 +35,6 @@ This entity implements an 18-bit direct digital synthesizer (DDS). The sine-wave
 | phi_step_i   | i        | rasterized   | Phase step between two consecutive output samples. The phase step is given in 2π (0.5 corresponds to π). The phase step can be changed at runtime safely. |
 | phi_offset_i | i        | phase_fmt_g  | Phase offset of the generated signal. The phase offset is given in 2π (0.5 corresponds to π). The phase offset can be changed at runtime safely.                                      |
 |vld_i   | i  | 1  | AXI-S handshaking signal that can be used to generate samples at any rate. For continuous operation (one sample per clock cycle) , the signal can be left unconnected. The inputs restart_i, phi_step_i and phi_offset_i are latched on vld_i=1.
-  |
 | dat_sin_o    | o        | 17           | sinus output                                      |
 | dat_cos_o    | o        | 17           | cosine output 90 degree phase shifted             |
 | vld_o        | o        | 1            | frequency sampling output valid                   |
@@ -49,4 +48,5 @@ The total pipeline delay of the DDS is **10 clock cycles**.
 
 When using the DDS in multi-channel TDM configuration, the inputs (phi_step_i, phi_offset_i, restart_i) of all channels must be applied in turns
 
+---
 [**component list**](index.md)

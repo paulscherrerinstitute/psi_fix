@@ -46,4 +46,5 @@ The example below shows how to use the multiply-add stage for an efficient fully
 
 <img align="center" src="psi_fix_mult_add_stage_b.png">
 
+---
 [**component list**](index.md)

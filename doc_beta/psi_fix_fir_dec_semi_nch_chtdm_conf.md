@@ -82,4 +82,5 @@ As a result, a slightly different architecture is required for full_inp_rate_sup
 
 <img align="center" src="psi_fix_fir_dec_semi_nch_chtdm_conf_g.png">
 
+---
 [**component list**](index.md)

@@ -43,4 +43,5 @@ The figure below shows an example with three taps.
 
 <img align="center" src="psi_fix_fir_par_nch_chtdm_conf.png">
 
+---
 [**component list**](index.md)

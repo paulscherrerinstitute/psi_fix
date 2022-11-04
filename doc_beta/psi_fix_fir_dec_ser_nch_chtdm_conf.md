@@ -80,5 +80,5 @@ In case of fixed coefficient implementation, the coefficient RAM is replaced by 
 
 **Important note**: Changing the decimation rate and/or the filter order at runtime can temporarily lead to inconsistent settings because usually they are changed by register accesses that are executed one after the other. To avoid this problem, it is suggested to keep the filter in reset whenever the parameters are changed.
 
-
+---
 [**component list**](index.md)

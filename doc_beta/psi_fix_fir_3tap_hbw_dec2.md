@@ -76,4 +76,5 @@ When Separate_g = false the component processes samples from only one channel. T
 
 <img align="center" src="psi_fix_fir_3tap_hbw_dec2_c.png">
 
+---
 [**component list**](index.md)

@@ -44,4 +44,5 @@ The static shift of the original filter is replaced by a pipelined dynamic shift
 | vld_o           | o        | 1          | valid output new frequency sampling fs/ratio                                              |
 | busy_o          | o        | 1          | active high                                                                               |
 
+---
 [**component list**](index.md)

@@ -1,21 +1,28 @@
 <img align="right" src="../doc/psi_logo.png">
+
 ***
+
+[**component list**](index.md)
 
 # psi_fix_pol2cart_approx
  - VHDL source: [psi_fix_pol2cart_approx](../hdl/psi_fix_pol2cart_approx.vhd)
  - Testbench source: [psi_fix_pol2cart_approx_tb.vhd](../testbench/psi_fix_pol2cart_approx_tb/psi_fix_pol2cart_approx_tb.vhd)
 
 ### Description
-*INSERT YOUR TEXT*
+
+This entity implements a polar to cartesian conversion based on a linear approximation of the sine/cosine function. In most cases (especially for signals with less than 18 bits) this approach offers a better tradeoff between resource usage and performance.
+
+Compared to the CORDIC implementation, 4 instead of 2 or 0 28x18 multipliers (depending on gain correction) are used and additional 72kBit of BRAM are used (= 4 RAMB18). On the other hand the LUT usage is lower than for the serial CORDIC implementation and the throughput is the same as for the pipelined CORDIC implementation.
+
 
 ### Generics
 | Name           | type          | Description                              |
 |:---------------|:--------------|:-----------------------------------------|
-| in_abs_fmt_g   | psi_fix_fmt_t | must be unsigned $$ constant=(0,0,16) $$ |
-| in_angle_fmt_g | psi_fix_fmt_t | must be unsigned $$ constant=(0,0,15) $$ |
-| out_fmt_g      | psi_fix_fmt_t | usually signed $$ constant=(1,0,16) $$   |
-| round_g        | psi_fix_rnd_t | round or trunc                           |
-| sat_g          | psi_fix_sat_t | sat or wrap                              |
+| in_abs_fmt_g   | psi_fix_fmt_t | must be unsigned  |
+| in_angle_fmt_g | psi_fix_fmt_t | must be unsigned, watch out usually (1,0,x)|
+| out_fmt_g      | psi_fix_fmt_t | usually signed    |
+| round_g        | psi_fix_rnd_t | round or trunc   (use truncation for high clock speeds)                        |
+| sat_g          | psi_fix_sat_t | sat or wrap  (use wrapping for high clock speeds)                              |
 | rst_pol_g      | std_logic     | reset polarity                           |
 
 ### Interfaces
@@ -29,3 +36,12 @@
 | dat_inp_o | o        | out_fmt_g)      | data inphase                          |
 | dat_qua_o | o        | out_fmt_g)      | data quadrature                       |
 | vld_o     | o        | 1               | valid output                          |
+
+### Architecture
+
+Note that some additional output registers outside the entity may be required if rounding and saturation are used.
+
+<img align="center" src="psi_fix_pol2cart_approx.png">
+
+---
+[**component list**](index.md)

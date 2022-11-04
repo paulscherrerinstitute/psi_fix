@@ -41,4 +41,5 @@ The static shift of the original filter is replaced by a pipelined dynamic shift
 | vld_o           | o        | 1          | valid otuput                                                                              |
 | busy_o          | o        | 1          | busy signal output active high                                                            |
 
+---
 [**component list**](index.md)
