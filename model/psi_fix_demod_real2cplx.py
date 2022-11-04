@@ -33,8 +33,8 @@ class psi_fix_demod_real2cplx:
         self.outFmt = outFmt
         self.ratio = ratio
         coefUnusedIntBits = np.floor(np.log2(ratio))
-        self.coefFmt = PsiFixFmt(1, 0-coefUnusedIntBits, coefBits+coefUnusedIntBits-1)
-        self.multFmt = PsiFixFmt(1, self.inFmt.i+self.coefFmt.i, self.outFmt.f+np.ceil(np.log2(ratio)) + 2) #truncation error does only lead to 1/4 LSB error on output
+        self.coefFmt = psi_fix_fmt_t(1, 0-coefUnusedIntBits, coefBits+coefUnusedIntBits-1)
+        self.multFmt = psi_fix_fmt_t(1, self.inFmt.i+self.coefFmt.i, self.outFmt.f+np.ceil(np.log2(ratio)) + 2) #truncation error does only lead to 1/4 LSB error on output
         self.movAvg = psi_fix_mov_avg(self.multFmt, self.outFmt, ratio, psi_fix_mov_avg.GAINCORR_NONE, psi_fix_rnd_t.round, psi_fix_sat_t.sat)
 
     ####################################################################################################################
