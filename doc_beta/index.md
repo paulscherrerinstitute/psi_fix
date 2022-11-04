@@ -22,7 +22,7 @@ CORDIC rotation mode Polar to Cartesian - Parallel/Serial mode | [psi_fix_cordic
 CORDIC vector mode Cartesian to Polar - Parallel/Serial mode | [psi_fix_cordic_vect.vhd](../hdl/psi_fix_cordic_vect.vhd)   | [link](psi_fix_cordic_vect.md)
 DDS 18bits fixed output | [psi_fix_dds_18b.vhd](../hdl/psi_fix_dds_18b.vhd)   | [link](psi_fix_dds_18b.md)   
 Non IQ demodulator with phase offset input and fixed non-integer ratio (generics) | [psi_fix_demod_real2cplx.vhd](../hdl/psi_fix_demod_real2cplx.vhd)    | [link](psi_fix_demod_real2cplx.md)  
-Non IQ modulator with phase offset input and fixed non-integer ratio (generics) | [psi_fix_mod_real2cplx.vhd](../hdl/psi_fix_mod_real2cplx.vhd)    | [link](psi_fix_mod_real2cplx.md)   
+Non IQ modulator with phase offset input and fixed non-integer ratio (generics) | [psi_fix_mod_cplx2real.vhd](../hdl/psi_fix_mod_cplx2real.vhd)    | [link](psi_fix_mod_cplx2real.md)   
 LP Filter Half-bandwidth 0.25 0.5 0.25 and decimation by 2 (without using multipliers)  | [psi_fix_fir_3tap_hbw_dec2.vhd](../hdl/psi_fix_fir_3tap_hbw_dec2.vhd)    | [link](psi_fix_fir_3tap_hbw_dec2.md)
 1/2 MAC FIR filter *decimation with optimized used of resources configurable  | [psi_fix_fir_dec_semi_nch_chtdm_conf.vhd](../hdl/psi_fix_fir_dec_semi_nch_chtdm_conf.vhd)    | [link](psi_fix_fir_dec_semi_nch_chtdm_conf.md)   
 MAC FIR filter *decimation N Channels input parallel configurable  | [psi_fix_fir_dec_ser_nch_chpar_conf.vhd](../hdl/psi_fix_fir_dec_ser_nch_chpar_conf.vhd)    | [link](psi_fix_fir_dec_ser_nch_chpar_conf.md)   
