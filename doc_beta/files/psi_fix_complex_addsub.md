@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_complex_addsub
- - VHDL source: [psi_fix_complex_addsub](../hdl/psi_fix_complex_addsub.vhd)
- - Testbench source: [psi_fix_complex_addsub_tb.vhd](../testbench/psi_fix_complex_addsub_tb/psi_fix_complex_addsub_tb.vhd)
+ - VHDL source: [psi_fix_complex_addsub](../../hdl/psi_fix_complex_addsub.vhd)
+ - Testbench source: [psi_fix_complex_addsub_tb.vhd](../../testbench/psi_fix_complex_addsub_tb/psi_fix_complex_addsub_tb.vhd)
 
 ### Description
 The block performs addition/subtraction on a complex number pair (Inphase & Quadrature, inputs of the block), let two complex numbers be:

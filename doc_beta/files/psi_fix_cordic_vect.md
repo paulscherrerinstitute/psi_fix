@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_cordic_vect
- - VHDL source: [psi_fix_cordic_vect](../hdl/psi_fix_cordic_vect.vhd)
- - Testbench source: [psi_fix_cordic_vect_tb.vhd](../testbench/psi_fix_cordic_vect_tb/psi_fix_cordic_vect_tb.vhd)
+ - VHDL source: [psi_fix_cordic_vect](../../hdl/psi_fix_cordic_vect.vhd)
+ - Testbench source: [psi_fix_cordic_vect_tb.vhd](../../testbench/psi_fix_cordic_vect_tb/psi_fix_cordic_vect_tb.vhd)
 
 ### Description
 This entity implements the CORDIC algorithm for Cartesian to Polar conversion.

@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_complex_mult
- - VHDL source: [psi_fix_complex_mult](../hdl/psi_fix_complex_mult.vhd)
- - Testbench source: [psi_fix_complex_mult_tb.vhd](../testbench/psi_fix_complex_mult_tb/psi_fix_complex_mult_tb.vhd)
+ - VHDL source: [psi_fix_complex_mult](../../hdl/psi_fix_complex_mult.vhd)
+ - Testbench source: [psi_fix_complex_mult_tb.vhd](../../testbench/psi_fix_complex_mult_tb/psi_fix_complex_mult_tb.vhd)
 
 ### Description
 

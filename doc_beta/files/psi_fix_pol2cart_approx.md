@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_pol2cart_approx
- - VHDL source: [psi_fix_pol2cart_approx](../hdl/psi_fix_pol2cart_approx.vhd)
- - Testbench source: [psi_fix_pol2cart_approx_tb.vhd](../testbench/psi_fix_pol2cart_approx_tb/psi_fix_pol2cart_approx_tb.vhd)
+ - VHDL source: [psi_fix_pol2cart_approx](../../hdl/psi_fix_pol2cart_approx.vhd)
+ - Testbench source: [psi_fix_pol2cart_approx_tb.vhd](../../testbench/psi_fix_pol2cart_approx_tb/psi_fix_pol2cart_approx_tb.vhd)
 
 ### Description
 

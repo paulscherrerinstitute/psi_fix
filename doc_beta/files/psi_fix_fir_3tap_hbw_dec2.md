@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_fir_3tap_hbw_dec2
- - VHDL source: [psi_fix_fir_3tap_hbw_dec2](../hdl/psi_fix_fir_3tap_hbw_dec2.vhd)
- - Testbench source: [psi_fix_fir_3tap_hbw_dec2_tb.vhd](../testbench/psi_fix_fir_3tap_hbw_dec2_tb/psi_fix_fir_3tap_hbw_dec2_tb.vhd)
+ - VHDL source: [psi_fix_fir_3tap_hbw_dec2](../../hdl/psi_fix_fir_3tap_hbw_dec2.vhd)
+ - Testbench source: [psi_fix_fir_3tap_hbw_dec2_tb.vhd](../../testbench/psi_fix_fir_3tap_hbw_dec2_tb/psi_fix_fir_3tap_hbw_dec2_tb.vhd)
 
 ### Description
 This component implements a decimating by 2 half-bandwidth filter. This particular implementation has 3 taps with fixed coefficients: 0.25, 0.5, 0.25. This enables efficient implementation based on bit shifting instead of multiplications. It can be used in a two modes of operation: Separate mode, in which all channels are independently processed (but still share AXI-S handshaking signals) and a second mode, in which input samples are processed as they come from one source. This enables decimate by N (where N is a power of two) by connecting more components of this type in a chained structure.

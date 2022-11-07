@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_mov_avg
- - VHDL source: [psi_fix_mov_avg](../hdl/psi_fix_mov_avg.vhd)
- - Testbench source: [psi_fix_mov_avg_tb.vhd](../testbench/psi_fix_mov_avg_tb/psi_fix_mov_avg_tb.vhd)
+ - VHDL source: [psi_fix_mov_avg](../../hdl/psi_fix_mov_avg.vhd)
+ - Testbench source: [psi_fix_mov_avg_tb.vhd](../../testbench/psi_fix_mov_avg_tb/psi_fix_mov_avg_tb.vhd)
 
 ### Description
 This entity implements a moving average implementation. It does not only calculate the moving sum but also compensate the gain from summing up multiple samples (either roughly by just shifting or exact by shifting and multiplication) if required.

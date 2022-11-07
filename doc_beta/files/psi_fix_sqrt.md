@@ -5,13 +5,13 @@
 [**component list**](../README.md)
 
 # psi_fix_sqrt
- - VHDL source: [psi_fix_sqrt](../hdl/psi_fix_sqrt.vhd)
- - Testbench source: [psi_fix_sqrt_tb.vhd](../testbench/psi_fix_sqrt_tb/psi_fix_sqrt_tb.vhd)
+ - VHDL source: [psi_fix_sqrt](../../hdl/psi_fix_sqrt.vhd)
+ - Testbench source: [psi_fix_sqrt_tb.vhd](../../testbench/psi_fix_sqrt_tb/psi_fix_sqrt_tb.vhd)
 
 ### Description
 
 This entity implements a square root calculation.
-The square root function is approximated in the range 0.25-1.0 using [psi_fix_lin_approx_sqrt](../hdl/psi_fix_lin_approx_sqrt.vhd) function and input/output are shifted to match the valid range of the approximation. The resulting implementation uses way less LUT than a CORDIC but multipliers and a bit or BRAM. Since the linear approximation of the square root function is limited to 18 bits, the result can have a relative error (relative to the absolute value of the output):
+The square root function is approximated in the range 0.25-1.0 using [psi_fix_lin_approx_sqrt](../../hdl/psi_fix_lin_approx_sqrt.vhd) function and input/output are shifted to match the valid range of the approximation. The resulting implementation uses way less LUT than a CORDIC but multipliers and a bit or BRAM. Since the linear approximation of the square root function is limited to 18 bits, the result can have a relative error (relative to the absolute value of the output):
 
 <img align="center" src="psi_fix_complex_abs_b.png">
 

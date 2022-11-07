@@ -2,8 +2,8 @@
 ***
 
 # psi_fix_param_ram
- - VHDL source: [psi_fix_param_ram](../hdl/psi_fix_param_ram.vhd)
- - Testbench source: [psi_fix_param_ram_tb.vhd](../testbench/psi_fix_param_ram_tb/psi_fix_param_ram_tb.vhd)
+ - VHDL source: [psi_fix_param_ram](../../hdl/psi_fix_param_ram.vhd)
+ - Testbench source: [psi_fix_param_ram_tb.vhd](../../testbench/psi_fix_param_ram_tb/psi_fix_param_ram_tb.vhd)
 
 ### Description
 *INSERT YOUR TEXT*

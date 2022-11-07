@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_cordic_rot
- - VHDL source: [psi_fix_cordic_rot](../hdl/psi_fix_cordic_rot.vhd)
- - Testbench source: [psi_fix_cordic_rot_tb.vhd](../testbench/psi_fix_cordic_rot_tb/psi_fix_cordic_rot_tb.vhd)
+ - VHDL source: [psi_fix_cordic_rot](../../hdl/psi_fix_cordic_rot.vhd)
+ - Testbench source: [psi_fix_cordic_rot_tb.vhd](../../testbench/psi_fix_cordic_rot_tb/psi_fix_cordic_rot_tb.vhd)
 
 ### Description
 

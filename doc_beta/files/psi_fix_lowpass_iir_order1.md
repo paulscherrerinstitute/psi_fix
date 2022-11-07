@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_lowpass_iir_order1
- - VHDL source: [psi_fix_lowpass_iir_order1](../hdl/psi_fix_lowpass_iir_order1.vhd)
- - Testbench source: [psi_fix_lowpass_iir_order1_tb.vhd](../testbench/psi_fix_lowpass_iir_order1_tb/psi_fix_lowpass_iir_order1_tb.vhd)
+ - VHDL source: [psi_fix_lowpass_iir_order1](../../hdl/psi_fix_lowpass_iir_order1.vhd)
+ - Testbench source: [psi_fix_lowpass_iir_order1_tb.vhd](../../testbench/psi_fix_lowpass_iir_order1_tb/psi_fix_lowpass_iir_order1_tb.vhd)
 
 ### Description
 

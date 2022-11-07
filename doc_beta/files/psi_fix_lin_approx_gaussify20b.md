@@ -2,8 +2,8 @@
 ***
 
 # psi_fix_lin_approx_gaussify20b
- - VHDL source: [psi_fix_lin_approx_gaussify20b](../hdl/psi_fix_lin_approx_gaussify20b.vhd)
- - Testbench source: [psi_fix_lin_approx_gaussify20b_tb.vhd](../testbench/psi_fix_lin_approx_gaussify20b_tb/psi_fix_lin_approx_gaussify20b_tb.vhd)
+ - VHDL source: [psi_fix_lin_approx_gaussify20b](../../hdl/psi_fix_lin_approx_gaussify20b.vhd)
+ - Testbench source: [psi_fix_lin_approx_gaussify20b_tb.vhd](../../testbench/psi_fix_lin_approx_gaussify20b_tb/psi_fix_lin_approx_gaussify20b_tb.vhd)
 
 ### Description
 *INSERT YOUR TEXT*

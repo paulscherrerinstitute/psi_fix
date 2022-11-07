@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_white_noise
- - VHDL source: [psi_fix_white_noise](../hdl/psi_fix_white_noise.vhd)
- - Testbench source: [psi_fix_white_noise_tb.vhd](../testbench/psi_fix_white_noise_tb/psi_fix_white_noise_tb.vhd)
+ - VHDL source: [psi_fix_white_noise](../../hdl/psi_fix_white_noise.vhd)
+ - Testbench source: [psi_fix_white_noise_tb.vhd](../../testbench/psi_fix_white_noise_tb/psi_fix_white_noise_tb.vhd)
 
 ### Description
 

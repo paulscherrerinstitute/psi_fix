@@ -4,7 +4,7 @@
 
 Prior to use the library following readings are recommended.
 
-**[1 Introduction](files/Introduction.md)**
+**[1 Introduction](files/introduction.md)**
 
 **[2 Tips and tricks with psi_fix](files/tips.md)**
 
@@ -14,23 +14,23 @@ Prior to use the library following readings are recommended.
 
 # List of compoments
 
-Component 				                               | Source                                                                    | Description
--------------------------------------------------|---------------------------------------------------------------------------|:-------------------------------------------:
-Binary division 																 | [psi_fix_bin_div.vhd](../hdl/psi_fix_bin_div.vhd)	 		 									 | [link](files/psi_fix_bin_div.md)
-Filter CIC Decimation 1 channel configurable   	 | [psi_fix_cic_dec_cfg_1ch.vhd](../hdl/psi_fix_cic_dec_cfg_1ch.vhd)	 	  	 | [link](files/psi_fix_cic_dec_cfg_1ch.md)
-Filter CIC Decimation N channels parallel input Tdm output configurable   	 | [psi_fix_cic_dec_cfg_nch_par_tdm.vhd](../hdl/psi_fix_cic_dec_cfg_nch_par_tdm.vhd)	 	  	 | [link](files/psi_fix_cic_dec_cfg_nch_par_tdm.md)  
-Filter CIC Decimation N channels Tdm input Tdm output configurable   	 | [psi_fix_cic_dec_cfg_nch_tdm_tdm.vhd](../hdl/psi_fix_cic_dec_cfg_nch_tdm_tdm.vhd)	 	  	 | [link](files/psi_fix_cic_dec_cfg_nch_tdm_tdm.md)  
-Filter CIC Decimation 1 channel fixed parameters (generics)  	 | [psi_fix_cic_dec_fix_1ch.vhd](../hdl/psi_fix_cic_dec_fix_1ch.vhd)	 	  	 | [link](files/psi_fix_cic_dec_fix_1ch.md)  
-Filter CIC Decimation N channels parallel input Tdm output fixed parameters (generics)   	 | [psi_fix_cic_dec_fix_nch_par_tdm.vhd](../hdl/psi_fix_cic_dec_fix_nch_par_tdm.vhd)	 	  	 | [link](files/psi_fix_cic_dec_fix_nch_par_tdm.md)  
-Filter CIC Decimation N channels  Tdm input Tdm output fixed parameters (generics)  	 | [psi_fix_cic_dec_fix_nch_tdm_tdm.vhd](../hdl/psi_fix_cic_dec_fix_nch_tdm_tdm.vhd)	 	  	 | [link](files/psi_fix_cic_dec_fix_nch_tdm_tdm.md)  
-Filter CIC Interpolation 1 channel fixed parameters   	 | [psi_fix_cic_int_fix_1ch.vhd](../hdl/psi_fix_cic_int_fix_1ch.vhd)	 	  	 | [link](files/psi_fix_cic_int_fix_1ch.md)  
-Simple comparator with unique FP format  | [psi_fix_comparator.vhd](../hdl/psi_fix_comparator.vhd)   | [link](files/psi_fix_comparator.md)   
-Complex amplitude calculation (no cordic)  |   [psi_fix_complex_abs.vhd](../hdl/psi_fix_complex_abs.vhd)   | [link](files/psi_fix_complex_abs.md)  
-Complex adder or subtractor   |  [psi_fix_complex_addsub.vhd](../hdl/psi_fix_complex_addsub.vhd)   | [link](files/psi_fix_complex_addsub.md)   
-Complex multiplier  | [psi_fix_complex_mult.vhd](../hdl/psi_fix_complex_mult.vhd)   | [link](files/psi_fix_complex_mult.md)   
-CORDIC rotation mode Polar to Cartesian - Parallel/Serial mode | [psi_fix_cordic_rot.vhd](../hdl/psi_fix_cordic_rot.vhd)   | [link](files/psi_fix_cordic_rot.md)  
-CORDIC vector mode Cartesian to Polar - Parallel/Serial mode | [psi_fix_cordic_vect.vhd](../hdl/psi_fix_cordic_vect.vhd)   | [link](files/psi_fix_cordic_vect.md)
-DDS 18bits fixed output | [psi_fix_dds_18b.vhd](../hdl/psi_fix_dds_18b.vhd)   | [link](files/psi_fix_dds_18b.md)   
+Component 				                               | Source                                                                    
+-------------------------------------------------|---------------------------------------------------------------------------
+[Binary division](files/psi_fix_bin_div.md) 																 | [psi_fix_bin_div.vhd](../hdl/psi_fix_bin_div.vhd)	 		 									 
+[Filter CIC Decimation 1 channel configurable](files/psi_fix_cic_dec_cfg_1ch.md)   	 | [psi_fix_cic_dec_cfg_1ch.vhd](../hdl/psi_fix_cic_dec_cfg_1ch.vhd)	 	  	
+[Filter CIC Decimation N channels parallel input Tdm output configurable](files/psi_fix_cic_dec_cfg_nch_par_tdm.md)   	 | [psi_fix_cic_dec_cfg_nch_par_tdm.vhd](../hdl/psi_fix_cic_dec_cfg_nch_par_tdm.vhd)	 	  	 
+[Filter CIC Decimation N channels Tdm input Tdm output configurable](files/psi_fix_cic_dec_cfg_nch_tdm_tdm.md)    	 | [psi_fix_cic_dec_cfg_nch_tdm_tdm.vhd](../hdl/psi_fix_cic_dec_cfg_nch_tdm_tdm.vhd)	 	   
+[Filter CIC Decimation 1 channel fixed parameters (generics)](files/psi_fix_cic_dec_fix_1ch.md)    	 | [psi_fix_cic_dec_fix_1ch.vhd](../hdl/psi_fix_cic_dec_fix_1ch.vhd)	 	  
+[Filter CIC Decimation N channels parallel input Tdm output fixed parameters (generics)](files/psi_fix_cic_dec_fix_nch_par_tdm.md)     	 | [psi_fix_cic_dec_fix_nch_par_tdm.vhd](../hdl/psi_fix_cic_dec_fix_nch_par_tdm.vhd)	 
+[Filter CIC Decimation N channels  Tdm input Tdm output fixed parameters (generics)](files/psi_fix_cic_dec_fix_nch_tdm_tdm.md)    	 | [psi_fix_cic_dec_fix_nch_tdm_tdm.vhd](../hdl/psi_fix_cic_dec_fix_nch_tdm_tdm.vhd)	 	  	 
+[Filter CIC Interpolation 1 channel fixed parameters](files/psi_fix_cic_int_fix_1ch.md)   	 | [psi_fix_cic_int_fix_1ch.vhd](../hdl/psi_fix_cic_int_fix_1ch.vhd)	 	  
+[Simple comparator with unique FP format](files/psi_fix_comparator.md)   | [psi_fix_comparator.vhd](../hdl/psi_fix_comparator.vhd)  
+[Complex amplitude calculation (no cordic)](files/psi_fix_complex_abs.md)   |   [psi_fix_complex_abs.vhd](../hdl/psi_fix_complex_abs.vhd)     
+[Complex adder or subtractor](files/psi_fix_complex_addsub.md)  |  [psi_fix_complex_addsub.vhd](../hdl/psi_fix_complex_addsub.vhd)
+[Complex multiplier](files/psi_fix_complex_mult.md)    | [psi_fix_complex_mult.vhd](../hdl/psi_fix_complex_mult.vhd)  
+[CORDIC rotation mode Polar to Cartesian - Parallel/Serial mode](files/psi_fix_cordic_rot.md)  | [psi_fix_cordic_rot.vhd](../hdl/psi_fix_cordic_rot.vhd)
+[CORDIC vector mode Cartesian to Polar - Parallel/Serial mode](files/psi_fix_cordic_vect.md) | [psi_fix_cordic_vect.vhd](../hdl/psi_fix_cordic_vect.vhd)    
+[DDS 18bits fixed output](files/psi_fix_dds_18b.md)  | [psi_fix_dds_18b.vhd](../hdl/psi_fix_dds_18b.vhd)  
 Non IQ demodulator with phase offset input and fixed non-integer ratio (generics) | [psi_fix_demod_real2cplx.vhd](../hdl/psi_fix_demod_real2cplx.vhd)    | [link](files/psi_fix_demod_real2cplx.md)  
 Non IQ modulator with phase offset input and fixed non-integer ratio (generics) | [psi_fix_mod_cplx2real.vhd](../hdl/psi_fix_mod_cplx2real.vhd)    | [link](files/psi_fix_mod_cplx2real.md)   
 LP Filter Half-bandwidth 0.25 0.5 0.25 and decimation by 2 (without using multipliers)  | [psi_fix_fir_3tap_hbw_dec2.vhd](../hdl/psi_fix_fir_3tap_hbw_dec2.vhd)    | [link](files/psi_fix_fir_3tap_hbw_dec2.md)

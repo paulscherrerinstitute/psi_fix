@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_phase_unwrap
- - VHDL source: [psi_fix_phase_unwrap](../hdl/psi_fix_phase_unwrap.vhd)
- - Testbench source: [psi_fix_phase_unwrap_tb.vhd](../testbench/psi_fix_phase_unwrap_tb/psi_fix_phase_unwrap_tb.vhd)
+ - VHDL source: [psi_fix_phase_unwrap](../../hdl/psi_fix_phase_unwrap.vhd)
+ - Testbench source: [psi_fix_phase_unwrap_tb.vhd](../../testbench/psi_fix_phase_unwrap_tb/psi_fix_phase_unwrap_tb.vhd)
 
 ### Description
 

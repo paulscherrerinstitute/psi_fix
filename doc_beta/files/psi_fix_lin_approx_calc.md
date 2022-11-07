@@ -4,8 +4,8 @@
 [**component list**](../README.md)
 
 # psi_fix_lin_approx_calc
- - VHDL source: [psi_fix_lin_approx_calc](../hdl/psi_fix_lin_approx_calc.vhd)
- - Testbench source: [psi_fix_lin_approx_calc_tb.vhd](../testbench/psi_fix_lin_approx_calc_tb/psi_fix_lin_approx_calc_tb.vhd)
+ - VHDL source: [psi_fix_lin_approx_calc](../../hdl/psi_fix_lin_approx_calc.vhd)
+ - Testbench source: [psi_fix_lin_approx_calc_tb.vhd](../../testbench/psi_fix_lin_approx_calc_tb/psi_fix_lin_approx_calc_tb.vhd)
 
 ### Description
 

@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_cic_int_fix_1ch
- - VHDL source: [psi_fix_cic_int_fix_1ch](../hdl/psi_fix_cic_int_fix_1ch.vhd)
- - Testbench source: [psi_fix_cic_int_fix_1ch_tb.vhd](../testbench/psi_fix_cic_int_fix_1ch_tb/psi_fix_cic_int_fix_1ch_tb.vhd)
+ - VHDL source: [psi_fix_cic_int_fix_1ch](../../hdl/psi_fix_cic_int_fix_1ch.vhd)
+ - Testbench source: [psi_fix_cic_int_fix_1ch_tb.vhd](../../testbench/psi_fix_cic_int_fix_1ch_tb/psi_fix_cic_int_fix_1ch_tb.vhd)
 
 ### Description
 

@@ -2,8 +2,8 @@
 ***
 
 # psi_fix_comparator
- - VHDL source: [psi_fix_comparator](../hdl/psi_fix_comparator.vhd)
- - Testbench source: [psi_fix_comparator_tb.vhd](../testbench/psi_fix_comparator_tb/psi_fix_comparator_tb.vhd)
+ - VHDL source: [psi_fix_comparator](../../hdl/psi_fix_comparator.vhd)
+ - Testbench source: [psi_fix_comparator_tb.vhd](../../testbench/psi_fix_comparator_tb/psi_fix_comparator_tb.vhd)
 
 ### Description
 *INSERT YOUR TEXT*

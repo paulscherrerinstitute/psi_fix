@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_mult_add_stage
- - VHDL source: [psi_fix_mult_add_stage](../hdl/psi_fix_mult_add_stage.vhd)
- - Testbench source: [psi_fix_mult_add_stage_tb.vhd](../testbench/psi_fix_mult_add_stage_tb/psi_fix_mult_add_stage_tb.vhd)
+ - VHDL source: [psi_fix_mult_add_stage](../../hdl/psi_fix_mult_add_stage.vhd)
+ - Testbench source: [psi_fix_mult_add_stage_tb.vhd](../../testbench/psi_fix_mult_add_stage_tb/psi_fix_mult_add_stage_tb.vhd)
 
 ### Description
 This entity implements a multiply-add stage that can be implemented efficiently for FPGAs supporting multiply-adder chains (as Xilinx 6- and 7-Series do for example). It is written in pure VHDL and also synthesizable for other FPGA families but it may lead to less optimal results.

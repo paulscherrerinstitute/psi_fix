@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_bin_div
- - VHDL source: [psi_fix_bin_div](../hdl/psi_fix_bin_div.vhd)
- - Testbench source: [psi_fix_bin_div_tb.vhd](../testbench/psi_fix_bin_div_tb/psi_fix_bin_div_tb.vhd)
+ - VHDL source: [psi_fix_bin_div](../../hdl/psi_fix_bin_div.vhd)
+ - Testbench source: [psi_fix_bin_div_tb.vhd](../../testbench/psi_fix_bin_div_tb/psi_fix_bin_div_tb.vhd)
 
 ### Description
 This component implements a fixed point binary divider.

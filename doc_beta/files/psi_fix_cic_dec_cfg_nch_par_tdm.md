@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_cic_dec_cfg_nch_par_tdm
- - VHDL source: [psi_fix_cic_dec_cfg_nch_par_tdm](../hdl/psi_fix_cic_dec_cfg_nch_par_tdm.vhd)
- - Testbench source: [psi_fix_cic_dec_cfg_nch_par_tdm_tb.vhd](../testbench/psi_fix_cic_dec_cfg_nch_par_tdm_tb/psi_fix_cic_dec_cfg_nch_par_tdm_tb.vhd)
+ - VHDL source: [psi_fix_cic_dec_cfg_nch_par_tdm](../../hdl/psi_fix_cic_dec_cfg_nch_par_tdm.vhd)
+ - Testbench source: [psi_fix_cic_dec_cfg_nch_par_tdm_tb.vhd](../../testbench/psi_fix_cic_dec_cfg_nch_par_tdm_tb/psi_fix_cic_dec_cfg_nch_par_tdm_tb.vhd)
 
 ### Description
 This is the same CIC filter as  [psi_fix_cic_dec_fix_nch_par_tdm](psi_fix_cic_dec_fix_nch_par_tdm.md) but with the decimation ratio selectable at runtime. For general documentation, refer to the section given above. This section only describes the differences between the two filters.

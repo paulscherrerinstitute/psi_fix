@@ -6,8 +6,8 @@
 
 
 # psi_fix_fir_dec_ser_nch_chtdm_conf
- - VHDL source: [psi_fix_fir_dec_ser_nch_chtdm_conf](../hdl/psi_fix_fir_dec_ser_nch_chtdm_conf.vhd)
- - Testbench source: [psi_fix_fir_dec_ser_nch_chtdm_conf_tb.vhd](../testbench/psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_tb.vhd)
+ - VHDL source: [psi_fix_fir_dec_ser_nch_chtdm_conf](../../hdl/psi_fix_fir_dec_ser_nch_chtdm_conf.vhd)
+ - Testbench source: [psi_fix_fir_dec_ser_nch_chtdm_conf_tb.vhd](../../testbench/psi_fix_fir_dec_ser_nch_chtdm_conf_tb/psi_fix_fir_dec_ser_nch_chtdm_conf_tb.vhd)
 
 ### Description
 

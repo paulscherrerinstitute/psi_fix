@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_inv
- - VHDL source: [psi_fix_inv](../hdl/psi_fix_inv.vhd)
- - Testbench source: [psi_fix_inv_tb.vhd](../testbench/psi_fix_inv_tb/psi_fix_inv_tb.vhd)
+ - VHDL source: [psi_fix_inv](../../hdl/psi_fix_inv.vhd)
+ - Testbench source: [psi_fix_inv_tb.vhd](../../testbench/psi_fix_inv_tb/psi_fix_inv_tb.vhd)
 
 ### Description
 

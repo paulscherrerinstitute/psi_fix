@@ -3,8 +3,8 @@
 
 # FirNaming
 
- - VHDL source: [FirNaming](../hdl/FirNaming.txt)
- - Testbench source: [FirNaming_tb.vhd](../testbench/FirNaming_tb/FirNaming_tb.vhd)
+ - VHDL source: [FirNaming](../../hdl/FirNaming.txt)
+ - Testbench source: [FirNaming_tb.vhd](../../testbench/FirNaming_tb/FirNaming_tb.vhd)
 
 ### Description
 *INSERT YOUR TEXT*

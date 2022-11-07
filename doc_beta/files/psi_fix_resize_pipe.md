@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_resize_pipe
- - VHDL source: [psi_fix_resize_pipe](../hdl/psi_fix_resize_pipe.vhd)
- - Testbench source: [psi_fix_resize_pipe_tb.vhd](../testbench/psi_fix_resize_pipe_tb/psi_fix_resize_pipe_tb.vhd)
+ - VHDL source: [psi_fix_resize_pipe](../../hdl/psi_fix_resize_pipe.vhd)
+ - Testbench source: [psi_fix_resize_pipe_tb.vhd](../../testbench/psi_fix_resize_pipe_tb/psi_fix_resize_pipe_tb.vhd)
 
 ### Description
 

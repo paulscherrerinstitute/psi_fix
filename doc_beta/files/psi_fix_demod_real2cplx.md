@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_demod_real2cplx
- - VHDL source: [psi_fix_demod_real2cplx](../hdl/psi_fix_demod_real2cplx.vhd)
- - Testbench source: [psi_fix_demod_real2cplx_tb.vhd](../testbench/psi_fix_demod_real2cplx_tb/psi_fix_demod_real2cplx_tb.vhd)
+ - VHDL source: [psi_fix_demod_real2cplx](../../hdl/psi_fix_demod_real2cplx.vhd)
+ - Testbench source: [psi_fix_demod_real2cplx_tb.vhd](../../testbench/psi_fix_demod_real2cplx_tb/psi_fix_demod_real2cplx_tb.vhd)
 
 ### Description
 

@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_noise_awgn
- - VHDL source: [psi_fix_noise_awgn](../hdl/psi_fix_noise_awgn.vhd)
- - Testbench source: [psi_fix_noise_awgn_tb.vhd](../testbench/psi_fix_noise_awgn_tb/psi_fix_noise_awgn_tb.vhd)
+ - VHDL source: [psi_fix_noise_awgn](../../hdl/psi_fix_noise_awgn.vhd)
+ - Testbench source: [psi_fix_noise_awgn_tb.vhd](../../testbench/psi_fix_noise_awgn_tb/psi_fix_noise_awgn_tb.vhd)
 
 ### Description
 

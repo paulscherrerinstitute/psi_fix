@@ -5,8 +5,8 @@
 [**component list**](../README.md)
 
 # psi_fix_complex_abs
- - VHDL source: [psi_fix_complex_abs](../hdl/psi_fix_complex_abs.vhd)
- - Testbench source: [psi_fix_complex_abs_tb.vhd](../testbench/psi_fix_complex_abs_tb/psi_fix_complex_abs_tb.vhd)
+ - VHDL source: [psi_fix_complex_abs](../../hdl/psi_fix_complex_abs.vhd)
+ - Testbench source: [psi_fix_complex_abs_tb.vhd](../../testbench/psi_fix_complex_abs_tb/psi_fix_complex_abs_tb.vhd)
 
 ### Description
 
@@ -14,7 +14,7 @@ This entity implements the absolute value calculation for a complex number based
 
 <img align="center" src="psi_fix_complex_abs_a.png">
 
-The square root function is approximated using [psi_fix_lin_approx_sqrt](../hdl/psi_fix_lin_approx_sqrt.vhd) function. The resulting implementation uses way less LUT than a CORDIC but multipliers and a bit or BRAM. Since the linear approximation of the square root function is limited to 18 bits, the result can have a relative error (relative to the absolute value of the output):
+The square root function is approximated using [psi_fix_lin_approx_sqrt](../../hdl/psi_fix_lin_approx_sqrt.vhd) function. The resulting implementation uses way less LUT than a CORDIC but multipliers and a bit or BRAM. Since the linear approximation of the square root function is limited to 18 bits, the result can have a relative error (relative to the absolute value of the output):
 
 <img align="center" src="psi_fix_complex_abs_b.png">
 
