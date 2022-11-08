@@ -26,8 +26,8 @@ class psi_fix_cic_dec:
     def __init__(self,  order : int,
                         ratio : int,
                         diffDelay : int,
-                        inFmt : PsiFixFmt,
-                        outFmt : PsiFixFmt,
+                        inFmt : psi_fix_fmt_t,
+                        outFmt : psi_fix_fmt_t,
                         autoGainCorr : bool):
         """
         Creation of a decimating CIC model
@@ -51,13 +51,13 @@ class psi_fix_cic_dec:
         self.shift = self.cicAddBits
         # CIC implementation does not rely on double-precision numbers for accumulators because they tend to
         # be quite large.
-        with PsiFixFmt.WithRangeCheckDisabled():
-            self.accuFmt = PsiFixFmt(inFmt.S, inFmt.I+self.cicAddBits, inFmt.F)
-        self.diffFmt = PsiFixFmt(outFmt.S, inFmt.I, outFmt.F+order+1)
-        self.gcInFmt = PsiFixFmt(1, outFmt.I, min(24-outFmt.I, self.diffFmt.F))
+        with psi_fix_fmt_t.with_range_check_disabled():
+            self.accuFmt = psi_fix_fmt_t(inFmt.s, inFmt.i+self.cicAddBits, inFmt.f)
+        self.diffFmt = psi_fix_fmt_t(outFmt.s, inFmt.i, outFmt.f+order+1)
+        self.gcInFmt = psi_fix_fmt_t(1, outFmt.i, min(24-outFmt.i, self.diffFmt.f))
         #Constants
-        self.gcCoefFmt = PsiFixFmt(0,1,16)
-        self.gc = PsiFixFromReal(2**self.cicAddBits/self.cicGain, self.gcCoefFmt)
+        self.gcCoefFmt = psi_fix_fmt_t(0,1,16)
+        self.gc = psi_fix_from_real(2**self.cicAddBits/self.cicGain, self.gcCoefFmt)
 
     ####################################################################################################################
     # Public functions
@@ -69,46 +69,46 @@ class psi_fix_cic_dec:
         :return: Output data
         """
         #Make iniput fixed point
-        sig = PsiFixFromReal(inp, self.inFmt)
+        sig = psi_fix_from_real(inp, self.inFmt)
 
         # Do integration in integer to avoid fixed point precision problems
         sigInt = []
-        sigInt.append(np.array(PsiFixGetBitsAsInt(sig, self.inFmt), dtype=object))
+        sigInt.append(np.array(psi_fix_get_bits_as_int(sig, self.inFmt), dtype=object))
         for stage in range(self.order):
             stageOut = np.zeros(sig.size, dtype=object)
             integrator = int(0)
             for i in range(sig.size):
-                integrator = (integrator + sigInt[stage][i]) % (1 << int(PsiFixSize(self.accuFmt)))
+                integrator = (integrator + sigInt[stage][i]) % (1 << int(psi_fix_size(self.accuFmt)))
                 stageOut[i] = integrator
             sigInt.append(stageOut)
 
         # Do decimation and shift
         sigDecFull = np.array(sigInt[self.order][::self.ratio], dtype=object)
-        addFracPlaces = self.diffFmt.F - self.accuFmt.F
+        addFracPlaces = self.diffFmt.f - self.accuFmt.f
         if self.shift - addFracPlaces > 0:
-            sigDecSft = (sigDecFull >> (self.shift - addFracPlaces)) % (1 << int(PsiFixSize(self.diffFmt)))
+            sigDecSft = (sigDecFull >> (self.shift - addFracPlaces)) % (1 << int(psi_fix_size(self.diffFmt)))
         else:
-            sigDecSft = (sigDecFull << (addFracPlaces - self.shift)) % (1 << int(PsiFixSize(self.diffFmt)))
-        signBitValue = 1 << int(PsiFixSize(self.diffFmt) - 1)
+            sigDecSft = (sigDecFull << (addFracPlaces - self.shift)) % (1 << int(psi_fix_size(self.diffFmt)))
+        signBitValue = 1 << int(psi_fix_size(self.diffFmt) - 1)
         sigDecSft = np.where(sigDecSft >= signBitValue, sigDecSft - 2 * signBitValue, sigDecSft)
-        sigDec = PsiFixFromBitsAsInt(sigDecSft, self.diffFmt)
+        sigDec = psi_fix_from_bits_as_int(sigDecSft, self.diffFmt)
         # Do differentiation
         sigDiff = []
         sigDiff.append(sigDec)
         for stage in range(self.order):
             last = np.concatenate((np.zeros([self.diffDelay]), sigDiff[stage][0:-self.diffDelay]))
-            stageOut = PsiFixSub(sigDiff[stage], self.diffFmt,
+            stageOut = psi_fix_sub(sigDiff[stage], self.diffFmt,
                                  last, self.diffFmt, self.diffFmt)
             sigDiff.append(stageOut)
         # Gain Compensation
         if self.autoGainCorr:
-            sigGcIn = PsiFixResize(sigDiff[self.order], self.diffFmt, self.gcInFmt, PsiFixRnd.Round, PsiFixSat.Sat)
-            sigGcOut = PsiFixMult(sigGcIn, self.gcInFmt,
+            sigGcIn = psi_fix_resize(sigDiff[self.order], self.diffFmt, self.gcInFmt, psi_fix_rnd_t.round, psi_fix_sat_t.sat)
+            sigGcOut = psi_fix_mult(sigGcIn, self.gcInFmt,
                                   self.gc, self.gcCoefFmt,
-                                  self.outFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+                                  self.outFmt, psi_fix_rnd_t.round, psi_fix_sat_t.sat)
             return sigGcOut
         else:
-            return PsiFixResize(sigDiff[self.order], self.diffFmt, self.outFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+            return psi_fix_resize(sigDiff[self.order], self.diffFmt, self.outFmt, psi_fix_rnd_t.round, psi_fix_sat_t.sat)
 
 
 

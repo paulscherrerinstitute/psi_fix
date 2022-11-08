@@ -26,10 +26,10 @@ except FileExistsError:
 #############################################################
 # Simulation
 #############################################################
-inFmt = PsiFixFmt(1, 0, 15)
-outFmt = PsiFixFmt(1, 0, 14)
-intFmt = PsiFixFmt(1, 0, 24)
-coefFmt = PsiFixFmt(1, 0, 17)
+inFmt = psi_fix_fmt_t(1, 0, 15)
+outFmt = psi_fix_fmt_t(1, 0, 14)
+intFmt = psi_fix_fmt_t(1, 0, 24)
+coefFmt = psi_fix_fmt_t(1, 0, 17)
 fSample = 100e6
 fCutoff = 1e6
 
@@ -39,7 +39,7 @@ FSTOP = fCutoff*10
 
 t = np.arange(0, (SAMPLES-1)/fSample, 1/fSample)
 sig = sps.chirp(t, FSTART, t[-1], FSTOP, method="log")*0.999
-sigFix = PsiFixFromReal(sig, inFmt)
+sigFix = psi_fix_from_real(sig, inFmt)
 
 iir = psi_fix_lowpass_iir_order1(fSample, fCutoff, inFmt, outFmt, intFmt, coefFmt)
 
@@ -60,7 +60,7 @@ if PLOT_ON:
 #############################################################
 # Write Files for Co sim
 #############################################################
-np.savetxt(STIM_DIR + "/input.txt", PsiFixGetBitsAsInt(sigFix, inFmt), fmt="%i", header="input")
-np.savetxt(STIM_DIR + "/output.txt", PsiFixGetBitsAsInt(res, outFmt), fmt="%i", header="output")
+np.savetxt(STIM_DIR + "/input.txt", psi_fix_get_bits_as_int(sigFix, inFmt), fmt="%i", header="input")
+np.savetxt(STIM_DIR + "/output.txt", psi_fix_get_bits_as_int(res, outFmt), fmt="%i", header="output")
 
 

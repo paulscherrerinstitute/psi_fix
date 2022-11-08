@@ -27,12 +27,12 @@ class psi_fix_mov_avg:
     ####################################################################################################################
     # Constructor
     ####################################################################################################################
-    def __init__(self,  inFmt: PsiFixFmt,
-                 outFmt : PsiFixFmt,
+    def __init__(self,  inFmt: psi_fix_fmt_t,
+                 outFmt : psi_fix_fmt_t,
                  taps : int,
                  gaincorr : str = GAINCORR_EXACT,
-                 rnd : PsiFixRnd = PsiFixRnd.Round,
-                 sat : PsiFixSat = PsiFixSat.Sat):
+                 rnd : psi_fix_rnd_t = psi_fix_rnd_t.round,
+                 sat : psi_fix_sat_t = psi_fix_sat_t.sat):
         """
         Constructor for a moving average model object
         :param inFmt: Input fixed-point format
@@ -50,15 +50,15 @@ class psi_fix_mov_avg:
         self.outFmt = outFmt
         self.taps = taps
         self.gaincorr = gaincorr
-        self.diffFmt = PsiFixFmt(1, inFmt.I+1, inFmt.F)
+        self.diffFmt = psi_fix_fmt_t(1, inFmt.i+1, inFmt.f)
         self.rnd = rnd
         self.sat = sat
         gain = taps
         self.additionalBits = np.ceil(np.log2(gain))
-        self.sumFmt = PsiFixFmt(1, inFmt.I+self.additionalBits, inFmt.F)
-        self.gcInFmt = PsiFixFmt(1, inFmt.I, min(24-inFmt.I, self.sumFmt.F+self.additionalBits))
-        self.gcCoefFmt = PsiFixFmt(0,1,16)
-        self.gc = PsiFixFromReal(2.0**self.additionalBits/gain, self.gcCoefFmt)
+        self.sumFmt = psi_fix_fmt_t(1, inFmt.i+self.additionalBits, inFmt.f)
+        self.gcInFmt = psi_fix_fmt_t(1, inFmt.i, min(24-inFmt.i, self.sumFmt.f+self.additionalBits))
+        self.gcCoefFmt = psi_fix_fmt_t(0,1,16)
+        self.gc = psi_fix_from_real(2.0**self.additionalBits/gain, self.gcCoefFmt)
 
     ####################################################################################################################
     # Public Methods
@@ -70,25 +70,25 @@ class psi_fix_mov_avg:
         :return: Output data
         """
         # resize real number to Fixed Point
-        dataFix = PsiFixFromReal(inData, self.inFmt)
+        dataFix = psi_fix_from_real(inData, self.inFmt)
 
         #generate delayed version of the data
         dataDel = np.concatenate((np.zeros(self.taps), dataFix[:-self.taps]))
 
         #differentiate
-        diff = PsiFixSub(dataFix, self.inFmt, dataDel, self.inFmt, self.diffFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap) #rounding not required, saturation cannot occur!
+        diff = psi_fix_sub(dataFix, self.inFmt, dataDel, self.inFmt, self.diffFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap) #rounding not required, saturation cannot occur!
 
         #summation
-        sum = PsiFixFromReal(np.cumsum(diff), self.sumFmt) #is bittrue since neither rounding nor saturation are required
+        sum = psi_fix_from_real(np.cumsum(diff), self.sumFmt) #is bittrue since neither rounding nor saturation are required
 
         #Gain correction
         if self.gaincorr == self.GAINCORR_NONE:
-            return PsiFixResize(sum, self.sumFmt, self.outFmt, self.rnd, self.sat)
+            return psi_fix_resize(sum, self.sumFmt, self.outFmt, self.rnd, self.sat)
         elif self.gaincorr == self.GAINCORR_ROUGH:
-            return PsiFixShiftRight(sum, self.sumFmt, self.additionalBits, self.additionalBits, self.outFmt, self.rnd, self.sat)
+            return psi_fix_shift_right(sum, self.sumFmt, self.additionalBits, self.additionalBits, self.outFmt, self.rnd, self.sat)
         else:
-            roughCorr = PsiFixShiftRight(sum, self.sumFmt, self.additionalBits, self.additionalBits, self.gcInFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
-            return PsiFixMult(roughCorr, self.gcInFmt, self.gc, self.gcCoefFmt, self.outFmt, self.rnd, self.sat)
+            roughCorr = psi_fix_shift_right(sum, self.sumFmt, self.additionalBits, self.additionalBits, self.gcInFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
+            return psi_fix_mult(roughCorr, self.gcInFmt, self.gc, self.gcCoefFmt, self.outFmt, self.rnd, self.sat)
 
 
 

@@ -21,7 +21,7 @@ class psi_fix_demod_real2cplx:
     ####################################################################################################################
     # Constructor
     ####################################################################################################################
-    def __init__(self, inFmt: PsiFixFmt, outFmt : PsiFixFmt, coefBits : int, ratio: int):
+    def __init__(self, inFmt: psi_fix_fmt_t, outFmt : psi_fix_fmt_t, coefBits : int, ratio: int):
         """
         Constructor for the demodulator model object
         :param inFmt: Input fixed-point format
@@ -31,12 +31,11 @@ class psi_fix_demod_real2cplx:
         """
         self.inFmt = inFmt
         self.outFmt = outFmt
-        self.outFmt = outFmt
         self.ratio = ratio
         coefUnusedIntBits = np.floor(np.log2(ratio))
-        self.coefFmt = PsiFixFmt(1, 0-coefUnusedIntBits, coefBits+coefUnusedIntBits-1)
-        self.multFmt = PsiFixFmt(1, self.inFmt.I+self.coefFmt.I, self.outFmt.F+np.ceil(np.log2(ratio)) + 2) #truncation error does only lead to 1/4 LSB error on output
-        self.movAvg = psi_fix_mov_avg(self.multFmt, self.outFmt, ratio, psi_fix_mov_avg.GAINCORR_NONE, PsiFixRnd.Round, PsiFixSat.Sat)
+        self.coefFmt = psi_fix_fmt_t(1, 0-coefUnusedIntBits, coefBits+coefUnusedIntBits-1)
+        self.multFmt = psi_fix_fmt_t(1, self.inFmt.i+self.coefFmt.i, self.outFmt.f+np.ceil(np.log2(ratio)) + 2) #truncation error does only lead to 1/4 LSB error on output
+        self.movAvg = psi_fix_mov_avg(self.multFmt, self.outFmt, ratio, psi_fix_mov_avg.GAINCORR_NONE, psi_fix_rnd_t.round, psi_fix_sat_t.sat)
 
     ####################################################################################################################
     # Public Methods and Properties
@@ -49,7 +48,7 @@ class psi_fix_demod_real2cplx:
         :return: Demodulated signal as tuple (I, Q)
         """
         # resize real number to Fixed Point
-        dataFix = PsiFixFromReal(inData, self.inFmt, errSat=True)
+        dataFix = psi_fix_from_real(inData, self.inFmt, err_sat=True)
 
         #Limit the phase offset
         phaseOffset = np.minimum(phOffset, self.ratio-1).astype("int32")
@@ -63,16 +62,16 @@ class psi_fix_demod_real2cplx:
         cpt = np.where(cptIntOffs > self.ratio-1, cptIntOffs - self.ratio, cptIntOffs)
 
         #Get Sin/Cos value
-        scale = (1.0-2.0**-self.coefFmt.F)/self.ratio
-        sinTable = PsiFixFromReal(np.sin(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.coefFmt)
-        cosTable = PsiFixFromReal(np.cos(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.coefFmt)
+        scale = (1.0-2.0**-self.coefFmt.f)/self.ratio
+        sinTable = psi_fix_from_real(np.sin(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.coefFmt)
+        cosTable = psi_fix_from_real(np.cos(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.coefFmt)
 
         #I-Path
-        multI = PsiFixMult(dataFix, self.inFmt, sinTable[cpt], self.coefFmt, self.multFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        multI = psi_fix_mult(dataFix, self.inFmt, sinTable[cpt], self.coefFmt, self.multFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
         resI = self.movAvg.Process(multI)
 
         #Q-Path
-        multQ = PsiFixMult(dataFix, self.inFmt, cosTable[cpt], self.coefFmt, self.multFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        multQ = psi_fix_mult(dataFix, self.inFmt, cosTable[cpt], self.coefFmt, self.multFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
         resQ = self.movAvg.Process(multQ)
 
         return resI, resQ

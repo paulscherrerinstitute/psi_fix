@@ -24,15 +24,15 @@ except FileExistsError:
 
 # Format definition
 sample = 8192
-inpFmt      = PsiFixFmt(1, 1, 15)
-coefFmt     = PsiFixFmt(1, 1, 23)
-intFmt      = PsiFixFmt(1, 1, 23)
-outFmt      = PsiFixFmt(1, 1, 15)
+inpFmt      = psi_fix_fmt_t(1, 1, 15)
+coefFmt     = psi_fix_fmt_t(1, 1, 23)
+intFmt      = psi_fix_fmt_t(1, 1, 23)
+outFmt      = psi_fix_fmt_t(1, 1, 15)
 ratio = 10
 
 # write into text file
-# x = np.genfromtxt(STIM_DIR + "stimuli_inphase.txt")/(2**intFmt.F)
-# y = np.genfromtxt(STIM_DIR + "stimuli_quadrature.txt")/(2**intFmt.F)
+# x = np.genfromtxt(STIM_DIR + "stimuli_inphase.txt")/(2**intFmt.f)
+# y = np.genfromtxt(STIM_DIR + "stimuli_quadrature.txt")/(2**intFmt.f)
 
 #x = np.full((sample), 4/5)
 #y = np.full((sample), -3/5)
@@ -40,12 +40,12 @@ ratio = 10
 
 inpAngle = np.linspace(0, 2*np.pi, sample)
 inpAmp = np.linspace(0.01, 0.99, sample)
-datQua = PsiFixFromReal(inpAmp*np.sin(inpAngle), inpFmt, errSat=False)
-datInp = PsiFixFromReal(inpAmp*np.cos(inpAngle), inpFmt, errSat=False)
+datQua = psi_fix_from_real(inpAmp*np.sin(inpAngle), inpFmt, err_sat=False)
+datInp = psi_fix_from_real(inpAmp*np.cos(inpAngle), inpFmt, err_sat=False)
 
 
-packInput = np.column_stack((PsiFixGetBitsAsInt(datInp, inpFmt),
-                             PsiFixGetBitsAsInt(datQua, inpFmt)))
+packInput = np.column_stack((psi_fix_get_bits_as_int(datInp, inpFmt),
+                             psi_fix_get_bits_as_int(datQua, inpFmt)))
 np.savetxt(STIM_DIR + '/stimuli.txt', packInput, fmt='% 4d', delimiter=' ', newline='\n', header='inp qua')
 
 
@@ -87,7 +87,7 @@ if PLOT_ON:
     ax5.set_ylabel("Amplitude [dB]")
     ax5.set_title("Output Spectrum")
 
-res = PsiFixGetBitsAsInt(results,outFmt)
+res = psi_fix_get_bits_as_int(results,outFmt)
 
 # text file used to make VHDL testbench comparison
 np.savetxt(STIM_DIR + '/model_result_IQmod.txt', res.astype(int).T, fmt='% 4d', newline='\n') #observable wave

@@ -19,20 +19,20 @@ class psi_fix_cordic_vect:
     # Constants
     ####################################################################################################################
     ATAN_TABLE = np.arctan(2.0 **-np.arange(0, 32))/(2*np.pi)
-    GAIN_COMP_FMT = PsiFixFmt(0, 0, 17)
+    GAIN_COMP_FMT = psi_fix_fmt_t(0, 0, 17)
 
     ####################################################################################################################
     # Constructor
     ####################################################################################################################
-    def __init__(self,  inFmt : PsiFixFmt,
-                        outFmt : PsiFixFmt,
-                        internalFmt : PsiFixFmt,
-                        angleFmt : PsiFixFmt,
-                        angleIntFmt : PsiFixFmt,
+    def __init__(self,  inFmt : psi_fix_fmt_t,
+                        outFmt : psi_fix_fmt_t,
+                        internalFmt : psi_fix_fmt_t,
+                        angleFmt : psi_fix_fmt_t,
+                        angleIntFmt : psi_fix_fmt_t,
                         iterations : int,
                         gainComp : bool,
-                        round : PsiFixRnd,
-                        sat : PsiFixSat):
+                        round : psi_fix_rnd_t,
+                        sat : psi_fix_sat_t):
         """
         Constructor of a vectoring CORDIC model.
         :param inFmt: Input fixed-point format
@@ -46,12 +46,12 @@ class psi_fix_cordic_vect:
         :param sat: Saturation mode at the output
         """
         #Checks
-        if inFmt.S != 1:                raise ValueError("psi_fix_cordic_vect: InFmt_g must be signed")
-        if outFmt.S != 0:               raise ValueError("psi_fix_cordic_vect: OutFmt_g must be unsigned")
-        if internalFmt.S != 1:          raise ValueError("psi_fix_cordic_vect: InternalFmt_g must be signed")
-        if internalFmt.I <= inFmt.I:    raise ValueError("psi_fix_cordic_vect: InternalFmt_g must have at least one more bit than InFmt_g")
-        if angleFmt.S != 0:             raise ValueError("psi_fix_cordic_vect: AngleFmt_g must be unsigned")
-        if angleIntFmt.S != 1:          raise ValueError("psi_fix_cordic_vect: AngleIntFmt_g must be signed")
+        if inFmt.s != 1:                raise ValueError("psi_fix_cordic_vect: InFmt_g must be signed")
+        if outFmt.s != 0:               raise ValueError("psi_fix_cordic_vect: OutFmt_g must be unsigned")
+        if internalFmt.s != 1:          raise ValueError("psi_fix_cordic_vect: InternalFmt_g must be signed")
+        if internalFmt.i <= inFmt.i:    raise ValueError("psi_fix_cordic_vect: InternalFmt_g must have at least one more bit than InFmt_g")
+        if angleFmt.s != 0:             raise ValueError("psi_fix_cordic_vect: AngleFmt_g must be unsigned")
+        if angleIntFmt.s != 1:          raise ValueError("psi_fix_cordic_vect: AngleIntFmt_g must be signed")
         #Implementation
         self.inFmt = inFmt
         self.outFmt = outFmt
@@ -62,10 +62,10 @@ class psi_fix_cordic_vect:
         self.angleFmt = angleFmt
         self.angleIntFmt = angleIntFmt
         self.gainComp = gainComp
-        self.gainCompCoef = PsiFixFromReal(1/self.CordicGain, self.GAIN_COMP_FMT)
-        self.angleIntExtFmt = PsiFixFmt(angleIntFmt.S, max(angleIntFmt.I, 1), angleIntFmt.F)
+        self.gainCompCoef = psi_fix_from_real(1/self.CordicGain, self.GAIN_COMP_FMT)
+        self.angleIntExtFmt = psi_fix_fmt_t(angleIntFmt.s, max(angleIntFmt.i, 1), angleIntFmt.f)
         #Angle table for up to 32 iterations
-        self.angleTable = PsiFixFromReal(self.ATAN_TABLE, angleIntFmt)
+        self.angleTable = psi_fix_from_real(self.ATAN_TABLE, angleIntFmt)
 
     ####################################################################################################################
     # Public Methods and Properties
@@ -90,8 +90,8 @@ class psi_fix_cordic_vect:
         :return: Output as tuple (abs, angle)
         """
         #always map to quadrant one
-        x = PsiFixAbs(PsiFixFromReal(inpI, self.inFmt), self.inFmt, self.internalFmt, self.round, self.sat)
-        y = PsiFixAbs(PsiFixFromReal(inpQ, self.inFmt), self.inFmt, self.internalFmt, self.round, self.sat)
+        x = psi_fix_abs(psi_fix_from_real(inpI, self.inFmt), self.inFmt, self.internalFmt, self.round, self.sat)
+        y = psi_fix_abs(psi_fix_from_real(inpQ, self.inFmt), self.inFmt, self.internalFmt, self.round, self.sat)
         z = 0
         for i in range(0, self.iterations):
             x_next = self._CordicStepX(x, y, i)
@@ -100,39 +100,39 @@ class psi_fix_cordic_vect:
             x = x_next
             y = y_next
             z = z_next
-        zQ1 = PsiFixResize(z, self.angleIntFmt, self.angleFmt, self.round, self.sat)
-        zQ2 = PsiFixSub(0.5, self.angleIntExtFmt, z, self.angleIntFmt, self.angleFmt, self.round, self.sat)
-        zQ3 = PsiFixAdd(0.5, self.angleIntExtFmt, z, self.angleIntFmt, self.angleFmt, self.round, self.sat)
-        zQ4 = PsiFixSub(1.0, self.angleIntExtFmt, z, self.angleIntFmt, self.angleFmt, self.round, self.sat)
+        zQ1 = psi_fix_resize(z, self.angleIntFmt, self.angleFmt, self.round, self.sat)
+        zQ2 = psi_fix_sub(0.5, self.angleIntExtFmt, z, self.angleIntFmt, self.angleFmt, self.round, self.sat)
+        zQ3 = psi_fix_add(0.5, self.angleIntExtFmt, z, self.angleIntFmt, self.angleFmt, self.round, self.sat)
+        zQ4 = psi_fix_sub(1.0, self.angleIntExtFmt, z, self.angleIntFmt, self.angleFmt, self.round, self.sat)
         zOut = np.select([ np.logical_and(inpI >= 0, inpQ >= 0),
                         np.logical_and(inpI < 0, inpQ >= 0),
                         np.logical_and(inpI < 0, inpQ < 0),
                         np.logical_and(inpI >= 0, inpQ < 0)], [zQ1, zQ2, zQ3, zQ4])
         if self.gainComp:
-            xOut = PsiFixMult(x, self.internalFmt, self.gainCompCoef, self.GAIN_COMP_FMT, self.outFmt, self.round, self.sat)
+            xOut = psi_fix_mult(x, self.internalFmt, self.gainCompCoef, self.GAIN_COMP_FMT, self.outFmt, self.round, self.sat)
         else:
-            xOut = PsiFixResize(x, self.internalFmt, self.outFmt, self.round, self.sat)
+            xOut = psi_fix_resize(x, self.internalFmt, self.outFmt, self.round, self.sat)
         return (xOut, zOut)
 
     ####################################################################################################################
     # Private Methods (do not call!)
     ####################################################################################################################
     def _CordicStepX(self, xLast, yLast, shift : int):
-        yShifted = PsiFixShiftRight(yLast, self.internalFmt, shift, self.iterations-1, self.internalFmt)
-        sub = PsiFixSub(xLast, self.internalFmt, yShifted, self.internalFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
-        add = PsiFixAdd(xLast, self.internalFmt, yShifted, self.internalFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        yShifted = psi_fix_shift_right(yLast, self.internalFmt, shift, self.iterations-1, self.internalFmt)
+        sub = psi_fix_sub(xLast, self.internalFmt, yShifted, self.internalFmt, self.internalFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
+        add = psi_fix_add(xLast, self.internalFmt, yShifted, self.internalFmt, self.internalFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
         return np.where(yLast < 0, sub, add)
 
     def _CordicStepY(self, xLast, yLast, shift: int):
-        xShifted = PsiFixShiftRight(xLast, self.internalFmt, shift, self.iterations - 1, self.internalFmt)
-        add = PsiFixAdd(yLast, self.internalFmt, xShifted, self.internalFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
-        sub = PsiFixSub(yLast, self.internalFmt, xShifted, self.internalFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        xShifted = psi_fix_shift_right(xLast, self.internalFmt, shift, self.iterations - 1, self.internalFmt)
+        add = psi_fix_add(yLast, self.internalFmt, xShifted, self.internalFmt, self.internalFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
+        sub = psi_fix_sub(yLast, self.internalFmt, xShifted, self.internalFmt, self.internalFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
         out = np.where(yLast < 0, add, sub)
         return out
 
     def _CordicStepZ(self, zLast, yLast, iteration : int):
-        add = PsiFixAdd(zLast, self.angleIntFmt, self.angleTable[iteration], self.angleIntFmt, self.angleIntFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
-        sub = PsiFixSub(zLast, self.angleIntFmt, self.angleTable[iteration], self.angleIntFmt, self.angleIntFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        add = psi_fix_add(zLast, self.angleIntFmt, self.angleTable[iteration], self.angleIntFmt, self.angleIntFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
+        sub = psi_fix_sub(zLast, self.angleIntFmt, self.angleTable[iteration], self.angleIntFmt, self.angleIntFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
         return np.where(yLast < 0, sub, add)
 
 

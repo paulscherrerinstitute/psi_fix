@@ -19,10 +19,10 @@ class psi_fix_mod_cplx2real:
     ####################################################################################################################
     # Constructor
     ####################################################################################################################
-    def __init__(self,  InpFmt  : PsiFixFmt,
-                        CoefFmt : PsiFixFmt,
-                        IntFmt  : PsiFixFmt,
-                        OutFmt  : PsiFixFmt,
+    def __init__(self,  InpFmt  : psi_fix_fmt_t,
+                        CoefFmt : psi_fix_fmt_t,
+                        IntFmt  : psi_fix_fmt_t,
+                        OutFmt  : psi_fix_fmt_t,
                         ratio: int):
         """
         Constructor for the modulator model object
@@ -49,10 +49,10 @@ class psi_fix_mod_cplx2real:
         :return: Real output signal
         """
         # resize real number to Fixed Point
-        multFmt = PsiFixFmt(self.InpFmt.S, 1+self.InpFmt.I+self.CoefFmt.I, self.InpFmt.F+self.CoefFmt.F)
-        addFmt = PsiFixFmt(self.IntFmt.S, self.IntFmt.I+1, self.IntFmt.F)
-        datInp = PsiFixFromReal(data_I_i, self.InpFmt, errSat=True)
-        datQua = PsiFixFromReal(data_Q_i, self.InpFmt, errSat=True)
+        multFmt = psi_fix_fmt_t(self.InpFmt.s, 1+self.InpFmt.i+self.CoefFmt.i, self.InpFmt.f+self.CoefFmt.f)
+        addFmt = psi_fix_fmt_t(self.IntFmt.s, self.IntFmt.i+1, self.IntFmt.f)
+        datInp = psi_fix_from_real(data_I_i, self.InpFmt, err_sat=True)
+        datQua = psi_fix_from_real(data_Q_i, self.InpFmt, err_sat=True)
 
         # ROM pointer
         # Generate phases (use integer to prevent floating point precision errors)
@@ -63,23 +63,23 @@ class psi_fix_mod_cplx2real:
         cpt = np.where(cptIntOffs > self.ratio - 1, cptIntOffs - self.ratio, cptIntOffs)
 
         # Get Sin/Cos value
-        scale = 1.0 - 2.0 ** -self.CoefFmt.F
-        sinTable = PsiFixFromReal(np.sin(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.CoefFmt)
-        cosTable = PsiFixFromReal(np.cos(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.CoefFmt)
+        scale = 1.0 - 2.0 ** -self.CoefFmt.f
+        sinTable = psi_fix_from_real(np.sin(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.CoefFmt)
+        cosTable = psi_fix_from_real(np.cos(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.CoefFmt)
 
         # process calculation
-        mult_i_s = PsiFixMult(datInp, self.InpFmt, sinTable[cpt], self.CoefFmt, multFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
-        mult_q_s = PsiFixMult(datQua, self.InpFmt, cosTable[cpt], self.CoefFmt, multFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        mult_i_s = psi_fix_mult(datInp, self.InpFmt, sinTable[cpt], self.CoefFmt, multFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
+        mult_q_s = psi_fix_mult(datQua, self.InpFmt, cosTable[cpt], self.CoefFmt, multFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
 
         #resize internal before add
-        mult_i_dff_s = PsiFixResize(mult_i_s, multFmt, self.IntFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
-        mult_q_dff_s = PsiFixResize(mult_q_s, multFmt, self.IntFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        mult_i_dff_s = psi_fix_resize(mult_i_s, multFmt, self.IntFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
+        mult_q_dff_s = psi_fix_resize(mult_q_s, multFmt, self.IntFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
 
         # adder
-        sum_s = PsiFixAdd(mult_i_dff_s, self.IntFmt, mult_q_dff_s, self.IntFmt, addFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        sum_s = psi_fix_add(mult_i_dff_s, self.IntFmt, mult_q_dff_s, self.IntFmt, addFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
 
         #resize output
-        rf_s = PsiFixResize(sum_s, addFmt, self.OutFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+        rf_s = psi_fix_resize(sum_s, addFmt, self.OutFmt, psi_fix_rnd_t.round, psi_fix_sat_t.sat)
 
         rf_o = rf_s
         return rf_o

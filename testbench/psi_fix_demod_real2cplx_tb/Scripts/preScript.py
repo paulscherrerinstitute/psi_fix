@@ -26,8 +26,8 @@ except FileExistsError:
 #############################################################
 # Simulation
 #############################################################
-inFmt = PsiFixFmt(1, 0, 15)
-outFmt = PsiFixFmt(1, 0, 16)
+inFmt = psi_fix_fmt_t(1, 0, 15)
+outFmt = psi_fix_fmt_t(1, 0, 16)
 coefBits = 25
 fSample = 100e6
 Ratio = 5
@@ -39,9 +39,9 @@ FSTOP = fSig*1.01
 
 t = np.arange(0, (SAMPLES-1)/fSample, 1/fSample)
 sig = sps.chirp(t, FSTART, t[-1], FSTOP, method="linear")*0.99
-sigFix = PsiFixFromReal(sig, inFmt)
+sigFix = psi_fix_from_real(sig, inFmt)
 sig2 = np.random.rand(t.size)*1.99-1
-sig2Fix = PsiFixFromReal(sig2, inFmt)
+sig2Fix = psi_fix_from_real(sig2, inFmt)
 phase = np.ones_like(sigFix)*2
 phase [100:1000] = 4
 
@@ -67,15 +67,15 @@ if PLOT_ON:
 # Write Files for Co sim
 #############################################################
 np.savetxt(STIM_DIR + "/input.txt",
-           np.column_stack((PsiFixGetBitsAsInt(sigFix, inFmt),
-                            PsiFixGetBitsAsInt(sig2Fix, inFmt),
+           np.column_stack((psi_fix_get_bits_as_int(sigFix, inFmt),
+                            psi_fix_get_bits_as_int(sig2Fix, inFmt),
                             phase)),
            fmt="%i", header="input phase")
 np.savetxt(STIM_DIR + "/output.txt",
-           np.column_stack((PsiFixGetBitsAsInt(resI, outFmt),
-                            PsiFixGetBitsAsInt(resQ, outFmt),
-                            PsiFixGetBitsAsInt(res2I, outFmt),
-                            PsiFixGetBitsAsInt(res2Q, outFmt))),
+           np.column_stack((psi_fix_get_bits_as_int(resI, outFmt),
+                            psi_fix_get_bits_as_int(resQ, outFmt),
+                            psi_fix_get_bits_as_int(res2I, outFmt),
+                            psi_fix_get_bits_as_int(res2Q, outFmt))),
            fmt="%i", header="result-I result-Q")
 
 

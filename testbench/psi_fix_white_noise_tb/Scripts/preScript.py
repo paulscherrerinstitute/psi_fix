@@ -26,8 +26,8 @@ except FileExistsError:
 #############################################################
 # Simulation
 #############################################################
-FMT_U = PsiFixFmt(0,2,13)
-FMT_S = PsiFixFmt(1,2,15)
+FMT_U = psi_fix_fmt_t(0,2,13)
+FMT_S = psi_fix_fmt_t(1,2,15)
 FORMATS = {"U" : FMT_U, "S" : FMT_S}
 
 Results = {}
@@ -56,6 +56,6 @@ if PLOT_ON:
 # Write Files for Co sim
 #############################################################
 for fmt, format in FORMATS.items():
-    np.savetxt(STIM_DIR + "/output_{}.txt".format(fmt), PsiFixGetBitsAsInt(Results[fmt], format), fmt="%i", header="noise")
+    np.savetxt(STIM_DIR + "/output_{}.txt".format(fmt), psi_fix_get_bits_as_int(Results[fmt], format), fmt="%i", header="noise")
 
 

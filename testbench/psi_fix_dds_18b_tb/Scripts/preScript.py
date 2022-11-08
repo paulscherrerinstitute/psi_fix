@@ -23,11 +23,11 @@ except FileExistsError:
 ########################################################################################################################
 # Constants
 ########################################################################################################################
-PHASE_FMT = PsiFixFmt(0, 0, 31)
-PHASE_STEP0 = PsiFixFromReal(0.12345, PHASE_FMT)
-PHASE_OFFS0 = PsiFixFromReal(0.98765, PHASE_FMT)
-PHASE_STEP1 = PsiFixFromReal(0.2, PHASE_FMT)
-PHASE_OFFS1 = PsiFixFromReal(0.3, PHASE_FMT)
+PHASE_FMT = psi_fix_fmt_t(0, 0, 31)
+PHASE_STEP0 = psi_fix_from_real(0.12345, PHASE_FMT)
+PHASE_OFFS0 = psi_fix_from_real(0.98765, PHASE_FMT)
+PHASE_STEP1 = psi_fix_from_real(0.2, PHASE_FMT)
+PHASE_OFFS1 = psi_fix_from_real(0.3, PHASE_FMT)
 SAMPLES = 10000
 
 
@@ -55,22 +55,22 @@ if PLOT_ON:
 ########################################################################################################################
 # 1 Channel
 np.savetxt(STIM_DIR + "/Config.txt",
-           np.column_stack((np.repeat(PsiFixGetBitsAsInt(PHASE_STEP0, PHASE_FMT), SAMPLES),
-                            np.repeat(PsiFixGetBitsAsInt(PHASE_OFFS0, PHASE_FMT), SAMPLES))),
+           np.column_stack((np.repeat(psi_fix_get_bits_as_int(PHASE_STEP0, PHASE_FMT), SAMPLES),
+                            np.repeat(psi_fix_get_bits_as_int(PHASE_OFFS0, PHASE_FMT), SAMPLES))),
            fmt="%i", header="PhaseStep PhaseOFfs")
 np.savetxt(STIM_DIR + "/SinCos.txt",
-           np.column_stack((PsiFixGetBitsAsInt(sigSin0, model.OUT_FMT),
-                            PsiFixGetBitsAsInt(sigCos0, model.OUT_FMT))),
+           np.column_stack((psi_fix_get_bits_as_int(sigSin0, model.OUT_FMT),
+                            psi_fix_get_bits_as_int(sigCos0, model.OUT_FMT))),
            fmt="%i", header="Sin Cos")
 
 # 2 Channels
 np.savetxt(STIM_DIR + "/Config2Ch.txt",
-           np.column_stack((np.tile(PsiFixGetBitsAsInt(np.array([PHASE_STEP0, PHASE_STEP1]), PHASE_FMT), SAMPLES,),
-                            np.tile(PsiFixGetBitsAsInt(np.array([PHASE_OFFS0, PHASE_OFFS1]), PHASE_FMT), SAMPLES))),
+           np.column_stack((np.tile(psi_fix_get_bits_as_int(np.array([PHASE_STEP0, PHASE_STEP1]), PHASE_FMT), SAMPLES,),
+                            np.tile(psi_fix_get_bits_as_int(np.array([PHASE_OFFS0, PHASE_OFFS1]), PHASE_FMT), SAMPLES))),
            fmt="%i", header="PhaseStep PhaseOFfs")
 np.savetxt(STIM_DIR + "/SinCos2Ch.txt",
-           np.column_stack((PsiFixGetBitsAsInt(np.hstack(list(zip(sigSin0,sigSin1))), model.OUT_FMT),
-                            PsiFixGetBitsAsInt(np.hstack(list(zip(sigCos0,sigCos1))), model.OUT_FMT))),
+           np.column_stack((psi_fix_get_bits_as_int(np.hstack(list(zip(sigSin0,sigSin1))), model.OUT_FMT),
+                            psi_fix_get_bits_as_int(np.hstack(list(zip(sigCos0,sigCos1))), model.OUT_FMT))),
            fmt="%i", header="Sin Cos")
 
 

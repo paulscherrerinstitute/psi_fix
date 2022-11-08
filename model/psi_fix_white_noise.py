@@ -19,12 +19,12 @@ class psi_fix_white_noise:
     ####################################################################################################################
     # Constructor
     ####################################################################################################################
-    def __init__(self, outFmt : PsiFixFmt, seed : int = 0xA38E3C1D):
-        if PsiFixSize(outFmt) > 32:
+    def __init__(self, outFmt : psi_fix_fmt_t, seed : int = 0xA38E3C1D):
+        if psi_fix_size(outFmt) > 32:
             raise Exception("psi_fix_white_noise: Output width cannot be larger than 32 bits")
         self.outFmt = outFmt
         self.seed = seed
-        self.outBits = PsiFixSize(self.outFmt)
+        self.outBits = psi_fix_size(self.outFmt)
         self.outMask = (1 << self.outBits)-1
 
     ####################################################################################################################
@@ -39,11 +39,11 @@ class psi_fix_white_noise:
             outVec += bitN << bitNr
 
         #Signed Conversion
-        if self.outFmt.S == 1:
+        if self.outFmt.s == 1:
             outVec = np.where(outVec >= 2**(self.outBits-1), outVec - 2**self.outBits, outVec)
 
         #Output
-        return PsiFixFromBitsAsInt(outVec, self.outFmt)
+        return psi_fix_from_bits_as_int(outVec, self.outFmt)
 
 
     ####################################################################################################################

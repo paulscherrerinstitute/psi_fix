@@ -25,13 +25,13 @@ class psi_fix_dds_18b:
     ####################################################################################################################
     # Constructor
     ####################################################################################################################
-    def __init__(self, phaseFmt : PsiFixFmt):
+    def __init__(self, phaseFmt : psi_fix_fmt_t):
         """
         Constructor for the DDS model object
         :param phaseFmt: Format of the phase accumulator
         """
         #check out Fmt
-        if phaseFmt.S == 1:
+        if phaseFmt.s == 1:
             raise ValueError("psi_fix_dds_18b currently only supports unsigned phase formats, got {}".format(phaseFmt))
         self.phaseFmt = phaseFmt
         self.sineApprox = psi_fix_lin_approx(psi_fix_lin_approx.CONFIGS.Sin18Bit)
@@ -60,18 +60,18 @@ class psi_fix_dds_18b:
         if phaseStep.size != phaseOffset.size:
             raise ValueError("psi_fix_dds_18b: Process() phaserStep and phaseOffset arrays must be of same size")
         #Calculate inputs
-        phaseStepFix = PsiFixFromReal(phaseStep, self.phaseFmt)
-        phaseOffsetFix = PsiFixFromReal(phaseOffset, self.phaseFmt)
+        phaseStepFix = psi_fix_from_real(phaseStep, self.phaseFmt)
+        phaseOffsetFix = psi_fix_from_real(phaseOffset, self.phaseFmt)
         numOfSamples = phaseStepFix.size
         #Generate phases (use integer to prevent floating point precision errors)
-        phaseSteps = np.ones(numOfSamples,dtype=np.int64)*PsiFixGetBitsAsInt(phaseStepFix, self.phaseFmt)
+        phaseSteps = np.ones(numOfSamples,dtype=np.int64)*psi_fix_get_bits_as_int(phaseStepFix, self.phaseFmt)
         phaseSteps[0] = 0 #start at zero
-        accumulator = np.cumsum(phaseSteps,dtype=np.int64) + PsiFixGetBitsAsInt(phaseOffsetFix, self.phaseFmt)
-        accuWrapped = accumulator % 2**PsiFixSize(self.phaseFmt)
-        accuPhase = PsiFixFromBitsAsInt(accuWrapped, self.phaseFmt)
+        accumulator = np.cumsum(phaseSteps,dtype=np.int64) + psi_fix_get_bits_as_int(phaseOffsetFix, self.phaseFmt)
+        accuWrapped = accumulator % 2**psi_fix_size(self.phaseFmt)
+        accuPhase = psi_fix_from_bits_as_int(accuWrapped, self.phaseFmt)
         #Generate sine wave
-        phaseQuantSin = PsiFixResize(accuPhase, self.phaseFmt, self.sineApprox.cfg.inFmt)
-        phaseQuantCos = PsiFixResize(accuPhase+0.25, self.phaseFmt, self.sineApprox.cfg.inFmt)
+        phaseQuantSin = psi_fix_resize(accuPhase, self.phaseFmt, self.sineApprox.cfg.inFmt)
+        phaseQuantCos = psi_fix_resize(accuPhase+0.25, self.phaseFmt, self.sineApprox.cfg.inFmt)
         outSin = self.sineApprox.Approximate(phaseQuantSin)
         outCos = self.sineApprox.Approximate(phaseQuantCos)
         return (outSin, outCos)
