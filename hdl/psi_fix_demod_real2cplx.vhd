@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 --  All rights reserved.
---  Authors: Benoit Stef
+--  Authors: Benoit Stef, Radoslaw Rybaniec
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -33,14 +33,15 @@ entity psi_fix_demod_real2cplx is
     out_fmt_g   : psi_fix_fmt_t;                                                     -- output format FP                   $$ constant=(1,0,16) $$
     coef_bits_g : positive  := 18;                                                   -- internal coefficent number of bits $$ constant=25 $$
     channels_g  : natural   := 1;                                                    -- number of channels TDM             $$ constant=2 $$
-    ratio_g     : natural   := 5                                                     -- ratio betwenn clock and IF/RF      $$ constant=5 $$
+    ratio_num_g     : natural   := 5;                                                    -- ratio numerator between clock and IF/RF      $$ constant=5 $$
+    ratio_denum_g    : natural   := 1                                                     -- ratio denumerator between clock and IF/RF    $$ constant=1 $$
   );
   port(
     clk_i        : in  std_logic;                                                       -- clk system $$ type=clk; freq=100e6 $$
     rst_i        : in  std_logic;                                                       -- rst system $$ type=rst; clk=clk_i $$
     dat_i        : in  std_logic_vector(psi_fix_size(in_fmt_g)*channels_g - 1 downto 0);-- data input IF/RF
     vld_i        : in  std_logic;                                                       -- valid input freqeuncy sampling
-    phi_offset_i : in  std_logic_vector(log2ceil(ratio_g)-1 downto 0);                  -- phase offset for demod LUT
+    phi_offset_i : in  std_logic_vector(log2ceil(ratio_num_g)-1 downto 0);                  -- phase offset for demod LUT
     dat_inp_o    : out std_logic_vector(psi_fix_size(out_fmt_g)*channels_g- 1 downto 0);-- inphase data output
     dat_qua_o    : out std_logic_vector(psi_fix_size(out_fmt_g)*channels_g- 1 downto 0);-- quadrature data output
     vld_o        : out std_logic                                                        -- valid output
@@ -49,19 +50,19 @@ end entity;
 -- @formatter:on
 architecture RTL of psi_fix_demod_real2cplx is
 
-  constant coefUnusedBits_c : integer     := log2(ratio_g);
+  constant coefUnusedBits_c : integer     := log2(ratio_num_g);
   constant CoefFmt_c        : psi_fix_fmt_t := (1, 0-coefUnusedBits_c, coef_bits_g + coefUnusedBits_c-1);
-  constant MultFmt_c        : psi_fix_fmt_t := (1, in_fmt_g.I + CoefFmt_c.I, out_fmt_g.F+log2ceil(ratio_g)+2); -- truncation error does only lead to 1/4 LSB error on output
-  constant coef_scale_c     : real        := (1.0-2.0**(-real(CoefFmt_c.F)))/real(ratio_g); -- prevent +/- 1.0 and pre-compensate for gain of moving average
+  constant MultFmt_c        : psi_fix_fmt_t := (1, in_fmt_g.I + CoefFmt_c.I, out_fmt_g.F+log2ceil(ratio_num_g)+2); -- truncation error does only lead to 1/4 LSB error on output
+  constant coef_scale_c     : real        := (1.0-2.0**(-real(CoefFmt_c.F)))/real(ratio_num_g); -- prevent +/- 1.0 and pre-compensate for gain of moving average
 
-  type coef_array_t is array (0 to ratio_g - 1) of std_logic_vector(psi_fix_size(CoefFmt_c) - 1 downto 0);
+  type coef_array_t is array (0 to ratio_num_g - 1) of std_logic_vector(psi_fix_size(CoefFmt_c) - 1 downto 0);
 
   --SIN coef function <=> Q coef n = (sin(nx2pi/Ratio)(2/Ratio))
   function coef_sin_array_func return coef_array_t is
     variable array_v : coef_array_t;
   begin
-    for i in 0 to ratio_g - 1 loop
-      array_v(i) := psi_fix_from_real(sin(2.0 * MATH_PI * real(i) / real(ratio_g)) * coef_scale_c, CoefFmt_c);
+    for i in 0 to ratio_num_g - 1 loop
+      array_v(i) := psi_fix_from_real(sin(2.0 * MATH_PI * real(i) / real(ratio_num_g)) * coef_scale_c, CoefFmt_c);
     end loop;
     return array_v;
   end function;
@@ -70,8 +71,8 @@ architecture RTL of psi_fix_demod_real2cplx is
   function coef_cos_array_func return coef_array_t is
     variable array_v : coef_array_t;
   begin
-    for i in 0 to ratio_g - 1 loop
-      array_v(i) := psi_fix_from_real(cos(2.0 * MATH_PI * real(i) / real(ratio_g)) * coef_scale_c, CoefFmt_c);
+    for i in 0 to ratio_num_g - 1 loop
+      array_v(i) := psi_fix_from_real(cos(2.0 * MATH_PI * real(i) / real(ratio_num_g)) * coef_scale_c, CoefFmt_c);
     end loop;
     return array_v;
   end function;
@@ -88,8 +89,8 @@ architecture RTL of psi_fix_demod_real2cplx is
   type InArray_t is array (0 to channels_g - 1) of std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);
   type OutArray_t is array (0 to channels_g - 1) of std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);
   --
-  signal cptInt        : integer range 0 to ratio_g - 1 := 0;
-  signal cpt_s         : integer range 0 to ratio_g - 1 := 0;
+  signal cptInt        : integer range 0 to ratio_denum_g*ratio_num_g - 1 := 0;
+  signal cpt_s         : integer range 0 to ratio_num_g - 1 := 0;
   signal mult_i_s      : MultArray_t;
   signal mult_q_s      : MultArray_t;
   --
@@ -144,10 +145,10 @@ begin
         cptInt <= 0;
       else
         if vld_i = '1' then
-          if cptInt = ratio_g - 1 then
-            cptInt <= 0;
+          if cptInt < ratio_num_g - ratio_denum_g then
+            cptInt <= cptInt + ratio_denum_g;
           else
-            cptInt <= cptInt + 1;
+            cptInt <= ratio_denum_g - (ratio_num_g - cptInt);
           end if;
         end if;
       end if;
@@ -155,18 +156,16 @@ begin
   end process;
 
   process(clk_i)
-    variable cptIntOffs : integer range 0 to 2 * ratio_g - 1 := 0;
+    variable cptIntOffs : integer range 0 to 2 * ratio_num_g - 1 := 0;
   begin
     if rising_edge(clk_i) then
       if rst_i = rst_pol_g then
         cpt_s <= 0;
       else
-        assert unsigned(phi_offset_i) <= ratio_g - 1 report "###ERROR###: psi_fix_demod_real2cpls: phi_offset_i must be <= ratio_g-1" severity error;
+        assert unsigned(phi_offset_i) <= ratio_num_g - 1 report "###ERROR###: psi_fix_demod_real2cpls: phi_offset_i must be <= ratio_num_g-1" severity error;
         cptIntOffs := cptInt + to_integer(unsigned(phi_offset_i));
-        if unsigned(phi_offset_i) > ratio_g - 1 then
-          cpt_s <= cptInt + ratio_g - 1;
-        elsif cptIntOffs > ratio_g - 1 then
-          cpt_s <= cptIntOffs - ratio_g;
+        if cptIntOffs > ratio_num_g - 1 then
+          cpt_s <= cptIntOffs - ratio_num_g;
         else
           cpt_s <= cptIntOffs;
         end if;
@@ -201,28 +200,30 @@ begin
     end if;
   end process;
   g_mov_avg_i : for i in 0 to channels_g - 1 generate
-    i_mov_avg : entity work.psi_fix_mov_avg
-      generic map(
-        in_fmt_g    => MultFmt_c,
-        out_fmt_g   => out_fmt_g,
-        taps_g     => ratio_g,
-        gain_corr_g => "NONE",
-        round_g    => psi_fix_round,
-        sat_g      => psi_fix_sat,
-        out_regs_g  => 2
-      )
-      port map(
-        clk_i     => clk_i,
-        rst_i     => RstPos,
-        vld_i   => strIn(4),
-        dat_i  => mult_i_dff2_s(i),
-        vld_o  => out_str_s(i),
-        dat_o => out_i_s(i)
-      );
+     i_mov_avg : entity work.psi_fix_mov_avg
+       generic map(
+         in_fmt_g    => MultFmt_c,
+         out_fmt_g   => out_fmt_g,
+         taps_g     => ratio_num_g,
+         gain_corr_g => "NONE",
+         round_g    => psi_fix_round,
+         sat_g      => psi_fix_sat,
+         out_regs_g  => 2
+       )
+       port map(
+         clk_i     => clk_i,
+         rst_i     => RstPos,
+         vld_i   => strIn(4),
+         dat_i  => mult_i_dff2_s(i),
+         vld_o  => out_str_s(i),
+         dat_o => out_i_s(i)
+       );
 
     dat_inp_o((i + 1) * psi_fix_size(out_fmt_g) - 1 downto i * psi_fix_size(out_fmt_g)) <= out_i_s(i);
-  end generate;
+    -- dat_inp_o((i + 1) * psi_fix_size(out_fmt_g) - 1 downto i * psi_fix_size(out_fmt_g)) <= psi_fix_resize(mult_i_dff2_s(i), MultFmt_c, out_fmt_g);
+end generate;
   vld_o <= out_str_s(0);
+  --  vld_o <= strIn(4);
 
   --===========================================================================
   -- Q PATH
@@ -252,26 +253,27 @@ begin
   end process;
 
   g_mov_avg_q : for i in 0 to channels_g - 1 generate
-    i_mov_avg : entity work.psi_fix_mov_avg
-      generic map(
-        in_fmt_g    => MultFmt_c,
-        out_fmt_g   => out_fmt_g,
-        taps_g     => ratio_g,
-        gain_corr_g => "NONE",
-        round_g    => psi_fix_round,
-        sat_g      => psi_fix_sat,
-        out_regs_g  => 2
-      )
-      port map(
-        clk_i     => clk_i,
-        rst_i     => RstPos,
-        vld_i   => strIn(4),
-        dat_i  => mult_q_dff2_s(i),
-        vld_o  => open,
-        dat_o => out_q_s(i)
-      );
+     i_mov_avg : entity work.psi_fix_mov_avg
+       generic map(
+         in_fmt_g    => MultFmt_c,
+         out_fmt_g   => out_fmt_g,
+         taps_g     => ratio_num_g,
+         gain_corr_g => "NONE",
+         round_g    => psi_fix_round,
+         sat_g      => psi_fix_sat,
+         out_regs_g  => 2
+       )
+       port map(
+         clk_i     => clk_i,
+         rst_i     => RstPos,
+         vld_i   => strIn(4),
+         dat_i  => mult_q_dff2_s(i),
+         vld_o  => open,
+         dat_o => out_q_s(i)
+       );
 
-    dat_qua_o((i + 1) * psi_fix_size(out_fmt_g) - 1 downto i * psi_fix_size(out_fmt_g)) <= out_q_s(i);
+     dat_qua_o((i + 1) * psi_fix_size(out_fmt_g) - 1 downto i * psi_fix_size(out_fmt_g)) <= out_q_s(i);
+    --  dat_qua_o((i + 1) * psi_fix_size(out_fmt_g) - 1 downto i * psi_fix_size(out_fmt_g)) <= psi_fix_resize(mult_q_dff2_s(i), MultFmt_c, out_fmt_g);
   end generate;
 
 end architecture;

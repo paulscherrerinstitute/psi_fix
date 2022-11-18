@@ -1,7 +1,7 @@
 ########################################################################################################################
 #  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 #  All rights reserved.
-#  Authors: Benoit Stef, Oliver Bründler
+#  Authors: Benoit Stef, Oliver Bründler, Radoslaw Rybaniec
 ########################################################################################################################
 
 ########################################################################################################################
@@ -19,24 +19,27 @@ class psi_fix_mod_cplx2real:
     ####################################################################################################################
     # Constructor
     ####################################################################################################################
-    def __init__(self,  InpFmt  : psi_fix_fmt_t,
-                        CoefFmt : psi_fix_fmt_t,
-                        IntFmt  : psi_fix_fmt_t,
-                        OutFmt  : psi_fix_fmt_t,
-                        ratio: int):
+    def __init__(self,  InpFmt         : psi_fix_fmt_t,
+                        CoefFmt        : psi_fix_fmt_t,
+                        IntFmt         : psi_fix_fmt_t,
+                        OutFmt         : psi_fix_fmt_t,
+                        ratio_num      : int,
+                        ratio_denum    : int):
         """
         Constructor for the modulator model object
         :param InpFmt: Input fixed-point format
         :param CoefFmt: Modulation coefficient fixed-point format
         :param IntFmt: Internal format (see documentation)
         :param OutFmt: Output fixed-point format
-        :param ratio: Ratio Fsample/Fcarrier (must be integer!)
+        :param ratio_num: Ratio Fsample/Fcarrier (must be integer!)
+        :param ratio_denum: NCO counter offset (must be integer!)
         """
         self.InpFmt     = InpFmt
         self.CoefFmt    = CoefFmt
         self.IntFmt     = IntFmt
         self.OutFmt     = OutFmt
-        self.ratio      = ratio
+        self.ratio_num  = ratio_num
+        self.ratio_denum  = ratio_denum
 
     ####################################################################################################################
     # Public Methods
@@ -57,15 +60,16 @@ class psi_fix_mod_cplx2real:
         # ROM pointer
         # Generate phases (use integer to prevent floating point precision errors)
         phaseSteps = np.ones(data_I_i.size, dtype=np.int64)
-        phaseSteps[0] = 0  # start at zero
-        cptInt = np.cumsum(phaseSteps, dtype=np.int64) % self.ratio
-        cptIntOffs = cptInt + 1
-        cpt = np.where(cptIntOffs > self.ratio - 1, cptIntOffs - self.ratio, cptIntOffs)
-
+        phaseSteps[0] = 1  # start at zero
+        cptInt = np.cumsum(phaseSteps+self.ratio_denum-1, dtype=np.int64) % self.ratio_num
+        cptIntOffs = cptInt
+        print(cptInt)
+        cpt = np.where(cptIntOffs > self.ratio_num - 1, cptIntOffs - self.ratio_num, cptIntOffs)
+        print(cpt)
         # Get Sin/Cos value
         scale = 1.0 - 2.0 ** -self.CoefFmt.f
-        sinTable = psi_fix_from_real(np.sin(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.CoefFmt)
-        cosTable = psi_fix_from_real(np.cos(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.CoefFmt)
+        sinTable = psi_fix_from_real(np.sin(2.0 * np.pi * np.arange(0, self.ratio_num) / self.ratio_num) * scale, self.CoefFmt)
+        cosTable = psi_fix_from_real(np.cos(2.0 * np.pi * np.arange(0, self.ratio_num) / self.ratio_num) * scale, self.CoefFmt)
 
         # process calculation
         mult_i_s = psi_fix_mult(datInp, self.InpFmt, sinTable[cpt], self.CoefFmt, multFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)

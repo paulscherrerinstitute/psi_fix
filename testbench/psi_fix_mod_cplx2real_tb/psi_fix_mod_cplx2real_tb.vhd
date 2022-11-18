@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 --  All rights reserved.
---  Authors: Oliver Bruendler
+--  Authors: Oliver Bruendler/ Benoît Stef / Radoslaw Rybaniec
 ------------------------------------------------------------------------------
 -- see Library/Python/TbGenerator
 
@@ -28,7 +28,9 @@ entity psi_fix_mod_cplx2real_tb is
           freq_clock_g  : real                 := 100.0e6;
           pl_stages_g   : integer range 5 to 6 := 5;
           rst_pol_g     : std_logic            := '1';
-          clk_per_spl_g  : integer              := 1);
+          clk_per_spl_g : integer              := 1;
+          ratio_num_g   : integer              := 10;
+          ratio_denum_g : integer              := 1);
 end entity;
 
 architecture tb of psi_fix_mod_cplx2real_tb is
@@ -62,13 +64,14 @@ begin
 
   DUT : entity work.psi_fix_mod_cplx2real
     generic map(
-      rst_pol_g   => rst_pol_g,
-      pl_stages_g => pl_stages_g,
-      inp_fmt_g   => InFixFmt_c,
-      coef_fmt_g  => CoefFixFmt_c,
-      int_fmt_g   => InternalFmt_c,
-      out_fmt_g   => OutFixFmt_c,
-      ratio_g    => 10)
+      rst_pol_g     => rst_pol_g,
+      pl_stages_g   => pl_stages_g,
+      inp_fmt_g     => InFixFmt_c,
+      coef_fmt_g    => CoefFixFmt_c,
+      int_fmt_g     => InternalFmt_c,
+      out_fmt_g     => OutFixFmt_c,
+      ratio_num_g   => ratio_num_g,
+      ratio_denum_g => ratio_denum_g)
     port map(
       clk_i     => clk_sti,
       rst_i     => rst_sti,
@@ -131,7 +134,7 @@ begin
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => str_sti,
                          Data        => SigIn,
-                         Filepath    => file_folder_g & "/stimuli.txt",
+                         Filepath    => file_folder_g & "/input_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_denum_g) & ".txt",
                          ClkPerSpl   => clk_per_spl_g,
                          IgnoreLines => 1);
 
@@ -152,8 +155,9 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => str_obs,
                          Data        => SigOut,
-                         Filepath    => file_folder_g & "/model_result_IQmod.txt",
-                         IgnoreLines => 0);
+                         Filepath    => file_folder_g & "/output_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_denum_g) & ".txt",
+                         IgnoreLines => 0,
+                         Tolerance   => 1); -- compatibility with GHDL
     -- end of process !DO NOT EDIT!
     ProcessDone(TbProcNr_check_c) <= '1';
     wait;

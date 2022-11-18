@@ -1,7 +1,7 @@
 ##############################################################################
 #  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 #  All rights reserved.
-#  Authors: Oliver Bruendler, Benoit Stef
+#  Authors: Oliver Bruendler, Benoit Stef, Radoslaw Rybaniec
 ##############################################################################
 
 #Constants
@@ -307,7 +307,10 @@ create_tb_run "psi_fix_demod_real2cplx_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_demod_real2cplx_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_demod_real2cplx_tb/Data"]
 tb_run_add_arguments   "-gfile_folder_g=$dataDir -gduty_cycle_g=1" \
-            "-gfile_folder_g=$dataDir -gduty_cycle_g=5"
+            "-gfile_folder_g=$dataDir -gduty_cycle_g=5" \
+            "-gfile_folder_g=$dataDir -gduty_cycle_g=1" "-gratio_num_g=5" "-gratio_denum_g=3" \
+            "-gfile_folder_g=$dataDir -gduty_cycle_g=1" "-gratio_num_g=100" "-gratio_denum_g=3" \
+
 add_tb_run
 
 create_tb_run "psi_fix_cordic_vect_tb"
@@ -359,9 +362,9 @@ set dataDir [file normalize "../testbench/psi_fix_mod_cplx2real_tb/Data"]
 tb_run_add_arguments   "-gfile_folder_g=$dataDir -gclk_per_spl_g=1 -gpl_stages_g=5" \
             "-gfile_folder_g=$dataDir -gclk_per_spl_g=1 -gpl_stages_g=6" \
             "-gfile_folder_g=$dataDir -gclk_per_spl_g=10 -gpl_stages_g=5" \
-            "-gfile_folder_g=$dataDir -gclk_per_spl_g=10 -gpl_stages_g=6"
-#Skipped for GHDL because of bug in GHDL (sin() is not 100% bittrue)
-tb_run_skip GHDL
+            "-gfile_folder_g=$dataDir -gclk_per_spl_g=10 -gpl_stages_g=6" \
+            "-gfile_folder_g=$dataDir -gclk_per_spl_g=1 -gpl_stages_g=6 -gratio_num_g=5 -gratio_denum_g=3" \
+
 add_tb_run
 
 create_tb_run "psi_fix_lut_gen_tb"
