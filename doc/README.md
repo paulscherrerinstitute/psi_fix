@@ -1,4 +1,4 @@
-<img align="right" src="../doc/psi_logo.png">
+<img align="right" src="files/psi_logo.png">
 
 ***
 
