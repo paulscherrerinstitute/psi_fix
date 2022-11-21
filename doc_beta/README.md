@@ -30,7 +30,7 @@ Component 				                               | Source
 [Complex multiplier](files/psi_fix_complex_mult.md)    | [psi_fix_complex_mult.vhd](../hdl/psi_fix_complex_mult.vhd)  
 [CORDIC rotation mode Polar to Cartesian - Parallel/Serial mode](files/psi_fix_cordic_rot.md)  | [psi_fix_cordic_rot.vhd](../hdl/psi_fix_cordic_rot.vhd)
 [CORDIC vector mode Cartesian to Polar - Parallel/Serial mode](files/psi_fix_cordic_vect.md) | [psi_fix_cordic_vect.vhd](../hdl/psi_fix_cordic_vect.vhd)    
-[[DDS 18bits fixed output](files/psi_fix_dds_18b.md)  | [psi_fix_dds_18b.vhd](../hdl/psi_fix_dds_18b.vhd)  
+[DDS 18bits fixed output](files/psi_fix_dds_18b.md)  | [psi_fix_dds_18b.vhd](../hdl/psi_fix_dds_18b.vhd)  
 [Non IQ demodulator with phase offset input and fixed non-integer ratio (generics)](files/psi_fix_demod_real2cplx.md)  | [psi_fix_demod_real2cplx.vhd](../hdl/psi_fix_demod_real2cplx.vhd)   
 [Non IQ modulator with phase offset input and fixed non-integer ratio (generics)](files/psi_fix_mod_cplx2real.md)  | [psi_fix_mod_cplx2real.vhd](../hdl/psi_fix_mod_cplx2real.vhd)
 [LP Filter Half-bandwidth 0.25 0.5 0.25 and decimation by 2 (without using multipliers)](files/psi_fix_fir_3tap_hbw_dec2.md)  | [psi_fix_fir_3tap_hbw_dec2.vhd](../hdl/psi_fix_fir_3tap_hbw_dec2.vhd)

@@ -1,4 +1,4 @@
-<img align="right" src="../../doc/psi_logo.png">
+<img align="right" src="psi_logo.png">
 
 ***
 
@@ -10,7 +10,8 @@
 
 ### Description
 
-The block converts complex data to real output with weighted coefficient regarding the given clock ratio K as generic. Giving input data In-phase and Quadrature at the input gives the following result:
+The block converts complex data to real output with weighted coefficient regarding the given clock ratio K as generic. In other words IQ baseband signal can be used to modify amplitude and phase of RF signal (e.g. IF/Carrier) with a local oscillator running at a clock speed ratio (integer or not).
+Ex: clock run at 250 MHz and RF signal to produce at 50 MHz then  Giving input data In-phase and Quadrature at the input gives the following result:
 
 <img align="center" src="psi_fix_mod_cplx2real_a.png">
 

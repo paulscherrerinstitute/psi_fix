@@ -28,20 +28,20 @@ use work.psi_fix_pkg.all;
 -- @formatter:off
 entity psi_fix_demod_real2cplx is
   generic(
-    rst_pol_g   : std_logic := '1';                                                  -- reset polarity active high ='1'    $$ constant = '1' $$
-    in_fmt_g    : psi_fix_fmt_t;                                                     -- input format FP                    $$ constant=(1,0,15) $$
-    out_fmt_g   : psi_fix_fmt_t;                                                     -- output format FP                   $$ constant=(1,0,16) $$
-    coef_bits_g : positive  := 18;                                                   -- internal coefficent number of bits $$ constant=25 $$
-    channels_g  : natural   := 1;                                                    -- number of channels TDM             $$ constant=2 $$
-    ratio_num_g     : natural   := 5;                                                    -- ratio numerator between clock and IF/RF      $$ constant=5 $$
-    ratio_denum_g    : natural   := 1                                                     -- ratio denumerator between clock and IF/RF    $$ constant=1 $$
+    rst_pol_g     : std_logic := '1';                                                  -- reset polarity active high ='1'    $$ constant = '1' $$
+    in_fmt_g      : psi_fix_fmt_t;                                                     -- input format FP                    $$ constant=(1,0,15) $$
+    out_fmt_g     : psi_fix_fmt_t;                                                     -- output format FP                   $$ constant=(1,0,16) $$
+    coef_bits_g   : positive  := 18;                                                   -- internal coefficent number of bits $$ constant=25 $$
+    channels_g    : natural   := 1;                                                    -- number of channels TDM             $$ constant=2 $$
+    ratio_num_g   : natural   := 5;                                                    -- ratio numerator between clock and IF/RF      $$ constant=5 $$
+    ratio_den_g : natural   := 1                                                       -- ratio denominator between clock and IF/RF    $$ constant=1 $$
   );
   port(
     clk_i        : in  std_logic;                                                       -- clk system $$ type=clk; freq=100e6 $$
     rst_i        : in  std_logic;                                                       -- rst system $$ type=rst; clk=clk_i $$
     dat_i        : in  std_logic_vector(psi_fix_size(in_fmt_g)*channels_g - 1 downto 0);-- data input IF/RF
     vld_i        : in  std_logic;                                                       -- valid input freqeuncy sampling
-    phi_offset_i : in  std_logic_vector(log2ceil(ratio_num_g)-1 downto 0);                  -- phase offset for demod LUT
+    phi_offset_i : in  std_logic_vector(log2ceil(ratio_num_g)-1 downto 0);              -- phase offset for demod LUT
     dat_inp_o    : out std_logic_vector(psi_fix_size(out_fmt_g)*channels_g- 1 downto 0);-- inphase data output
     dat_qua_o    : out std_logic_vector(psi_fix_size(out_fmt_g)*channels_g- 1 downto 0);-- quadrature data output
     vld_o        : out std_logic                                                        -- valid output
@@ -89,7 +89,7 @@ architecture RTL of psi_fix_demod_real2cplx is
   type InArray_t is array (0 to channels_g - 1) of std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);
   type OutArray_t is array (0 to channels_g - 1) of std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);
   --
-  signal cptInt        : integer range 0 to ratio_denum_g*ratio_num_g - 1 := 0;
+  signal cptInt        : integer range 0 to ratio_den_g*ratio_num_g - 1 := 0;
   signal cpt_s         : integer range 0 to ratio_num_g - 1 := 0;
   signal mult_i_s      : MultArray_t;
   signal mult_q_s      : MultArray_t;
@@ -145,10 +145,10 @@ begin
         cptInt <= 0;
       else
         if vld_i = '1' then
-          if cptInt < ratio_num_g - ratio_denum_g then
-            cptInt <= cptInt + ratio_denum_g;
+          if cptInt < ratio_num_g - ratio_den_g then
+            cptInt <= cptInt + ratio_den_g;
           else
-            cptInt <= ratio_denum_g - (ratio_num_g - cptInt);
+            cptInt <= ratio_den_g - (ratio_num_g - cptInt);
           end if;
         end if;
       end if;

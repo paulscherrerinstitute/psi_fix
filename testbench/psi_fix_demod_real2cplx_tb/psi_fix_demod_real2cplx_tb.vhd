@@ -77,7 +77,7 @@ begin
       coef_bits_g => coef_bits_g,
       channels_g  => 1,
       ratio_num_g => ratio_num_g,
-      ratio_denum_g => ratio_denum_g
+      ratio_den_g => ratio_denum_g
     )
     port map(
       clk_i        => clk_i,

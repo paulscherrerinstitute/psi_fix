@@ -17,7 +17,7 @@ This library is published under [PSI HDL Library License](License.txt), which is
 See [Changelog](Changelog.md)
 
 ## Detailed Documentation
-See [Documentation](doc/psi_fix.pdf)
+See [Documentation](doc/REAMDE.md)
 
 ## What belongs into this Library
 
