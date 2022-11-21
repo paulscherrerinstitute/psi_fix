@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 --  All rights reserved.
---  Authors: Oliver Bruendler
+--  Authors: Oliver Bruendler, Radoslaw Rybaniec
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------
@@ -27,8 +27,10 @@ use work.psi_fix_pkg.all;
 ------------------------------------------------------------
 entity psi_fix_demod_real2cplx_tb is
   generic(
-    file_folder_g : string  := "../tesbench/psi_fix_demod_real2cplx_tb/Data";
-    duty_cycle_g  : integer := 1
+    file_folder_g : string  := "../testbench/psi_fix_demod_real2cplx_tb/Data";
+    duty_cycle_g  : integer := 1;
+    ratio_num_g   : natural := 5;  
+    ratio_denum_g : natural := 3      
   );
 end entity;
 
@@ -42,9 +44,7 @@ architecture sim of psi_fix_demod_real2cplx_tb is
   constant out_fmt_g   : psi_fix_fmt_t := (1, 0, 16);
   constant coef_bits_g : integer     := 25;
 
-  -- *** Not Assigned Generics (default values) ***
-  constant ratio_g : natural := 5;      -- $$ constant=5 $$;
-
+  
   -- *** TB Control ***
   signal TbRunning            : boolean                  := True;
   signal NextCase             : integer                  := -1;
@@ -57,35 +57,34 @@ architecture sim of psi_fix_demod_real2cplx_tb is
   signal clk_i         : std_logic                                               := '0';
   signal rst_i         : std_logic                                               := '1';
   signal str_i         : std_logic                                               := '0';
-  signal data1_i       : std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0)      := (others => '0');
-  signal data2_i       : std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0)      := (others => '0');
-  signal data_i        : std_logic_vector(2 * psi_fix_size(in_fmt_g) - 1 downto 0)  := (others => '0');
-  signal data_I_o      : std_logic_vector(2 * psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
-  signal data_Q_o      : std_logic_vector(2 * psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
+  signal data_i        : std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0)  := (others => '0');
+  signal data_I_o      : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
+  signal data_Q_o      : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
   signal str_o         : std_logic                                               := '0';
-  signal phi_offset_16 : std_logic_vector(data_i'range)                          := (others => '0');
-  signal SigIn         : TextfileData_t(0 to 2)                                  := (others => 0);
-  signal SigOut        : TextfileData_t(0 to 3)                                  := (others => 0);
+  signal phi_offset_16 : std_logic_vector(log2ceil(ratio_num_g)-1 downto 0)                          := (others => '0');
+  signal SigIn         : TextfileData_t(0 to 1)                                  := (others => 0);
+  signal SigOut        : TextfileData_t(0 to 1)                                  := (others => 0);
 
 begin
   ------------------------------------------------------------
   -- DUT Instantiation
   ------------------------------------------------------------
-  data_i <= data2_i & data1_i;
   i_dut : entity work.psi_fix_demod_real2cplx
     generic map(
       rst_pol_g   => rst_pol_g,
       in_fmt_g    => in_fmt_g,
       out_fmt_g   => out_fmt_g,
       coef_bits_g => coef_bits_g,
-      channels_g => 2
+      channels_g  => 1,
+      ratio_num_g => ratio_num_g,
+      ratio_denum_g => ratio_denum_g
     )
     port map(
       clk_i        => clk_i,
       rst_i        => rst_i,
       vld_i        => str_i,
       dat_i       => data_i,
-      phi_offset_i => phi_offset_16(2 downto 0),
+      phi_offset_i => phi_offset_16,
       dat_inp_o     => data_I_o,
       dat_qua_o     => data_Q_o,
       vld_o        => str_o
@@ -132,9 +131,8 @@ begin
   -- Processes
   ------------------------------------------------------------
   -- *** stim ***
-  data1_i       <= std_logic_vector(to_signed(SigIn(0), data1_i'length));
-  data2_i       <= std_logic_vector(to_signed(SigIn(1), data2_i'length));
-  phi_offset_16 <= std_logic_vector(to_unsigned(SigIn(2), phi_offset_16'length));
+  data_i       <= std_logic_vector(to_signed(SigIn(0), data_i'length));
+  phi_offset_16 <= std_logic_vector(to_unsigned(SigIn(1), phi_offset_16'length));
   p_stim : process
   begin
     -- start of process !DO NOT EDIT
@@ -145,7 +143,7 @@ begin
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => str_i,
                          Data        => SigIn,
-                         Filepath    => file_folder_g & "/input.txt",
+                         Filepath    => file_folder_g & "/input_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_denum_g) & ".txt",
                          ClkPerSpl   => duty_cycle_g,
                          IgnoreLines => 1);
 
@@ -155,10 +153,9 @@ begin
   end process;
 
   -- *** check ***
-  SigOut(0) <= to_integer(signed(data_I_o(1 * psi_fix_size(out_fmt_g) - 1 downto 0 * psi_fix_size(out_fmt_g))));
-  SigOut(1) <= to_integer(signed(data_Q_o(1 * psi_fix_size(out_fmt_g) - 1 downto 0 * psi_fix_size(out_fmt_g))));
-  SigOut(2) <= to_integer(signed(data_I_o(2 * psi_fix_size(out_fmt_g) - 1 downto 1 * psi_fix_size(out_fmt_g))));
-  SigOut(3) <= to_integer(signed(data_Q_o(2 * psi_fix_size(out_fmt_g) - 1 downto 1 * psi_fix_size(out_fmt_g))));
+  SigOut(0) <= to_integer(signed(data_I_o));
+  SigOut(1) <= to_integer(signed(data_Q_o));
+
   p_check : process
   begin
     -- start of process !DO NOT EDIT
@@ -169,7 +166,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => str_o,
                          Data        => SigOut,
-                         Filepath    => file_folder_g & "/output.txt",
+                         Filepath    => file_folder_g & "/output_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_denum_g) & ".txt",
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!

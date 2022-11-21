@@ -198,3 +198,7 @@ def psi_fix_in_range(a, a_fmt : psi_fix_fmt_t,
 def psi_fix_write_formats(fmts, names, filename):
     # Note: Do not convert to FixFormat. Rely on psi_fix_fmt_t.__str__ to format the string correctly.
     cl_fix_write_formats(fmts, names, filename)
+
+def psi_fix_to_hex(a, a_fmt : psi_fix_fmt_t):
+    return "0x{:x}".format(psi_fix_get_bits_as_int(a, a_fmt))
+

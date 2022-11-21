@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 --  All rights reserved.
---  Authors: Benoit Stef
+--  Authors: Benoit Stef, Radoslaw Rybaniec
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -11,6 +11,8 @@
 -- modulates the signal with a specific ratio given comared to its clock
 -- it automatically computes sin(w) cos(w) where w=2pi/ratio.Fclk.t
 -- and perform the following computation RF = I.sin(w)+Q.cos(w)
+------------------------------------------------------------------------------
+-- 25.10.2021: Add phase offset in case of non-integer ratio wanted
 ------------------------------------------------------------------------------
 
 library ieee;
@@ -23,13 +25,14 @@ use work.psi_fix_pkg.all;
 --@formatter:off
 -- $$ processes=stim,check $$
 entity psi_fix_mod_cplx2real is
-  generic(rst_pol_g   : std_logic            := '1';                      -- reset polarity $$ constant = '1' $$
-          pl_stages_g : integer range 5 to 6 := 5;                        -- select the pipelines stages required
-          inp_fmt_g   : psi_fix_fmt_t        := (1, 1, 15);               -- input format FP $$ constant=(1,1,15) $$
-          coef_fmt_g  : psi_fix_fmt_t        := (1, 1, 15);               -- coef format $$ constant=(1,1,15) $$
-          int_fmt_g   : psi_fix_fmt_t        := (1, 1, 15);               -- internal format computation $$ constant=(1,1,15) $$
-          out_fmt_g   : psi_fix_fmt_t        := (1, 1, 15);               -- output format FP $$ constant=(1,1,15) $$
-          ratio_g     : natural              := 5                         -- ratio for deciamtion $$ constant=5 $$
+  generic(rst_pol_g     : std_logic            := '1';                    -- reset polarity $$ constant = '1' $$
+          pl_stages_g   : integer range 5 to 6 := 5;                      -- select the pipelines stages required
+          inp_fmt_g     : psi_fix_fmt_t        := (1, 1, 15);             -- input format FP $$ constant=(1,1,15) $$
+          coef_fmt_g    : psi_fix_fmt_t        := (1, 1, 15);             -- coef format $$ constant=(1,1,15) $$
+          int_fmt_g     : psi_fix_fmt_t        := (1, 1, 15);             -- internal format computation $$ constant=(1,1,15) $$
+          out_fmt_g     : psi_fix_fmt_t        := (1, 1, 15);             -- output format FP $$ constant=(1,1,15) $$
+          ratio_num_g   : natural              := 5;                      -- ratio for deciamtion (numerator) $$ constant=5 $$
+          ratio_denum_g : natural              := 1                       -- ratio for decimation (denumerator) $$ constant=1 $$  
          );
   port(
     clk_i     : in  std_logic;                                            -- $$ type=clk; freq=100e6 $$
@@ -44,7 +47,7 @@ end entity;
 --@formatter:on
 architecture rtl of psi_fix_mod_cplx2real is
 
-  type coef_array_t is array (0 to ratio_g - 1) of std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0);
+  type coef_array_t is array (0 to ratio_num_g - 1) of std_logic_vector(psi_fix_size(coef_fmt_g) - 1 downto 0);
   constant coef_scale_c : real := 1.0 - 1.0 / 2.0**(real(coef_fmt_g.F)); -- prevent +/- 1.0 -
   ------------------------------------------------------------------------------
   --Sin coef function <=> Q coef n = (cos(nx2pi/Ratio))
@@ -53,20 +56,20 @@ architecture rtl of psi_fix_mod_cplx2real is
   function coef_sin_array_func return coef_array_t is
     variable array_v : coef_array_t;
   begin
-    for i in 0 to ratio_g - 1 loop
-      array_v(i) := psi_fix_from_real(sin(2.0 * MATH_PI * real(i) / real(ratio_g)) * coef_scale_c, coef_fmt_g);
+    for i in 0 to ratio_num_g - 1 loop
+      array_v(i) := psi_fix_from_real(sin(2.0 * MATH_PI * real(i) / real(ratio_num_g)) * coef_scale_c, coef_fmt_g);
     end loop;
     return array_v;
   end function;
 
   ------------------------------------------------------------------------------
-  --COS coef function <=> Q coef n = (cos(nx2pi/Ratio))
+  -- COS coef function <=> Q coef n = (cos(nx2pi/Ratio))
   ------------------------------------------------------------------------------
   function coef_cos_array_func return coef_array_t is
     variable array_v : coef_array_t;
   begin
-    for i in 0 to ratio_g - 1 loop
-      array_v(i) := psi_fix_from_real(cos(2.0 * MATH_PI * real(i) / real(ratio_g)) * coef_scale_c, coef_fmt_g);
+    for i in 0 to ratio_num_g - 1 loop
+      array_v(i) := psi_fix_from_real(cos(2.0 * MATH_PI * real(i) / real(ratio_num_g)) * coef_scale_c, coef_fmt_g);
     end loop;
     return array_v;
   end function;
@@ -103,6 +106,7 @@ architecture rtl of psi_fix_mod_cplx2real is
   signal datInp1_s : std_logic_vector(psi_fix_size(inp_fmt_g) - 1 downto 0);
   signal datQua_s  : std_logic_vector(psi_fix_size(inp_fmt_g) - 1 downto 0);
   signal datQua1_s : std_logic_vector(psi_fix_size(inp_fmt_g) - 1 downto 0);
+  --signal debug0_s  : unsigned(log2ceil(ratio_num_g*ratio_denum_g)-1 downto 0);
 
 begin
   ------------------------------------------------
@@ -116,23 +120,24 @@ begin
   -- simple ROM pointer for both array
   -------------------------------------------------------------------------------
   proc_add_coef : process(clk_i)
-    variable cpt_v : integer range 0 to ratio_g := 0;
+    variable cpt_v : integer range 0 to ratio_denum_g*ratio_num_g := 0;
   begin
     if rising_edge(clk_i) then
       if rst_i = rst_pol_g then
         cpt_v := 0;
       else
         if vld_i = '1' then
-          if cpt_v < ratio_g - 1 then
-            cpt_v := cpt_v + 1;
+          if cpt_v < ratio_num_g - ratio_denum_g then
+            cpt_v := cpt_v + ratio_denum_g;
           else
-            cpt_v := 0;
+            cpt_v := ratio_denum_g - (ratio_num_g - cpt_v);
           end if;
         end if;
       end if;
     end if;
     sin_s <= table_sin(cpt_v);          --TODO perhaps add dff stage to help timing
     cos_s <= table_cos(cpt_v);          --TODO perhaps add dff stage to help timing
+    --debug0_s <= to_unsigned(cpt_v,log2ceil(ratio_num_g*ratio_denum_g));
   end process;
 
   -------------------------------------------------------------------------------
