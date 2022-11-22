@@ -7,12 +7,12 @@
 -- Libraries
 ------------------------------------------------------------------------------
 library ieee;
-	use ieee.std_logic_1164.all;
-	use ieee.numeric_std.all;
-	
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
 library <PSI_COMMON_LIB>;
-	use <PSI_COMMON_LIB>.psi_common_array_pkg.all;
-	
+use <PSI_COMMON_LIB>.psi_common_array_pkg.all;
+
 ------------------------------------------------------------------------------
 -- Package Declaration
 ------------------------------------------------------------------------------
@@ -23,6 +23,6 @@ end package;
 ------------------------------------------------------------------------------
 -- Package Body
 ------------------------------------------------------------------------------
-package body <PACKAGE_NAME> is 
+package body <PACKAGE_NAME> is
 
 end <PACKAGE_NAME>;

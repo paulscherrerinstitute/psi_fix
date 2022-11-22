@@ -24,8 +24,8 @@ filepath = os.path.realpath(__file__)
 dirpath = os.path.dirname(filepath)
 STIM_DIR = os.path.join(dirpath, "../Data")
 
-IN_FMT = PsiFixFmt(1, 4, 14)
-OUT_FMT = PsiFixFmt(1, 1, 15)
+IN_FMT = psi_fix_fmt_t(1, 4, 14)
+OUT_FMT = psi_fix_fmt_t(1, 1, 15)
 
 ########################################################################################################################
 # Simulation
@@ -35,10 +35,10 @@ stimSimple = np.linspace(-3, 3, SIMPLE_SAMPLES)
 stimRand= np.random.rand(RAND_SAMPLES)*4-2
 stim = np.concatenate(([0, 1/8, 1/4, 1/2, 1, 2, 4], stimSimple, stimRand))
 
-stimQuant = PsiFixFromReal(stim, IN_FMT, errSat=False)
+stimQuant = psi_fix_from_real(stim, IN_FMT, err_sat=False)
 
 #Simulation
-model = psi_fix_inv(IN_FMT, OUT_FMT, PsiFixRnd.Round, PsiFixSat.Sat)
+model = psi_fix_inv(IN_FMT, OUT_FMT, psi_fix_rnd_t.round, psi_fix_sat_t.sat)
 out = model.Process(stimQuant)
 
 ########################################################################################################################
@@ -47,8 +47,8 @@ out = model.Process(stimQuant)
 if PLOT_ON:
     fig, ax = plt.subplots(2,1)
     exp = 1/(stimQuant+1e-12)
-    exp = np.minimum(exp, PsiFixUpperBound(OUT_FMT))
-    exp = np.maximum(exp, PsiFixLowerBound(OUT_FMT))
+    exp = np.minimum(exp, psi_fix_upper_bound(OUT_FMT))
+    exp = np.maximum(exp, psi_fix_lower_bound(OUT_FMT))
     ax[0].plot(out, "b")
     ax[0].plot(exp, "r")
     ax[0].set_title("compare to expected")
@@ -67,8 +67,8 @@ except FileExistsError:
     pass
 
 np.savetxt(STIM_DIR + "/input.txt",
-           PsiFixGetBitsAsInt(stimQuant, IN_FMT),
+           psi_fix_get_bits_as_int(stimQuant, IN_FMT),
            fmt="%i", header="I Q")
 np.savetxt(STIM_DIR + "/output.txt",
-           PsiFixGetBitsAsInt(out, OUT_FMT),
+           psi_fix_get_bits_as_int(out, OUT_FMT),
            fmt="%i", header="inv")

@@ -74,15 +74,16 @@ if PLOT_ON:
     impz(a)
 
 #generate VHDL file coefficient with cfg setting
-coefFmt  = PsiFixFmt(1,0,15)
+coefFmt  = psi_fix_fmt_t(1,0,15)
 fileName = "psi_fix_lut_test1"
 path     = "../"
 
 cfg = psi_fix_lut(a,coefFmt)
-c = psi_fix_lut.Process(cfg,np.arange(size(a)))
-np.savetxt(STIM_DIR + 'model.txt', PsiFixGetBitsAsInt(c,coefFmt), fmt='% i', newline='\n', header='model')
+c = psi_fix_lut.Process(cfg,np.arange(np.size(a)))
+np.savetxt(STIM_DIR + 'model.txt', psi_fix_get_bits_as_int(c,coefFmt), fmt='% i', newline='\n', header='model')
 print(c)
 
 psi_fix_lut.Generate(cfg,path,fileName)
 
-show()
+if PLOT_ON:
+    show()

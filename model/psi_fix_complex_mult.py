@@ -17,12 +17,12 @@ class psi_fix_complex_mult:
     ####################################################################################################################
     # Constructor
     ####################################################################################################################
-    def __init__(self, inAFmt: PsiFixFmt,
-                 inBFmt: PsiFixFmt,
-                 internalFmt : PsiFixFmt,
-                 outFmt : PsiFixFmt,
-                 rnd : PsiFixRnd = PsiFixRnd.Round,
-                 sat : PsiFixSat = PsiFixSat.Sat):
+    def __init__(self, inAFmt: psi_fix_fmt_t,
+                 inBFmt: psi_fix_fmt_t,
+                 internalFmt : psi_fix_fmt_t,
+                 outFmt : psi_fix_fmt_t,
+                 rnd : psi_fix_rnd_t = psi_fix_rnd_t.round,
+                 sat : psi_fix_sat_t = psi_fix_sat_t.sat):
         """
         Creation of a complex multiplication model
         :param inAFmt: Input A fixed point format
@@ -52,19 +52,19 @@ class psi_fix_complex_mult:
         :param bq: Input B, imaginary part
         :return: Result tuple (I, Q)
         """
-        aif = PsiFixFromReal(ai, self.inAFmt)
-        aqf = PsiFixFromReal(aq, self.inAFmt)
-        bif = PsiFixFromReal(bi, self.inBFmt)
-        bqf = PsiFixFromReal(bq, self.inBFmt)
+        aif = psi_fix_from_real(ai, self.inAFmt)
+        aqf = psi_fix_from_real(aq, self.inAFmt)
+        bif = psi_fix_from_real(bi, self.inBFmt)
+        bqf = psi_fix_from_real(bq, self.inBFmt)
 
         # Multiplications
-        multIQ = PsiFixMult(aif, self.inAFmt, bqf, self.inBFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
-        multQI = PsiFixMult(aqf, self.inAFmt, bif, self.inBFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
-        multII = PsiFixMult(aif, self.inAFmt, bif, self.inBFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
-        multQQ = PsiFixMult(aqf, self.inAFmt, bqf, self.inBFmt, self.internalFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        multIQ = psi_fix_mult(aif, self.inAFmt, bqf, self.inBFmt, self.internalFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
+        multQI = psi_fix_mult(aqf, self.inAFmt, bif, self.inBFmt, self.internalFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
+        multII = psi_fix_mult(aif, self.inAFmt, bif, self.inBFmt, self.internalFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
+        multQQ = psi_fix_mult(aqf, self.inAFmt, bqf, self.inBFmt, self.internalFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
 
         #Summations
-        sumI = PsiFixSub(multII, self.internalFmt, multQQ, self.internalFmt, self.outFmt, self.rnd, self.sat)
-        sumQ = PsiFixAdd(multIQ, self.internalFmt, multQI, self.internalFmt, self.outFmt, self.rnd, self.sat)
+        sumI = psi_fix_sub(multII, self.internalFmt, multQQ, self.internalFmt, self.outFmt, self.rnd, self.sat)
+        sumQ = psi_fix_add(multIQ, self.internalFmt, multQI, self.internalFmt, self.outFmt, self.rnd, self.sat)
 
         return sumI, sumQ

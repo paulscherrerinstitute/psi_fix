@@ -33,18 +33,18 @@ def WriteFile(signal, filePath, fracBits):
 #############################################################
 # Data Generation
 #############################################################
-inFmt = PsiFixFmt(1, 0, 16)
-coefFmt = PsiFixFmt(1, 0, 15)
-outFmt = PsiFixFmt(1, 0, 17)
+inFmt = psi_fix_fmt_t(1, 0, 16)
+coefFmt = psi_fix_fmt_t(1, 0, 15)
+outFmt = psi_fix_fmt_t(1, 0, 17)
 
 coefs = sps.firwin(12, 0.2)
-coefsFix = PsiFixFromReal(coefs, coefFmt)
+coefsFix = psi_fix_from_real(coefs, coefFmt)
 
 np.random.seed(0)
 inSig = []
 for i in range(2):
     sigFloat = (np.random.rand(SAMPLES)-0.5)*1.99
-    sigFix = PsiFixFromReal(sigFloat, inFmt)
+    sigFix = psi_fix_from_real(sigFloat, inFmt)
     inSig.append(sigFix)
 
 outSig = []
@@ -57,19 +57,19 @@ for i in range(2):
 # Write files
 #############################################################
 with open(STIM_DIR + "/input.txt", "w+") as f:
-    inSigInt0 = PsiFixGetBitsAsInt(inSig[0], inFmt)
-    inSigInt1 = PsiFixGetBitsAsInt(inSig[1], inFmt)
+    inSigInt0 = psi_fix_get_bits_as_int(inSig[0], inFmt)
+    inSigInt1 = psi_fix_get_bits_as_int(inSig[1], inFmt)
     for i in range(SAMPLES):
         f.write("{} {}\n".format(inSigInt0[i], inSigInt1[i]))
 
 with open(STIM_DIR + "/coefs.txt", "w+") as f:
     for c in coefsFix:
-        f.write("{}\n".format(PsiFixGetBitsAsInt(c, coefFmt)))
+        f.write("{}\n".format(psi_fix_get_bits_as_int(c, coefFmt)))
 
 
 with open(STIM_DIR + "/output.txt", "w+") as f:
-    outSigInt0 = PsiFixGetBitsAsInt(outSig[0], outFmt)
-    outSigInt1 = PsiFixGetBitsAsInt(outSig[1], outFmt)
+    outSigInt0 = psi_fix_get_bits_as_int(outSig[0], outFmt)
+    outSigInt1 = psi_fix_get_bits_as_int(outSig[1], outFmt)
     for i in range(outSig[0].size):
         f.write("{} {}\n".format(outSigInt0[i], outSigInt1[i]))
 

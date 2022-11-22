@@ -26,13 +26,13 @@ except FileExistsError:
 #############################################################
 # Data Generation
 #############################################################
-inFmt = PsiFixFmt(1, 0, 16)
-outFmt = PsiFixFmt(1, 0, 17)
+inFmt = psi_fix_fmt_t(1, 0, 16)
+outFmt = psi_fix_fmt_t(1, 0, 17)
 
 np.random.seed(0)
 t = np.linspace(0,TEND,SAMPLES)
 inSig = sps.chirp(t, 0, TEND, FREQ_SAMPLE/2)
-inSig = PsiFixFromReal(inSig, inFmt, errSat=False)
+inSig = psi_fix_from_real(inSig, inFmt, err_sat=False)
 
 CfgInfo = NamedTuple("CfgInfo", [("order", int), ("ratio", int), ("diffDel", int), ("gainCorr", bool)])
 configs = []
@@ -55,12 +55,12 @@ for cfg in configs:
 #############################################################
 with open(STIM_DIR + "/input.txt", "w+") as f:
     for spl in inSig:
-        f.write("{}\n".format(PsiFixGetBitsAsInt(spl, inFmt)))
+        f.write("{}\n".format(psi_fix_get_bits_as_int(spl, inFmt)))
 
 for nr, sig in enumerate(outSig):
     cfg = configs[nr]
     with open(STIM_DIR + "/output_o{}_r{}_dd{}_gc{}.txt".format(cfg.order, cfg.ratio, cfg.diffDel, cfg.gainCorr), "w+") as f:
         for spl in sig:
-            f.write("{}\n".format(PsiFixGetBitsAsInt(spl, outFmt)))
+            f.write("{}\n".format(psi_fix_get_bits_as_int(spl, outFmt)))
 
 

@@ -13,164 +13,161 @@
 -- Libraries
 ------------------------------------------------------------
 library ieee;
-	use ieee.std_logic_1164.all;
-	use ieee.numeric_std.all;
-	use ieee.math_real.all;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+use ieee.math_real.all;
 
 library work;
-	use work.psi_fix_pkg.all;
-	use work.psi_common_array_pkg.all;
-	use work.psi_common_math_pkg.all;
-	use work.psi_tb_textfile_pkg.all;
+use work.psi_fix_pkg.all;
+use work.psi_common_array_pkg.all;
+use work.psi_common_math_pkg.all;
+use work.psi_tb_textfile_pkg.all;
 
 ------------------------------------------------------------
 -- Entity Declaration
 ------------------------------------------------------------
 entity psi_fix_pol2cart_approx_tb is
-	generic (
-		FileFolder_g	: string 		:= "../tesbench/psi_fix_cordic_vect_tb/Data"
-	);
+  generic(
+    file_folder_g : string := "../tesbench/psi_fix_cordic_vect_tb/Data"
+  );
 end entity;
 
 ------------------------------------------------------------
 -- Architecture
 ------------------------------------------------------------
 architecture sim of psi_fix_pol2cart_approx_tb is
-	-- *** Fixed Generics ***
-	constant InAbsFmt_g : PsiFixFmt_t := (0,0,16);
-	constant InAngleFmt_g : PsiFixFmt_t := (0,0,15);
-	constant OutFmt_g : PsiFixFmt_t := (1,0,16);
-	
-	-- *** Not Assigned Generics (default values) ***
-	
-	-- *** TB Control ***
-	signal TbRunning : boolean := True;
-	signal NextCase : integer := -1;
-	signal ProcessDone : std_logic_vector(0 to 1) := (others => '0');
-	constant AllProcessesDone_c : std_logic_vector(0 to 1) := (others => '1');
-	constant TbProcNr_stim_c : integer := 0;
-	constant TbProcNr_resp_c : integer := 1;
-	
-	-- *** DUT Signals ***
-	signal Clk : std_logic := '0';
-	signal Rst : std_logic := '1';
-	signal InVld : std_logic := '0';
-	signal InAbs : std_logic_vector(PsiFixSize(InAbsFmt_g)-1 downto 0) := (others => '0');
-	signal InAng : std_logic_vector(PsiFixSize(InAngleFmt_g)-1 downto 0) := (others => '0');
-	signal OutVld : std_logic := '0';
-	signal OutI : std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0) := (others => '0');
-	signal OutQ : std_logic_vector(PsiFixSize(OutFmt_g)-1 downto 0) := (others => '0');
-	
-	-- *** User Definitions ***
-	signal SigIn					: TextfileData_t(0 to 1)	:= (others => 0);
-	signal SigOut					: TextfileData_t(0 to 1)	:= (others => 0);	
-	
+  -- *** Fixed Generics ***
+  constant in_abs_fmt_g   : psi_fix_fmt_t := (0, 0, 16);
+  constant in_angle_fmt_g : psi_fix_fmt_t := (0, 0, 15);
+  constant out_fmt_g     : psi_fix_fmt_t := (1, 0, 16);
+
+  -- *** Not Assigned Generics (default values) ***
+
+  -- *** TB Control ***
+  signal TbRunning            : boolean                  := True;
+  signal NextCase             : integer                  := -1;
+  signal ProcessDone          : std_logic_vector(0 to 1) := (others => '0');
+  constant AllProcessesDone_c : std_logic_vector(0 to 1) := (others => '1');
+  constant TbProcNr_stim_c    : integer                  := 0;
+  constant TbProcNr_resp_c    : integer                  := 1;
+
+  -- *** DUT Signals ***
+  signal Clk    : std_logic                                               := '0';
+  signal Rst    : std_logic                                               := '1';
+  signal InVld  : std_logic                                               := '0';
+  signal InAbs  : std_logic_vector(psi_fix_size(in_abs_fmt_g) - 1 downto 0)   := (others => '0');
+  signal InAng  : std_logic_vector(psi_fix_size(in_angle_fmt_g) - 1 downto 0) := (others => '0');
+  signal OutVld : std_logic                                               := '0';
+  signal OutI   : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0)     := (others => '0');
+  signal OutQ   : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0)     := (others => '0');
+
+  -- *** User Definitions ***
+  signal SigIn  : TextfileData_t(0 to 1) := (others => 0);
+  signal SigOut : TextfileData_t(0 to 1) := (others => 0);
+
 begin
-	------------------------------------------------------------
-	-- DUT Instantiation
-	------------------------------------------------------------
-	i_dut : entity work.psi_fix_pol2cart_approx
-		generic map (
-			InAbsFmt_g		=> InAbsFmt_g,
-			InAngleFmt_g	=> InAngleFmt_g,
-			OutFmt_g		=> OutFmt_g,
-			Round_g 		=> PsiFixRound,					
-			Sat_g			=> PsiFixSat
-		)
-		port map (
-			Clk => Clk,
-			Rst => Rst,
-			InVld => InVld,
-			InAbs => InAbs,
-			InAng => InAng,
-			OutVld => OutVld,
-			OutI => OutI,
-			OutQ => OutQ
-		);
-	
-	------------------------------------------------------------
-	-- Testbench Control !DO NOT EDIT!
-	------------------------------------------------------------
-	p_tb_control : process
-	begin
-		wait until Rst = '0';
-		wait until ProcessDone = AllProcessesDone_c;
-		TbRunning <= false;
-		wait;
-	end process;
-	
-	------------------------------------------------------------
-	-- Clocks !DO NOT EDIT!
-	------------------------------------------------------------
-	p_clock_Clk : process
-		constant Frequency_c : real := real(100e6);
-	begin
-		while TbRunning loop
-			wait for 0.5*(1 sec)/Frequency_c;
-			Clk <= not Clk;
-		end loop;
-		wait;
-	end process;
-	
-	
-	------------------------------------------------------------
-	-- Resets
-	------------------------------------------------------------
-	p_rst_Rst : process
-	begin
-		wait for 1 us;
-		-- Wait for two clk edges to ensure reset is active for at least one edge
-		wait until rising_edge(Clk);
-		wait until rising_edge(Clk);
-		Rst <= '0';
-		wait;
-	end process;
-	
-	
-	------------------------------------------------------------
-	-- Processes
-	------------------------------------------------------------
-	-- *** stim ***
-	InAbs <= std_logic_vector(to_signed(SigIn(0), InAbs'length));
-	InAng <= std_logic_vector(to_signed(SigIn(1), InAng'length));
-	p_stim : process
-	begin
-		-- start of process !DO NOT EDIT
-		
-		wait until Rst = '0';
-		-- Apply Stimuli	
-		ApplyTextfileContent(	Clk 		=> Clk, 
-								Rdy 		=> PsiTextfile_SigOne,
-								Vld 		=> InVld, 
-								Data		=> SigIn, 
-								Filepath	=> FileFolder_g & "/input.txt", 
-								IgnoreLines => 1);	
-		
-		-- end of process !DO NOT EDIT!
-		ProcessDone(TbProcNr_stim_c) <= '1';
-		wait;
-	end process;
-	
-	-- *** resp ***
-	SigOut(0) <= to_integer(signed(OutI));
-	SigOut(1) <= to_integer(signed(OutQ));
-	p_resp : process
-	begin
-		-- start of process !DO NOT EDIT
-		wait until Rst = '0';
-		
-		-- Check
-		CheckTextfileContent(	Clk			=> Clk,
-								Rdy			=> PsiTextfile_SigUnused,
-								Vld			=> OutVld,
-								Data		=> SigOut,
-								Filepath	=> FileFolder_g & "/output.txt",
-								IgnoreLines => 1);
-		
-		-- end of process !DO NOT EDIT!
-		ProcessDone(TbProcNr_resp_c) <= '1';
-		wait;
-	end process;
-	
-	
+  ------------------------------------------------------------
+  -- DUT Instantiation
+  ------------------------------------------------------------
+  i_dut : entity work.psi_fix_pol2cart_approx
+    generic map(
+      in_abs_fmt_g   => in_abs_fmt_g,
+      in_angle_fmt_g => in_angle_fmt_g,
+      out_fmt_g     => out_fmt_g,
+      round_g      => psi_fix_round,
+      sat_g        => psi_fix_sat
+    )
+    port map(
+      clk_i  => Clk,
+      rst_i  => Rst,
+      vld_i  => InVld,
+      dat_abs_i  => InAbs,
+      dat_ang_i  => InAng,
+      vld_o => OutVld,
+      dat_inp_o   => OutI,
+      dat_qua_o   => OutQ
+    );
+
+  ------------------------------------------------------------
+  -- Testbench Control !DO NOT EDIT!
+  ------------------------------------------------------------
+  p_tb_control : process
+  begin
+    wait until Rst = '0';
+    wait until ProcessDone = AllProcessesDone_c;
+    TbRunning <= false;
+    wait;
+  end process;
+
+  ------------------------------------------------------------
+  -- Clocks !DO NOT EDIT!
+  ------------------------------------------------------------
+  p_clock_Clk : process
+    constant Frequency_c : real := real(100e6);
+  begin
+    while TbRunning loop
+      wait for 0.5 * (1 sec) / Frequency_c;
+      Clk <= not Clk;
+    end loop;
+    wait;
+  end process;
+
+  ------------------------------------------------------------
+  -- Resets
+  ------------------------------------------------------------
+  p_rst_Rst : process
+  begin
+    wait for 1 us;
+    -- Wait for two clk edges to ensure reset is active for at least one edge
+    wait until rising_edge(Clk);
+    wait until rising_edge(Clk);
+    Rst <= '0';
+    wait;
+  end process;
+
+  ------------------------------------------------------------
+  -- Processes
+  ------------------------------------------------------------
+  -- *** stim ***
+  InAbs <= std_logic_vector(to_signed(SigIn(0), InAbs'length));
+  InAng <= std_logic_vector(to_signed(SigIn(1), InAng'length));
+  p_stim : process
+  begin
+    -- start of process !DO NOT EDIT
+
+    wait until Rst = '0';
+    -- Apply Stimuli
+    ApplyTextfileContent(Clk         => Clk,
+                         Rdy         => PsiTextfile_SigOne,
+                         Vld         => InVld,
+                         Data        => SigIn,
+                         Filepath    => file_folder_g & "/input.txt",
+                         IgnoreLines => 1);
+
+    -- end of process !DO NOT EDIT!
+    ProcessDone(TbProcNr_stim_c) <= '1';
+    wait;
+  end process;
+
+  -- *** resp ***
+  SigOut(0) <= to_integer(signed(OutI));
+  SigOut(1) <= to_integer(signed(OutQ));
+  p_resp : process
+  begin
+    -- start of process !DO NOT EDIT
+    wait until Rst = '0';
+
+    -- Check
+    CheckTextfileContent(Clk         => Clk,
+                         Rdy         => PsiTextfile_SigUnused,
+                         Vld         => OutVld,
+                         Data        => SigOut,
+                         Filepath    => file_folder_g & "/output.txt",
+                         IgnoreLines => 1);
+
+    -- end of process !DO NOT EDIT!
+    ProcessDone(TbProcNr_resp_c) <= '1';
+    wait;
+  end process;
+
 end;

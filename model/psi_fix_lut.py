@@ -23,7 +23,7 @@ class psi_fix_lut:
     ####################################################################################################################
     def __init__(self,
                  lut_content    : np.ndarray,
-                 coefFmt        : PsiFixFmt):
+                 coefFmt        : psi_fix_fmt_t):
         """
         Constructor for a bittrue model object of the LUT
         :param lut_content: LUT content
@@ -34,7 +34,7 @@ class psi_fix_lut:
         self.coefFmt      = coefFmt
 
         #transform value to PsiFix format from Real
-        self.table      = PsiFixFromReal(self.lut_content, self.coefFmt, errSat=True)
+        self.table      = psi_fix_from_real(self.lut_content, self.coefFmt, err_sat=True)
 
     ####################################################################################################################
     # Public Methods
@@ -73,12 +73,12 @@ class psi_fix_lut:
 
         #coef Strings
         conv = "to_unsigned"
-        if self.coefFmt.S == 1:
+        if self.coefFmt.s == 1:
             conv = "to_signed"
 
         coefStr = ["{}({},{})".format(conv,
-                                      PsiFixGetBitsAsInt(v, self.coefFmt),
-                                      PsiFixSize(self.coefFmt))
+                                      psi_fix_get_bits_as_int(v, self.coefFmt),
+                                      psi_fix_size(self.coefFmt))
                    for v in self.table]
         #modify table (transposition)
         tableLines = ["std_logic_vector({}),".format(g) for g in coefStr]

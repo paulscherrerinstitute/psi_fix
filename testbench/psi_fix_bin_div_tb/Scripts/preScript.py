@@ -36,9 +36,9 @@ def WriteFile(signal, filePath, fracBits):
 #############################################################
 # Simulation
 #############################################################
-numFmt = PsiFixFmt(1, 2, 5)
-denomFmt = PsiFixFmt(1, 2, 8)
-outFmt = PsiFixFmt(1, 4, 10)
+numFmt = psi_fix_fmt_t(1, 2, 5)
+denomFmt = psi_fix_fmt_t(1, 2, 8)
+outFmt = psi_fix_fmt_t(1, 4, 10)
 
 np.random.seed(0)
 num = (np.random.random(SAMPLES)-0.5)*2*3.9
@@ -46,26 +46,26 @@ denom = (np.random.random(SAMPLES)-0.5)*2*3.9
 #num[0] = 3
 #denom[0] = 0.5
 
-numF = PsiFixFromReal(num, numFmt)
-denomF = PsiFixFromReal(denom, denomFmt)
+numF = psi_fix_from_real(num, numFmt)
+denomF = psi_fix_from_real(denom, denomFmt)
 
-res = psi_fix_bin_div(numF, numFmt, denomF, denomFmt, outFmt, PsiFixRnd.Trunc, PsiFixSat.Sat)
+res = psi_fix_bin_div(numF, numFmt, denomF, denomFmt, outFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.sat)
 
 #############################################################
 # Plot (if required)
 #############################################################
 if PLOT_ON:
     resExp = numF/denomF
-    resExp = PsiFixFromReal(resExp, outFmt, errSat=False)
+    resExp = psi_fix_from_real(resExp, outFmt, err_sat=False)
     err = res - resExp
-    pyplot.plot(err*2**outFmt.F)
+    pyplot.plot(err*2**outFmt.f)
     pyplot.show()
 
 #############################################################
 # Write Files for Co sim
 #############################################################
 with open(STIM_DIR + "/input.txt", "w+") as f:
-    f.writelines(["{} {}\n".format(int(i), int(q)) for i, q in zip(PsiFixGetBitsAsInt(numF, numFmt), PsiFixGetBitsAsInt(denomF, denomFmt))])
+    f.writelines(["{} {}\n".format(int(i), int(q)) for i, q in zip(psi_fix_get_bits_as_int(numF, numFmt), psi_fix_get_bits_as_int(denomF, denomFmt))])
 with open(STIM_DIR + "/output.txt", "w+") as f:
-    f.writelines(["{}\n".format(int(r)) for r in PsiFixGetBitsAsInt(res, outFmt)])
+    f.writelines(["{}\n".format(int(r)) for r in psi_fix_get_bits_as_int(res, outFmt)])
 

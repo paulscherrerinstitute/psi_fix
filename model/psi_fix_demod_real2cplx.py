@@ -1,7 +1,7 @@
 ########################################################################################################################
 #  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 #  All rights reserved.
-#  Authors: Oliver Bruendler
+#  Authors: Oliver Bruendler, Benoit Stef, Radoslaw Rybaniec
 ########################################################################################################################
 
 ########################################################################################################################
@@ -21,22 +21,26 @@ class psi_fix_demod_real2cplx:
     ####################################################################################################################
     # Constructor
     ####################################################################################################################
-    def __init__(self, inFmt: PsiFixFmt, outFmt : PsiFixFmt, coefBits : int, ratio: int):
+    def __init__(self, inFmt: psi_fix_fmt_t, outFmt : psi_fix_fmt_t, coefBits : int, ratio_num: int, ratio_den : int, debug : bool = False):
         """
         Constructor for the demodulator model object
         :param inFmt: Input fixed-point format
         :param outFmt: Output fixed-point format
         :param coefBits: Number of bits to use for the coefficients of the sin/cos demodulation table
-        :param ratio: Ratio Fsample/Fsignal (must be integer)
+        :param ratio_num: Ratio Fsample/Fsignal (must be integer)
+        :param ratio_den: Ratio denominator
+        :param debug: Debugging mode
         """
         self.inFmt = inFmt
         self.outFmt = outFmt
-        coefUnusedIntBits = np.floor(np.log2(ratio))
-        self.coefFmt = PsiFixFmt(1, 0-coefUnusedIntBits, coefBits+coefUnusedIntBits-1)
-        self.outFmt = outFmt
-        self.ratio = ratio
-        self.multFmt = PsiFixFmt(1, self.inFmt.I+self.coefFmt.I, self.outFmt.F+np.ceil(np.log2(ratio)) + 2) #truncation error does only lead to 1/4 LSB error on output
-        self.movAvg = psi_fix_mov_avg(self.multFmt, self.outFmt, ratio, psi_fix_mov_avg.GAINCORR_NONE, PsiFixRnd.Round, PsiFixSat.Sat)
+        self.ratio_num = ratio_num
+        self.ratio_den = ratio_den
+        self._debug = debug
+        coefUnusedIntBits = np.floor(np.log2(ratio_num))
+        self.coefFmt = psi_fix_fmt_t(1, 0-coefUnusedIntBits, coefBits+coefUnusedIntBits-1)
+        #self.multFmt = psi_fix_fmt_t(1, self.inFmt.i+self.coefFmt.i, self.outFmt.f+np.ceil(np.log2(ratio_num/ratio_den)) + 2) #truncation error does only lead to 1/4 LSB error on output
+        self.multFmt = psi_fix_fmt_t(1, self.inFmt.i+self.coefFmt.i, self.outFmt.f+np.ceil(np.log2(ratio_num)) + 2) #truncation error does only lead to 1/4 LSB error on output
+        self.movAvg = psi_fix_mov_avg(self.multFmt, self.outFmt, ratio_num, psi_fix_mov_avg.GAINCORR_NONE, psi_fix_rnd_t.round, psi_fix_sat_t.sat)
 
     ####################################################################################################################
     # Public Methods and Properties
@@ -49,31 +53,34 @@ class psi_fix_demod_real2cplx:
         :return: Demodulated signal as tuple (I, Q)
         """
         # resize real number to Fixed Point
-        dataFix = PsiFixFromReal(inData, self.inFmt, errSat=True)
+        dataFix = psi_fix_from_real(inData, self.inFmt, err_sat=True)
 
         #Limit the phase offset
-        phaseOffset = np.minimum(phOffset, self.ratio-1).astype("int32")
+        phaseOffset = np.minimum(phOffset, self.ratio_num-1).astype("int32")
 
         #ROM pointer
         #Generate phases (use integer to prevent floating point precision errors)
         phaseSteps = np.ones(inData.size,dtype=np.int64)
-        phaseSteps[0] = 0 #start at zero
-        cptInt = np.cumsum(phaseSteps,dtype=np.int64) % self.ratio
-        cptIntOffs = cptInt + phaseOffset
-        cpt = np.where(cptIntOffs > self.ratio-1, cptIntOffs - self.ratio, cptIntOffs)
-
+        phaseSteps[0] = 1-self.ratio_den #start at zero
+        cpt = (phaseOffset + np.cumsum(phaseSteps+self.ratio_den-1, dtype=np.int64)) % self.ratio_num
         #Get Sin/Cos value
-        scale = (1.0-2.0**-self.coefFmt.F)/self.ratio
-        sinTable = PsiFixFromReal(np.sin(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.coefFmt)
-        cosTable = PsiFixFromReal(np.cos(2.0 * np.pi * np.arange(0, self.ratio) / self.ratio) * scale, self.coefFmt)
+        scale = (1.0-2.0**-self.coefFmt.f)/self.ratio_num
+        sinTable = psi_fix_from_real(np.sin(2.0 * np.pi * np.arange(0, self.ratio_num) / self.ratio_num) * scale, self.coefFmt)
+        cosTable = psi_fix_from_real(np.cos(2.0 * np.pi * np.arange(0, self.ratio_num) / self.ratio_num) * scale, self.coefFmt)
 
         #I-Path
-        multI = PsiFixMult(dataFix, self.inFmt, sinTable[cpt], self.coefFmt, self.multFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        multI = psi_fix_mult(dataFix, self.inFmt, sinTable[cpt], self.coefFmt, self.multFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
         resI = self.movAvg.Process(multI)
-
         #Q-Path
-        multQ = PsiFixMult(dataFix, self.inFmt, cosTable[cpt], self.coefFmt, self.multFmt, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        multQ = psi_fix_mult(dataFix, self.inFmt, cosTable[cpt], self.coefFmt, self.multFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
         resQ = self.movAvg.Process(multQ)
 
-        return resI, resQ
+        if self._debug:
+            for i in range(10):
+                print("I{:3} IN {:10} TAB {:10} MULT {:10} CPT {:x}".format(i,
+                    psi_fix_to_hex(dataFix[i], self.inFmt),
+                    psi_fix_to_hex(sinTable[cpt[i]], self.coefFmt),
+                    psi_fix_to_hex(multI[i], self.multFmt),
+                    cpt[i]))
 
+        return resI, resQ

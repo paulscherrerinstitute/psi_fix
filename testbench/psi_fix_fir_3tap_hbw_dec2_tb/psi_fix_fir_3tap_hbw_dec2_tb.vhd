@@ -26,12 +26,12 @@ use work.psi_tb_textfile_pkg.all;
 ------------------------------------------------------------
 entity psi_fix_fir_3tap_hbw_dec2_tb is
   generic (
-    FileFolder_g : string := "../testbench/psi_fix_fir_3tap_hbw_dec2_tb/Data/";
-    InFile_g : string := "input.txt";
-    OutFile_g : string := "output.txt";
-    VldDutyCycle_g : positive := 5;
-    Channels_g : natural := 2;
-    Separate_g : boolean := true
+    file_folder_g : string := "../testbench/psi_fix_fir_3tap_hbw_dec2_tb/Data/";
+    in_file_g : string := "input.txt";
+    out_file_g : string := "output.txt";
+    vld_duty_cycle_g : positive := 5;
+    channels_g : natural := 2;
+    separate_g : boolean := true
     );
 end entity;
 
@@ -42,12 +42,12 @@ architecture sim of psi_fix_fir_3tap_hbw_dec2_tb is
   -- *** Fixed Generics ***
 
   -- *** Not Assigned Generics (default values) ***
-  constant InFmt_g  : PsiFixFmt_t := (1, 0, 17);
-  constant OutFmt_g : PsiFixFmt_t := (1, 0, 17);
-  constant IntFmt_g : PsiFixFmt_t := (1, 0, 17);
-  constant Rnd_g    : PsiFixRnd_t := PsiFixRound;
-  constant Sat_g    : PsiFixSat_t := PsiFixSat;
-  constant Shifts_g : t_ainteger  := (2, 1, 2);
+  constant in_fmt_g  : psi_fix_fmt_t := (1, 0, 17);
+  constant out_fmt_g : psi_fix_fmt_t := (1, 0, 17);
+  constant int_fmt_g : psi_fix_fmt_t := (1, 0, 17);
+  constant rnd_g    : psi_fix_rnd_t := psi_fix_round;
+  constant sat_g    : psi_fix_sat_t := psi_fix_sat;
+  constant shifts_g : t_ainteger  := (2, 1, 2);
 
   -- *** TB Control ***
   signal TbRunning            : boolean                  := true;
@@ -61,12 +61,12 @@ architecture sim of psi_fix_fir_3tap_hbw_dec2_tb is
   signal Clk     : std_logic                                                     := '1';
   signal Rst     : std_logic                                                     := '1';
   signal InVld   : std_logic                                                     := '0';
-  signal InData  : std_logic_vector(PsiFixSize(InFmt_g)*2*Channels_g-1 downto 0) := (others => '0');
+  signal InData  : std_logic_vector(psi_fix_size(in_fmt_g)*2*channels_g-1 downto 0) := (others => '0');
   signal OutVld  : std_logic                                                     := '0';
-  signal OutData : std_logic_vector(PsiFixSize(OutFmt_g)*Channels_g-1 downto 0)  := (others => '0');
-  
-  signal SigIn					: TextfileData_t(0 to 2*Channels_g-1)	:= (others => 0);
-  signal SigOut					: TextfileData_t(0 to Channels_g-1)	:= (others => 0);		
+  signal OutData : std_logic_vector(psi_fix_size(out_fmt_g)*channels_g-1 downto 0)  := (others => '0');
+
+  signal SigIn          : TextfileData_t(0 to 2*channels_g-1) := (others => 0);
+  signal SigOut         : TextfileData_t(0 to channels_g-1) := (others => 0);
 
 begin
   ------------------------------------------------------------
@@ -74,16 +74,16 @@ begin
   ------------------------------------------------------------
   i_dut : entity work.psi_fix_fir_3tap_hbw_dec2
     generic map (
-      Channels_g => Channels_g,
-      Separate_g => Separate_g
+      channels_g => channels_g,
+      separate_g => separate_g
       )
     port map (
-      Clk     => Clk,
-      Rst     => Rst,
-      InVld   => InVld,
-      InData  => InData,
-      OutVld  => OutVld,
-      OutData => OutData
+      clk_i     => Clk,
+      rst_i     => Rst,
+      vld_i   => InVld,
+      dat_i  => InData,
+      vld_o  => OutVld,
+      dat_o => OutData
       );
 
   ------------------------------------------------------------
@@ -134,37 +134,37 @@ begin
     if InVld = '0' then
       InData <= (others => 'X');
     else
-      for i in 0 to Channels_g-1 loop
-        InData(PsiFixSize(InFmt_g)*(2*i+1)-1 downto PsiFixSize(InFmt_g)*(2*i)) <= std_logic_vector(to_signed(SigIn(2*i), PsiFixSize(InFmt_g)));
-        InData(PsiFixSize(InFmt_g)*(2*i+2)-1 downto PsiFixSize(InFmt_g)*(2*i+1)) <= std_logic_vector(to_signed(SigIn(2*i+1), PsiFixSize(InFmt_g)));
+      for i in 0 to channels_g-1 loop
+        InData(psi_fix_size(in_fmt_g)*(2*i+1)-1 downto psi_fix_size(in_fmt_g)*(2*i)) <= std_logic_vector(to_signed(SigIn(2*i), psi_fix_size(in_fmt_g)));
+        InData(psi_fix_size(in_fmt_g)*(2*i+2)-1 downto psi_fix_size(in_fmt_g)*(2*i+1)) <= std_logic_vector(to_signed(SigIn(2*i+1), psi_fix_size(in_fmt_g)));
       end loop;
     end if;
   end process;
-  
+
   p_stimuli : process
   begin
     -- start of process !DO NOT EDIT
     wait until Rst = '0';
-    
+
     -- User Code
-    ApplyTextfileContent(	Clk 		=> Clk, 
-                            Rdy 		=> PsiTextfile_SigOne,
-                            Vld 		=> InVld, 
-                            Data		=> SigIn, 
-                            Filepath	=> FileFolder_g & "/" & InFile_g,
-                            ClkPerSpl	=> VldDutyCycle_g,
-                            IgnoreLines => 1);	
-    
+    ApplyTextfileContent( Clk     => Clk,
+                            Rdy     => PsiTextfile_SigOne,
+                            Vld     => InVld,
+                            Data    => SigIn,
+                            Filepath  => file_folder_g & "/" & in_file_g,
+                            ClkPerSpl => vld_duty_cycle_g,
+                            IgnoreLines => 1);
+
     -- end of process !DO NOT EDIT!
     ProcessDone(TbProcNr_input_c) <= '1';
     wait;
   end process;
-  
+
   -- *** response ***
   process (OutData) is
   begin
-    for i in 0 to Channels_g-1 loop
-      SigOut(i) <= to_integer(signed(OutData(PsiFixSize(OutFmt_g)*(i+1)-1 downto PsiFixSize(OutFmt_g)*i)));
+    for i in 0 to channels_g-1 loop
+      SigOut(i) <= to_integer(signed(OutData(psi_fix_size(out_fmt_g)*(i+1)-1 downto psi_fix_size(out_fmt_g)*i)));
     end loop;
   end process;
 
@@ -172,15 +172,15 @@ begin
   begin
     -- start of process !DO NOT EDIT
     wait until Rst = '0';
-    
+
     -- User Code
-    CheckTextfileContent(	Clk			=> Clk,
-                            Rdy			=> PsiTextfile_SigUnused,
-                            Vld			=> OutVld,
-                            Data		=> SigOut,
-                            Filepath	=> FileFolder_g & "/" & OutFile_g,
+    CheckTextfileContent( Clk     => Clk,
+                            Rdy     => PsiTextfile_SigUnused,
+                            Vld     => OutVld,
+                            Data    => SigOut,
+                            Filepath  => file_folder_g & "/" & out_file_g,
                             IgnoreLines => 1);
-    
+
     -- end of process !DO NOT EDIT!
     ProcessDone(TbProcNr_output_c) <= '1';
     wait;

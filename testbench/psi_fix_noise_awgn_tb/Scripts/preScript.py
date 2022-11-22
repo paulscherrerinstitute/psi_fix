@@ -24,7 +24,7 @@ except FileExistsError:
 #############################################################
 # Simulation
 #############################################################
-FORMAT = PsiFixFmt(1,0,15)
+FORMAT = psi_fix_fmt_t(1,0,15)
 
 Gen = psi_fix_noise_awgn(FORMAT)
 Results = Gen.Generate(SAMPLES)
@@ -49,6 +49,6 @@ if PLOT_ON:
 #############################################################
 # Write Files for Co sim
 #############################################################
-np.savetxt(STIM_DIR + "/output.txt".format(FORMAT), PsiFixGetBitsAsInt(Results, FORMAT), fmt="%i", header="noise")
+np.savetxt(STIM_DIR + "/output.txt".format(FORMAT), psi_fix_get_bits_as_int(Results, FORMAT), fmt="%i", header="noise")
 
 

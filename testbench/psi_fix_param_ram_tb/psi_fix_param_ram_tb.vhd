@@ -12,15 +12,15 @@
 -- Libraries
 ------------------------------------------------------------
 library ieee;
-	use ieee.std_logic_1164.all;
-	use ieee.numeric_std.all;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 library work;
-	use work.psi_common_array_pkg.all;
-	use work.psi_common_math_pkg.all;
-	use work.psi_common_array_pkg.all;
-	use work.psi_fix_pkg.all;
-	use work.psi_tb_compare_pkg.all;
+use work.psi_common_array_pkg.all;
+use work.psi_common_math_pkg.all;
+use work.psi_common_array_pkg.all;
+use work.psi_fix_pkg.all;
+use work.psi_tb_compare_pkg.all;
 
 ------------------------------------------------------------
 -- Entity Declaration
@@ -32,164 +32,161 @@ end entity;
 -- Architecture
 ------------------------------------------------------------
 architecture sim of psi_fix_param_ram_tb is
-	-- *** Fixed Generics ***
-	
-	-- *** Not Assigned Generics (default values) ***
-	constant Depth_g : positive := 8 ;
-	constant Fmt_g : PsiFixFmt_t := (1,0,15) ;
-	constant Behavior_g : string := "RBW" ;
-	constant Init_g : t_areal := (0.1, 0.2, 0.3) ;
-	
-	-- *** TB Control ***
-	signal TbRunning : boolean := True;
-	signal NextCase : integer := -1;
-	signal ProcessDone : std_logic_vector(0 to 0) := (others => '0');
-	constant AllProcessesDone_c : std_logic_vector(0 to 0) := (others => '1');
-	constant TbProcNr_Stimuli_c : integer := 0;
-	
-	-- *** DUT Signals ***
-	signal ClkA : std_logic := '0';
-	signal AddrA : std_logic_vector(log2ceil(Depth_g)-1 downto 0) := (others => '0');
-	signal WrA : std_logic := '0';
-	signal DinA : std_logic_vector(PsiFixSize(Fmt_g)-1 downto 0) := (others => '0');
-	signal DoutA : std_logic_vector(PsiFixSize(Fmt_g)-1 downto 0) := (others => '0');
-	signal ClkB : std_logic := '0';
-	signal AddrB : std_logic_vector(log2ceil(Depth_g) - 1 downto 0) := (others => '0');
-	signal WrB : std_logic := '0';
-	signal DinB : std_logic_vector(PsiFixSize(Fmt_g)-1 downto 0) := (others => '0');
-	signal DoutB : std_logic_vector(PsiFixSize(Fmt_g)-1 downto 0) := (others => '0');
-	
+  -- *** Fixed Generics ***
+
+  -- *** Not Assigned Generics (default values) ***
+  constant depth_g    : positive    := 8;
+  constant fmt_g      : psi_fix_fmt_t := (1, 0, 15);
+  constant behavior_g : string      := "RBW";
+  constant init_g     : t_areal     := (0.1, 0.2, 0.3);
+
+  -- *** TB Control ***
+  signal TbRunning            : boolean                  := True;
+  signal NextCase             : integer                  := -1;
+  signal ProcessDone          : std_logic_vector(0 to 0) := (others => '0');
+  constant AllProcessesDone_c : std_logic_vector(0 to 0) := (others => '1');
+  constant TbProcNr_Stimuli_c : integer                  := 0;
+
+  -- *** DUT Signals ***
+  signal ClkA  : std_logic                                        := '0';
+  signal AddrA : std_logic_vector(log2ceil(depth_g) - 1 downto 0) := (others => '0');
+  signal WrA   : std_logic                                        := '0';
+  signal DinA  : std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');
+  signal DoutA : std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');
+  signal ClkB  : std_logic                                        := '0';
+  signal AddrB : std_logic_vector(log2ceil(depth_g) - 1 downto 0) := (others => '0');
+  signal WrB   : std_logic                                        := '0';
+  signal DinB  : std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');
+  signal DoutB : std_logic_vector(psi_fix_size(fmt_g) - 1 downto 0) := (others => '0');
+
 begin
-	------------------------------------------------------------
-	-- DUT Instantiation
-	------------------------------------------------------------
-	i_dut : entity work.psi_fix_param_ram
-		generic map (
-			Depth_g => Depth_g,
-			Fmt_g => Fmt_g,
-			Behavior_g => Behavior_g,
-			Init_g => Init_g
-		)
-		port map (
-			ClkA => ClkA,
-			AddrA => AddrA,
-			WrA => WrA,
-			DinA => DinA,
-			DoutA => DoutA,
-			ClkB => ClkB,
-			AddrB => AddrB,
-			WrB => WrB,
-			DinB => DinB,
-			DoutB => DoutB
-		);
-	
-	------------------------------------------------------------
-	-- Testbench Control !DO NOT EDIT!
-	------------------------------------------------------------
-	p_tb_control : process
-	begin
-		wait until ProcessDone = AllProcessesDone_c;
-		TbRunning <= false;
-		wait;
-	end process;
-	
-	------------------------------------------------------------
-	-- Clocks !DO NOT EDIT!
-	------------------------------------------------------------
-	p_clock_ClkA : process
-		constant Frequency_c : real := real(100e6);
-	begin
-		while TbRunning loop
-			wait for 0.5*(1 sec)/Frequency_c;
-			ClkA <= not ClkA;
-		end loop;
-		wait;
-	end process;
-	
-	p_clock_ClkB : process
-		constant Frequency_c : real := real(133e6);
-	begin
-		while TbRunning loop
-			wait for 0.5*(1 sec)/Frequency_c;
-			ClkB <= not ClkB;
-		end loop;
-		wait;
-	end process;
-	
-	------------------------------------------------------------
-	-- Resets
-	------------------------------------------------------------
-	
-	------------------------------------------------------------
-	-- Processes
-	------------------------------------------------------------
-	-- *** Stimuli ***
-	p_Stimuli : process
-	begin	
-		
-		-- Check Initial Content (Port A)
-		wait until rising_edge(ClkA);
-		for i in 0 to Depth_g-1 loop
-			AddrA <= to_uslv(i, AddrA'length);
-			wait until rising_edge(ClkA);
-			wait until rising_edge(ClkA);
-			if i < Init_g'length then
-				StdlvCompareStdlv(PsiFixFromReal(Init_g(i), Fmt_g), DoutA, "InitA");
-			else
-				StdlvCompareInt(0, DoutA, "ZeroA");
-			end if;
-		end loop;
-		
-		-- Check Initial Content (Port B)
-		wait until rising_edge(ClkB);
-		for i in 0 to Depth_g-1 loop
-			AddrB <= to_uslv(i, AddrB'length);
-			wait until rising_edge(ClkB);
-			wait until rising_edge(ClkB);
-			if i < Init_g'length then
-				StdlvCompareStdlv(PsiFixFromReal(Init_g(i), Fmt_g), DoutB, "InitB");
-			else
-				StdlvCompareInt(0, DoutB, "ZeroB");
-			end if;
-		end loop;
-		
-		-- Check Overwrite Content (Port A)
-		wait until rising_edge(ClkA);
-		for i in 0 to Depth_g-1 loop
-			AddrA <= to_uslv(i, AddrA'length);
-			DinA <= to_uslv(i+10, DinA'length);
-			WrA <= '1';
-			wait until rising_edge(ClkA);
-		end loop;
-		WrA <= '0';
-		for i in 0 to Depth_g-1 loop
-			AddrA <= to_uslv(i, AddrA'length);
-			wait until rising_edge(ClkA);
-			wait until rising_edge(ClkA);
-			StdlvCompareInt(i+10, DoutA, "OverwriteA");
-		end loop;
-		
-		-- Check Overwrite Content (Port B)
-		wait until rising_edge(ClkB);
-		for i in 0 to Depth_g-1 loop
-			AddrB <= to_uslv(i, AddrA'length);
-			DinB <= to_uslv(i+20, DinA'length);
-			WrB <= '1';
-			wait until rising_edge(ClkB);
-		end loop;
-		WrB <= '0';
-		for i in 0 to Depth_g-1 loop
-			AddrB <= to_uslv(i, AddrB'length);
-			wait until rising_edge(ClkB);
-			wait until rising_edge(ClkB);
-			StdlvCompareInt(i+20, DoutB, "OverwriteB");
-		end loop;
-		
-		
-		-- end of process !DO NOT EDIT!
-		ProcessDone(TbProcNr_Stimuli_c) <= '1';
-		wait;
-	end process;
-	
-	
+  ------------------------------------------------------------
+  -- DUT Instantiation
+  ------------------------------------------------------------
+  i_dut : entity work.psi_fix_param_ram
+    generic map(
+      depth_g    => depth_g,
+      fmt_g      => fmt_g,
+      behavior_g => behavior_g,
+      init_g     => init_g
+    )
+    port map(
+      ClkA  => ClkA,
+      AddrA => AddrA,
+      WrA   => WrA,
+      DinA  => DinA,
+      DoutA => DoutA,
+      ClkB  => ClkB,
+      AddrB => AddrB,
+      WrB   => WrB,
+      DinB  => DinB,
+      DoutB => DoutB
+    );
+
+  ------------------------------------------------------------
+  -- Testbench Control !DO NOT EDIT!
+  ------------------------------------------------------------
+  p_tb_control : process
+  begin
+    wait until ProcessDone = AllProcessesDone_c;
+    TbRunning <= false;
+    wait;
+  end process;
+
+  ------------------------------------------------------------
+  -- Clocks !DO NOT EDIT!
+  ------------------------------------------------------------
+  p_clock_ClkA : process
+    constant Frequency_c : real := real(100e6);
+  begin
+    while TbRunning loop
+      wait for 0.5 * (1 sec) / Frequency_c;
+      ClkA <= not ClkA;
+    end loop;
+    wait;
+  end process;
+
+  p_clock_ClkB : process
+    constant Frequency_c : real := real(133e6);
+  begin
+    while TbRunning loop
+      wait for 0.5 * (1 sec) / Frequency_c;
+      ClkB <= not ClkB;
+    end loop;
+    wait;
+  end process;
+
+  ------------------------------------------------------------
+  -- Resets
+  ------------------------------------------------------------
+
+  ------------------------------------------------------------
+  -- Processes
+  ------------------------------------------------------------
+  -- *** Stimuli ***
+  p_Stimuli : process
+  begin
+    -- Check Initial Content (Port A)
+    wait until rising_edge(ClkA);
+    for i in 0 to depth_g - 1 loop
+      AddrA <= to_uslv(i, AddrA'length);
+      wait until rising_edge(ClkA);
+      wait until rising_edge(ClkA);
+      if i < init_g'length then
+        StdlvCompareStdlv(psi_fix_from_real(init_g(i), fmt_g), DoutA, "InitA");
+      else
+        StdlvCompareInt(0, DoutA, "ZeroA");
+      end if;
+    end loop;
+
+    -- Check Initial Content (Port B)
+    wait until rising_edge(ClkB);
+    for i in 0 to depth_g - 1 loop
+      AddrB <= to_uslv(i, AddrB'length);
+      wait until rising_edge(ClkB);
+      wait until rising_edge(ClkB);
+      if i < init_g'length then
+        StdlvCompareStdlv(psi_fix_from_real(init_g(i), fmt_g), DoutB, "InitB");
+      else
+        StdlvCompareInt(0, DoutB, "ZeroB");
+      end if;
+    end loop;
+
+    -- Check Overwrite Content (Port A)
+    wait until rising_edge(ClkA);
+    for i in 0 to depth_g - 1 loop
+      AddrA <= to_uslv(i, AddrA'length);
+      DinA  <= to_uslv(i + 10, DinA'length);
+      WrA   <= '1';
+      wait until rising_edge(ClkA);
+    end loop;
+    WrA <= '0';
+    for i in 0 to depth_g - 1 loop
+      AddrA <= to_uslv(i, AddrA'length);
+      wait until rising_edge(ClkA);
+      wait until rising_edge(ClkA);
+      StdlvCompareInt(i + 10, DoutA, "OverwriteA");
+    end loop;
+
+    -- Check Overwrite Content (Port B)
+    wait until rising_edge(ClkB);
+    for i in 0 to depth_g - 1 loop
+      AddrB <= to_uslv(i, AddrA'length);
+      DinB  <= to_uslv(i + 20, DinA'length);
+      WrB   <= '1';
+      wait until rising_edge(ClkB);
+    end loop;
+    WrB <= '0';
+    for i in 0 to depth_g - 1 loop
+      AddrB <= to_uslv(i, AddrB'length);
+      wait until rising_edge(ClkB);
+      wait until rising_edge(ClkB);
+      StdlvCompareInt(i + 20, DoutB, "OverwriteB");
+    end loop;
+
+    -- end of process !DO NOT EDIT!
+    ProcessDone(TbProcNr_Stimuli_c) <= '1';
+    wait;
+  end process;
+
 end;

@@ -27,23 +27,23 @@ except FileExistsError:
 #############################################################
 # Simulation
 #############################################################
-inAbsFmt = PsiFixFmt(0, 0, 16)
-inAngleFmt = PsiFixFmt(0,0,15)
-outFmt = PsiFixFmt(1, 0, 16)
+inAbsFmt = psi_fix_fmt_t(0, 0, 16)
+inAngleFmt = psi_fix_fmt_t(0,0,15)
+outFmt = psi_fix_fmt_t(1, 0, 16)
 
 np.random.seed(0)
-sigRandAbs = PsiFixFromReal(np.random.rand(SAMPLES_RAND), inAbsFmt, errSat=False)
-sigRandAng = PsiFixFromReal(np.random.rand(SAMPLES_RAND), inAngleFmt, errSat=False)
+sigRandAbs = psi_fix_from_real(np.random.rand(SAMPLES_RAND), inAbsFmt, err_sat=False)
+sigRandAng = psi_fix_from_real(np.random.rand(SAMPLES_RAND), inAngleFmt, err_sat=False)
 
 anglesLogic = np.linspace(0, 1, SAMPLES_LOGIC)
 amplitudeLogic = np.linspace(0.01, 0.99, SAMPLES_LOGIC)
-sigLogicAbs = PsiFixFromReal(amplitudeLogic, inAbsFmt, errSat=False)
-sigLogicAng = PsiFixFromReal(anglesLogic, inAngleFmt, errSat=False)
+sigLogicAbs = psi_fix_from_real(amplitudeLogic, inAbsFmt, err_sat=False)
+sigLogicAng = psi_fix_from_real(anglesLogic, inAngleFmt, err_sat=False)
 
 sigAbs = np.concatenate((sigLogicAbs, sigRandAbs))
 sigAng = np.concatenate((sigLogicAng, sigRandAng))
 
-conv = psi_fix_pol2cart_approx(inAbsFmt, inAngleFmt, outFmt, PsiFixRnd.Round, PsiFixSat.Sat)
+conv = psi_fix_pol2cart_approx(inAbsFmt, inAngleFmt, outFmt, psi_fix_rnd_t.round, psi_fix_sat_t.sat)
 resI, resQ = conv.Process(sigAbs, sigAng)
 
 
@@ -60,7 +60,7 @@ if PLOT_ON:
     plt.plot(resQ, 'b')
     plt.figure()
     plt.title("Error [LSB]")
-    plt.plot((resI-np.cos(sigAng*2*np.pi)*sigAbs)*2**outFmt.F, (resQ-np.sin(sigAng*2*np.pi)*sigAbs)*2**outFmt.F, ".")
+    plt.plot((resI-np.cos(sigAng*2*np.pi)*sigAbs)*2**outFmt.f, (resQ-np.sin(sigAng*2*np.pi)*sigAbs)*2**outFmt.f, ".")
     plt.show()
 
 
@@ -69,12 +69,12 @@ if PLOT_ON:
 # Write Files for Co sim
 #############################################################
 np.savetxt(STIM_DIR + "/input.txt",
-           np.column_stack((PsiFixGetBitsAsInt(sigAbs, inAbsFmt),
-                            PsiFixGetBitsAsInt(sigAng, inAngleFmt))),
+           np.column_stack((psi_fix_get_bits_as_int(sigAbs, inAbsFmt),
+                            psi_fix_get_bits_as_int(sigAng, inAngleFmt))),
            fmt="%i", header="input-Abs input-Ang")
 np.savetxt(STIM_DIR + "/output.txt",
-           np.column_stack((PsiFixGetBitsAsInt(resI, outFmt),
-                           PsiFixGetBitsAsInt(resQ, outFmt))),
+           np.column_stack((psi_fix_get_bits_as_int(resI, outFmt),
+                           psi_fix_get_bits_as_int(resQ, outFmt))),
            fmt="%i", header="result-I result-Q")
 
 
