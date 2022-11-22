@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 --  All rights reserved.
---  Authors: Benoit Stef, Radoslaw Rybaniec
+--  Authors: Oliver Bruendler, Benoit Stef, Radoslaw Rybaniec
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -264,11 +264,11 @@ end generate;
          out_regs_g  => 2
        )
        port map(
-         clk_i     => clk_i,
-         rst_i     => RstPos,
-         vld_i   => strIn(4),
-         dat_i  => mult_q_dff2_s(i),
-         vld_o  => open,
+         clk_i => clk_i,
+         rst_i => RstPos,
+         vld_i => strIn(4),
+         dat_i => mult_q_dff2_s(i),
+         vld_o => open,
          dat_o => out_q_s(i)
        );
 

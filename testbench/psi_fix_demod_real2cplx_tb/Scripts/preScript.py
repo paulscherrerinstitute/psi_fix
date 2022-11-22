@@ -35,18 +35,18 @@ coefFmt = psi_fix_fmt_t(1, 0, coefBits)
 fSample = 100e6
 
 ratio_nums = [5, 100]
-ratio_denums = [3, 1]
+ratio_dens = [3, 1]
 
 for ratio_num in ratio_nums:
-    for ratio_denum in ratio_denums:
+    for ratio_den in ratio_dens:
         #ratio_num = 5
-        #ratio_denum = 3
+        #ratio_den = 3
         fSig = fSample/ratio_num
 
         coefUnusedIntBits = np.floor(np.log2(ratio_num))
         coefFmt = psi_fix_fmt_t(1, 0-coefUnusedIntBits, coefBits+coefUnusedIntBits-1)
         multFmt = psi_fix_fmt_t(1, inFmt.i + coefFmt.i, outFmt.f + np.ceil(np.log2(ratio_num)) + 2)
-        #self.multFmt = psi_fix_fmt_t(1, self.inFmt.i+self.coefFmt.i, self.outFmt.f+np.ceil(np.log2(ratio_num/ratio_denum)) + 2) #truncation error does only lead to 1/4 LSB error on output
+        #self.multFmt = psi_fix_fmt_t(1, self.inFmt.i+self.coefFmt.i, self.outFmt.f+np.ceil(np.log2(ratio_num/ratio_den)) + 2) #truncation error does only lead to 1/4 LSB error on output
 
         FSTART = fSig*0.99
         FSTOP = fSig*1.01
@@ -56,7 +56,7 @@ for ratio_num in ratio_nums:
         sig = sps.chirp(t, FSTART, t[-1], FSTOP, method="linear")*0.99
 
         #We use IF 
-        sig = np.sin(np.arange(0,SAMPLES-1)*2*np.pi*1/(ratio_num/ratio_denum))*(2**(inFmt.f+inFmt.i)-1)/2**(inFmt.f+inFmt.i)
+        sig = np.sin(np.arange(0,SAMPLES-1)*2*np.pi*1/(ratio_num/ratio_den))*(2**(inFmt.f+inFmt.i)-1)/2**(inFmt.f+inFmt.i)
 
         ## We use ones instead of Chirp
         #sig = np.ones(t.size)*(2**(inFmt.f+inFmt.i)-1)/2**(inFmt.f+inFmt.i)
@@ -65,7 +65,7 @@ for ratio_num in ratio_nums:
         phase = np.ones_like(sigFix)*0
         phase [100:1000] = 1
 
-        demod = psi_fix_demod_real2cplx(inFmt, outFmt, coefBits, ratio_num, ratio_denum, DEBUG_ON)
+        demod = psi_fix_demod_real2cplx(inFmt, outFmt, coefBits, ratio_num, ratio_den, DEBUG_ON)
         resI, resQ = demod.Process(sigFix, phase)
 
         #############################################################
@@ -86,12 +86,12 @@ for ratio_num in ratio_nums:
         #############################################################
         # Write Files for Co sim
         #############################################################
-        np.savetxt(STIM_DIR + "/input_{}_{}.txt".format(ratio_num, ratio_denum),
+        np.savetxt(STIM_DIR + "/input_{}_{}.txt".format(ratio_num, ratio_den),
                    np.column_stack((psi_fix_get_bits_as_int(sigFix, inFmt),
                                     #psi_fix_get_bits_as_int(sig2Fix, inFmt),
                                     phase)),
                    fmt="%i", header="input phase")
-        np.savetxt(STIM_DIR + "/output_{}_{}.txt".format(ratio_num, ratio_denum),
+        np.savetxt(STIM_DIR + "/output_{}_{}.txt".format(ratio_num, ratio_den),
                    np.column_stack((psi_fix_get_bits_as_int(resI, outFmt),
                                     psi_fix_get_bits_as_int(resQ, outFmt),
                                     )),

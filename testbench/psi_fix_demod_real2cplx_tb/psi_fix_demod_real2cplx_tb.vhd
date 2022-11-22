@@ -30,7 +30,7 @@ entity psi_fix_demod_real2cplx_tb is
     file_folder_g : string  := "../testbench/psi_fix_demod_real2cplx_tb/Data";
     duty_cycle_g  : integer := 1;
     ratio_num_g   : natural := 5;  
-    ratio_denum_g : natural := 3      
+    ratio_den_g   : natural := 3      
   );
 end entity;
 
@@ -77,7 +77,7 @@ begin
       coef_bits_g => coef_bits_g,
       channels_g  => 1,
       ratio_num_g => ratio_num_g,
-      ratio_den_g => ratio_denum_g
+      ratio_den_g => ratio_den_g
     )
     port map(
       clk_i        => clk_i,
@@ -143,7 +143,7 @@ begin
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => str_i,
                          Data        => SigIn,
-                         Filepath    => file_folder_g & "/input_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_denum_g) & ".txt",
+                         Filepath    => file_folder_g & "/input_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_den_g) & ".txt",
                          ClkPerSpl   => duty_cycle_g,
                          IgnoreLines => 1);
 
@@ -166,7 +166,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => str_o,
                          Data        => SigOut,
-                         Filepath    => file_folder_g & "/output_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_denum_g) & ".txt",
+                         Filepath    => file_folder_g & "/output_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_den_g) & ".txt",
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!

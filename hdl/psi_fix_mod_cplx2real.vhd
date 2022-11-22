@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 --  All rights reserved.
---  Authors: Benoit Stef, Radoslaw Rybaniec
+--  Authors: Benoit Stef, Oliver Bruendler, Radoslaw Rybaniec
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ entity psi_fix_mod_cplx2real is
           int_fmt_g     : psi_fix_fmt_t        := (1, 1, 15);             -- internal format computation $$ constant=(1,1,15) $$
           out_fmt_g     : psi_fix_fmt_t        := (1, 1, 15);             -- output format FP $$ constant=(1,1,15) $$
           ratio_num_g   : natural              := 5;                      -- ratio for deciamtion (numerator) $$ constant=5 $$
-          ratio_denum_g : natural              := 1                       -- ratio for decimation (denumerator) $$ constant=1 $$  
+          ratio_den_g   : natural              := 1                       -- ratio for decimation (denominator) $$ constant=1 $$  
          );
   port(
     clk_i     : in  std_logic;                                            -- $$ type=clk; freq=100e6 $$
@@ -106,7 +106,7 @@ architecture rtl of psi_fix_mod_cplx2real is
   signal datInp1_s : std_logic_vector(psi_fix_size(inp_fmt_g) - 1 downto 0);
   signal datQua_s  : std_logic_vector(psi_fix_size(inp_fmt_g) - 1 downto 0);
   signal datQua1_s : std_logic_vector(psi_fix_size(inp_fmt_g) - 1 downto 0);
-  --signal debug0_s  : unsigned(log2ceil(ratio_num_g*ratio_denum_g)-1 downto 0);
+  --signal debug0_s  : unsigned(log2ceil(ratio_num_g*ratio_den_g)-1 downto 0);
 
 begin
   ------------------------------------------------
@@ -120,24 +120,24 @@ begin
   -- simple ROM pointer for both array
   -------------------------------------------------------------------------------
   proc_add_coef : process(clk_i)
-    variable cpt_v : integer range 0 to ratio_denum_g*ratio_num_g := 0;
+    variable cpt_v : integer range 0 to ratio_den_g*ratio_num_g := 0;
   begin
     if rising_edge(clk_i) then
       if rst_i = rst_pol_g then
         cpt_v := 0;
       else
         if vld_i = '1' then
-          if cpt_v < ratio_num_g - ratio_denum_g then
-            cpt_v := cpt_v + ratio_denum_g;
+          if cpt_v < ratio_num_g - ratio_den_g then
+            cpt_v := cpt_v + ratio_den_g;
           else
-            cpt_v := ratio_denum_g - (ratio_num_g - cpt_v);
+            cpt_v := ratio_den_g - (ratio_num_g - cpt_v);
           end if;
         end if;
       end if;
     end if;
     sin_s <= table_sin(cpt_v);          --TODO perhaps add dff stage to help timing
     cos_s <= table_cos(cpt_v);          --TODO perhaps add dff stage to help timing
-    --debug0_s <= to_unsigned(cpt_v,log2ceil(ratio_num_g*ratio_denum_g));
+    --debug0_s <= to_unsigned(cpt_v,log2ceil(ratio_num_g*ratio_den_g));
   end process;
 
   -------------------------------------------------------------------------------

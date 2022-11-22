@@ -308,8 +308,8 @@ tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_demod_real2
 set dataDir [file normalize "../testbench/psi_fix_demod_real2cplx_tb/Data"]
 tb_run_add_arguments   "-gfile_folder_g=$dataDir -gduty_cycle_g=1" \
             "-gfile_folder_g=$dataDir -gduty_cycle_g=5" \
-            "-gfile_folder_g=$dataDir -gduty_cycle_g=1" "-gratio_num_g=5" "-gratio_denum_g=3" \
-            "-gfile_folder_g=$dataDir -gduty_cycle_g=1" "-gratio_num_g=100" "-gratio_denum_g=3" \
+            "-gfile_folder_g=$dataDir -gduty_cycle_g=1" "-gratio_num_g=5" "-gratio_den_g=3" \
+            "-gfile_folder_g=$dataDir -gduty_cycle_g=1" "-gratio_num_g=100" "-gratio_den_g=3" \
 
 add_tb_run
 
@@ -363,7 +363,7 @@ tb_run_add_arguments   "-gfile_folder_g=$dataDir -gclk_per_spl_g=1 -gpl_stages_g
             "-gfile_folder_g=$dataDir -gclk_per_spl_g=1 -gpl_stages_g=6" \
             "-gfile_folder_g=$dataDir -gclk_per_spl_g=10 -gpl_stages_g=5" \
             "-gfile_folder_g=$dataDir -gclk_per_spl_g=10 -gpl_stages_g=6" \
-            "-gfile_folder_g=$dataDir -gclk_per_spl_g=1 -gpl_stages_g=6 -gratio_num_g=5 -gratio_denum_g=3" \
+            "-gfile_folder_g=$dataDir -gclk_per_spl_g=1 -gpl_stages_g=6 -gratio_num_g=5 -gratio_den_g=3" \
 
 add_tb_run
 

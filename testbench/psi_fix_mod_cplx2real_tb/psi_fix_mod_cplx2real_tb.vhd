@@ -30,7 +30,7 @@ entity psi_fix_mod_cplx2real_tb is
           rst_pol_g     : std_logic            := '1';
           clk_per_spl_g : integer              := 1;
           ratio_num_g   : integer              := 10;
-          ratio_denum_g : integer              := 1);
+          ratio_den_g   : integer              := 1);
 end entity;
 
 architecture tb of psi_fix_mod_cplx2real_tb is
@@ -71,7 +71,7 @@ begin
       int_fmt_g     => InternalFmt_c,
       out_fmt_g     => OutFixFmt_c,
       ratio_num_g   => ratio_num_g,
-      ratio_denum_g => ratio_denum_g)
+      ratio_den_g => ratio_den_g)
     port map(
       clk_i     => clk_sti,
       rst_i     => rst_sti,
@@ -134,7 +134,7 @@ begin
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => str_sti,
                          Data        => SigIn,
-                         Filepath    => file_folder_g & "/input_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_denum_g) & ".txt",
+                         Filepath    => file_folder_g & "/input_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_den_g) & ".txt",
                          ClkPerSpl   => clk_per_spl_g,
                          IgnoreLines => 1);
 
@@ -155,7 +155,7 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => str_obs,
                          Data        => SigOut,
-                         Filepath    => file_folder_g & "/output_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_denum_g) & ".txt",
+                         Filepath    => file_folder_g & "/output_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_den_g) & ".txt",
                          IgnoreLines => 0,
                          Tolerance   => 1); -- compatibility with GHDL
     -- end of process !DO NOT EDIT!
