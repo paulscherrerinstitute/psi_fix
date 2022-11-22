@@ -24,7 +24,7 @@ class psi_fix_mod_cplx2real:
                         IntFmt         : psi_fix_fmt_t,
                         OutFmt         : psi_fix_fmt_t,
                         ratio_num      : int,
-                        ratio_denum    : int):
+                        ratio_den      : int):
         """
         Constructor for the modulator model object
         :param InpFmt: Input fixed-point format
@@ -32,14 +32,14 @@ class psi_fix_mod_cplx2real:
         :param IntFmt: Internal format (see documentation)
         :param OutFmt: Output fixed-point format
         :param ratio_num: Ratio Fsample/Fcarrier (must be integer!)
-        :param ratio_denum: NCO counter offset (must be integer!)
+        :param ratio_den: NCO counter offset (must be integer!)
         """
         self.InpFmt     = InpFmt
         self.CoefFmt    = CoefFmt
         self.IntFmt     = IntFmt
         self.OutFmt     = OutFmt
         self.ratio_num  = ratio_num
-        self.ratio_denum  = ratio_denum
+        self.ratio_den  = ratio_den
 
     ####################################################################################################################
     # Public Methods
@@ -61,7 +61,7 @@ class psi_fix_mod_cplx2real:
         # Generate phases (use integer to prevent floating point precision errors)
         phaseSteps = np.ones(data_I_i.size, dtype=np.int64)
         phaseSteps[0] = 1  # start at zero
-        cptInt = np.cumsum(phaseSteps+self.ratio_denum-1, dtype=np.int64) % self.ratio_num
+        cptInt = np.cumsum(phaseSteps+self.ratio_den-1, dtype=np.int64) % self.ratio_num
         cptIntOffs = cptInt
         print(cptInt)
         cpt = np.where(cptIntOffs > self.ratio_num - 1, cptIntOffs - self.ratio_num, cptIntOffs)

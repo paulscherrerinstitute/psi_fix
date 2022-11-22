@@ -85,4 +85,5 @@ print(c)
 
 psi_fix_lut.Generate(cfg,path,fileName)
 
-#show()
+if PLOT_ON:
+    show()

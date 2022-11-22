@@ -29,10 +29,10 @@ coefFmt     = psi_fix_fmt_t(1, 1, 23)
 intFmt      = psi_fix_fmt_t(1, 1, 23)
 outFmt      = psi_fix_fmt_t(1, 1, 15)
 ratio_nums = [10, 5]
-ratio_denums = [1, 3]
+ratio_dens = [1, 3]
 
 for ratio_num in ratio_nums:
-    for ratio_denum in ratio_denums:
+    for ratio_den in ratio_dens:
         # write into text file
         # x = np.genfromtxt(STIM_DIR + "stimuli_inphase.txt")/(2**intFmt.f)
         # y = np.genfromtxt(STIM_DIR + "stimuli_quadrature.txt")/(2**intFmt.f)
@@ -49,10 +49,10 @@ for ratio_num in ratio_nums:
 
         packInput = np.column_stack((psi_fix_get_bits_as_int(datInp, inpFmt),
                                      psi_fix_get_bits_as_int(datQua, inpFmt)))
-        np.savetxt(STIM_DIR + '/input_{}_{}.txt'.format(ratio_num, ratio_denum), packInput, fmt='% 4d', delimiter=' ', newline='\n', header='inp qua')
+        np.savetxt(STIM_DIR + '/input_{}_{}.txt'.format(ratio_num, ratio_den), packInput, fmt='% 4d', delimiter=' ', newline='\n', header='inp qua')
 
 
-        mod = psi_fix_mod_cplx2real(inpFmt, coefFmt, intFmt, outFmt, ratio_num, ratio_denum)
+        mod = psi_fix_mod_cplx2real(inpFmt, coefFmt, intFmt, outFmt, ratio_num, ratio_den)
         results = mod.Process(datInp, datQua)
 
         if PLOT_ON:
@@ -93,7 +93,7 @@ for ratio_num in ratio_nums:
         res = psi_fix_get_bits_as_int(results,outFmt)
 
         # text file used to make VHDL testbench comparison
-        np.savetxt(STIM_DIR + 'output_{}_{}.txt'.format(ratio_num, ratio_denum), res.astype(int).T, fmt='% 4d', newline='\n') #observable wave
+        np.savetxt(STIM_DIR + 'output_{}_{}.txt'.format(ratio_num, ratio_den), res.astype(int).T, fmt='% 4d', newline='\n') #observable wave
 
         if PLOT_ON:
             plt.show()

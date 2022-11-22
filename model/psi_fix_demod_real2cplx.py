@@ -21,24 +21,24 @@ class psi_fix_demod_real2cplx:
     ####################################################################################################################
     # Constructor
     ####################################################################################################################
-    def __init__(self, inFmt: psi_fix_fmt_t, outFmt : psi_fix_fmt_t, coefBits : int, ratio_num: int, ratio_denum : int, debug : bool = False):
+    def __init__(self, inFmt: psi_fix_fmt_t, outFmt : psi_fix_fmt_t, coefBits : int, ratio_num: int, ratio_den : int, debug : bool = False):
         """
         Constructor for the demodulator model object
         :param inFmt: Input fixed-point format
         :param outFmt: Output fixed-point format
         :param coefBits: Number of bits to use for the coefficients of the sin/cos demodulation table
         :param ratio_num: Ratio Fsample/Fsignal (must be integer)
-        :param ratio_denum: Ratio denominator
+        :param ratio_den: Ratio denominator
         :param debug: Debugging mode
         """
         self.inFmt = inFmt
         self.outFmt = outFmt
         self.ratio_num = ratio_num
-        self.ratio_denum = ratio_denum
+        self.ratio_den = ratio_den
         self._debug = debug
         coefUnusedIntBits = np.floor(np.log2(ratio_num))
         self.coefFmt = psi_fix_fmt_t(1, 0-coefUnusedIntBits, coefBits+coefUnusedIntBits-1)
-        #self.multFmt = psi_fix_fmt_t(1, self.inFmt.i+self.coefFmt.i, self.outFmt.f+np.ceil(np.log2(ratio_num/ratio_denum)) + 2) #truncation error does only lead to 1/4 LSB error on output
+        #self.multFmt = psi_fix_fmt_t(1, self.inFmt.i+self.coefFmt.i, self.outFmt.f+np.ceil(np.log2(ratio_num/ratio_den)) + 2) #truncation error does only lead to 1/4 LSB error on output
         self.multFmt = psi_fix_fmt_t(1, self.inFmt.i+self.coefFmt.i, self.outFmt.f+np.ceil(np.log2(ratio_num)) + 2) #truncation error does only lead to 1/4 LSB error on output
         self.movAvg = psi_fix_mov_avg(self.multFmt, self.outFmt, ratio_num, psi_fix_mov_avg.GAINCORR_NONE, psi_fix_rnd_t.round, psi_fix_sat_t.sat)
 
@@ -61,8 +61,8 @@ class psi_fix_demod_real2cplx:
         #ROM pointer
         #Generate phases (use integer to prevent floating point precision errors)
         phaseSteps = np.ones(inData.size,dtype=np.int64)
-        phaseSteps[0] = 1-self.ratio_denum #start at zero
-        cpt = (phaseOffset + np.cumsum(phaseSteps+self.ratio_denum-1, dtype=np.int64)) % self.ratio_num
+        phaseSteps[0] = 1-self.ratio_den #start at zero
+        cpt = (phaseOffset + np.cumsum(phaseSteps+self.ratio_den-1, dtype=np.int64)) % self.ratio_num
         #Get Sin/Cos value
         scale = (1.0-2.0**-self.coefFmt.f)/self.ratio_num
         sinTable = psi_fix_from_real(np.sin(2.0 * np.pi * np.arange(0, self.ratio_num) / self.ratio_num) * scale, self.coefFmt)
