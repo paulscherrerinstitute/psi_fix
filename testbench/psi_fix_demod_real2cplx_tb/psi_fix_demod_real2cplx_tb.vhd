@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 --  All rights reserved.
---  Authors: Oliver Bruendler
+--  Authors: Oliver Bruendler, Radoslaw Rybaniec
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------
@@ -13,171 +13,165 @@
 -- Libraries
 ------------------------------------------------------------
 library ieee;
-	use ieee.std_logic_1164.all;
-	use ieee.numeric_std.all;
-	use ieee.math_real.all;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+use ieee.math_real.all;
 
 library work;
-	use work.psi_common_math_pkg.all;
-	use work.psi_tb_textfile_pkg.all;
-	use work.psi_fix_pkg.all;
+use work.psi_common_math_pkg.all;
+use work.psi_tb_textfile_pkg.all;
+use work.psi_fix_pkg.all;
 
 ------------------------------------------------------------
 -- Entity Declaration
 ------------------------------------------------------------
 entity psi_fix_demod_real2cplx_tb is
-	generic (
-		FileFolder_g	: string 	:= "../tesbench/psi_fix_demod_real2cplx_tb/Data";
-		DutyCycle_g		: integer	:= 1
-	);
+  generic(
+    file_folder_g : string  := "../testbench/psi_fix_demod_real2cplx_tb/Data";
+    duty_cycle_g  : integer := 1;
+    ratio_num_g   : natural := 5;  
+    ratio_den_g   : natural := 3      
+  );
 end entity;
 
 ------------------------------------------------------------
 -- Architecture
 ------------------------------------------------------------
 architecture sim of psi_fix_demod_real2cplx_tb is
-	-- *** Fixed Generics ***
-	constant RstPol_g 	: std_logic 	:= '1';
-	constant InFmt_g 	: PsiFixFmt_t 	:= (1,0,15);
-	constant OutFmt_g	: PsiFixFmt_t	:= (1,0,16);
-	constant CoefBits_g	: integer		:= 25;
-	
-	-- *** Not Assigned Generics (default values) ***
-	constant Ratio_g : natural := 5;   -- $$ constant=5 $$;
-	
-	-- *** TB Control ***
-	signal TbRunning : boolean := True;
-	signal NextCase : integer := -1;
-	signal ProcessDone : std_logic_vector(0 to 1) := (others => '0');
-	constant AllProcessesDone_c : std_logic_vector(0 to 1) := (others => '1');
-	constant TbProcNr_stim_c : integer := 0;
-	constant TbProcNr_check_c : integer := 1;
-	
-	-- *** DUT Signals ***
-	signal clk_i : std_logic := '0';
-	signal rst_i : std_logic := '1';
-	signal str_i : std_logic := '0';
-	signal data1_i : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0) := (others => '0');
-	signal data2_i : std_logic_vector(PsiFixSize(InFmt_g) - 1 downto 0) := (others => '0');
-	signal data_i  : std_logic_vector(2*PsiFixSize(InFmt_g) - 1 downto 0) := (others => '0');
-	signal data_I_o : std_logic_vector(2*PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
-	signal data_Q_o : std_logic_vector(2*PsiFixSize(OutFmt_g) - 1 downto 0) := (others => '0');
-	signal str_o : std_logic := '0';
-	signal phi_offset_16 : std_logic_vector(data_i'range) := (others => '0');
-	signal SigIn					: TextfileData_t(0 to 2)	:= (others => 0);
-	signal SigOut					: TextfileData_t(0 to 3)	:= (others => 0);	
-	
+  -- *** Fixed Generics ***
+  constant rst_pol_g   : std_logic   := '1';
+  constant in_fmt_g    : psi_fix_fmt_t := (1, 0, 15);
+  constant out_fmt_g   : psi_fix_fmt_t := (1, 0, 16);
+  constant coef_bits_g : integer     := 25;
+
+  
+  -- *** TB Control ***
+  signal TbRunning            : boolean                  := True;
+  signal NextCase             : integer                  := -1;
+  signal ProcessDone          : std_logic_vector(0 to 1) := (others => '0');
+  constant AllProcessesDone_c : std_logic_vector(0 to 1) := (others => '1');
+  constant TbProcNr_stim_c    : integer                  := 0;
+  constant TbProcNr_check_c   : integer                  := 1;
+
+  -- *** DUT Signals ***
+  signal clk_i         : std_logic                                               := '0';
+  signal rst_i         : std_logic                                               := '1';
+  signal str_i         : std_logic                                               := '0';
+  signal data_i        : std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0)  := (others => '0');
+  signal data_I_o      : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
+  signal data_Q_o      : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
+  signal str_o         : std_logic                                               := '0';
+  signal phi_offset_16 : std_logic_vector(log2ceil(ratio_num_g)-1 downto 0)                          := (others => '0');
+  signal SigIn         : TextfileData_t(0 to 1)                                  := (others => 0);
+  signal SigOut        : TextfileData_t(0 to 1)                                  := (others => 0);
+
 begin
-	------------------------------------------------------------
-	-- DUT Instantiation
-	------------------------------------------------------------
-	data_i <= data2_i & data1_i;
-	i_dut : entity work.psi_fix_demod_real2cplx
-		generic map (
-			RstPol_g => RstPol_g,
-			InFmt_g => InFmt_g,
-			OutFmt_g => OutFmt_g,
-			CoefBits_g => CoefBits_g,
-			Channels_g => 2
-		)
-		port map (
-			clk_i => clk_i,
-			rst_i => rst_i,
-			str_i => str_i,
-			data_i => data_i,
-			phi_offset_i => phi_offset_16(2 downto 0),
-			data_I_o => data_I_o,
-			data_Q_o => data_Q_o,
-			str_o => str_o
-		);
-	
-	------------------------------------------------------------
-	-- Testbench Control !DO NOT EDIT!
-	------------------------------------------------------------
-	p_tb_control : process
-	begin
-		wait until rst_i = '0';
-		wait until ProcessDone = AllProcessesDone_c;
-		TbRunning <= false;
-		wait;
-	end process;
-	
-	------------------------------------------------------------
-	-- Clocks !DO NOT EDIT!
-	------------------------------------------------------------
-	p_clock_clk_i : process
-		constant Frequency_c : real := real(100e6);
-	begin
-		while TbRunning loop
-			wait for 0.5*(1 sec)/Frequency_c;
-			clk_i <= not clk_i;
-		end loop;
-		wait;
-	end process;
-	
-	
-	------------------------------------------------------------
-	-- Resets
-	------------------------------------------------------------
-	p_rst_rst_i : process
-	begin
-		wait for 1 us;
-		-- Wait for two clk edges to ensure reset is active for at least one edge
-		wait until rising_edge(clk_i);
-		wait until rising_edge(clk_i);
-		rst_i <= '0';
-		wait;
-	end process;
-	
-	
-	------------------------------------------------------------
-	-- Processes
-	------------------------------------------------------------
-	-- *** stim ***
-	data1_i <= std_logic_vector(to_signed(SigIn(0), data1_i'length));
-	data2_i <= std_logic_vector(to_signed(SigIn(1), data2_i'length));
-	phi_offset_16 <= std_logic_vector(to_unsigned(SigIn(2), phi_offset_16'length));
-	p_stim : process
-	begin
-		-- start of process !DO NOT EDIT
-		wait until rst_i = '0';
-		
-		-- Apply Stimuli	
-		ApplyTextfileContent(	Clk 		=> clk_i, 
-								Rdy 		=> PsiTextfile_SigOne,
-								Vld 		=> str_i, 
-								Data		=> SigIn, 
-								Filepath	=> FileFolder_g & "/input.txt", 
-								ClkPerSpl	=> DutyCycle_g,
-								IgnoreLines => 1);		
-		
-		-- end of process !DO NOT EDIT!
-		ProcessDone(TbProcNr_stim_c) <= '1';
-		wait;
-	end process;
-	
-	-- *** check ***
-	SigOut(0) <= to_integer(signed(data_I_o(1*PsiFixSize(OutFmt_g)-1 downto 0*PsiFixSize(OutFmt_g))));
-	SigOut(1) <= to_integer(signed(data_Q_o(1*PsiFixSize(OutFmt_g)-1 downto 0*PsiFixSize(OutFmt_g))));
-	SigOut(2) <= to_integer(signed(data_I_o(2*PsiFixSize(OutFmt_g)-1 downto 1*PsiFixSize(OutFmt_g))));
-	SigOut(3) <= to_integer(signed(data_Q_o(2*PsiFixSize(OutFmt_g)-1 downto 1*PsiFixSize(OutFmt_g))));	
-	p_check : process
-	begin
-		-- start of process !DO NOT EDIT
-		wait until rst_i = '0';
-		
-		-- Check
-		CheckTextfileContent(	Clk			=> clk_i,
-								Rdy			=> PsiTextfile_SigUnused,
-								Vld			=> str_o,
-								Data		=> SigOut,
-								Filepath	=> FileFolder_g & "/output.txt",
-								IgnoreLines => 1);
-		
-		-- end of process !DO NOT EDIT!
-		ProcessDone(TbProcNr_check_c) <= '1';
-		wait;
-	end process;
-	
-	
+  ------------------------------------------------------------
+  -- DUT Instantiation
+  ------------------------------------------------------------
+  i_dut : entity work.psi_fix_demod_real2cplx
+    generic map(
+      rst_pol_g   => rst_pol_g,
+      in_fmt_g    => in_fmt_g,
+      out_fmt_g   => out_fmt_g,
+      coef_bits_g => coef_bits_g,
+      channels_g  => 1,
+      ratio_num_g => ratio_num_g,
+      ratio_den_g => ratio_den_g
+    )
+    port map(
+      clk_i        => clk_i,
+      rst_i        => rst_i,
+      vld_i        => str_i,
+      dat_i       => data_i,
+      phi_offset_i => phi_offset_16,
+      dat_inp_o     => data_I_o,
+      dat_qua_o     => data_Q_o,
+      vld_o        => str_o
+    );
+
+  ------------------------------------------------------------
+  -- Testbench Control !DO NOT EDIT!
+  ------------------------------------------------------------
+  p_tb_control : process
+  begin
+    wait until rst_i = '0';
+    wait until ProcessDone = AllProcessesDone_c;
+    TbRunning <= false;
+    wait;
+  end process;
+
+  ------------------------------------------------------------
+  -- Clocks !DO NOT EDIT!
+  ------------------------------------------------------------
+  p_clock_clk_i : process
+    constant Frequency_c : real := real(100e6);
+  begin
+    while TbRunning loop
+      wait for 0.5 * (1 sec) / Frequency_c;
+      clk_i <= not clk_i;
+    end loop;
+    wait;
+  end process;
+
+  ------------------------------------------------------------
+  -- Resets
+  ------------------------------------------------------------
+  p_rst_rst_i : process
+  begin
+    wait for 1 us;
+    -- Wait for two clk edges to ensure reset is active for at least one edge
+    wait until rising_edge(clk_i);
+    wait until rising_edge(clk_i);
+    rst_i <= '0';
+    wait;
+  end process;
+
+  ------------------------------------------------------------
+  -- Processes
+  ------------------------------------------------------------
+  -- *** stim ***
+  data_i       <= std_logic_vector(to_signed(SigIn(0), data_i'length));
+  phi_offset_16 <= std_logic_vector(to_unsigned(SigIn(1), phi_offset_16'length));
+  p_stim : process
+  begin
+    -- start of process !DO NOT EDIT
+    wait until rst_i = '0';
+
+    -- Apply Stimuli
+    ApplyTextfileContent(Clk         => clk_i,
+                         Rdy         => PsiTextfile_SigOne,
+                         Vld         => str_i,
+                         Data        => SigIn,
+                         Filepath    => file_folder_g & "/input_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_den_g) & ".txt",
+                         ClkPerSpl   => duty_cycle_g,
+                         IgnoreLines => 1);
+
+    -- end of process !DO NOT EDIT!
+    ProcessDone(TbProcNr_stim_c) <= '1';
+    wait;
+  end process;
+
+  -- *** check ***
+  SigOut(0) <= to_integer(signed(data_I_o));
+  SigOut(1) <= to_integer(signed(data_Q_o));
+
+  p_check : process
+  begin
+    -- start of process !DO NOT EDIT
+    wait until rst_i = '0';
+
+    -- Check
+    CheckTextfileContent(Clk         => clk_i,
+                         Rdy         => PsiTextfile_SigUnused,
+                         Vld         => str_o,
+                         Data        => SigOut,
+                         Filepath    => file_folder_g & "/output_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_den_g) & ".txt",
+                         IgnoreLines => 1);
+
+    -- end of process !DO NOT EDIT!
+    ProcessDone(TbProcNr_check_c) <= '1';
+    wait;
+  end process;
+
 end;

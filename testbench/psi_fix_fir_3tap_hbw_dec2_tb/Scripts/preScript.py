@@ -26,9 +26,9 @@ except FileExistsError:
 #############################################################
 # Simulation
 #############################################################
-inFmt = PsiFixFmt(1, 0, 17)
-outFmt = PsiFixFmt(1, 0, 17)
-coefFmt = PsiFixFmt(1, 0, 17)
+inFmt = psi_fix_fmt_t(1, 0, 17)
+outFmt = psi_fix_fmt_t(1, 0, 17)
+coefFmt = psi_fix_fmt_t(1, 0, 17)
 
 h = np.array([0.25,0.5,0.25])
 
@@ -39,7 +39,7 @@ h = np.array([0.25,0.5,0.25])
 MAX_CHANNELS = 4
 DATA_LEN = 512
 
-inData = PsiFixFromReal(np.random.random((MAX_CHANNELS,DATA_LEN))*0.9999-0.5, inFmt)
+inData = psi_fix_from_real(np.random.random((MAX_CHANNELS,DATA_LEN))*0.9999-0.5, inFmt)
 outData = np.zeros((MAX_CHANNELS,DATA_LEN//2))
 
 for ch in range(0, MAX_CHANNELS):
@@ -55,13 +55,13 @@ for separate in [True, False]:
                 for i in range(0,inData.shape[1],2):
                     line = ""
                     for ch in range(0,inData.shape[0]):
-                        line = line + "{} {} ".format(int(PsiFixGetBitsAsInt(inData[ch,i], inFmt)), int(PsiFixGetBitsAsInt(inData[ch,i+1], inFmt)))
+                        line = line + "{} {} ".format(int(psi_fix_get_bits_as_int(inData[ch,i], inFmt)), int(psi_fix_get_bits_as_int(inData[ch,i+1], inFmt)))
                     f.writelines(line+"\n")
             else:
                 for i in range(0,inData.shape[1],2*channels):
                     line = ""
                     for ch in range(0,2*channels,2):
-                        line = line + "{} {} ".format(int(PsiFixGetBitsAsInt(inData[1,i+ch], inFmt)), int(PsiFixGetBitsAsInt(inData[1,i+ch+1], inFmt)))
+                        line = line + "{} {} ".format(int(psi_fix_get_bits_as_int(inData[1,i+ch], inFmt)), int(psi_fix_get_bits_as_int(inData[1,i+ch+1], inFmt)))
                     f.writelines(line+"\n")
 
         with open(STIM_DIR + "/outChannels{}Separate{}.txt".format(int(channels), separate), "w+") as f:                
@@ -69,13 +69,13 @@ for separate in [True, False]:
                 for i in range(0,outData.shape[1]):
                     line = ""
                     for ch in range(0,outData.shape[0]):
-                        line = line + " {}".format(int(PsiFixGetBitsAsInt(outData[ch,i], outFmt)))
+                        line = line + " {}".format(int(psi_fix_get_bits_as_int(outData[ch,i], outFmt)))
                     f.writelines(line+"\n")
             else:
                 for i in range(0,outData.shape[1],channels):
                     line = ""
                     for ch in range(0,channels):
-                        line = line + " {}".format(int(PsiFixGetBitsAsInt(outData[1,i+ch], outFmt)))
+                        line = line + " {}".format(int(psi_fix_get_bits_as_int(outData[1,i+ch], outFmt)))
                     f.writelines(line+"\n")
 
                     

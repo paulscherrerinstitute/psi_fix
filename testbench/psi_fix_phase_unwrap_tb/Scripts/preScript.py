@@ -22,9 +22,9 @@ filepath = os.path.realpath(__file__)
 dirpath = os.path.dirname(filepath)
 STIM_DIR = os.path.join(dirpath, "../Data")
 
-IN_FMT_S = PsiFixFmt(1, 0, 15)
-IN_FMT_U = PsiFixFmt(0, 1, 15)
-OUT_FMT = PsiFixFmt(1, 3, 15)
+IN_FMT_S = psi_fix_fmt_t(1, 0, 15)
+IN_FMT_U = psi_fix_fmt_t(0, 1, 15)
+OUT_FMT = psi_fix_fmt_t(1, 3, 15)
 
 ########################################################################################################################
 # Simulation
@@ -37,13 +37,13 @@ overflowPos = np.cumsum(np.ones(100)*0.2)
 overflowNeg = np.cumsum(np.ones(100)*-0.3)
 
 stim = np.concatenate((rampForward, rampBackward, bigSteps, overflowPos, overflowNeg))
-stimFixS = PsiFixResize(stim, PsiFixFmt(1,20,20), IN_FMT_S)
-stimFixU = PsiFixResize(stim, PsiFixFmt(1,20,20), IN_FMT_U)
+stimFixS = psi_fix_resize(stim, psi_fix_fmt_t(1,20,20), IN_FMT_S)
+stimFixU = psi_fix_resize(stim, psi_fix_fmt_t(1,20,20), IN_FMT_U)
 
 #Simulation
-modelS = psi_fix_phase_unwrap(IN_FMT_S, OUT_FMT, PsiFixRnd.Trunc)
+modelS = psi_fix_phase_unwrap(IN_FMT_S, OUT_FMT, psi_fix_rnd_t.trunc)
 outSSig, outSWrap = modelS.Process(stimFixS)
-modelU = psi_fix_phase_unwrap(IN_FMT_U, OUT_FMT, PsiFixRnd.Trunc)
+modelU = psi_fix_phase_unwrap(IN_FMT_U, OUT_FMT, psi_fix_rnd_t.trunc)
 outUSig, outUWrap = modelU.Process(stimFixU)
 
 ########################################################################################################################
@@ -77,16 +77,16 @@ except FileExistsError:
     pass
 
 np.savetxt(STIM_DIR + "/InputS.txt",
-           (PsiFixGetBitsAsInt(stimFixS, IN_FMT_S)),
+           (psi_fix_get_bits_as_int(stimFixS, IN_FMT_S)),
            fmt="%i", header="Input")
 np.savetxt(STIM_DIR + "/InputU.txt",
-           (PsiFixGetBitsAsInt(stimFixU, IN_FMT_U)),
+           (psi_fix_get_bits_as_int(stimFixU, IN_FMT_U)),
            fmt="%i", header="Input")
 np.savetxt(STIM_DIR + "/OutputS.txt",
-           np.column_stack((PsiFixGetBitsAsInt(outSSig, OUT_FMT),
+           np.column_stack((psi_fix_get_bits_as_int(outSSig, OUT_FMT),
                             np.array(outSWrap, dtype=int))),
            fmt="%i", header="Sig, Wrp")
 np.savetxt(STIM_DIR + "/OutputU.txt",
-           np.column_stack((PsiFixGetBitsAsInt(outUSig, OUT_FMT),
+           np.column_stack((psi_fix_get_bits_as_int(outUSig, OUT_FMT),
                             np.array(outUWrap, dtype=int))),
            fmt="%i", header="Sig, Wrp")

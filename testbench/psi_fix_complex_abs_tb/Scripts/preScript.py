@@ -25,8 +25,8 @@ filepath = os.path.realpath(__file__)
 dirpath = os.path.dirname(filepath)
 STIM_DIR = os.path.join(dirpath, "../Data")
 
-IN_FMT = PsiFixFmt(1, 2, 14)
-OUT_FMT = PsiFixFmt(0, 1, 15)
+IN_FMT = psi_fix_fmt_t(1, 2, 14)
+OUT_FMT = psi_fix_fmt_t(0, 1, 15)
 
 ########################################################################################################################
 # Simulation
@@ -43,11 +43,11 @@ stimAmp[0] = 2**-12
 stimI = np.cos(stimAng)*stimAmp
 stimQ = np.sin(stimAng)*stimAmp
 
-stimIQuant = PsiFixFromReal(stimI, IN_FMT, errSat=False)
-stimQQuant = PsiFixFromReal(stimQ, IN_FMT, errSat=False)
+stimIQuant = psi_fix_from_real(stimI, IN_FMT, err_sat=False)
+stimQQuant = psi_fix_from_real(stimQ, IN_FMT, err_sat=False)
 
 #Simulation
-model = psi_fix_complex_abs(IN_FMT, OUT_FMT, PsiFixRnd.Round, PsiFixSat.Sat)
+model = psi_fix_complex_abs(IN_FMT, OUT_FMT, psi_fix_rnd_t.round, psi_fix_sat_t.sat)
 out = model.Process(stimIQuant, stimQQuant)
 
 ########################################################################################################################
@@ -56,7 +56,7 @@ out = model.Process(stimIQuant, stimQQuant)
 if PLOT_ON:
     fig, ax = plt.subplots(2,1)
     exp = np.sqrt(stimIQuant**2+stimQQuant**2)
-    exp = np.minimum(exp, PsiFixUpperBound(OUT_FMT))
+    exp = np.minimum(exp, psi_fix_upper_bound(OUT_FMT))
     ax[0].plot(out, "b")
     ax[0].plot(exp, "r")
     ax[0].set_title("compare to expected")
@@ -75,9 +75,9 @@ except FileExistsError:
     pass
 
 np.savetxt(STIM_DIR + "/input.txt",
-           np.column_stack((PsiFixGetBitsAsInt(stimIQuant, IN_FMT),
-                            PsiFixGetBitsAsInt(stimQQuant, IN_FMT))),
+           np.column_stack((psi_fix_get_bits_as_int(stimIQuant, IN_FMT),
+                            psi_fix_get_bits_as_int(stimQQuant, IN_FMT))),
            fmt="%i", header="I Q")
 np.savetxt(STIM_DIR + "/output.txt",
-           PsiFixGetBitsAsInt(out, OUT_FMT),
+           psi_fix_get_bits_as_int(out, OUT_FMT),
            fmt="%i", header="abs")

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 --  All rights reserved.
---  Authors: Oliver Bruendler/ Benoît Stef
+--  Authors: Oliver Bruendler/ Benoît Stef / Radoslaw Rybaniec
 ------------------------------------------------------------------------------
 -- see Library/Python/TbGenerator
 
@@ -24,34 +24,36 @@ use work.psi_fix_pkg.all;
 -- Entity Declaration
 ------------------------------------------------------------
 entity psi_fix_mod_cplx2real_tb is
-  generic(FileFolder_g : string               := "../testbench/psi_fix_mod_cplx2real_tb/Data";
-          FreqClock_g  : real                 := 100.0e6;
-          PlStages_g   : integer range 5 to 6 := 5;
-          RstPol_g     : std_logic            := '1';
-          ClkPerSpl_g  : integer              := 1);
+  generic(file_folder_g : string               := "../testbench/psi_fix_mod_cplx2real_tb/Data";
+          freq_clock_g  : real                 := 100.0e6;
+          pl_stages_g   : integer range 5 to 6 := 5;
+          rst_pol_g     : std_logic            := '1';
+          clk_per_spl_g : integer              := 1;
+          ratio_num_g   : integer              := 10;
+          ratio_den_g   : integer              := 1);
 end entity;
 
 architecture tb of psi_fix_mod_cplx2real_tb is
   -- Format definition
-  constant InFixFmt_c         : PsiFixFmt_t              := (1, 1, 15); --same as python model
-  constant CoefFixFmt_c       : PsiFixFmt_t              := (1, 1, 23); --same as python model
-  constant OutFixFmt_c        : PsiFixFmt_t              := (1, 1, 15); --same as python model
-  constant InternalFmt_c      : PsiFixFmt_t              := (1, 1, 23); --same as python model
+  constant InFixFmt_c         : psi_fix_fmt_t              := (1, 1, 15); --same as python model
+  constant CoefFixFmt_c       : psi_fix_fmt_t              := (1, 1, 23); --same as python model
+  constant OutFixFmt_c        : psi_fix_fmt_t              := (1, 1, 15); --same as python model
+  constant InternalFmt_c      : psi_fix_fmt_t              := (1, 1, 23); --same as python model
   --smthg
   constant TbProcNr_stim_c    : integer                  := 0;
   constant TbProcNr_check_c   : integer                  := 1;
   signal ProcessDone          : std_logic_vector(0 to 1) := (others => '0');
   constant AllProcessesDone_c : std_logic_vector(0 to 1) := (others => '1');
   --timedef
-  constant period_c           : time                     := (1 sec) / FreqClock_g;
+  constant period_c           : time                     := (1 sec) / freq_clock_g;
 
   --internal signals definition
   signal clk_sti    : std_logic                                              := '0';
-  signal rst_sti    : std_logic                                              := RstPol_g;
+  signal rst_sti    : std_logic                                              := rst_pol_g;
   signal str_sti    : std_logic                                              := '0';
-  signal data_I_sti : std_logic_vector(PsiFixSize(InFixFmt_c) - 1 downto 0)  := (others => '0');
-  signal data_Q_sti : std_logic_vector(PsiFixSize(InFixFmt_c) - 1 downto 0)  := (others => '0');
-  signal data_obs   : std_logic_vector(PsiFixSize(OutFixFmt_c) - 1 downto 0) := (others => '0');
+  signal data_I_sti : std_logic_vector(psi_fix_size(InFixFmt_c) - 1 downto 0)  := (others => '0');
+  signal data_Q_sti : std_logic_vector(psi_fix_size(InFixFmt_c) - 1 downto 0)  := (others => '0');
+  signal data_obs   : std_logic_vector(psi_fix_size(OutFixFmt_c) - 1 downto 0) := (others => '0');
   signal str_obs    : std_logic                                              := '0';
   signal Vld_s      : std_logic;
 
@@ -62,22 +64,22 @@ begin
 
   DUT : entity work.psi_fix_mod_cplx2real
     generic map(
-      RstPol_g   => RstPol_g,
-      PlStages_g => PlStages_g,
-      InpFmt_g   => InFixFmt_c,
-      CoefFmt_g  => CoefFixFmt_c,
-      IntFmt_g   => InternalFmt_c,
-      OutFmt_g   => OutFixFmt_c,
-      Ratio_g    => 10,
-      Offset_g   => 3)
+      rst_pol_g     => rst_pol_g,
+      pl_stages_g   => pl_stages_g,
+      inp_fmt_g     => InFixFmt_c,
+      coef_fmt_g    => CoefFixFmt_c,
+      int_fmt_g     => InternalFmt_c,
+      out_fmt_g     => OutFixFmt_c,
+      ratio_num_g   => ratio_num_g,
+      ratio_den_g => ratio_den_g)
     port map(
-      InClk    => clk_sti,
-      InRst    => rst_sti,
-      InVld    => str_sti,
-      InInpDat => data_I_sti,
-      InQuaDat => data_Q_sti,
-      OutDat   => data_obs,
-      OutVld   => str_obs);
+      clk_i     => clk_sti,
+      rst_i     => rst_sti,
+      vld_i     => str_sti,
+      dat_inp_i => data_I_sti,
+      dat_qua_i => data_Q_sti,
+      dat_o     => data_obs,
+      vld_o     => str_obs);
 
   ------------------------------------------------------------
   -- Testbench Control !DO NOT EDIT!
@@ -94,7 +96,7 @@ begin
   -- Clocks !DO NOT EDIT!
   ------------------------------------------------------------
   p_clock_clk_i : process
-    constant Frequency_c : real := real(FreqClock_g);
+    constant Frequency_c : real := real(freq_clock_g);
   begin
     while TbRunning loop
       wait for 0.5 * (1 sec) / Frequency_c;
@@ -127,13 +129,13 @@ begin
     -- start of process !DO NOT EDIT
     wait until rst_sti = '0';
 
-    -- Apply Stimuli	
+    -- Apply Stimuli
     ApplyTextfileContent(Clk         => clk_sti,
                          Rdy         => PsiTextfile_SigOne,
                          Vld         => str_sti,
                          Data        => SigIn,
-                         Filepath    => FileFolder_g & "/stimuli.txt",
-                         ClkPerSpl   => ClkPerSpl_g,
+                         Filepath    => file_folder_g & "/input_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_den_g) & ".txt",
+                         ClkPerSpl   => clk_per_spl_g,
                          IgnoreLines => 1);
 
     -- end of process !DO NOT EDIT!
@@ -153,8 +155,9 @@ begin
                          Rdy         => PsiTextfile_SigUnused,
                          Vld         => str_obs,
                          Data        => SigOut,
-                         Filepath    => FileFolder_g & "/model_result_IQmod.txt",
-                         IgnoreLines => 0);
+                         Filepath    => file_folder_g & "/output_" & integer'image(ratio_num_g) & "_" & integer'image(ratio_den_g) & ".txt",
+                         IgnoreLines => 0,
+                         Tolerance   => 1); -- compatibility with GHDL
     -- end of process !DO NOT EDIT!
     ProcessDone(TbProcNr_check_c) <= '1';
     wait;

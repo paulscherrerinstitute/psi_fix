@@ -12,14 +12,14 @@ from matplotlib import pyplot as plt
 ########################################################################################################################
 class psi_fix_inv:
 
-    def __init__(self, inFmt : PsiFixFmt, outFmt : PsiFixFmt, rnd : PsiFixRnd = PsiFixRnd.Trunc, sat : PsiFixSat = PsiFixSat.Wrap):
+    def __init__(self, inFmt : psi_fix_fmt_t, outFmt : psi_fix_fmt_t, rnd : psi_fix_rnd_t = psi_fix_rnd_t.trunc, sat : psi_fix_sat_t = psi_fix_sat_t.wrap):
         self._inFmt = inFmt
         self._outFmt = outFmt
-        self._absFmt = PsiFixFmt(0, inFmt.I, inFmt.F)
+        self._absFmt = psi_fix_fmt_t(0, inFmt.i, inFmt.f)
         self._sat = sat
         self._rnd = rnd
-        self._inFmtNorm = PsiFixFmt(0, 1, inFmt.I+inFmt.F)
-        self._outFmtNorm = PsiFixFmt(0, 1+self._inFmt.F, outFmt.I+outFmt.F)
+        self._inFmtNorm = psi_fix_fmt_t(0, 1, inFmt.i+inFmt.f)
+        self._outFmtNorm = psi_fix_fmt_t(0, 1+self._inFmt.f, outFmt.i+outFmt.f)
         self._sqrt = psi_fix_lin_approx(psi_fix_lin_approx.CONFIGS.Invert18Bit)
 
     def Process(self, data : np.ndarray) -> np.ndarray:
@@ -30,29 +30,29 @@ class psi_fix_inv:
         """
 
         #Input quantization
-        d_fix = PsiFixFromReal(data, self._inFmt)
+        d_fix = psi_fix_from_real(data, self._inFmt)
 
         #Input normalization (to range 1.0 ... 2.0)
-        d_abs = PsiFixAbs(d_fix, self._inFmt, self._absFmt, PsiFixRnd.Trunc, PsiFixSat.Sat)
+        d_abs = psi_fix_abs(d_fix, self._inFmt, self._absFmt, psi_fix_rnd_t.trunc, psi_fix_sat_t.sat)
         sign = d_fix < 0
-        normSft = self._inFmt.I-1
+        normSft = self._inFmt.i-1
         if normSft > 0:
-            d_norm = PsiFixShiftRight(d_abs, self._absFmt, normSft, normSft, self._inFmtNorm)
+            d_norm = psi_fix_shift_right(d_abs, self._absFmt, normSft, normSft, self._inFmtNorm)
         else:
-            d_norm = PsiFixShiftLeft(d_abs, self._absFmt, -normSft, -normSft, self._inFmtNorm)
+            d_norm = psi_fix_shift_left(d_abs, self._absFmt, -normSft, -normSft, self._inFmtNorm)
 
         #Calculate square-root
         sft = np.ceil(-np.log2(d_norm+1e-12))
-        sft = np.minimum(sft, self._inFmtNorm.F)
-        invIn = PsiFixShiftLeft(d_norm, self._inFmt, sft, self._inFmtNorm.F, psi_fix_lin_approx.CONFIGS.Invert18Bit.inFmt, PsiFixRnd.Trunc)
+        sft = np.minimum(sft, self._inFmtNorm.f)
+        invIn = psi_fix_shift_left(d_norm, self._inFmt, sft, self._inFmtNorm.f, psi_fix_lin_approx.CONFIGS.Invert18Bit.inFmt, psi_fix_rnd_t.trunc)
         resInv = self._sqrt.Approximate(invIn)
-        sftIn = PsiFixResize(resInv, psi_fix_lin_approx.CONFIGS.Invert18Bit.outFmt, self._outFmtNorm)
-        resSft = PsiFixShiftLeft(sftIn, self._outFmtNorm, sft, np.ceil(self._inFmtNorm.F + 1), self._outFmtNorm, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+        sftIn = psi_fix_resize(resInv, psi_fix_lin_approx.CONFIGS.Invert18Bit.outFmt, self._outFmtNorm)
+        resSft = psi_fix_shift_left(sftIn, self._outFmtNorm, sft, np.ceil(self._inFmtNorm.f + 1), self._outFmtNorm, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
         if normSft > 0:
-            denorm = PsiFixShiftRight(resSft, self._outFmtNorm, normSft, normSft, self._outFmt, self._rnd, self._sat)
+            denorm = psi_fix_shift_right(resSft, self._outFmtNorm, normSft, normSft, self._outFmt, self._rnd, self._sat)
         else:
-            denorm = PsiFixShiftLeft(resSft, self._outFmtNorm, -normSft, -normSft, self._outFmt, self._rnd, self._sat)
-        return np.where(sign,PsiFixNeg(denorm, self._outFmt, self._outFmt, PsiFixRnd.Trunc, self._sat),denorm)
+            denorm = psi_fix_shift_left(resSft, self._outFmtNorm, -normSft, -normSft, self._outFmt, self._rnd, self._sat)
+        return np.where(sign,psi_fix_neg(denorm, self._outFmt, self._outFmt, psi_fix_rnd_t.trunc, self._sat),denorm)
 
 
 

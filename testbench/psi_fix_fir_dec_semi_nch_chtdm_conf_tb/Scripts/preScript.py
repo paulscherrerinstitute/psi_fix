@@ -30,21 +30,21 @@ Settings = NamedTuple("Settings", (("Ratio", int), ("Taps", int)))
 # Inputs
 #############################################################
 #Common Settings
-inFmt = PsiFixFmt(1, 0, 15)
-outFmt = PsiFixFmt(1, 0, 13)
-coefFmt = PsiFixFmt(1, 0, 17)
+inFmt = psi_fix_fmt_t(1, 0, 15)
+outFmt = psi_fix_fmt_t(1, 0, 13)
+coefFmt = psi_fix_fmt_t(1, 0, 17)
 
 #Generate Common Inputs
 np.random.seed(0)
 sigRand = np.random.randn(STIM_SAMPLES)*2-1
-sigRand = PsiFixFromReal(sigRand, inFmt, errSat=False)
+sigRand = psi_fix_from_real(sigRand, inFmt, err_sat=False)
 
 sigRand2 = np.random.randn(STIM_SAMPLES)*2-1
-sigRand2 = PsiFixFromReal(sigRand2, inFmt, errSat=False)
+sigRand2 = psi_fix_from_real(sigRand2, inFmt, err_sat=False)
 
 sigPulse = np.zeros(STIM_SAMPLES)
 sigPulse[50] = 0.5
-sigPulse = PsiFixFromReal(sigPulse, inFmt, errSat=False)
+sigPulse = psi_fix_from_real(sigPulse, inFmt, err_sat=False)
 
 #############################################################
 # Loop
@@ -59,7 +59,7 @@ for s in ALL_SETTINGS:
     # Simulation
     #############################################################
     coefs = sps.firwin(s.Taps, 0.6*1/s.Ratio)
-    coefs = PsiFixFromReal(coefs, coefFmt)
+    coefs = psi_fix_from_real(coefs, coefFmt)
 
     model = psi_fix_fir(inFmt, outFmt, coefFmt)
 
@@ -76,13 +76,13 @@ for s in ALL_SETTINGS:
     in3ch = np.reshape(np.column_stack((sigPulse, sigRand, sigRand2)), 3*sigPulse.size)
     out3ch = np.reshape(np.column_stack((respPulse, respRand, respRand2)), 3*respPulse.size)
 
-    np.savetxt(STIM_DIR + "/Input_1Ch.txt", PsiFixGetBitsAsInt(sigPulse, inFmt), fmt="%i", header="input")
-    np.savetxt(STIM_DIR + "/Input_2Ch.txt", PsiFixGetBitsAsInt(in2ch, inFmt), fmt="%i", header="input interleaved")
-    np.savetxt(STIM_DIR + "/Input_3Ch.txt", PsiFixGetBitsAsInt(in3ch, inFmt), fmt="%i", header="input interleaved")
-    np.savetxt(STIM_DIR + "/Output_1Ch_R{}_{}Taps.txt".format(s.Ratio, s.Taps), PsiFixGetBitsAsInt(respPulse, outFmt), fmt="%i", header="output")
-    np.savetxt(STIM_DIR + "/Output_2Ch_R{}_{}Taps.txt".format(s.Ratio, s.Taps), PsiFixGetBitsAsInt(out2ch, outFmt), fmt="%i", header="output interleaved")
-    np.savetxt(STIM_DIR + "/Output_3Ch_R{}_{}Taps.txt".format(s.Ratio, s.Taps), PsiFixGetBitsAsInt(out3ch, outFmt), fmt="%i", header="output interleaved")
-    np.savetxt(STIM_DIR + "/Coefs_R{}_{}Taps.txt".format(s.Ratio, s.Taps), PsiFixGetBitsAsInt(coefs, coefFmt), fmt="%i", header="coef")
+    np.savetxt(STIM_DIR + "/Input_1Ch.txt", psi_fix_get_bits_as_int(sigPulse, inFmt), fmt="%i", header="input")
+    np.savetxt(STIM_DIR + "/Input_2Ch.txt", psi_fix_get_bits_as_int(in2ch, inFmt), fmt="%i", header="input interleaved")
+    np.savetxt(STIM_DIR + "/Input_3Ch.txt", psi_fix_get_bits_as_int(in3ch, inFmt), fmt="%i", header="input interleaved")
+    np.savetxt(STIM_DIR + "/Output_1Ch_R{}_{}Taps.txt".format(s.Ratio, s.Taps), psi_fix_get_bits_as_int(respPulse, outFmt), fmt="%i", header="output")
+    np.savetxt(STIM_DIR + "/Output_2Ch_R{}_{}Taps.txt".format(s.Ratio, s.Taps), psi_fix_get_bits_as_int(out2ch, outFmt), fmt="%i", header="output interleaved")
+    np.savetxt(STIM_DIR + "/Output_3Ch_R{}_{}Taps.txt".format(s.Ratio, s.Taps), psi_fix_get_bits_as_int(out3ch, outFmt), fmt="%i", header="output interleaved")
+    np.savetxt(STIM_DIR + "/Coefs_R{}_{}Taps.txt".format(s.Ratio, s.Taps), psi_fix_get_bits_as_int(coefs, coefFmt), fmt="%i", header="coef")
 
     #############################################################
     # Write Coefficient File for Simulation

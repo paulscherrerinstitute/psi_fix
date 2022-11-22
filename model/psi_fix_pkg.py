@@ -1,7 +1,7 @@
 ########################################################################################################################
 #  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 #  All rights reserved.
-#  Authors: Oliver Bruendler
+#  Authors: Oliver Bruendler, Radoslaw Rybaniec
 ########################################################################################################################
 
 ########################################################################################################################
@@ -23,56 +23,56 @@ from en_cl_fix_pkg import *
 
 class BittruenessNotGuaranteed(Exception): pass
 
-class PsiFixFmt:
+class psi_fix_fmt_t:
 
     __enable_range_check = False
 
-    def __init__(self, S : int, I : int, F : int):
-        self.S = S
-        self.I = I
-        self.F = F
-        if PsiFixSize(self) > 53 and self.__enable_range_check:
-            raise BittruenessNotGuaranteed("PsiFixFmt: Format exceeding 53 bits (double range), bittrueness is not guaranteed!")
+    def __init__(self, s : int, i : int, f : int):
+        self.s = s
+        self.i = i
+        self.f = f
+        if psi_fix_size(self) > 53 and self.__enable_range_check:
+            raise BittruenessNotGuaranteed("psi_fix_fmt_t: Format exceeding 53 bits (double range), bittrueness is not guaranteed!")
 
     def __str__(self):
-        return "({}, {}, {})".format(self.S, self.I, self.F)
+        return "({}, {}, {})".format(self.s, self.i, self.f)
 
     def __eq__(self, other):
-        return (self.S == other.S) and (self.I == other.I) and (self.F == other.F)
+        return (self.s == other.s) and (self.i == other.i) and (self.f == other.f)
 
     @classmethod
-    def EnableRangeCheck(cls, ena : bool):
+    def enable_range_check(cls, ena : bool):
         cls.__enable_range_check = ena
 
     @classmethod
     @contextlib.contextmanager
-    def WithRangeCheckDisabled(cls):
+    def with_range_check_disabled(cls):
         enaBefore = cls.__enable_range_check
-        cls.EnableRangeCheck(False)
+        cls.enable_range_check(False)
         yield
-        cls.EnableRangeCheck(enaBefore)
+        cls.enable_range_check(enaBefore)
 
-class PsiFixRnd(Enum):
-    Round = 0
-    Trunc = 1
+class psi_fix_rnd_t(Enum):
+    round = 0
+    trunc = 1
 
-class PsiFixSat(Enum):
-    Wrap = 0
-    Sat = 1
+class psi_fix_sat_t(Enum):
+    wrap = 0
+    sat = 1
 
 ########################################################################################################################
-# PsiFix <-> ClFix conversion functions
+# psi_fix <-> ClFix conversion functions
 ########################################################################################################################
 def PsiFix2ClFix(arg):
-    if type(arg) is PsiFixFmt:
-        return FixFormat(arg.S == 1, arg.I, arg.F)
-    elif type(arg) is PsiFixRnd:
-        if arg == PsiFixRnd.Round: return FixRound.NonSymPos_s
-        elif arg == PsiFixRnd.Trunc: return FixRound.Trunc_s
+    if type(arg) is psi_fix_fmt_t:
+        return FixFormat(arg.s == 1, arg.i, arg.f)
+    elif type(arg) is psi_fix_rnd_t:
+        if arg == psi_fix_rnd_t.round: return FixRound.NonSymPos_s
+        elif arg == psi_fix_rnd_t.trunc: return FixRound.Trunc_s
         else: raise Exception("PsiFix2ClFix(): unsupported rounding mode")
-    elif type(arg) is PsiFixSat:
-        if arg == PsiFixSat.Wrap: return FixSaturate.None_s
-        elif arg == PsiFixSat.Sat: return FixSaturate.Sat_s
+    elif type(arg) is psi_fix_sat_t:
+        if arg == psi_fix_sat_t.wrap: return FixSaturate.None_s
+        elif arg == psi_fix_sat_t.sat: return FixSaturate.Sat_s
         else: raise Exception("PsiFix2ClFix(): unsupported saturation mode")
     else:
         raise Exception("PsiFix2ClFix(): unsupported argument type")
@@ -82,14 +82,14 @@ def ClFix2PsiFix(arg):
         signBits = 0
         if arg.Signed:
             signBits = 1
-        return PsiFixFmt(signBits, arg.IntBits, arg.FracBits)
+        return psi_fix_fmt_t(signBits, arg.IntBits, arg.FracBits)
     elif type(arg) is FixRound:
-        if arg == FixRound.NonSymPos_s: return PsiFixRnd.Round
-        elif arg == FixRound.Trunc_s: return PsiFixRnd.Trunc
+        if arg == FixRound.NonSymPos_s: return psi_fix_rnd_t.round
+        elif arg == FixRound.trunc_s: return psi_fix_rnd_t.trunc
         else: raise Exception("PsiFix2ClFix(): unsupported rounding mode")
     elif type(arg) is FixSaturate:
-        if arg == FixSaturate.None_s: return PsiFixSat.Wrap
-        elif arg == FixSaturate.Sat_s: return PsiFixSat.Sat
+        if arg == FixSaturate.None_s: return psi_fix_sat_t.wrap
+        elif arg == FixSaturate.sat_s: return psi_fix_sat_t.sat
         else: raise Exception("PsiFix2ClFix(): unsupported saturation mode")
     else:
         raise Exception("PsiFix2ClFix(): unsupported argument type")
@@ -98,115 +98,107 @@ def ClFix2PsiFix(arg):
 ########################################################################################################################
 # Bittrue available in VHDL
 ########################################################################################################################
-def PsiFixSize(fmt : PsiFixFmt) -> int:
+def psi_fix_size(fmt : psi_fix_fmt_t) -> int:
     return cl_fix_width(PsiFix2ClFix(fmt))
 
-def PsiFixFromReal(a,
-                   rFmt : PsiFixFmt,
-                   errSat : bool = True):
-    # PsiFix specific implementation because of the errSat parameter that does not exist in cl_fix
-    x = np.floor(a*(2**rFmt.F)+0.5)/2**rFmt.F
-    if np.ndim(a) == 0:
-        a = np.array(a, ndmin=1)
-    if errSat:
-        if np.max(a) > PsiFixUpperBound(rFmt):
-            raise ValueError("PsiFixFromReal: Number {} could not be represented by format {}".format(max(a), rFmt))
-        if np.min(a) < PsiFixLowerBound(rFmt):
-            raise ValueError("PsiFixFromReal: Number {} could not be represented by format {}".format(min(a), rFmt))
-    x = np.where(x > PsiFixUpperBound(rFmt), PsiFixUpperBound(rFmt), x)
-    x = np.where(x < PsiFixLowerBound(rFmt), PsiFixLowerBound(rFmt), x)
-    return x
+def psi_fix_from_real(a,
+                      r_fmt : psi_fix_fmt_t,
+                      err_sat : bool = True):
+    # psi_fix specific implementation because of the err_sat parameter that does not exist in cl_fix
+    if err_sat:
+        if np.max(a) > psi_fix_upper_bound(r_fmt):
+            raise ValueError("psi_fix_from_real: Number {} could not be represented by format {}".format(np.max(a), r_fmt))
+        if np.min(a) < psi_fix_lower_bound(r_fmt):
+            raise ValueError("psi_fix_from_real: Number {} could not be represented by format {}".format(np.min(a), r_fmt))
+    return cl_fix_from_real(a, PsiFix2ClFix(r_fmt), FixSaturate.Sat_s)
 
-def PsiFixFromBitsAsInt(a : int, aFmt : PsiFixFmt):
-    return cl_fix_from_bits_as_int(a, PsiFix2ClFix(aFmt))
+def psi_fix_from_bits_as_int(a : int, a_fmt : psi_fix_fmt_t):
+    return cl_fix_from_bits_as_int(a, PsiFix2ClFix(a_fmt))
 
-def PsiFixGetBitsAsInt(a, aFmt : PsiFixFmt):
-    return cl_fix_get_bits_as_int(a, PsiFix2ClFix(aFmt))
+def psi_fix_get_bits_as_int(a, a_fmt : psi_fix_fmt_t):
+    return cl_fix_get_bits_as_int(a, PsiFix2ClFix(a_fmt))
 
-def PsiFixResize(a, aFmt : PsiFixFmt,
-                 rFmt : PsiFixFmt,
-                 rnd : PsiFixRnd = PsiFixRnd.Trunc, sat : PsiFixSat = PsiFixSat.Wrap):
-    return cl_fix_resize(a, PsiFix2ClFix(aFmt), PsiFix2ClFix(rFmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat))
+def psi_fix_resize(a, a_fmt : psi_fix_fmt_t,
+                   r_fmt : psi_fix_fmt_t,
+                   rnd : psi_fix_rnd_t = psi_fix_rnd_t.trunc, sat : psi_fix_sat_t = psi_fix_sat_t.wrap):
+    return cl_fix_resize(a, PsiFix2ClFix(a_fmt), PsiFix2ClFix(r_fmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat))
 
-def PsiFixAdd(a, aFmt : PsiFixFmt,
-              b, bFmt : PsiFixFmt,
-              rFmt : PsiFixFmt,
-              rnd: PsiFixRnd = PsiFixRnd.Trunc, sat: PsiFixSat = PsiFixSat.Wrap):
-    return cl_fix_add(a, PsiFix2ClFix(aFmt),
-                      b, PsiFix2ClFix(bFmt),
-                      PsiFix2ClFix(rFmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat))
+def psi_fix_add(a, a_fmt : psi_fix_fmt_t,
+                b, b_fmt : psi_fix_fmt_t,
+                r_fmt : psi_fix_fmt_t,
+                rnd: psi_fix_rnd_t = psi_fix_rnd_t.trunc, sat: psi_fix_sat_t = psi_fix_sat_t.wrap):
+    return cl_fix_add(a, PsiFix2ClFix(a_fmt),
+                      b, PsiFix2ClFix(b_fmt),
+                      PsiFix2ClFix(r_fmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat))
 
-def PsiFixSub(a, aFmt : PsiFixFmt,
-              b, bFmt : PsiFixFmt,
-              rFmt : PsiFixFmt,
-              rnd: PsiFixRnd = PsiFixRnd.Trunc, sat: PsiFixSat = PsiFixSat.Wrap):
-    return cl_fix_sub(a, PsiFix2ClFix(aFmt),
-                      b, PsiFix2ClFix(bFmt),
-                      PsiFix2ClFix(rFmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat))
+def psi_fix_sub(a, a_fmt : psi_fix_fmt_t,
+                b, b_fmt : psi_fix_fmt_t,
+                r_fmt : psi_fix_fmt_t,
+                rnd: psi_fix_rnd_t = psi_fix_rnd_t.trunc, sat: psi_fix_sat_t = psi_fix_sat_t.wrap):
+    return cl_fix_sub(a, PsiFix2ClFix(a_fmt),
+                      b, PsiFix2ClFix(b_fmt),
+                      PsiFix2ClFix(r_fmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat))
 
 
-def PsiFixMult(a, aFmt : PsiFixFmt,
-               b, bFmt : PsiFixFmt,
-               rFmt : PsiFixFmt,
-               rnd: PsiFixRnd = PsiFixRnd.Trunc, sat: PsiFixSat = PsiFixSat.Wrap):
-    return cl_fix_mult(a, PsiFix2ClFix(aFmt),
-                       b, PsiFix2ClFix(bFmt),
-                       PsiFix2ClFix(rFmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat))
+def psi_fix_mult(a, a_fmt : psi_fix_fmt_t,
+                 b, b_fmt : psi_fix_fmt_t,
+                 r_fmt : psi_fix_fmt_t,
+                 rnd: psi_fix_rnd_t = psi_fix_rnd_t.trunc, sat: psi_fix_sat_t = psi_fix_sat_t.wrap):
+    return cl_fix_mult(a, PsiFix2ClFix(a_fmt),
+                       b, PsiFix2ClFix(b_fmt),
+                       PsiFix2ClFix(r_fmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat))
 
-def PsiFixAbs(a, aFmt : PsiFixFmt,
-              rFmt : PsiFixFmt,
-              rnd: PsiFixRnd = PsiFixRnd.Trunc, sat: PsiFixSat = PsiFixSat.Wrap):
-    return cl_fix_abs(a, PsiFix2ClFix(aFmt), PsiFix2ClFix(rFmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat))
+def psi_fix_abs(a, a_fmt : psi_fix_fmt_t,
+                r_fmt : psi_fix_fmt_t,
+                rnd: psi_fix_rnd_t = psi_fix_rnd_t.trunc, sat: psi_fix_sat_t = psi_fix_sat_t.wrap):
+    return cl_fix_abs(a, PsiFix2ClFix(a_fmt), PsiFix2ClFix(r_fmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat))
 
-def PsiFixNeg(a, aFmt : PsiFixFmt,
-              rFmt : PsiFixFmt,
-              rnd: PsiFixRnd = PsiFixRnd.Trunc, sat: PsiFixSat = PsiFixSat.Wrap):
-    return cl_fix_neg(a, PsiFix2ClFix(aFmt), PsiFix2ClFix(rFmt), PsiFix2ClFix(rnd),PsiFix2ClFix(sat))
+def psi_fix_neg(a, a_fmt : psi_fix_fmt_t,
+                r_fmt : psi_fix_fmt_t,
+                rnd: psi_fix_rnd_t = psi_fix_rnd_t.trunc, sat: psi_fix_sat_t = psi_fix_sat_t.wrap):
+    return cl_fix_neg(a, PsiFix2ClFix(a_fmt), PsiFix2ClFix(r_fmt), PsiFix2ClFix(rnd),PsiFix2ClFix(sat))
 
-def PsiFixShiftLeft(a, aFmt : PsiFixFmt,
-                    shift : int, maxShift : int,
-                    rFmt : PsiFixFmt,
-                    rnd: PsiFixRnd = PsiFixRnd.Trunc, sat: PsiFixSat = PsiFixSat.Wrap):
-    # PsiFix specific implementation because of slightly different signature (related to synthesis issues)
-    if np.any(shift > maxShift):
-        raise ValueError("PsiFixShiftLeft: shift must be <= maxShift")
+def psi_fix_shift_left(a, a_fmt : psi_fix_fmt_t,
+                       shift : int, max_shift : int,
+                       r_fmt : psi_fix_fmt_t,
+                       rnd: psi_fix_rnd_t = psi_fix_rnd_t.trunc, sat: psi_fix_sat_t = psi_fix_sat_t.wrap):
+    # psi_fix specific implementation because of slightly different signature (related to synthesis issues)
+    if np.any(shift > max_shift):
+        raise ValueError("psi_fix_shift_left: shift must be <= max_shift")
     if np.any(shift < 0):
-        raise ValueError("PsiFixShiftLeft: shift must be > 0")
-    fullFmt = PsiFixFmt(max(aFmt.S, rFmt.S), max(aFmt.I+maxShift, rFmt.I), max(aFmt.F, rFmt.F))
-    fullA = PsiFixResize(a, aFmt, fullFmt)
-    fullOut = fullA*2**shift
-    return PsiFixResize(fullOut, fullFmt, rFmt, rnd, sat)
+        raise ValueError("psi_fix_shift_left: shift must be > 0")
+    return cl_fix_shift(a, PsiFix2ClFix(a_fmt), shift, PsiFix2ClFix(r_fmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat))
 
-def PsiFixShiftRight(a, aFmt : PsiFixFmt,
-                     shift : int, maxShift : int,
-                     rFmt : PsiFixFmt,
-                     rnd: PsiFixRnd = PsiFixRnd.Trunc, sat: PsiFixSat = PsiFixSat.Wrap):
-    # PsiFix specific implementation because of slightly different signature (related to synthesis issues)
-    if np.any(shift > maxShift):
-        raise ValueError("PsiFixShiftRight: shift must be <= maxShift")
+def psi_fix_shift_right(a, a_fmt : psi_fix_fmt_t,
+                        shift : int, max_shift : int,
+                        r_fmt : psi_fix_fmt_t,
+                        rnd: psi_fix_rnd_t = psi_fix_rnd_t.trunc, sat: psi_fix_sat_t = psi_fix_sat_t.wrap):
+    # psi_fix specific implementation because of slightly different signature (related to synthesis issues)
+    if np.any(shift > max_shift):
+        raise ValueError("psi_fix_shift_right: shift must be <= max_shift")
     if np.any(shift < 0):
-        raise ValueError("PsiFixShiftRight: shift must be > 0")
-    fullFmt = PsiFixFmt(max(aFmt.S, rFmt.S), max(aFmt.I, rFmt.I), max(aFmt.F+maxShift, rFmt.F+1))   #Additional bit for rounding
-    fullA = PsiFixResize(a, aFmt, fullFmt)
-    fullOut = fullA * 2**-shift
-    return PsiFixResize(fullOut, fullFmt, rFmt, rnd, sat)
+        raise ValueError("psi_fix_shift_right: shift must be > 0")
+    return cl_fix_shift(a, PsiFix2ClFix(a_fmt), -shift, PsiFix2ClFix(r_fmt), PsiFix2ClFix(rnd), PsiFix2ClFix(sat))
 
-def PsiFixUpperBound(rFmt : PsiFixFmt):
-    return cl_fix_max_value(PsiFix2ClFix(rFmt))
+def psi_fix_upper_bound(r_fmt : psi_fix_fmt_t):
+    return cl_fix_max_value(PsiFix2ClFix(r_fmt))
 
-def PsiFixLowerBound(rFmt : PsiFixFmt):
-    return cl_fix_min_value(PsiFix2ClFix(rFmt))
+def psi_fix_lower_bound(r_fmt : psi_fix_fmt_t):
+    return cl_fix_min_value(PsiFix2ClFix(r_fmt))
 
-def PsiFixInRange(a, aFmt : PsiFixFmt,
-                  rFmt : PsiFixFmt,
-                  rnd: PsiFixRnd = PsiFixRnd.Trunc):
-    return cl_fix_in_range(a, PsiFix2ClFix(aFmt), PsiFix2ClFix(rFmt), PsiFix2ClFix(rnd))
+def psi_fix_in_range(a, a_fmt : psi_fix_fmt_t,
+                     r_fmt : psi_fix_fmt_t,
+                     rnd: psi_fix_rnd_t = psi_fix_rnd_t.trunc):
+    return cl_fix_in_range(a, PsiFix2ClFix(a_fmt), PsiFix2ClFix(r_fmt), PsiFix2ClFix(rnd))
 
 ########################################################################################################################
 # Python only (helpers)
 ########################################################################################################################
-# Currently none
 
+def psi_fix_write_formats(fmts, names, filename):
+    # Note: Do not convert to FixFormat. Rely on psi_fix_fmt_t.__str__ to format the string correctly.
+    cl_fix_write_formats(fmts, names, filename)
 
-
+def psi_fix_to_hex(a, a_fmt : psi_fix_fmt_t):
+    return "0x{:x}".format(psi_fix_get_bits_as_int(a, a_fmt))
 

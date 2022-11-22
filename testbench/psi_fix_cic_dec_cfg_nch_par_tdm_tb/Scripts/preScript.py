@@ -38,8 +38,8 @@ def WriteFile(signal, filePath, fracBits):
 #############################################################
 # Data Generation
 #############################################################
-inFmt = PsiFixFmt(1, 0, 16)
-outFmt = PsiFixFmt(1, 0, 17)
+inFmt = psi_fix_fmt_t(1, 0, 16)
+outFmt = psi_fix_fmt_t(1, 0, 17)
 
 np.random.seed(0)
 t = np.linspace(0,TEND,SAMPLES)
@@ -54,11 +54,11 @@ inSig = []
 outSig = []
 for cfg in configs:
     inSig0 = sps.chirp(t, 0, TEND, FREQ_SAMPLE / cfg.ratio)
-    inSig0 = PsiFixFromReal(inSig0, inFmt, errSat=False)
+    inSig0 = psi_fix_from_real(inSig0, inFmt, err_sat=False)
     inSig1 = np.zeros_like(inSig0)
-    inSig1[10] = PsiFixFromReal(0.5, inFmt, errSat=False)
+    inSig1[10] = psi_fix_from_real(0.5, inFmt, err_sat=False)
     inSig2 = np.ones_like(inSig0)
-    inSig2 = PsiFixFromReal(inSig2, inFmt, errSat=False)
+    inSig2 = psi_fix_from_real(inSig2, inFmt, err_sat=False)
     model = psi_fix_cic_dec(cfg.order, cfg.ratio, cfg.diffDel, inFmt, outFmt, cfg.gainCorr)
     outp0 = model.Process(inSig0)
     outp1 = model.Process(inSig1)
@@ -77,16 +77,16 @@ for nr, sig in enumerate(inSig):
     cfg = configs[nr]
     with open(STIM_DIR + "/input_o{}_r{}_dd{}_gc{}.txt".format(cfg.order, cfg.ratio, cfg.diffDel, cfg.gainCorr), "w+") as f:
         for spl in zip(sig[0], sig[1], sig[2]):
-            f.write("{} {} {}\n".format(PsiFixGetBitsAsInt(spl[0], inFmt),
-                                        PsiFixGetBitsAsInt(spl[1], inFmt),
-                                        PsiFixGetBitsAsInt(spl[2], inFmt)))
+            f.write("{} {} {}\n".format(psi_fix_get_bits_as_int(spl[0], inFmt),
+                                        psi_fix_get_bits_as_int(spl[1], inFmt),
+                                        psi_fix_get_bits_as_int(spl[2], inFmt)))
 
 for nr, sig in enumerate(outSig):
     cfg = configs[nr]
     with open(STIM_DIR + "/output_o{}_r{}_dd{}_gc{}.txt".format(cfg.order, cfg.ratio, cfg.diffDel, cfg.gainCorr), "w+") as f:
         for spl in zip(sig[0], sig[1], sig[2]):
-            f.write("{} {} {}\n".format(PsiFixGetBitsAsInt(spl[0], outFmt),
-                                        PsiFixGetBitsAsInt(spl[1], outFmt),
-                                        PsiFixGetBitsAsInt(spl[2], outFmt)))
+            f.write("{} {} {}\n".format(psi_fix_get_bits_as_int(spl[0], outFmt),
+                                        psi_fix_get_bits_as_int(spl[1], outFmt),
+                                        psi_fix_get_bits_as_int(spl[2], outFmt)))
 
 

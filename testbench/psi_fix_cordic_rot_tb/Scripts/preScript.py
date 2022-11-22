@@ -27,29 +27,29 @@ except FileExistsError:
 #############################################################
 # Simulation
 #############################################################
-inAbsFmt = PsiFixFmt(0, 0, 16)
-inAngleFmt = PsiFixFmt(0,0,15)
-angleIntFmt = PsiFixFmt(1,-2,23)
-intFmt = PsiFixFmt(1, 2, 22)
-outFmt = PsiFixFmt(1, 2, 16)
+inAbsFmt = psi_fix_fmt_t(0, 0, 16)
+inAngleFmt = psi_fix_fmt_t(0,0,15)
+angleIntFmt = psi_fix_fmt_t(1,-2,23)
+intFmt = psi_fix_fmt_t(1, 2, 22)
+outFmt = psi_fix_fmt_t(1, 2, 16)
 iterations = 21
 
 np.random.seed(0)
-sigRandAbs = PsiFixFromReal(np.random.rand(SAMPLES_RAND), inAbsFmt, errSat=False)
-sigRandAng = PsiFixFromReal(np.random.rand(SAMPLES_RAND), inAngleFmt, errSat=False)
+sigRandAbs = psi_fix_from_real(np.random.rand(SAMPLES_RAND), inAbsFmt, err_sat=False)
+sigRandAng = psi_fix_from_real(np.random.rand(SAMPLES_RAND), inAngleFmt, err_sat=False)
 
 anglesLogic = np.linspace(0, 1, SAMPLES_LOGIC)
 amplitudeLogic = np.linspace(0.01, 0.99, SAMPLES_LOGIC)
-sigLogicAbs = PsiFixFromReal(amplitudeLogic, inAbsFmt, errSat=False)
-sigLogicAng = PsiFixFromReal(anglesLogic, inAngleFmt, errSat=False)
+sigLogicAbs = psi_fix_from_real(amplitudeLogic, inAbsFmt, err_sat=False)
+sigLogicAng = psi_fix_from_real(anglesLogic, inAngleFmt, err_sat=False)
 
 sigAbs = np.concatenate((sigLogicAbs, sigRandAbs))
 sigAng = np.concatenate((sigLogicAng, sigRandAng))
 
-cordic = psi_fix_cordic_rot(inAbsFmt, inAngleFmt, outFmt, intFmt, angleIntFmt, iterations, True, PsiFixRnd.Round, PsiFixSat.Sat)
+cordic = psi_fix_cordic_rot(inAbsFmt, inAngleFmt, outFmt, intFmt, angleIntFmt, iterations, True, psi_fix_rnd_t.round, psi_fix_sat_t.sat)
 resI, resQ = cordic.Process(sigAbs, sigAng)
 
-cordicNoGc = psi_fix_cordic_rot(inAbsFmt, inAngleFmt, outFmt, intFmt, angleIntFmt, iterations, False, PsiFixRnd.Trunc, PsiFixSat.Wrap)
+cordicNoGc = psi_fix_cordic_rot(inAbsFmt, inAngleFmt, outFmt, intFmt, angleIntFmt, iterations, False, psi_fix_rnd_t.trunc, psi_fix_sat_t.wrap)
 resNoGcI, resNoGcQ = cordicNoGc.Process(sigAbs, sigAng)
 
 #############################################################
@@ -65,7 +65,7 @@ if PLOT_ON:
     plt.plot(resQ, 'b')
     plt.figure()
     plt.title("Error [LSB]")
-    plt.plot((resI-np.cos(sigAng*2*np.pi)*sigAbs)*2**outFmt.F, (resQ-np.sin(sigAng*2*np.pi)*sigAbs)*2**outFmt.F, ".")
+    plt.plot((resI-np.cos(sigAng*2*np.pi)*sigAbs)*2**outFmt.f, (resQ-np.sin(sigAng*2*np.pi)*sigAbs)*2**outFmt.f, ".")
     plt.show()
 
 
@@ -74,15 +74,15 @@ if PLOT_ON:
 # Write Files for Co sim
 #############################################################
 np.savetxt(STIM_DIR + "/input.txt",
-           np.column_stack((PsiFixGetBitsAsInt(sigAbs, inAbsFmt),
-                            PsiFixGetBitsAsInt(sigAng, inAngleFmt))),
+           np.column_stack((psi_fix_get_bits_as_int(sigAbs, inAbsFmt),
+                            psi_fix_get_bits_as_int(sigAng, inAngleFmt))),
            fmt="%i", header="input-Abs input-Ang")
 np.savetxt(STIM_DIR + "/outputWithGc.txt",
-           np.column_stack((PsiFixGetBitsAsInt(resI, outFmt),
-                           PsiFixGetBitsAsInt(resQ, outFmt))),
+           np.column_stack((psi_fix_get_bits_as_int(resI, outFmt),
+                           psi_fix_get_bits_as_int(resQ, outFmt))),
            fmt="%i", header="result-I result-Q")
 np.savetxt(STIM_DIR + "/outputWithNoGc.txt",
-           np.column_stack((PsiFixGetBitsAsInt(resNoGcI, outFmt),
-                           PsiFixGetBitsAsInt(resNoGcQ, outFmt))),
+           np.column_stack((psi_fix_get_bits_as_int(resNoGcI, outFmt),
+                           psi_fix_get_bits_as_int(resNoGcQ, outFmt))),
            fmt="%i", header="result-I result-Q")
 
