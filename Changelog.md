@@ -1,3 +1,9 @@
+## 4.0.0
+* Changes (not reverse compatible)
+  * Refactored interfaces of components to snake case convention instead of camel case
+* Added Features
+  * Support for non integer ratio for psi\_fix\_demod\_real2cplx and psi\_fix\_mod\_cplx2real
+
 ## 3.2.0
 * Added Features
   * Added wide fixed-point support for Python (>53 bits)
