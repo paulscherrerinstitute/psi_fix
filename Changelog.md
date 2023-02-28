@@ -1,3 +1,7 @@
+## 3.2.1
+* Bugfixes
+  * reset handling in psi\_fix\_fir\_dec\_ser\_nch\_chtdm\_conf
+
 ## 3.2.0
 * Added Features
   * Added wide fixed-point support for Python (>53 bits)

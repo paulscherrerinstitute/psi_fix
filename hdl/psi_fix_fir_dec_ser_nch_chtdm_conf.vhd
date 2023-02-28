@@ -15,6 +15,9 @@
 --
 -- Required Memory depth per channel = MaxTaps_g + MaxRatio_g
 
+-- Changelog
+-- 28.02.2023 Correction of major bugs with reset decount
+
 ------------------------------------------------------------------------------
 -- Libraries
 ------------------------------------------------------------------------------
@@ -330,6 +333,7 @@ begin
 				r.CalcOngoing		<= '0';
 				r.FirstAfterRst		<= '1';
 				r.FirstTapLoop_3	<= '1';
+                r.TapCnt_1          <= Taps;
 			end if;
 		end if;
 	end process;
