@@ -1,3 +1,8 @@
+## 4.0.1
+* Bugfixes
+  * reset handling in psi\_fix\_fir\_dec\_ser\_nch\_chtdm\_conf
+
+
 ## 4.0.0
 * Changes (not reverse compatible)
   * Refactored interfaces of components to snake case convention instead of camel case

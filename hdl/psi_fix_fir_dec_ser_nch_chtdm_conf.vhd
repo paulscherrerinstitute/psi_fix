@@ -320,6 +320,7 @@ begin
         r.CalcOngoing    <= '0';
         r.FirstAfterRst  <= '1';
         r.FirstTapLoop_3 <= '1';
+        r.TapCnt_1       <= cfg_taps_i;
       end if;
     end if;
   end process;

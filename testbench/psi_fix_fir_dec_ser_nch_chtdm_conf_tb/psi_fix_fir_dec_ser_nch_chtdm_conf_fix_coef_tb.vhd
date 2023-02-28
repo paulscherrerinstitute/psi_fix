@@ -101,78 +101,89 @@ begin
     wait;
   end process;
 
-  -------------------------------------------------------------------------
-  -- TB Control
-  -------------------------------------------------------------------------
-  p_control : process
-  begin
-    -- Reset
-    Rst <= '1';
-    wait for 1 us;
-    wait until rising_edge(Clk);
-    Rst <= '0';
-    wait for 1 us;
+    -------------------------------------------------------------------------
+	-- TB Control
+	-------------------------------------------------------------------------
+	p_control : process(Clk, Rst) is
+      variable v_cnt : integer := 0;
+	begin
+      if Rst = '1' then
+        v_cnt := 0;
+      elsif rising_edge(Clk) then
+        -- Apply Input
+       
+        case v_cnt is
+          when 0 =>
+            InVld 	<= '1'; 
+            InData	<= psi_fix_from_real(0.5, DataFmt_c);
+          when 1 =>
+            InVld 	<= '0';
+          when 4 =>
+            InVld 	<= '1';
+            InData	<= psi_fix_from_real(0.0, DataFmt_c);
+          when 300 =>
+            assert ResponseDone report "###ERROR###: Response aquisition not completed" severity error;
+            TbRunning <= false;
+          when others =>
+            InVld <= '0';
+        end case;
 
-    -- Apply Input
-    wait until rising_edge(Clk);
-    InVld  <= '1';
-    InData <= psi_fix_from_real(0.5, DataFmt_c);
-    wait until rising_edge(Clk);
-    InVld  <= '0';
-    wait until rising_edge(Clk);
-    wait until rising_edge(Clk);
-    wait until rising_edge(Clk);
-    InData <= psi_fix_from_real(0.0, DataFmt_c);
-    for i in 0 to 200 loop
-      InVld <= '1';
-      wait until rising_edge(Clk);
-      InVld <= '0';
-      wait until rising_edge(Clk);
-      wait until rising_edge(Clk);
-      wait until rising_edge(Clk);
-    end loop;
+        if v_cnt mod 4 = 0 then
+          InVld 	<= '1';
+        else
+          InVld 	<= '0';
+        end if;
+        
+        v_cnt := v_cnt + 1;
+      end if;
+        
+	end process;
+	
+	p_check : process(Clk, Rst) is
+      variable v_cnt : integer := 0;
+	begin
 
-    -- TB done
-    assert ResponseDone report "###ERROR###: Response aquisition not completed" severity error;
-    TbRunning <= false;
-    wait;
-  end process;
+      if Rst = '1' then
+        v_cnt := 0;
+        ResponseDone <= False;
+      elsif rising_edge(Clk) and OutVld = '1' then
+        
+        case v_cnt is
+          when 0 =>
+            assert OutData = psi_fix_from_real(0.5*Coefs_c(0), DataFmt_c) report "###ERROR###: Wrong CH0 output 0" severity error;
+          when 1 => assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH1 output 0" severity error;
+          when 2 => assert OutData = psi_fix_from_real(0.5*Coefs_c(3), DataFmt_c) report "###ERROR###: Wrong CH0 output 1" severity error;
+          when 3 => assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH1 output 1" severity error;
+          when 4 => assert OutData = psi_fix_from_real(0.5*Coefs_c(6), DataFmt_c) report "###ERROR###: Wrong CH0 output 2" severity error;
+          when 5 => assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH1 output 2" severity error;
+          when 6 => assert OutData = psi_fix_from_real(0.5*Coefs_c(9), DataFmt_c) report "###ERROR###: Wrong CH0 output 3" severity error;
+          when 7 => assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH1 output 3" severity error;
+          when 8 => assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH0 output 4" severity error;
+          when 9 => assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH1 output 4" severity error;
+          when 10 => assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH0 output 5" severity error;
+          when 11 => assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH1 output 5" severity error;
+          when 12 => assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH0 output 6" severity error;
+          when 15 =>
+          -- TB done
+            ResponseDone <= True;
+          when others => null;
+        end case;
+        v_cnt := v_cnt + 1;    
+      end if;
 
-  p_check : process
-  begin
-    wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = psi_fix_from_real(0.5 * Coefs_c(0), DataFmt_c) report "###ERROR###: Wrong CH0 output 0" severity error;
-    wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH1 output 0" severity error;
-    wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = psi_fix_from_real(0.5 * Coefs_c(3), DataFmt_c) report "###ERROR###: Wrong CH0 output 1" severity error;
-    wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH1 output 1" severity error;
-    wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = psi_fix_from_real(0.5 * Coefs_c(6), DataFmt_c) report "###ERROR###: Wrong CH0 output 2" severity error;
-    wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH1 output 2" severity error;
-    wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = psi_fix_from_real(0.5 * Coefs_c(9), DataFmt_c) report "###ERROR###: Wrong CH0 output 3" severity error;
-    wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH1 output 3" severity error;
-    wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH0 output 4" severity error;
-    wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH1 output 4" severity error;
-    wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH0 output 5" severity error;
-    wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH1 output 5" severity error;
-    wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH0 output 6" severity error;
-    wait until rising_edge(Clk) and OutVld = '1';
-    assert OutData = psi_fix_from_real(0.0, DataFmt_c) report "###ERROR###: Wrong CH1 output 6" severity error;
-    wait until rising_edge(Clk) and OutVld = '1';
-
-    -- TB done
-    ResponseDone <= True;
-    wait;
-  end process;
+    
+    end process;
+	
+    process
+    begin
+      for rst_cnt in 0 to 3 loop
+        Rst <= '1';
+        wait for 10 ns;
+        Rst <= '0';
+        wait for 2 us;
+      end loop;
+      wait;
+    end process;
+  
 
 end sim;
