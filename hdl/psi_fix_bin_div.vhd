@@ -138,7 +138,7 @@ begin
         end if;
 
         -- Calculation
-        v.ResultInt     := ShiftLeft(r.ResultInt, 1);
+        v.ResultInt     := shift_left(r.ResultInt, 1);
         NumInDenomFmt_v := psi_fix_resize(r.NumComp, num_comp_fmt_c, denom_comp_fmt_c, psi_fix_trunc, psi_fix_wrap);
         if unsigned(r.DenomComp) <= unsigned(NumInDenomFmt_v) then
           v.ResultInt(0) := '1';

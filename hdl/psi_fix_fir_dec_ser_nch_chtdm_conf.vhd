@@ -380,16 +380,16 @@ begin
       behavior_g => ram_behavior_g
     )
     port map(
-      ClkA  => clk_i,
-      AddrA => DataRamWrAddr_1,
-      WrA   => r.Vld(1),
-      DinA  => r.InSig(1),
-      DoutA => open,
-      ClkB  => clk_i,
-      AddrB => DataRamRdAddr_2,
-      WrB   => '0',
-      DinB  => (others => '0'),
-      DoutB => DataRamDout_3
+      a_clk_i  => clk_i,
+      a_addr_i => DataRamWrAddr_1,
+      a_wr_i   => r.Vld(1),
+      a_dat_i  => r.InSig(1),
+      a_dat_o => open,
+      b_clk_i  => clk_i,
+      b_addr_i => DataRamRdAddr_2,
+      b_wr_i   => '0',
+      b_dat_i  => (others => '0'),
+      b_dat_o => DataRamDout_3
     );
 
 end architecture;

@@ -143,7 +143,7 @@ begin
       -- Do Shift
       SftBefore_v := 2**(SftStgBeforeApprox_c - stg);
       if unsigned(SftBeforeIn_v(SftBeforeIn_v'left downto SftBeforeIn_v'left - SftBefore_v + 1)) = 0 then
-        v.InSft(stg)                                  := SftBeforeIn_v(SftBeforeIn_v'left - SftBefore_v downto 0) & ZerosVector(SftBefore_v);
+        v.InSft(stg)                                  := SftBeforeIn_v(SftBeforeIn_v'left - SftBefore_v downto 0) & zeros_vector(SftBefore_v);
         v.SftCnt(stg)(SftStgBeforeApprox_c - stg - 1) := '1';
       else
         v.InSft(stg)                                  := SftBeforeIn_v;
@@ -222,17 +222,17 @@ begin
     FifoIn      <= IsZeroIn_s & std_logic_vector(r.SftCnt(r.SftCnt'high));
     inst_sft_del : entity work.psi_common_sync_fifo
       generic map(
-        Width_g       => SftStgBeforeApprox_c + 1,
-        Depth_g       => 16,
-        RamBehavior_g => ram_behavior_g
+        width_g       => SftStgBeforeApprox_c + 1,
+        depth_g       => 16,
+        ram_behavior_g => ram_behavior_g
       )
       port map(
-        Clk     => clk_i,
-        Rst     => rst_i,
-        InData  => FifoIn,
-        InVld   => r.InVld(r.InVld'high),
-        OutData => FifoOut,
-        OutRdy  => SqrtVld_s
+        clk_i     => clk_i,
+        rst_i     => rst_i,
+        dat_i  => FifoIn,
+        vld_i   => r.InVld(r.InVld'high),
+        dat_o => FifoOut,
+        rdy_i  => SqrtVld_s
       );
     SftCntOut_s <= FifoOut(SftCntOut_s'high downto 0);
     IsZeroOut_s <= FifoOut(FifoOut'high);

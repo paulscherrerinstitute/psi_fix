@@ -158,17 +158,17 @@ begin
   --------------------------------------------------------------------------
   i_del : entity work.psi_common_delay
     generic map(
-      Width_g    => psi_fix_size(in_fmt_g),
-      Delay_g    => taps_g,
-      Resource_g => "AUTO",
-      RstState_g => True
+      width_g    => psi_fix_size(in_fmt_g),
+      delay_g    => taps_g,
+      resource_g => "AUTO",
+      rst_state_g => True
     )
     port map(
-      Clk     => clk_i,
-      Rst     => rst_i,
-      InData  => dat_i,
-      InVld   => vld_i,
-      OutData => DataDel
+      clk_i     => clk_i,
+      rst_i     => rst_i,
+      dat_i  => dat_i,
+      vld_i   => vld_i,
+      dat_o => DataDel
     );
 
 end architecture;

@@ -405,16 +405,16 @@ begin
         behavior_g => ram_behavior_g
       )
       port map(
-        ClkA  => clk_i,
-        AddrA => DataWrAddr_1i,
-        WrA   => DataWr,
-        DinA  => DataDin,
-        DoutA => RamRdData,
-        ClkB  => clk_i,
-        AddrB => r.TapRdAddr(3 + i),
-        WrB   => '0',
-        DinB  => (others => '0'),
-        DoutB => RdData_4i
+        a_clk_i  => clk_i,
+        a_addr_i => DataWrAddr_1i,
+        a_wr_i   => DataWr,
+        a_dat_i  => DataDin,
+        a_dat_o => RamRdData,
+        b_clk_i  => clk_i,
+        b_addr_i => r.TapRdAddr(3 + i),
+        b_wr_i   => '0',
+        b_dat_i  => (others => '0'),
+        b_dat_o => RdData_4i
       );
 
     -- *** Tap data delay  ***
@@ -422,18 +422,18 @@ begin
     g_fullrate : if full_inp_rate_support_g generate
       i_tapdelay : entity work.psi_common_delay
         generic map(
-          Width_g       => psi_fix_size(in_fmt_g),
-          Delay_g       => channels_g * TapsPerStage_c,
-          Resource_g    => "AUTO",
-          RstState_g    => impl_flush_if_g, -- the tap delay only needs to be reset cleanly if the memory can be flushed too. Otherwise leftovers are in memory anyways.
-          RamBehavior_g => ram_behavior_g
+          width_g       => psi_fix_size(in_fmt_g),
+          delay_g       => channels_g * TapsPerStage_c,
+          resource_g    => "AUTO",
+          rst_state_g    => impl_flush_if_g, -- the tap delay only needs to be reset cleanly if the memory can be flushed too. Otherwise leftovers are in memory anyways.
+          ram_behavior_g => ram_behavior_g
         )
         port map(
-          Clk     => clk_i,
-          Rst     => rst_i,
-          InData  => DataInChain(i + 1),
-          InVld   => r.Vld(i + 1),
-          OutData => FullRateDel
+          clk_i     => clk_i,
+          rst_i     => rst_i,
+          dat_i  => DataInChain(i + 1),
+          vld_i   => r.Vld(i + 1),
+          dat_o => FullRateDel
         );
     end generate;
     -- Otherwise the RAM output is delayed

@@ -28,7 +28,7 @@ entity psi_fix_dds_18b is
     phi_offset_i : in  std_logic_vector(psi_fix_size(phase_fmt_g) - 1 downto 0); -- phase offset
     vld_i        : in  std_logic := '1';                                         -- frequency sampling input valid
     dat_sin_o    : out std_logic_vector(17 downto 0);                            -- sinus output
-    dat_cos_o    : out std_logic_vector(17 downto 0);                            -- cosine output 90°  phase shifted
+    dat_cos_o    : out std_logic_vector(17 downto 0);                            -- cosine output 90 degree  phase shifted
     vld_o        : out std_logic                                                 -- freqeuncy sampling output valid
   );
 end entity;
@@ -134,7 +134,7 @@ begin
   --------------------------------------------------------------------------
   -- Sequential Process
   --------------------------------------------------------------------------
-  sync_rst_gene : if rst_sync_g generate
+  gene_sync_rst : if rst_sync_g generate
   begin
     p_seq : process(clk_i)
     begin
@@ -149,7 +149,7 @@ begin
     end process;
   end generate;
 
-  async_rst_gene : if not rst_sync_g generate
+  gene_async_rst : if not rst_sync_g generate
   begin
     process(clk_i, rst_i)
     begin
@@ -166,6 +166,9 @@ begin
   -- Component Instantiation
   --------------------------------------------------------------------------
   i_sincos : entity work.psi_fix_lin_approx_sin18b_dual
+      generic map(
+        rst_pol_g => rst_pol_g
+      )
     port map(
       -- Control Signals
       clk_i   => clk_i,
@@ -184,18 +187,18 @@ begin
 
   i_accu : entity work.psi_common_delay
     generic map(
-      Width_g       => psi_fix_size(phase_fmt_g),
-      Delay_g       => tdm_channels_g,
-      Resource_g    => "AUTO",
-      RstState_g    => true,
-      RamBehavior_g => ram_behavior_g
+      width_g       => psi_fix_size(phase_fmt_g),
+      delay_g       => tdm_channels_g,
+      resource_g    => "AUTO",
+      rst_state_g    => true,
+      ram_behavior_g => ram_behavior_g
     )
     port map(
-      Clk     => clk_i,
-      Rst     => rst_i,                   -- TODO ensure psi fix is consistent with reset snc or async
-      InData  => PhaseAccu_Next,
-      InVld   => vld_i,
-      OutData => PhaseAccu
+      clk_i     => clk_i,
+      rst_i     => rst_i,                   -- TODO ensure psi fix is consistent with reset snc or async
+      dat_i  => PhaseAccu_Next,
+      vld_i   => vld_i,
+      dat_o => PhaseAccu
     );
 
 end architecture;

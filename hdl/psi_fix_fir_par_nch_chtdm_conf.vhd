@@ -142,11 +142,11 @@ begin
           delay_g => channels_g - 1
         )
         port map(
-          Clk     => clk_i,
-          Rst     => rst_i,
-          InData  => DspDataChainI(i),
-          InVld   => DspVldChain(i + 1),
-          OutData => DspDataChainO(i)
+          clk_i     => clk_i,
+          rst_i     => rst_i,
+          dat_i  => DspDataChainI(i),
+          vld_i   => DspVldChain(i + 1),
+          dat_o => DspDataChainO(i)
         );
     end generate;
   end generate;

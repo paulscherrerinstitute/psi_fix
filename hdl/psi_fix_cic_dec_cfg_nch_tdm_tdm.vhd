@@ -263,20 +263,20 @@ begin
   ShiftDataIn <= psi_fix_resize(r.Accu(order_g), AccuFmt_c, SftFmt_c);
   i_sft : entity work.psi_common_dyn_sft
     generic map(
-      Direction_g          => "RIGHT",
-      SelectBitsPerStage_g => 4,
-      MaxShift_g           => MaxShift_c,
-      Width_g              => psi_fix_size(SftFmt_c),
-      SignExtend_g         => true
+      direction_g          => "RIGHT",
+      sel_bit_per_stage_g => 4,
+      max_shift_g           => MaxShift_c,
+      width_g              => psi_fix_size(SftFmt_c),
+      sign_extend_g         => true
     )
     port map(
-      Clk     => clk_i,
-      Rst     => rst_i,
-      InVld   => r.VldAccu(order_g),
-      InShift => ShiftSel,
-      InData  => ShiftDataIn,
-      OutVld  => ShiftVld,
-      OutData => ShiftDataOut
+      clk_i     => clk_i,
+      rst_i     => rst_i,
+      vld_i   => r.VldAccu(order_g),
+      shift_i => ShiftSel,
+      dat_i  => ShiftDataIn,
+      vld_o  => ShiftVld,
+      dat_o => ShiftDataOut
     );
 
   -- *** Diff-delays ***
@@ -289,17 +289,17 @@ begin
 
     i_del : entity work.psi_common_delay
       generic map(
-        Width_g    => psi_fix_size(DiffFmt_c),
-        Delay_g    => channels_g * diff_delay_g,
-        RstState_g => true
+        width_g    => psi_fix_size(DiffFmt_c),
+        delay_g    => channels_g * diff_delay_g,
+        rst_state_g => true
       )
       port map(
-        Clk     => clk_i,
-        Rst     => rst_i,
+        clk_i     => clk_i,
+        rst_i     => rst_i,
         -- Data
-        InData  => DiffDelIn,
-        InVld   => DiffVldIn,
-        OutData => DiffDel(stage)
+        dat_i  => DiffDelIn,
+        vld_i   => DiffVldIn,
+        dat_o => DiffDel(stage)
       );
   end generate;
 
@@ -308,17 +308,17 @@ begin
   begin
     i_del : entity work.psi_common_delay
       generic map(
-        Width_g    => psi_fix_size(AccuFmt_c),
-        Delay_g    => channels_g - 1,
-        RstState_g => true
+        width_g    => psi_fix_size(AccuFmt_c),
+        delay_g    => channels_g - 1,
+        rst_state_g => true
       )
       port map(
-        Clk     => clk_i,
-        Rst     => rst_i,
+        clk_i     => clk_i,
+        rst_i     => rst_i,
         -- Data
-        InData  => r.Accu(stage + 1),
-        InVld   => r.VldAccu(stage),
-        OutData => IntDel(stage + 1)
+        dat_i  => r.Accu(stage + 1),
+        vld_i   => r.VldAccu(stage),
+        dat_o => IntDel(stage + 1)
       );
   end generate;
 

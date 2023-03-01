@@ -167,14 +167,15 @@ begin
 
   --*** TAG par 2 tdm block INP ***
   inst_par2tdm_inp : entity work.psi_common_par_tdm
-    generic map(ChannelCount_g => ch_nb_g,
-                ChannelWidth_g => psi_fix_size(fix_fmt_g))
-    port map(Clk         => clk_sti,
-             Rst         => rst_sti,
-             Parallel    => data_in_s,
-             ParallelVld => str_dff_s,
-             Tdm         => dat_sti,
-             TdmVld      => str_sti);
+    generic map(rst_pol_g => '1',
+    ch_nb_g => ch_nb_g,
+                ch_width_g => psi_fix_size(fix_fmt_g))
+    port map(clk_i         => clk_sti,
+             rst_i         => rst_sti,
+             dat_i    => data_in_s,
+             vld_i => str_dff_s,
+             dat_o         => dat_sti,
+             vld_o      => str_sti);
 
   proc_deserializer : process(clk_sti)
   begin
