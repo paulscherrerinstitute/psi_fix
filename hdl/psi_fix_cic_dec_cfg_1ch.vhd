@@ -266,20 +266,20 @@ begin
   ShiftDataIn <= psi_fix_resize(r.Accu(order_g), AccuFmt_c, SftFmt_c);
   i_sft : entity work.psi_common_dyn_sft
     generic map(
-      Direction_g          => "RIGHT",
-      SelectBitsPerStage_g => 4,
-      MaxShift_g           => MaxShift_c,
-      Width_g              => psi_fix_size(SftFmt_c),
-      SignExtend_g         => true
+      direction_g          => "RIGHT",
+      sel_bit_per_stage_g => 4,
+      max_shift_g           => MaxShift_c,
+      width_g              => psi_fix_size(SftFmt_c),
+      sign_extend_g         => true
     )
     port map(
-      Clk     => clk_i,
-      Rst     => rst_i,
-      InVld   => r.VldAccu(order_g),
-      InShift => ShiftSel,
-      InData  => ShiftDataIn,
-      OutVld  => ShiftVld,
-      OutData => ShiftDataOut
+      clk_i     => clk_i,
+      rst_i     => rst_i,
+      vld_i   => r.VldAccu(order_g),
+      shift_i => ShiftSel,
+      dat_i  => ShiftDataIn,
+      vld_o  => ShiftVld,
+      dat_o => ShiftDataOut
     );
 
 end architecture;

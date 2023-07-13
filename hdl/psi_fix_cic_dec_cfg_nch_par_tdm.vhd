@@ -23,38 +23,38 @@ use work.psi_fix_pkg.all;
 
 entity psi_fix_cic_dec_cfg_nch_par_tdm is
   generic(
-    channels_g       : integer              := 3;         -- Min. 2
-    order_g          : integer              := 4;         -- filter order
-    max_ratio_g      : natural              := 12;        -- maximaum decimation ratio
-    diff_delay_g     : natural range 1 to 2 := 1;         -- differential delay
-    in_fmt_g         : psi_fix_fmt_t        := (1, 0, 15);-- input fomrat FP
-    out_fmt_g        : psi_fix_fmt_t        := (1, 0, 15);-- output fromat FP
-    rst_pol_g        : std_logic            := '1';       -- reset polarity active high ='1'
-    auto_gain_corr_g : boolean              := True       -- Use CfgGainCorr for fine-grained gain correction (beyond pure shifting)
+    channels_g       : integer              := 3; -- Min. 2
+    order_g          : integer              := 4; -- filter order
+    max_ratio_g      : natural              := 12; -- maximaum decimation ratio
+    diff_delay_g     : natural range 1 to 2 := 1; -- differential delay
+    in_fmt_g         : psi_fix_fmt_t        := (1, 0, 15); -- input fomrat FP
+    out_fmt_g        : psi_fix_fmt_t        := (1, 0, 15); -- output fromat FP
+    rst_pol_g        : std_logic            := '1'; -- reset polarity active high ='1'
+    auto_gain_corr_g : boolean              := True -- Use CfgGainCorr for fine-grained gain correction (beyond pure shifting)
   );
   port(
     -- Control Signals
-    clk_i           : in  std_logic;                                                         -- clk system
-    rst_i           : in  std_logic;                                                         -- rst system
+    clk_i           : in  std_logic;    -- clk system
+    rst_i           : in  std_logic;    -- rst system
     -- Configuration (only change when in reset!)
-    cfg_ratio_i     : in  std_logic_vector(log2ceil(max_ratio_g) - 1 downto 0);              -- Ratio-1 (0 --> no decimation, 3 --> decimation by 4)
-    cfg_shift_i     : in  std_logic_vector(7 downto 0);                                      -- Shifting by more than 255 bits is not supported, this would lead to timing issues anyways
-    cfg_gain_corr_i : in  std_logic_vector(16 downto 0);                                     -- Gain correction factor in format [0,1,16]
+    cfg_ratio_i     : in  std_logic_vector(log2ceil(max_ratio_g) - 1 downto 0); -- Ratio-1 (0 --> no decimation, 3 --> decimation by 4)
+    cfg_shift_i     : in  std_logic_vector(7 downto 0); -- Shifting by more than 255 bits is not supported, this would lead to timing issues anyways
+    cfg_gain_corr_i : in  std_logic_vector(16 downto 0); -- Gain correction factor in format [0,1,16]
     -- Data Ports
     dat_i           : in  std_logic_vector(psi_fix_size(in_fmt_g) * channels_g - 1 downto 0); -- data input
-    vld_i           : in  std_logic;                                                          -- valid input
-    dat_o           : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);             -- data output
-    vld_o           : out std_logic;                                                          -- valid otuput
+    vld_i           : in  std_logic;    -- valid input
+    dat_o           : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0); -- data output
+    vld_o           : out std_logic;    -- valid otuput
     -- Status output
-    busy_o          : out std_logic                                                           --  busy signal output active high
+    busy_o          : out std_logic     --  busy signal output active high
   );
 end entity;
 
 architecture rtl of psi_fix_cic_dec_cfg_nch_par_tdm is
   -- Constants
-  constant MaxCicGain_c    : real        := (real(max_ratio_g) * real(diff_delay_g))**real(order_g);
-  constant MaxCicAddBits_c : integer     := log2ceil(MaxCicGain_c - 0.1); -- WORKAROUND: Vivado does real calculations imprecisely. With the -0.1, wrong results are avoided.
-  constant MaxShift_c      : integer     := MaxCicAddBits_c;
+  constant MaxCicGain_c    : real          := (real(max_ratio_g) * real(diff_delay_g))**real(order_g);
+  constant MaxCicAddBits_c : integer       := log2ceil(MaxCicGain_c - 0.1); -- WORKAROUND: Vivado does real calculations imprecisely. With the -0.1, wrong results are avoided.
+  constant MaxShift_c      : integer       := MaxCicAddBits_c;
   constant AccuFmt_c       : psi_fix_fmt_t := (in_fmt_g.S, in_fmt_g.I + MaxCicAddBits_c, in_fmt_g.F);
   constant DiffFmt_c       : psi_fix_fmt_t := (out_fmt_g.S, in_fmt_g.I, out_fmt_g.F + order_g + 1);
   constant GcInFmt_c       : psi_fix_fmt_t := (1, out_fmt_g.I, work.psi_common_math_pkg.min(24 - out_fmt_g.I, DiffFmt_c.F));
@@ -135,8 +135,8 @@ begin
     if r.VldAccu(0) = '1' then
       for ch in 0 to channels_g - 1 loop
         v.Accu(1)(ch) := psi_fix_add(r.Accu(1)(ch), AccuFmt_c,
-                                   r.Input_0(ch), in_fmt_g,
-                                   AccuFmt_c);
+                                     r.Input_0(ch), in_fmt_g,
+                                     AccuFmt_c);
       end loop;
     end if;
 
@@ -145,8 +145,8 @@ begin
       if r.VldAccu(stage) = '1' then
         for ch in 0 to channels_g - 1 loop
           v.Accu(stage + 1)(ch) := psi_fix_add(r.Accu(stage + 1)(ch), AccuFmt_c,
-                                             r.Accu(stage)(ch), AccuFmt_c,
-                                             AccuFmt_c);
+                                               r.Accu(stage)(ch), AccuFmt_c,
+                                               AccuFmt_c);
         end loop;
       end if;
     end loop;
@@ -178,8 +178,8 @@ begin
     if VldDiff_0 = '1' then
       -- Differentiate
       v.DiffVal(1) := psi_fix_sub(DiffIn_0, DiffFmt_c,
-                                DiffDel(0), DiffFmt_c,
-                                DiffFmt_c);
+                                  DiffDel(0), DiffFmt_c,
+                                  DiffFmt_c);
     end if;
 
     -- *** Diff Stages ***
@@ -188,8 +188,8 @@ begin
       if r.VldDiff(stage) = '1' then
         -- Differentiate
         v.DiffVal(stage + 1) := psi_fix_sub(r.DiffVal(stage), DiffFmt_c,
-                                          DiffDel(stage), DiffFmt_c,
-                                          DiffFmt_c);
+                                            DiffDel(stage), DiffFmt_c,
+                                            DiffFmt_c);
       end if;
     end loop;
 
@@ -203,8 +203,8 @@ begin
 
       -- *** Gain Correction Stage 1 ***
       v.GcMult_1 := psi_fix_mult(r.GcIn_0, GcInFmt_c,
-                               cfg_gain_corr_i, GcCoefFmt_c,
-                               GcMultFmt_c, psi_fix_trunc, psi_fix_wrap); -- Round/Truncation in next stage
+                                 cfg_gain_corr_i, GcCoefFmt_c,
+                                 GcMultFmt_c, psi_fix_trunc, psi_fix_wrap); -- Round/Truncation in next stage
       v.GcOut_2  := psi_fix_resize(r.GcMult_1, GcMultFmt_c, out_fmt_g, psi_fix_round, psi_fix_sat);
     end if;
 
@@ -269,16 +269,17 @@ begin
 
   i_partdm : entity work.psi_common_par_tdm
     generic map(
-      ChannelCount_g => channels_g,
-      ChannelWidth_g => psi_fix_size(AccuFmt_c)
+      ch_nb_g    => channels_g,
+      ch_width_g => psi_fix_size(AccuFmt_c),
+      rst_pol_g  => rst_pol_g
     )
     port map(
-      Clk         => clk_i,
-      Rst         => rst_i,
-      Parallel    => ParTdmIn,
-      ParallelVld => r.VldParTdm,
-      Tdm         => ParTdmOut,
-      TdmVld      => ParTdmOutVld
+      clk_i => clk_i,
+      rst_i => rst_i,
+      dat_i => ParTdmIn,
+      vld_i => r.VldParTdm,
+      dat_o => ParTdmOut,
+      vld_o => ParTdmOutVld
     );
 
   -- *** Dynamic Shifter ***
@@ -286,20 +287,21 @@ begin
   ShiftDataIn <= psi_fix_resize(ParTdmOut, AccuFmt_c, SftFmt_c);
   i_sft : entity work.psi_common_dyn_sft
     generic map(
-      Direction_g          => "RIGHT",
-      SelectBitsPerStage_g => 4,
-      MaxShift_g           => MaxShift_c,
-      Width_g              => psi_fix_size(SftFmt_c),
-      SignExtend_g         => true
+      direction_g         => "RIGHT",
+      sel_bit_per_stage_g => 4,
+      max_shift_g         => MaxShift_c,
+      width_g             => psi_fix_size(SftFmt_c),
+      sign_extend_g       => true,
+      rst_pol_g           => rst_pol_g
     )
     port map(
-      Clk     => clk_i,
-      Rst     => rst_i,
-      InVld   => ParTdmOutVld,
-      InShift => ShiftSel,
-      InData  => ShiftDataIn,
-      OutVld  => ShiftVld,
-      OutData => ShiftDataOut
+      clk_i   => clk_i,
+      rst_i   => rst_i,
+      vld_i   => ParTdmOutVld,
+      shift_i => ShiftSel,
+      dat_i   => ShiftDataIn,
+      vld_o   => ShiftVld,
+      dat_o   => ShiftDataOut
     );
   VldDiff_0   <= ShiftVld;
   DiffIn_0    <= psi_fix_resize(ShiftDataOut, SftFmt_c, DiffFmt_c, psi_fix_trunc, psi_fix_wrap);
@@ -314,17 +316,17 @@ begin
 
     i_del : entity work.psi_common_delay
       generic map(
-        Width_g    => psi_fix_size(DiffFmt_c),
-        Delay_g    => channels_g * diff_delay_g,
-        RstState_g => true
+        width_g     => psi_fix_size(DiffFmt_c),
+        delay_g     => channels_g * diff_delay_g,
+        rst_state_g => true
       )
       port map(
-        Clk     => clk_i,
-        Rst     => rst_i,
+        clk_i => clk_i,
+        rst_i => rst_i,
         -- Data
-        InData  => DiffDelIn,
-        InVld   => DiffVldIn,
-        OutData => DiffDel(stage)
+        dat_i => DiffDelIn,
+        vld_i => DiffVldIn,
+        dat_o => DiffDel(stage)
       );
   end generate;
 

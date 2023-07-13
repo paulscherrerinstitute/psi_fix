@@ -473,11 +473,11 @@ package body psi_fix_pkg is
     assert shift <= maxShift report "psi_fix_shift_left: Shift must be <= maxShift" severity error;
     FullA_v := psi_fix_resize(a, a_fmt, FullFmt_c);
     if not dynamic then
-      FullOut_v := ShiftLeft(FullA_v, shift);
+      FullOut_v := shift_left(FullA_v, shift);
     else
       for i in 0 to maxShift loop
         if i = shift then
-          FullOut_v := ShiftLeft(FullA_v, i);
+          FullOut_v := shift_left(FullA_v, i);
         end if;
       end loop;
     end if;
@@ -504,17 +504,17 @@ package body psi_fix_pkg is
     FullA_v := psi_fix_resize(a, a_fmt, FullFmt_c);
     if not dynamic then
       if a_fmt.S = 1 then
-        FullOut_v := ShiftRight(FullA_v, shift, FullA_v(FullA_v'left));
+        FullOut_v := shift_right(FullA_v, shift, FullA_v(FullA_v'left));
       else
-        FullOut_v := ShiftRight(FullA_v, shift, '0');
+        FullOut_v := shift_right(FullA_v, shift, '0');
       end if;
     else
       for i in 0 to maxShift loop       -- make a loop to ensure the shift is a constant (required by the tools)
         if i = shift then
           if a_fmt.S = 1 then
-            FullOut_v := ShiftRight(FullA_v, i, FullA_v(FullA_v'left));
+            FullOut_v := shift_right(FullA_v, i, FullA_v(FullA_v'left));
           else
-            FullOut_v := ShiftRight(FullA_v, i, '0');
+            FullOut_v := shift_right(FullA_v, i, '0');
           end if;
         end if;
       end loop;

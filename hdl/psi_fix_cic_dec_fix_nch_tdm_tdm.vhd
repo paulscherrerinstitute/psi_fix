@@ -103,16 +103,16 @@ begin
     -- First accumulator
     if r.VldAccu(0) = '1' then
       v.Accu(1) := psi_fix_add(IntDel(1), AccuFmt_c,
-                             r.Input_0, in_fmt_g,
-                             AccuFmt_c);
+                               r.Input_0, in_fmt_g,
+                               AccuFmt_c);
     end if;
 
     -- *** Accumuator Stages (2 to Order) ***
     for stage in 1 to order_g - 1 loop
       if r.VldAccu(stage) = '1' then
         v.Accu(stage + 1) := psi_fix_add(IntDel(stage + 1), AccuFmt_c,
-                                       r.Accu(stage), AccuFmt_c,
-                                       AccuFmt_c);
+                                         r.Accu(stage), AccuFmt_c,
+                                         AccuFmt_c);
       end if;
     end loop;
 
@@ -143,8 +143,8 @@ begin
     if r.VldDiff(0) = '1' then
       -- Differentiate
       v.DiffVal(1) := psi_fix_sub(r.DiffIn_0, DiffFmt_c,
-                                DiffDel(0), DiffFmt_c,
-                                DiffFmt_c);
+                                  DiffDel(0), DiffFmt_c,
+                                  DiffFmt_c);
     end if;
 
     -- *** Diff Stages ***
@@ -153,8 +153,8 @@ begin
       if r.VldDiff(stage) = '1' then
         -- Differentiate
         v.DiffVal(stage + 1) := psi_fix_sub(r.DiffVal(stage), DiffFmt_c,
-                                          DiffDel(stage), DiffFmt_c,
-                                          DiffFmt_c);
+                                            DiffDel(stage), DiffFmt_c,
+                                            DiffFmt_c);
       end if;
     end loop;
 
@@ -165,8 +165,8 @@ begin
 
       -- *** Gain Correction Stage 1 ***
       v.GcMult_1 := psi_fix_mult(r.GcIn_0, GcInFmt_c,
-                               Gc_c, GcCoefFmt_c,
-                               GcMultFmt_c, psi_fix_trunc, psi_fix_wrap); -- Round/Truncation in next stage
+                                 Gc_c, GcCoefFmt_c,
+                                 GcMultFmt_c, psi_fix_trunc, psi_fix_wrap); -- Round/Truncation in next stage
       v.GcOut_2  := psi_fix_resize(r.GcMult_1, GcMultFmt_c, out_fmt_g, psi_fix_round, psi_fix_sat);
     end if;
 
@@ -232,17 +232,18 @@ begin
 
     i_del : entity work.psi_common_delay
       generic map(
-        Width_g    => psi_fix_size(DiffFmt_c),
-        Delay_g    => channels_g * diff_delay_g,
-        RstState_g => true
+        rst_pol_g   => rst_pol_g,
+        width_g     => psi_fix_size(DiffFmt_c),
+        delay_g     => channels_g * diff_delay_g,
+        rst_state_g => true
       )
       port map(
-        Clk     => clk_i,
-        Rst     => rst_i,
+        clk_i => clk_i,
+        rst_i => rst_i,
         -- Data
-        InData  => DiffDelIn,
-        InVld   => DiffVldIn,
-        OutData => DiffDel(stage)
+        dat_i => DiffDelIn,
+        vld_i => DiffVldIn,
+        dat_o => DiffDel(stage)
       );
   end generate;
 
@@ -251,17 +252,18 @@ begin
   begin
     i_del : entity work.psi_common_delay
       generic map(
-        Width_g    => psi_fix_size(AccuFmt_c),
-        Delay_g    => channels_g - 1,
-        RstState_g => true
+        rst_pol_g   => rst_pol_g,
+        width_g     => psi_fix_size(AccuFmt_c),
+        delay_g     => channels_g - 1,
+        rst_state_g => true
       )
       port map(
-        Clk     => clk_i,
-        Rst     => rst_i,
+        clk_i => clk_i,
+        rst_i => rst_i,
         -- Data
-        InData  => r.Accu(stage + 1),
-        InVld   => r.VldAccu(stage),
-        OutData => IntDel(stage + 1)
+        dat_i => r.Accu(stage + 1),
+        vld_i => r.VldAccu(stage),
+        dat_o => IntDel(stage + 1)
       );
   end generate;
 

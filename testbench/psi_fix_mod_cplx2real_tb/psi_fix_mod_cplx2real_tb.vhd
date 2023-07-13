@@ -73,13 +73,13 @@ begin
       ratio_num_g   => ratio_num_g,
       ratio_den_g => ratio_den_g)
     port map(
-      clk_i     => clk_sti,
-      rst_i     => rst_sti,
-      vld_i     => str_sti,
+      clk_i => clk_sti,
+      rst_i => rst_sti,
       dat_inp_i => data_I_sti,
       dat_qua_i => data_Q_sti,
-      dat_o     => data_obs,
-      vld_o     => str_obs);
+      vld_i => str_sti,
+      dat_o => data_obs,
+      vld_o => str_obs);
 
   ------------------------------------------------------------
   -- Testbench Control !DO NOT EDIT!
