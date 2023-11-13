@@ -43,7 +43,7 @@ entity psi_fix_cordic_vect is
     dat_inp_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- data input input
     dat_qua_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- dat quadrature input
     vld_i     : in  std_logic;                                               -- valid signal in
-    rdy_i     : out std_logic;                                               -- ready signal output $$ lowactive=true $$
+    rdy_o     : out std_logic;                                               -- ready signal output $$ lowactive=true $$
     dat_abs_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);  -- data amplitude output
     dat_ang_o : out std_logic_vector(psi_fix_size(angle_fmt_g) - 1 downto 0);-- dat angle output
     vld_o     : out std_logic                                                -- valid output
@@ -179,7 +179,7 @@ begin
     signal Quad       : t_aslv2(0 to iterations_g * pl_stg_per_iter_g);
   begin
     -- Pipelined implementation can take a sample every clock cycle
-    rdy_i <= '1';
+    rdy_o <= '1';
 
     -- Implementation
     p_cordic_pipelined : process(clk_i)
@@ -251,7 +251,7 @@ begin
     signal Quad     : std_logic_vector(1 downto 0);
     constant Z0_c   : std_logic_vector(psi_fix_size(angle_int_fmt_g) - 1 downto 0) := (others => '0');
   begin
-    rdy_i <= not XinVld;
+    rdy_o <= not XinVld;
 
     p_cordic_serial : process(clk_i)
     begin

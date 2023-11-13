@@ -96,7 +96,7 @@ begin
       clk_i     => Clk,
       rst_i     => Rst,
       vld_i     => InVld,
-      rdy_i     => InRdy,
+      rdy_o     => InRdy,
       dat_inp_i => InI,
       dat_qua_i => InQ,
       vld_o     => OutVld,

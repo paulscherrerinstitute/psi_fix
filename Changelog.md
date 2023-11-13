@@ -1,3 +1,7 @@
+## 4.0.2
+* Bugfixes
+  * renamed rdy\_i to rdy\_o in psi\_fix\_cordic\_vect
+
 ## 4.0.1
 * Bugfixes
   * reset handling in psi\_fix\_fir\_dec\_ser\_nch\_chtdm\_conf
