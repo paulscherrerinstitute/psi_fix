@@ -43,7 +43,7 @@ entity psi_fix_cordic_vect is
     dat_inp_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- data input input
     dat_qua_i : in  std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0);   -- dat quadrature input
     vld_i     : in  std_logic;                                               -- valid signal in
-    rdy_i     : out std_logic;                                               -- ready signal output $$ lowactive=true $$
+    rdy_o     : out std_logic;                                               -- ready signal output $$ lowactive=true $$
     dat_abs_o : out std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0);  -- data amplitude output
     dat_ang_o : out std_logic_vector(psi_fix_size(angle_fmt_g) - 1 downto 0);-- dat angle output
     vld_o     : out std_logic                                                -- valid output

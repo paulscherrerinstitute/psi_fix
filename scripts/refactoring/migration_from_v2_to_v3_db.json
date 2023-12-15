@@ -233,7 +233,7 @@
       "fault_o": "fault_o"
    },
    "psi_common_status_cc": {
-      "DataWidth_g": "data_width_g",
+      "DataWidth_g": "width_g",
       "ClkA": "a_clk_i",
       "RstInA": "a_rst_i",
       "RstOutA": "a_rst_o",
@@ -244,7 +244,7 @@
       "DataB": "b_dat_o"
    },
    "psi_common_simple_cc": {
-      "DataWidth_g": "data_width_g",
+      "DataWidth_g": "width_g",
       "ClkA": "a_clk_i",
       "RstInA": "a_rst_i",
       "RstOutA": "a_rst_o",
@@ -257,8 +257,8 @@
       "VldB": "b_vld_o"
    },
    "psi_common_par_tdm": {
-      "ChannelCount_g": "channel_count_g",
-      "ChannelWidth_g": "channel_width_g",
+      "ChannelCount_g": "ch_nb_g",
+      "ChannelWidth_g": "ch_width_g",
       "Clk": "clk_i",
       "Rst": "rst_i",
       "Parallel": "dat_i",
@@ -609,7 +609,7 @@
       "run_str_o": "run_str_o"
    },
    "psi_common_bit_cc": {
-      "NumBits_g": "num_bits_g",
+      "NumBits_g": "width_g",
       "BitsA": "dat_i",
       "ClkB": "clk_i",
       "BitsB": "dat_o"
@@ -656,7 +656,7 @@
       "InRdy": "in_rdy_o",
       "OutData": "out_dat_o",
       "OutVld": "out_vld_o",
-      "OutRdy": "out_rdy_o",
+      "OutRdy": "out_rdy_i",
       "InFull": "in_full_o",
       "InEmpty": "in_empty_o",
       "InAlmFull": "in_afull_o",
@@ -937,10 +937,10 @@
       "Clk": "clk_i",
       "Rst": "rst_i",
       "InVld": "vld_i",
-      "InRdy": "rdy_in_i",
+      "InRdy": "rdy_o",
       "InData": "dat_i",
       "OutVld": "vld_o",
-      "OutRdy": "rdy_out_i",
+      "OutRdy": "rdy_i",
       "OutData": "dat_o"
    },
    "psi_common_pulse_cc": {

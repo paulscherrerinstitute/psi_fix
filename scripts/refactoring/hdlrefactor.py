@@ -9,6 +9,8 @@ import os
 
 import json
 
+ENCODING = 'utf-8'
+
 DICT = {}
 
 def set_refactor_database(db_file_i, fix_case = True, add_tb = True):
@@ -31,29 +33,30 @@ def set_refactor_database(db_file_i, fix_case = True, add_tb = True):
                 for from_name, to_name in comp_dict.items():
                     db2[comp_name+suffix][from_name] = to_name
             db = db2
-    add_dict = {'psi_common_axi_master_simple_tb_pkg' : 'psi_common_axi_master_simple_tb',
-                'psi_common_axi_master_full_tb_pkg' : 'psi_common_axi_master_full_tb',
-                'psi_common_axi_master_simple_tb_case_simple_tf' : 'psi_common_axi_master_simple_tb_pkg',
-                'psi_common_axi_master_simple_tb_case_axi_hs' : 'psi_common_axi_master_simple_tb_pkg',
-                'psi_common_axi_master_simple_tb_case_internals' : 'psi_common_axi_master_simple_tb_pkg',
-                'psi_common_axi_master_simple_tb_case_max_transact' : 'psi_common_axi_master_simple_tb_pkg',
-                'psi_common_axi_master_simple_tb_case_simple_tf' : 'psi_common_axi_master_simple_tb_pkg',
-                'psi_common_axi_master_simple_tb_case_special' : 'psi_common_axi_master_simple_tb_pkg',
-                'psi_common_axi_master_simple_tb_case_split' : 'psi_common_axi_master_simple_tb_pkg',
-                'psi_common_axi_master_full_tb_case_simple_tf' : 'psi_common_axi_master_full_tb_pkg',
-                'psi_common_axi_master_full_tb_case_axi_hs' : 'psi_common_axi_master_full_tb_pkg',
-                'psi_common_axi_master_full_tb_case_user_hs' : 'psi_common_axi_master_full_tb_pkg',
-                'psi_common_axi_master_full_tb_case_internals' : 'psi_common_axi_master_full_tb_pkg',
-                'psi_common_axi_master_full_tb_case_max_transact' : 'psi_common_axi_master_full_tb_pkg',
-                'psi_common_axi_master_full_tb_case_full_tf' : 'psi_common_axi_master_full_tb_pkg',
-                'psi_common_axi_master_full_tb_case_special' : 'psi_common_axi_master_full_tb_pkg',
-                'psi_common_axi_master_full_tb_case_split' : 'psi_common_axi_master_full_tb_pkg',
-                'psi_common_axi_master_full_tb_case_large' : 'psi_common_axi_master_full_tb_pkg',
-                }
+        add_dict = {'psi_common_axi_master_simple_tb_pkg' : 'psi_common_axi_master_simple_tb',
+                    'psi_common_axi_master_full_tb_pkg' : 'psi_common_axi_master_full_tb',
+                    'psi_common_axi_master_simple_tb_case_simple_tf' : 'psi_common_axi_master_simple_tb_pkg',
+                    'psi_common_axi_master_simple_tb_case_axi_hs' : 'psi_common_axi_master_simple_tb_pkg',
+                    'psi_common_axi_master_simple_tb_case_internals' : 'psi_common_axi_master_simple_tb_pkg',
+                    'psi_common_axi_master_simple_tb_case_max_transact' : 'psi_common_axi_master_simple_tb_pkg',
+                    'psi_common_axi_master_simple_tb_case_simple_tf' : 'psi_common_axi_master_simple_tb_pkg',
+                    'psi_common_axi_master_simple_tb_case_special' : 'psi_common_axi_master_simple_tb_pkg',
+                    'psi_common_axi_master_simple_tb_case_split' : 'psi_common_axi_master_simple_tb_pkg',
+                    'psi_common_axi_master_full_tb_case_simple_tf' : 'psi_common_axi_master_full_tb_pkg',
+                    'psi_common_axi_master_full_tb_case_axi_hs' : 'psi_common_axi_master_full_tb_pkg',
+                    'psi_common_axi_master_full_tb_case_user_hs' : 'psi_common_axi_master_full_tb_pkg',
+                    'psi_common_axi_master_full_tb_case_internals' : 'psi_common_axi_master_full_tb_pkg',
+                    'psi_common_axi_master_full_tb_case_max_transact' : 'psi_common_axi_master_full_tb_pkg',
+                    'psi_common_axi_master_full_tb_case_full_tf' : 'psi_common_axi_master_full_tb_pkg',
+                    'psi_common_axi_master_full_tb_case_special' : 'psi_common_axi_master_full_tb_pkg',
+                    'psi_common_axi_master_full_tb_case_split' : 'psi_common_axi_master_full_tb_pkg',
+                    'psi_common_axi_master_full_tb_case_large' : 'psi_common_axi_master_full_tb_pkg',
+                    }
 
 
-    for k,v in add_dict.items():
-        db[k] = db[v]
+        for k,v in add_dict.items():
+            db[k] = db[v]
+        #end add_tb
     DICT = json.loads(json.dumps(db))
     
 def conv_fun(comp_name, signal, make_lower_case = False, use_all = False):
@@ -106,7 +109,7 @@ def instantiation_refactor (file_name_i, file_name_o):
     # ======================================================================
     start_instantiation_map = re.compile(r'\s*generic\s+map|\s*port\s+map')
     end_instatiation_map = re.compile(r'\s*\)\s*;')
-    component_instantiation = re.compile(r'\s*\w+\s*:\s*entity\s*\w+\.(psi_common_\w+)')
+    component_instantiation = re.compile(r'\s*\w+\s*:\s*entity\s*\w+\.(\w+)')
     #instantiation_assignment = re.compile(r'(\s*)(\w+\s*)(\s*=>\s*)(\w+)(.*)', re.DOTALL)
     # version which also includes aaa(1) => bbb,
     #instantiation_assignment = re.compile(r'(\s*)(\w+)(\s*\(.*\))?(\s*=>.*)', re.DOTALL)
@@ -117,7 +120,7 @@ def instantiation_refactor (file_name_i, file_name_o):
     # Process Parsing file and list creation
     # ======================================================================
     out_lines = []
-    with open(file_name_i, encoding='latin-1') as fh:  # open text file
+    with open(file_name_i, encoding=ENCODING) as fh:  # open text file
             out_lines = []
             lines = [l for l in fh.readlines()]
             comp_name = ''
@@ -182,7 +185,7 @@ def entity_declaration_parser (file_name_i):
     # ======================================================================
     # Process Parsing file and list creation
     # ======================================================================
-    with open(file_name_i, encoding='latin-1') as fh:  # open text file
+    with open(file_name_i, encoding=ENCODING) as fh:  # open text file
         out_lines = []
         start = False
         lines = [l for l in fh.readlines()]
@@ -230,7 +233,7 @@ def entity_declaration_refactor (file_name_i, file_name_o):
     # ======================================================================
     out_lines = []
     start = False
-    with open(file_name_i, encoding='latin-1') as fh:  # open text file
+    with open(file_name_i, encoding=ENCODING) as fh:  # open text file
             out_lines = []
             lines = [l for l in fh.readlines()]
             comp_name = ''
@@ -280,7 +283,7 @@ def symbol_refactor(file_name_i, file_name_o):
     # ======================================================================
     out_lines = []
     start = False
-    with open(file_name_i, encoding='latin-1') as fh:  # open text file
+    with open(file_name_i, encoding=ENCODING) as fh:  # open text file
             out_lines = []
             lines = [l for l in fh.readlines()]
             comp_name = ''
@@ -332,7 +335,7 @@ def tcl_generics_refactor(file_name_i, file_name_o):
     # ======================================================================
     out_lines = []
     start = False
-    with open(file_name_i, encoding='latin-1') as fh:  # open text file
+    with open(file_name_i, encoding=ENCODING) as fh:  # open text file
             out_lines = []
             lines = [l for l in fh.readlines()]
             comp_name = ''
