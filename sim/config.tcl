@@ -82,6 +82,7 @@ add_sources "../hdl" {
   psi_fix_lowpass_iir_order1.vhd \
   psi_fix_complex_mult.vhd \
   psi_fix_mov_avg.vhd \
+  psi_fix_mov_avg_var.vhd \
   psi_fix_demod_real2cplx.vhd \
   psi_fix_cordic_vect.vhd \
   psi_fix_cordic_rot.vhd \
@@ -133,6 +134,7 @@ add_sources "../testbench" {
   psi_fix_lowpass_iir_order1_tb/psi_fix_lowpass_iir_order1_tb.vhd \
   psi_fix_complex_mult_tb/psi_fix_complex_mult_tb.vhd \
   psi_fix_mov_avg_tb/psi_fix_mov_avg_tb.vhd \
+  psi_fix_mov_avg_var_tb/psi_fix_mov_avg_var_tb.vhd \
   psi_fix_demod_real2cplx_tb/psi_fix_demod_real2cplx_tb.vhd \
   psi_fix_cordic_vect_tb/psi_fix_cordic_vect_tb.vhd \
   psi_fix_cordic_rot_tb/psi_fix_cordic_rot_tb.vhd \
