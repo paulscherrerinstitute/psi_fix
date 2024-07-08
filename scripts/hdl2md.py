@@ -138,9 +138,12 @@ def hdl2md (file_name_i, path_name_o, psi_lib):
     # ======================================================================
     f = open(path_name_o+"/"+md_name[0]+".md", "w+")  # write into file
     if psi_lib:
-        f.write('<img align="right" src="../doc/psi_logo.png">')
+        f.write('<img align="right" src="../psi_logo.png">')
+    f.write('\n')
     f.write('\n')
     f.write('***\n')
+    f.write('\n')
+    f.write("[**component list**](../ README.md)")
     f.write('\n')
     f.write('# '+md_name[0])
     f.write('\n')
@@ -159,6 +162,8 @@ def hdl2md (file_name_i, path_name_o, psi_lib):
     f.write('\n')
     f.write('### Interfaces\n')
     f.write(df2.to_markdown())
+    f.write('\n')
+    f.write("[**component list**](../ README.md)")
 
     f.close()
     return  print("[INFO]: "+md_name[0]+".vhd MD File created")
