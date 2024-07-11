@@ -34,7 +34,9 @@ entity psi_fix_demod_real2cplx is
     coef_bits_g   : positive  := 18;                                                   -- internal coefficent number of bits $$ constant=25 $$
     channels_g    : natural   := 1;                                                    -- number of channels TDM             $$ constant=2 $$
     ratio_num_g   : natural   := 5;                                                    -- ratio numerator between clock and IF/RF      $$ constant=5 $$
-    ratio_den_g : natural   := 1                                                       -- ratio denominator between clock and IF/RF    $$ constant=1 $$
+    ratio_den_g   : natural   := 1;                                                    -- ratio denominator between clock and IF/RF    $$ constant=1 $$
+    phi_activ_g   : boolean   := true;                                                 -- avoid cos(0) increase
+    phi_adj_g     : real      := (2.0 * MATH_PI  / real(2*ratio_num_g))                -- phi adjust constant
   );
   port(
     clk_i        : in  std_logic;                                                       -- clk system $$ type=clk; freq=100e6 $$
@@ -50,37 +52,49 @@ end entity;
 -- @formatter:on
 architecture RTL of psi_fix_demod_real2cplx is
 
-  constant coefUnusedBits_c : integer     := log2(ratio_num_g);
+  constant coefUnusedBits_c : integer       := log2(ratio_num_g);
   constant CoefFmt_c        : psi_fix_fmt_t := (1, 0-coefUnusedBits_c, coef_bits_g + coefUnusedBits_c-1);
   constant MultFmt_c        : psi_fix_fmt_t := (1, in_fmt_g.I + CoefFmt_c.I, out_fmt_g.F+log2ceil(ratio_num_g)+2); -- truncation error does only lead to 1/4 LSB error on output
-  constant coef_scale_c     : real        := (1.0-2.0**(-real(CoefFmt_c.F)))/real(ratio_num_g); -- prevent +/- 1.0 and pre-compensate for gain of moving average
+  constant coef_scale_c     : real          := (1.0-2.0**(-real(CoefFmt_c.F)))/real(ratio_num_g); -- prevent +/- 1.0 and pre-compensate for gain of moving average
 
   type coef_array_t is array (0 to ratio_num_g - 1) of std_logic_vector(psi_fix_size(CoefFmt_c) - 1 downto 0);
 
   --SIN coef function <=> Q coef n = (sin(nx2pi/Ratio)(2/Ratio))
-  function coef_sin_array_func return coef_array_t is
-    variable array_v : coef_array_t;
+  function coef_sin_array_func(activ : boolean:=false) return coef_array_t is
+    variable array_v    : coef_array_t;
+    --constant phi_adj_c  : real := (2.0 * MATH_PI  / real(2*ratio_num_g));
   begin
     for i in 0 to ratio_num_g - 1 loop
       array_v(i) := psi_fix_from_real(sin(2.0 * MATH_PI * real(i) / real(ratio_num_g)) * coef_scale_c, CoefFmt_c);
     end loop;
+    if activ then
+      for i in 0 to ratio_num_g - 1 loop
+       array_v(i) := psi_fix_from_real(sin(2.0 * MATH_PI * real(i) / real(ratio_num_g)+ phi_adj_g) * coef_scale_c, CoefFmt_c);
+      end loop;
+    end if;
     return array_v;
   end function;
 
   --COS coef function <=> Q coef n = (cos(nx2pi/Ratio)(2/Ratio))
-  function coef_cos_array_func return coef_array_t is
-    variable array_v : coef_array_t;
+  function coef_cos_array_func(activ : boolean:=false) return coef_array_t is
+    variable array_v    : coef_array_t;
+    --constant phi_adj_c  : real := (2.0 * MATH_PI  / real(2*ratio_num_g));
   begin
     for i in 0 to ratio_num_g - 1 loop
       array_v(i) := psi_fix_from_real(cos(2.0 * MATH_PI * real(i) / real(ratio_num_g)) * coef_scale_c, CoefFmt_c);
     end loop;
+    if activ then
+      for i in 0 to ratio_num_g - 1 loop
+        array_v(i) := psi_fix_from_real(cos(2.0 * MATH_PI * real(i) / real(ratio_num_g)+phi_adj_g) * coef_scale_c, CoefFmt_c);
+      end loop;
+    end if;
     return array_v;
   end function;
 
   -- I coef n = (sin(nx2pi/5)(2/5))
-  constant nonIQ_table_sin : coef_array_t := coef_sin_array_func;
+  constant nonIQ_table_sin : coef_array_t := coef_sin_array_func(phi_activ_g);
   -- Q coef n = (cos(nx2pi/5)(2/5))
-  constant nonIQ_table_cos : coef_array_t := coef_cos_array_func;
+  constant nonIQ_table_cos : coef_array_t := coef_cos_array_func(phi_activ_g);
   --xilinx constraint
   attribute rom_style      : string;
   attribute rom_style of nonIQ_table_sin, nonIQ_table_cos : constant is "distributed";

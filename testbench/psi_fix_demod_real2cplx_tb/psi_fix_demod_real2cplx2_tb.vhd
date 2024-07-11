@@ -30,7 +30,7 @@ entity psi_fix_demod_real2cplx_tb is
     file_folder_g : string  := "../testbench/psi_fix_demod_real2cplx_tb/Data";
     duty_cycle_g  : integer := 1;
     ratio_num_g   : natural := 5;
-    ratio_den_g   : natural := 2
+    ratio_den_g   : natural := 1
   );
 end entity;
 
@@ -59,13 +59,16 @@ architecture sim of psi_fix_demod_real2cplx_tb is
   signal data_i        : std_logic_vector(psi_fix_size(in_fmt_g) - 1 downto 0)  := (others => '0');
   signal data_I_o      : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
   signal data_Q_o      : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
+  signal data_I2_o      : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
+  signal data_Q2_o      : std_logic_vector(psi_fix_size(out_fmt_g) - 1 downto 0) := (others => '0');
   signal str_o         : std_logic                                              := '0';
   signal phi_offset_16 : std_logic_vector(log2ceil(ratio_num_g) - 1 downto 0)   := (others => '0');
   signal SigIn         : TextfileData_t(0 to 1)                                 := (others => 0);
   signal SigOut        : TextfileData_t(0 to 1)                                 := (others => 0);
   -- dds stimuli to check out
   signal restart_i     : std_logic                                              := '0';
-  signal phi_step_i    : std_logic_vector(30 downto 0)                          := std_logic_vector(to_unsigned(integer(((2.0**31) - 1.0) / 2.5), 31));
+  constant ratio_dds_c : real                                                   := real(ratio_num_g)/real(ratio_den_g);
+  signal phi_step_i    : std_logic_vector(30 downto 0)                          := std_logic_vector(to_unsigned(integer(((2.0**31) - 1.0) / ratio_dds_c), 31));
   signal phi_offset_i  : std_logic_vector(30 downto 0)                          := (others => '0');
   signal vld_i         : std_logic                                              := '1';
   signal dat_sin_sti   : std_logic_vector(17 downto 0);
@@ -77,6 +80,8 @@ architecture sim of psi_fix_demod_real2cplx_tb is
   signal sel_sti        : std_logic                                              := '0';
   signal clk2_i         : std_logic                                              := '0';
   signal clk3_i : std_logic := '0';
+  --
+  signal test_res, test_res2 : real;
 begin
   ------------------------------------------------------------
   -- DUT Instantiation
@@ -89,7 +94,9 @@ begin
       coef_bits_g => 24,
       channels_g  => 1,
       ratio_num_g => ratio_num_g,
-      ratio_den_g => ratio_den_g
+      ratio_den_g => ratio_den_g,
+      phi_activ_g => true
+      
     )
     port map(
       clk_i        => clk3_i,
@@ -122,6 +129,34 @@ begin
       vld_o        => vld_sti
     );
 
+  i_dut2 : entity work.psi_fix_demod_real2cplx
+    generic map(
+      rst_pol_g   => rst_pol_g,
+      in_fmt_g    => in_fmt_g,
+      out_fmt_g   => out_fmt_g,
+      coef_bits_g => 24,
+      channels_g  => 1,
+      ratio_num_g => ratio_num_g,
+      ratio_den_g => ratio_den_g,
+      phi_activ_g => false
+      
+    )
+    port map(
+      clk_i        => clk3_i,
+      rst_i        => rst_i,
+      vld_i        => vld_sti,
+      dat_i        => data_i,
+      phi_offset_i => phi_offset_16,
+      dat_inp_o    => data_I2_o,
+      dat_qua_o    => data_Q2_o,
+      vld_o        => open
+    );
+  
+  test_res <= sqrt(psi_fix_to_real(data_I_o,out_fmt_g)*psi_fix_to_real(data_I_o,out_fmt_g) +
+               psi_fix_to_real(data_Q_o,out_fmt_g)*psi_fix_to_real(data_Q_o,out_fmt_g));
+  
+  test_res2 <= sqrt(psi_fix_to_real(data_I2_o,out_fmt_g)*psi_fix_to_real(data_I2_o,out_fmt_g) +
+               psi_fix_to_real(data_Q2_o,out_fmt_g)*psi_fix_to_real(data_Q2_o,out_fmt_g));
   ------------------------------------------------------------
   -- Testbench Control !DO NOT EDIT!
   ------------------------------------------------------------
