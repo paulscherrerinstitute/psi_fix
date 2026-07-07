@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --  Copyright (c) 2018 by Paul Scherrer Institute, Switzerland
 --  All rights reserved.
---  Authors: Oliver Bruendler, Radoslaw Rybaniec
+--  Authors: Oliver Bruendler, Radoslaw Rybaniec, Daniele Felici
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -277,15 +277,30 @@ begin
       r <= r_next;
       if rst_i = rst_pol_g then
         r.Vld            <= (others => '0');
+        r.InSig          <= (others=>(others => (others=>'0')));
         r.TapWrAddr_1    <= (others => '0');
+        r.Tap0Addr_1     <= (others => '0');
         r.DecCnt_1       <= (others => '0');
+        r.TapCnt_1       <= (others => '0');
+        r.TapRdAddr_2    <= (others => '0');
+        r.CoefRdAddr_2   <= (others => '0');
         r.CalcOn         <= (others => '0');
         r.RndVld_8       <= '0';
         r.OutVld_9       <= '0';
         r.Last           <= (others => '0');
+        r.First          <= (others => '0');
+        r.MultInTap_4    <= (others => (others => '0'));
+        r.MultInCoef_4   <= (others => '0');
+        r.MultOut_5      <= (others => (others => '0'));
+        r.Accu_6         <= (others => (others => '0'));
+        r.Rnd_7          <= (others => (others => '0'));
+        r.RndVld_7       <= '0';
+        r.Output_8       <= (others => (others => '0'));
+        r.OutVld_8       <= '0';
+        r.FirstTapLoop_3 <= '1';
+        r.TapRdAddr_3    <= (others => '0');
         r.ReplaceZero_4  <= '1';
         r.CalcOngoing    <= '0';
-        r.FirstTapLoop_3 <= '1';
       end if;
     end if;
   end process;
