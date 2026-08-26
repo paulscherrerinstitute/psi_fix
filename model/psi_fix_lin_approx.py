@@ -69,7 +69,7 @@ class psi_fix_lin_approx:
     @classmethod
     def _Gaussify(cls, values):
         idxExact = (values / 2 + 0.5) * 1024
-        idx = np.array(idxExact, dtype=np.int)
+        idx = np.array(idxExact, dtype=int)
         offset = idxExact - idx
         return cls.GAUSSIFY_TABLE[idx] + offset * (cls.GAUSSIFY_TABLE[idx + 1] - cls.GAUSSIFY_TABLE[idx])
 
