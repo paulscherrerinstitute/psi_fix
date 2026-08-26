@@ -80,6 +80,7 @@ add_sources "../hdl" {
   psi_fix_bin_div.vhd \
   psi_fix_dds_18b.vhd \
   psi_fix_lowpass_iir_order1.vhd \
+  psi_fix_lowpass_iir_order1_conf.vhd \
   psi_fix_complex_mult.vhd \
   psi_fix_mov_avg.vhd \
   psi_fix_demod_real2cplx.vhd \
@@ -131,6 +132,7 @@ add_sources "../testbench" {
   psi_fix_cic_int_fix_1ch_tb/psi_fix_cic_int_fix_1ch_tb.vhd \
   psi_fix_dds_18b_tb/psi_fix_dds_18b_tb.vhd \
   psi_fix_lowpass_iir_order1_tb/psi_fix_lowpass_iir_order1_tb.vhd \
+  psi_fix_lowpass_iir_order1_conf_tb/psi_fix_lowpass_iir_order1_conf_tb.vhd \
   psi_fix_complex_mult_tb/psi_fix_complex_mult_tb.vhd \
   psi_fix_mov_avg_tb/psi_fix_mov_avg_tb.vhd \
   psi_fix_demod_real2cplx_tb/psi_fix_demod_real2cplx_tb.vhd \
@@ -282,6 +284,13 @@ add_tb_run
 create_tb_run "psi_fix_lowpass_iir_order1_tb"
 tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_lowpass_iir_order1_tb/Scripts"
 set dataDir [file normalize "../testbench/psi_fix_lowpass_iir_order1_tb/Data"]
+tb_run_add_arguments   "-gfile_folder_g=$dataDir -gpipeline_g=true" \
+            "-gfile_folder_g=$dataDir -gpipeline_g=false"
+add_tb_run
+
+create_tb_run "psi_fix_lowpass_iir_order1_conf_tb"
+tb_run_add_pre_script "python3" "preScript.py" "../testbench/psi_fix_lowpass_iir_order1_conf_tb/Scripts"
+set dataDir [file normalize "../testbench/psi_fix_lowpass_iir_order1_conf_tb/Data"]
 tb_run_add_arguments   "-gfile_folder_g=$dataDir -gpipeline_g=true" \
             "-gfile_folder_g=$dataDir -gpipeline_g=false"
 add_tb_run
