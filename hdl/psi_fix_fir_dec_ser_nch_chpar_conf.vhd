@@ -291,12 +291,12 @@ begin
         r.First          <= (others => '0');
         r.MultInTap_4    <= (others => (others => '0'));
         r.MultInCoef_4   <= (others => '0');
-        r.MultOut_5      <= (others => (others => '0'));
-        r.Accu_6         <= (others => (others => '0'));
-        r.Rnd_7          <= (others => (others => '0'));
-        r.RndVld_7       <= '0';
-        r.Output_8       <= (others => (others => '0'));
-        r.OutVld_8       <= '0';
+        r.MultOut_6      <= (others => (others => '0'));
+        r.Accu_7         <= (others => (others => '0'));
+        r.Rnd_8          <= (others => (others => '0'));
+        r.RndVld_8       <= '0';
+        r.Output_9       <= (others => (others => '0'));
+        r.OutVld_9       <= '0';
         r.FirstTapLoop_3 <= '1';
         r.TapRdAddr_3    <= (others => '0');
         r.ReplaceZero_4  <= '1';
