@@ -285,12 +285,11 @@ begin
         r.TapRdAddr_2    <= (others => '0');
         r.CoefRdAddr_2   <= (others => '0');
         r.CalcOn         <= (others => '0');
-        r.RndVld_8       <= '0';
-        r.OutVld_9       <= '0';
         r.Last           <= (others => '0');
         r.First          <= (others => '0');
         r.MultInTap_4    <= (others => (others => '0'));
         r.MultInCoef_4   <= (others => '0');
+        r.MultInCoef_5   <= (others => '0');
         r.MultOut_6      <= (others => (others => '0'));
         r.Accu_7         <= (others => (others => '0'));
         r.Rnd_8          <= (others => (others => '0'));
