@@ -1,3 +1,9 @@
+## 4.1.0
+* Added Features
+  * added psi\_fix\_lowpass\_iir\_order1\_conf.vhd
+* Bugfix
+  * fixed compiation issue in psi\_fix\_fir\_dec\_ser\_nch\_chpar\_conf.vhd
+
 ## 4.0.2
 * Bugfixes
   * renamed rdy\_i to rdy\_o in psi\_fix\_cordic\_vect
