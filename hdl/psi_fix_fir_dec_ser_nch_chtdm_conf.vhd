@@ -308,7 +308,7 @@ begin
       r <= r_next;
       if rst_i = rst_pol_g then
         r.Vld            <= (others => '0');
-        r.InSig          <= (others=>(others => (others=>'0')));
+        r.InSig          <= (others=>(others=>'0'));
         r.ChannelNr(0)   <= (others => '0');
         r.CalcChnl_1     <= (others => '0');
         r.CalcChnl_2     <= (others => '0');
@@ -322,14 +322,14 @@ begin
         r.OutVld_9       <= '0';
         r.Last           <= (others => '0');
         r.First          <= (others => '0');
-        r.MultInTap_4    <= (others => (others => '0'));
+        r.MultInTap_4    <= (others => '0');
         r.MultInCoef_4   <= (others => '0');
-        r.MultInTap_5    <= (others => (others => '0'));
+        r.MultInTap_5    <= (others => '0');
         r.MultInCoef_5   <= (others => '0');
-        r.MultOut_6      <= (others => (others => '0'));
-        r.Accu_7         <= (others => (others => '0'));
-        r.Rnd_8          <= (others => (others => '0'));
-        r.Output_9       <= (others => (others => '0'));
+        r.MultOut_6      <= (others => '0');
+        r.Accu_7         <= (others => '0');
+        r.Rnd_8          <= (others => '0');
+        r.Output_9       <= (others => '0');
         r.TapRdAddr_3    <= (others => '0');
         r.ReplaceZero_4  <= '1';
         r.CalcOngoing    <= '0';
